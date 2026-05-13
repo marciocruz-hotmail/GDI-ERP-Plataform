@@ -1,0 +1,782 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Data.Entity;
+using System.IO;
+using System.IO.Hashing;
+using System.Linq;
+using System.Net;
+using System.Web.Mvc;
+using System.Web.SessionState;
+using GdiPlataform.Db;
+using GdiPlataform.Domain;
+using GdiPlataform.Models;
+using GdiPlataform.Security;
+using GdiPlataform.ViewModels;
+using GdiPlataform.Lib;
+using ICSharpCode.SharpZipLib.Checksum;
+
+namespace GdiPlataform.Controllers
+{
+    public class UserIdentityController : Controller
+    {
+        private GdiPlataformEntities db;
+
+        // GET: Account
+        public ActionResult Index()
+        {
+            try
+            {
+                String MsgTokenMFA = string.Empty;
+                String MsgError = string.Empty;
+                String MsgInfo = string.Empty;
+                String LogMFA = string.Empty;
+                String SessionId = String.Empty;
+                String DeviceId = String.Empty;
+                String DeviceInfo = String.Empty;
+                String DeviceCRC32 = String.Empty;
+
+                DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
+                if (CachePersister.userIdentity != null)
+                    return RedirectToAction("Index", "Home", new { area = "" });
+                CachePersister.logout();
+                HttpContext.Session["TokenId"] = HttpContext.Session.SessionID.ToString();
+                System.Web.HttpContext context = System.Web.HttpContext.Current;
+
+                string host = this.Request.Headers["Host"].ToLower().Replace("http://", "").Replace("https://", "").Replace("www.", "").Trim().ToLowerInvariant();
+                int.TryParse(DateTime.Now.ToString("HH"), out int horaAtual);
+                String SessionID = String.Empty;
+                int DiaDoAno = LibDateTime.getDataHoraBrasilia().DayOfYear;
+
+                // SessionID
+                try
+                {
+                    SessionID = HttpContext.Session.SessionID.ToString().ToUpper();
+                    if (SessionID.ToString().Trim().Length > 20) { SessionID = SessionID.Substring(0, 20); };
+                }
+                catch (Exception) { }
+
+                // DeviceId 
+                string ipAddress = context.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                if (!string.IsNullOrEmpty(ipAddress))
+                {
+                    string[] addresses = ipAddress.Split(',');
+                    if (addresses.Length != 0)
+                    {
+                        DeviceId = addresses[0];
+                    }
+                }
+                else
+                {
+                    DeviceId = context.Request.ServerVariables["REMOTE_ADDR"];
+                }
+
+                // DeviceInfo + DeviceCRC32
+                DeviceInfo += "Platform: " + context.Request.Browser.Platform.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "UserAgent: " + context.Request.UserAgent.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenCharactersHeight: " + context.Request.Browser.ScreenCharactersHeight.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenCharactersWidth: " + context.Request.Browser.ScreenCharactersWidth.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenPixelsHeight: " + context.Request.Browser.ScreenPixelsHeight.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenPixelsWidth: " + context.Request.Browser.ScreenPixelsWidth.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenBitDepth: " + context.Request.Browser.ScreenBitDepth.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "Browser.Type: " + context.Request.Browser.Type.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "Browser.Version: " + context.Request.Browser.Version.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "Browser: " + context.Request.Browser.Browser + ";";
+                byte[] data = System.Text.Encoding.UTF8.GetBytes(DeviceInfo);
+                System.IO.Hashing.Crc32 crc32 = new System.IO.Hashing.Crc32();
+                crc32.Append(data);
+                byte[] hashBytes = crc32.GetCurrentHash();
+                DeviceCRC32 = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+
+                ViewBag.WallPaper = "https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/wallpaper/" + DiaDoAno.ToString() + ".jpg";
+                ViewBag.Version = ControlVersion.getShortVersion();
+                ViewBag.SessionID = SessionID;
+                ViewBag.DeviceId = DeviceId;
+
+                TempData.Remove("WallPaper");
+                TempData["WallPaper"] = ViewBag.WallPaper;
+                TempData.Keep("WallPaper");
+
+                TempData.Remove("SessionID");
+                TempData["SessionID"] = ViewBag.SessionID;
+                TempData.Keep("SessionID");
+
+                TempData.Remove("DeviceId");
+                TempData["DeviceId"] = ViewBag.DeviceId;
+                TempData.Keep("DeviceId");
+
+                TempData.Remove("Version");
+                TempData["Version"] = ViewBag.Version;
+                TempData.Keep("Version");
+
+                TempData.Remove("yesFilterField");
+                TempData.Remove("yesFilterOperador");
+                TempData.Remove("yesFilterText");
+                TempData.Remove("yesFilterOn");
+                TempData.Remove("yesFilterController");
+                TempData.Remove("yesFilterControllerTemp");
+            }
+            catch (Exception)
+            {
+                ViewBag.WallPaper = "Images/defaultWallpaper.jpg";
+            }
+            ViewBag.Version = ControlVersion.getShortVersion();
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Index(IdentityViewModel avm)
+        {
+            try
+            {
+                String MsgTokenMFA = string.Empty;
+                String MsgError = string.Empty;
+                String MsgInfo = string.Empty;
+                String LogMFA = string.Empty;
+                String SessionID = String.Empty;
+                String DeviceId = String.Empty;
+                String DeviceInfo = String.Empty;
+                String DeviceCRC32 = String.Empty;
+
+                DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
+                if (CachePersister.userIdentity != null)
+                    return RedirectToAction("Index", "Home", new { area = "" });
+                CachePersister.logout();
+                HttpContext.Session["TokenId"] = HttpContext.Session.SessionID.ToString();
+                System.Web.HttpContext context = System.Web.HttpContext.Current;
+
+                // Localizando o Tentanty
+                string subDominio = "";
+                string host = this.Request.Headers["Host"].ToLower().Replace("http://", "").Replace("https://", "").Replace("www.", "").Trim();
+                string dominio = this.Request.Headers["Host"].ToLower().Trim();
+                if (host.IndexOf(":") >= 0)
+                {
+                    host = host.Substring(0, host.IndexOf(":"));
+                }
+                var index = host.IndexOf(".");
+                if (index < 0)
+                {
+                    subDominio = host.Trim();
+                }
+                else
+                {
+                    subDominio = host.Substring(0, index);
+                }
+
+                // SessionID
+                try
+                {
+                    SessionID = HttpContext.Session.SessionID.ToString().ToUpper();
+                    if (SessionID.ToString().Trim().Length > 20) { SessionID = SessionID.Substring(0, 20); };
+                }
+                catch (Exception) { }
+
+                // DeviceId 
+                string ipAddress = context.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                if (!string.IsNullOrEmpty(ipAddress))
+                {
+                    string[] addresses = ipAddress.Split(',');
+                    if (addresses.Length != 0)
+                    {
+                        DeviceId = addresses[0];
+                    }
+                }
+                else
+                {
+                    DeviceId = context.Request.ServerVariables["REMOTE_ADDR"];
+                }
+
+                // DeviceInfo + DeviceCRC32
+                DeviceInfo += "Platform: " + context.Request.Browser.Platform.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "UserAgent: " + context.Request.UserAgent.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenCharactersHeight: " + context.Request.Browser.ScreenCharactersHeight.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenCharactersWidth: " + context.Request.Browser.ScreenCharactersWidth.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenPixelsHeight: " + context.Request.Browser.ScreenPixelsHeight.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenPixelsWidth: " + context.Request.Browser.ScreenPixelsWidth.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "ScreenBitDepth: " + context.Request.Browser.ScreenBitDepth.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "Browser.Type: " + context.Request.Browser.Type.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "Browser.Version: " + context.Request.Browser.Version.EmptyIfNull().ToString().Trim() + ";";
+                DeviceInfo += "Browser: " + context.Request.Browser.Browser + ";";
+                byte[] data = System.Text.Encoding.UTF8.GetBytes(DeviceInfo);
+                System.IO.Hashing.Crc32 crc32 = new System.IO.Hashing.Crc32();
+                crc32.Append(data);
+                byte[] hashBytes = crc32.GetCurrentHash();
+                DeviceCRC32 = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+
+
+                UserIdentity userIdentity = new UserIdentity
+                {
+                    DataHoraExpiracao = LibDateTime.getDataHoraBrasilia().AddHours(4), // Tempo máximo de sessão
+                    VersionERP = ControlVersion.getShortVersion(),
+                    DisplayScreenHeight = avm.userIdentity.DisplayScreenHeight,
+                    DisplayScreenWidth = avm.userIdentity.DisplayScreenWidth
+                };
+
+                string _ImgLogoSubdominio = string.Empty;
+                string _database = string.Empty;
+                string _GoogleTag = string.Empty;
+                string _GoogleTagURL = string.Empty;
+                string _DbConnectionString = string.Empty;
+
+                if (string.IsNullOrEmpty(avm.userIdentity.Acesso) || string.IsNullOrEmpty(avm.userIdentity.Password))
+                {
+                    ViewBag.Error = "Invalid account!";
+                    return View("Index");
+                }
+
+                // Tenants
+                var allTenants = new List<cstTenant>();
+                allTenants = SetTenants();
+                cstTenant currentTenant = allTenants.Where(t => t.subDominio == subDominio).FirstOrDefault();
+                if (currentTenant == null)
+                {
+                    ViewBag.Error = "Invalid domain [" + subDominio + "]!";
+                    return View("Index");
+                }
+                else
+                {
+                    _ImgLogoSubdominio = currentTenant.ImgLogoSubdominio;
+                    _database = currentTenant.database;
+                    _GoogleTag = currentTenant.GoogleTag;
+                    _GoogleTagURL = currentTenant.GoogleTagURL;
+                    LibDB.CheckConnectionDB(_database);
+
+                    db = new GdiPlataformEntities(_database);
+                    List<Db.a_sistemas> allSistemas = db.a_sistemas.ToList();
+                    List<Db.a_sistemas_modulos> allSistemasModulos = db.a_sistemas_modulos.ToList();
+                    List<Db.a_yesprodutos> allYesProdutos = db.a_yesprodutos.ToList();
+                    a_parametros record_a_parametros = db.a_parametros.FirstOrDefault();
+                    g_parametros record_g_parametros = db.g_parametros.FirstOrDefault();
+                    g_usuarios regUsuario = null;
+
+                    // Parametros
+                    userIdentity.EmpresaID = record_a_parametros.empresa_id.GetValueOrDefault();
+                    userIdentity.EmpresaNome = record_a_parametros.empresa_nome.ToString();
+                    userIdentity.record_g_parametros = record_g_parametros;
+
+                    #region Login por Usuário Padrão
+                    // Usuário Padrão
+                    var queryUsuario = db.g_usuarios.Where(p => p.login == avm.userIdentity.Acesso && p.senha == avm.userIdentity.Password).ToList();
+                    if (queryUsuario.Count() > 0) { regUsuario = queryUsuario.First(); }
+                    if (regUsuario != null)
+                    {
+                        // Senha vencida: obrigar troca antes de autenticar
+                        if (regUsuario.datahora_proxima_troca.HasValue && DataHoraAtual >= regUsuario.datahora_proxima_troca.Value)
+                        {
+                            Session["TrocaObrigatoria_IdUsuario"] = regUsuario.id_usuario;
+                            Session["TrocaObrigatoria_Login"] = regUsuario.login;
+                            Session["TrocaObrigatoria_Database"] = _database;
+                            Session["TrocaObrigatoria_IdColigada"] = regUsuario.id_coligada;
+                            Session["TrocaObrigatoria_IdFilial"] = regUsuario.id_filial;
+                            ViewBag.WallPaper = TempData["WallPaper"];
+                            ViewBag.SessionID = TempData["SessionID"];
+                            ViewBag.DeviceId = TempData["DeviceId"];
+                            ViewBag.Version = TempData["Version"];
+                            TempData.Keep("WallPaper");
+                            TempData.Keep("SessionID");
+                            TempData.Keep("DeviceId");
+                            TempData.Keep("Version");
+                            return RedirectToAction("TrocaObrigatoriaSenha");
+                        }
+
+                        // LogoMarca - Verificar se o usuário tem uma logo específica
+                        if (regUsuario.id_logomarca > 0)
+                        {
+                            int id_logomarca = regUsuario.id_logomarca.GetValueOrDefault();
+                            g_logomarcas record_g_logomarcas = db.g_logomarcas.Where(p => p.id_logomarca == id_logomarca).ToList().FirstOrDefault();
+                            if (record_g_logomarcas != null)
+                            {
+                                //_ImgLogoSubdominio = subDominio + "/" + record_g_logomarcas.arquivo.ToString();
+                                _ImgLogoSubdominio = record_g_logomarcas.arquivo.ToString();
+                            }
+                        }
+
+                        // Base de Dados
+                        CachePersister.dataBase = _database;
+
+                        _DbConnectionString = ConfigurationManager.ConnectionStrings[_database].ConnectionString;
+                        if (_DbConnectionString.IndexOf("homologacao") > 0) { userIdentity.AmbienteDatabase = "Homologação"; }
+                        else if (_DbConnectionString.IndexOf("producao") > 0) { userIdentity.AmbienteDatabase = "Produção"; }
+                        else { userIdentity.AmbienteDatabase = "Desconhecido"; }
+
+
+                        // Identificação do Usuário
+                        userIdentity.IdUsuario = regUsuario.id_usuario;
+                        userIdentity.IdPerfil = regUsuario.id_perfil;
+                        userIdentity.TokenAcesso = "U" + userIdentity.IdUsuario; // Usuário + Código do Usuário
+
+                        // Administrador
+                        if (regUsuario.id_perfil == 1) { userIdentity.Administrador = true; }
+                        else { userIdentity.Administrador = false; }
+
+                        userIdentity.Username = regUsuario.nome;
+                        userIdentity.Acesso = regUsuario.login.ToString();
+                        userIdentity.Email = regUsuario.email.ToString();
+                        userIdentity.Password = regUsuario.senha.ToString();
+                        userIdentity.Dominio = dominio;
+                        userIdentity.SubDominio = subDominio;
+                        userIdentity.ImgLogoSubdominio = _ImgLogoSubdominio;
+                        userIdentity.GoogleTag = _GoogleTag;
+                        userIdentity.GoogleTagURL = _GoogleTagURL;
+                        userIdentity.DataHoraUltimoLogin = LibDateTime.getDataHoraBrasilia().ToString("dd/MM/yy HH:mm");
+                        CachePersister.userIdentity = userIdentity;
+
+                        // Acessos do Usuário
+                        var contexto = new Contexto();
+                        ContextoModel contextoModel = new ContextoModel
+                        {
+                            allNavbarItemMenu = contexto.getNavbarItemsMenu().ToList()
+                        };
+                        CachePersister.contextoModel = contextoModel;
+
+                        // Sistemas Ativos nos Parâmetros Administrativos
+                        CachePersister.allSistemas = allSistemas;
+
+                        // Modulos Ativos nos Parâmetros Administrativos
+                        CachePersister.allSistemasModulos = allSistemasModulos;
+
+                        // Produtos Ativos
+                        CachePersister.allYesProdutos = allYesProdutos;
+
+                        // Coligada, Filial e Perfil
+
+                        //Verificar se existe dados na tabela g_coligada
+                        int idColigadaVerificar = regUsuario.id_coligada;
+                        g_coligadas record_g_coligadas = db.g_coligadas.Where(c => c.id_coligada == idColigadaVerificar).ToList().FirstOrDefault();
+
+                        if (record_g_coligadas != null)
+                        {
+                            CachePersister.userIdentity.id_coligada = regUsuario.id_coligada;
+                            CachePersister.userIdentity.NomeColigada = db.g_coligadas.Find(regUsuario.id_coligada).razao_social.ToString();
+                        }
+                        else
+                        {
+                            g_usuarios_login_logs RecordUsuarioLoginLog = new g_usuarios_login_logs
+                            {
+                                id_usuario = regUsuario.id_usuario,
+                                login_datahora = DataHoraAtual,
+                                login_ip = DeviceId.EmptyIfNull().ToString().Trim(),
+                                log = "ERRO: Acesso não liberado, Tabela Coligada Não Parametrizada, acesso negado para usuário!",
+                                id_usuario_cadastro = 0,
+                                datahora_cadastro = DataHoraAtual,
+                                id_coligada = 0,
+                                id_filial = 0
+                            };
+                            db.Entry(RecordUsuarioLoginLog).State = EntityState.Added;
+                            db.SaveChanges();
+
+                            ViewBag.Error = "Tabela Coligada Não Parametrizada, acesso negado para usuário!";
+                            ViewBag.WallPaper = TempData["WallPaper"];
+                            ViewBag.SessionID = SessionID;
+                            ViewBag.DeviceId = DeviceId;
+                            ViewBag.Version = TempData["Version"];
+                            TempData.Keep("WallPaper");
+                            TempData.Keep("SessionID");
+                            TempData.Keep("DeviceId");
+                            TempData.Keep("Version");
+                            return View("Index");
+                        }
+
+                        //Verificar se existe dados na tabela g_filial
+                        int idFilialVerificar = regUsuario.id_filial;
+                        g_filiais record_g_filiais = db.g_filiais.Where(f => f.id_filial == idFilialVerificar).ToList().FirstOrDefault();
+
+                        if (record_g_filiais != null)
+                        {
+                            CachePersister.userIdentity.id_filial = regUsuario.id_filial;
+                            CachePersister.userIdentity.FilialNome = db.g_filiais.Find(regUsuario.id_filial).nome.ToString();
+                        }
+                        else
+                        {
+                            g_usuarios_login_logs RecordUsuarioLoginLog = new g_usuarios_login_logs
+                            {
+                                id_usuario = regUsuario.id_usuario,
+                                login_datahora = DataHoraAtual,
+                                login_ip = DeviceId.EmptyIfNull().ToString().Trim(),
+                                log = "ERRO: Acesso não liberado, Tabela Filial Não Parametrizada, acesso negado para usuário!",
+                                id_usuario_cadastro = 0,
+                                datahora_cadastro = DataHoraAtual,
+                                id_coligada = 0,
+                                id_filial = 0
+                            };
+                            db.Entry(RecordUsuarioLoginLog).State = EntityState.Added;
+                            db.SaveChanges();
+
+                            ViewBag.Error = "Tabela Filial Não Parametrizada, acesso negado para usuário!";
+                            ViewBag.WallPaper = TempData["WallPaper"];
+                            ViewBag.SessionID = TempData["SessionID"];
+                            ViewBag.DeviceId = TempData["DeviceId"];
+                            ViewBag.Version = TempData["Version"];
+                            TempData.Keep("WallPaper");
+                            TempData.Keep("SessionID");
+                            TempData.Keep("DeviceId");
+                            TempData.Keep("Version");
+                            return View("Index");
+                        }
+                                                
+                        //Verificar se existe dados tabela g_perfis
+                        int idPerfilVerificar = userIdentity.IdPerfil;
+                        g_perfis record_g_perfis = db.g_perfis.Where(p => p.id_perfil == idPerfilVerificar).ToList().FirstOrDefault();
+                        
+                        if (record_g_perfis != null)
+                        {
+                            if (userIdentity.IdPerfil > 0) { CachePersister.userIdentity.PerfilNome = db.g_perfis.Find(userIdentity.IdPerfil).nome_display.ToString(); };
+                        }
+                        else
+                        {
+                            g_usuarios_login_logs RecordUsuarioLoginLog = new g_usuarios_login_logs
+                            {
+                                id_usuario = regUsuario.id_usuario,
+                                login_datahora = DataHoraAtual,
+                                login_ip = DeviceId.EmptyIfNull().ToString().Trim(),
+                                log = "ERRO: Acesso não liberado, Tabela Perfil Não Parametrizada, acesso negado para usuário!",
+                                id_usuario_cadastro = 0,
+                                datahora_cadastro = DataHoraAtual,
+                                id_coligada = 0,
+                                id_filial = 0
+                            };
+                            db.Entry(RecordUsuarioLoginLog).State = EntityState.Added;
+                            db.SaveChanges();
+
+                            ViewBag.Error = "Tabela Perfil Não Parametrizada, acesso negado para usuário!";
+                            ViewBag.WallPaper = TempData["WallPaper"];
+                            ViewBag.SessionID = TempData["SessionID"];
+                            ViewBag.DeviceId = TempData["DeviceId"];
+                            ViewBag.Version = TempData["Version"];
+                            TempData.Keep("WallPaper");
+                            TempData.Keep("SessionID");
+                            TempData.Keep("DeviceId");
+                            TempData.Keep("Version");
+                            return View("Index");
+                        }
+
+                        // Verificar se o usuário atual é um vendedor
+                        g_vendedores record_g_vendedores = db.g_vendedores.Where(v => v.id_usuario == regUsuario.id_usuario).FirstOrDefault();
+                        if (record_g_vendedores != null) { userIdentity.IdVendedor = record_g_vendedores.id_vendedor; }
+                        else { userIdentity.IdVendedor = 0; }
+
+                        // Verificar os Parâmetros GC
+                        CachePersister.userIdentity.GcParamGrupoVendedor = regUsuario.gc_param_grupo_vendedor.EmptyIfNull().ToString();
+                        CachePersister.userIdentity.IdDepartamento = regUsuario.id_departamento;
+
+                        // Verificar a competência do estoque
+                        gc_estoque_competencia RecordEstoqueCompetencia = db.gc_estoque_competencia.Where(e => e.status == "A").FirstOrDefault();
+                        if (RecordEstoqueCompetencia != null) { CachePersister.userIdentity.GcEstoqueCompetenciaAtual = DateTime.Now.ToString("MM/yyyy"); }
+                        else { CachePersister.userIdentity.GcEstoqueCompetenciaAtual = "<b style='color:red;'>FECHADA</b>"; };
+
+                        // Apagar os filtros do usuários
+                        String _token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+                        db.g_filtros.RemoveRange(db.g_filtros.Where(f => f.token == _token).ToList());
+                        db.SaveChanges();
+
+                        return RedirectToAction("Index", "Home", new { area = "" });
+                    }
+                    else
+                    {
+                        // Se chegar aqui, não atendeu nenhum critério de login
+                        g_usuarios_login_logs RecordUsuarioLoginLog = new g_usuarios_login_logs();
+                        if (regUsuario != null) { RecordUsuarioLoginLog.id_usuario = regUsuario.id_usuario; } else { RecordUsuarioLoginLog.id_usuario = 0; }
+                        RecordUsuarioLoginLog.login_datahora = DataHoraAtual;
+                        RecordUsuarioLoginLog.login_ip = DeviceId.EmptyIfNull().ToString().Trim();
+                        RecordUsuarioLoginLog.log = "ERRO: Acesso não liberado, Credenciais Inválidas. Usuário: " + avm.userIdentity.Acesso.EmptyIfNull().ToString().Trim() + " Senha: " + avm.userIdentity.Password.EmptyIfNull().ToString().Trim();
+                        RecordUsuarioLoginLog.id_usuario_cadastro = 0;
+                        RecordUsuarioLoginLog.datahora_cadastro = DataHoraAtual;
+                        RecordUsuarioLoginLog.id_coligada = 0;
+                        RecordUsuarioLoginLog.id_filial = 0;
+                        db.Entry(RecordUsuarioLoginLog).State = EntityState.Added;
+                        db.SaveChanges();
+
+                        ViewBag.Error = "Credenciais Inválidas!";
+                        ViewBag.WallPaper = TempData["WallPaper"];
+                        ViewBag.SessionID = TempData["SessionID"];
+                        ViewBag.DeviceId = TempData["DeviceId"];
+                        ViewBag.Version = TempData["Version"];
+                        TempData.Keep("WallPaper");
+                        TempData.Keep("SessionID");
+                        TempData.Keep("DeviceId");
+                        TempData.Keep("Version");
+                        return View("Index");
+                    }
+                    #endregion
+                }
+            }
+            catch (Exception ex)
+            {
+                CachePersister.logout();
+                String msgErro = LibExceptions.getExceptionShortMessage(ex);
+                msgErro = msgErro.Replace("The underlying provider failed on Open", "Failed to connect to the database.");
+                ViewBag.Error = "Erro ["+msgErro+"]";
+                ViewBag.WallPaper = TempData["WallPaper"];
+                ViewBag.SessionID = TempData["SessionID"];
+                ViewBag.DeviceId = TempData["DeviceId"];
+                ViewBag.Version = TempData["Version"];
+                TempData.Keep("WallPaper");
+                TempData.Keep("SessionID");
+                TempData.Keep("DeviceId");
+                TempData.Keep("Version");
+                return View("Index");
+            }
+        }
+
+        #region Troca obrigatória de senha (senha expirada)
+        [HttpGet]
+        public ActionResult TrocaObrigatoriaSenha()
+        {
+            if (Session["TrocaObrigatoria_Login"] == null || Session["TrocaObrigatoria_Database"] == null)
+            {
+                return RedirectToAction("Index");
+            }
+            var vm = new TrocaObrigatoriaSenhaViewModel { Login = Session["TrocaObrigatoria_Login"].ToString() };
+            ViewBag.Version = ControlVersion.getShortVersion();
+            ViewBag.WallPaper = TempData["WallPaper"] ?? "https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/wallpaper/1.jpg";
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult TrocaObrigatoriaSenhaExecute(TrocaObrigatoriaSenhaViewModel vm)
+        {
+            string login = Session["TrocaObrigatoria_Login"] as string;
+            string database = Session["TrocaObrigatoria_Database"] as string;
+            object idUsuarioObj = Session["TrocaObrigatoria_IdUsuario"];
+            object idColigadaObj = Session["TrocaObrigatoria_IdColigada"];
+            object idFilialObj = Session["TrocaObrigatoria_IdFilial"];
+
+            if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(database) || idUsuarioObj == null)
+            {
+                TempData["Error"] = "Sessão de troca de senha inválida. Efetue o login novamente.";
+                return RedirectToAction("Index");
+            }
+
+            int idUsuario = (int)idUsuarioObj;
+            int idColigada = idColigadaObj != null ? (int)idColigadaObj : 0;
+            int idFilial = idFilialObj != null ? (int)idFilialObj : 0;
+
+            if (string.IsNullOrEmpty(vm?.SenhaAtual))
+            {
+                TempData["Error"] = "Informe a senha atual.";
+                return RedirectToAction("TrocaObrigatoriaSenha");
+            }
+            if (string.IsNullOrEmpty(vm.NovaSenha))
+            {
+                TempData["Error"] = "Informe a nova senha.";
+                return RedirectToAction("TrocaObrigatoriaSenha");
+            }
+            if (vm.NovaSenha != vm.ConfirmacaoNovaSenha)
+            {
+                TempData["Error"] = "A nova senha e a confirmação não conferem.";
+                return RedirectToAction("TrocaObrigatoriaSenha");
+            }
+
+            string msgComplexidade;
+            if (!Lib.PasswordPolicy.ValidarComplexidade(vm.NovaSenha, out msgComplexidade))
+            {
+                TempData["Error"] = msgComplexidade;
+                return RedirectToAction("TrocaObrigatoriaSenha");
+            }
+
+            GdiPlataformEntities ctx = null;
+            try
+            {
+                ctx = new GdiPlataformEntities(database);
+                g_usuarios regUsuario = ctx.g_usuarios.Find(idUsuario);
+                if (regUsuario == null || regUsuario.login != login)
+                {
+                    TempData["Error"] = "Usuário não encontrado. Efetue o login novamente.";
+                    LimparSessionTrocaObrigatoria();
+                    return RedirectToAction("Index");
+                }
+                if (regUsuario.senha != vm.SenhaAtual)
+                {
+                    TempData["Error"] = "Senha atual incorreta.";
+                    return RedirectToAction("TrocaObrigatoriaSenha");
+                }
+
+                var ultimas3Senhas = ctx.g_usuarios_senhas_historico
+                    .Where(h => h.id_usuario == idUsuario)
+                    .OrderByDescending(h => h.datahora_troca)
+                    .Take(3)
+                    .Select(h => h.senha)
+                    .ToList();
+                if (!Lib.PasswordPolicy.ValidarNaoReutilizacao(vm.NovaSenha, regUsuario.senha, ultimas3Senhas, out string msgReutilizacao))
+                {
+                    TempData["Error"] = msgReutilizacao;
+                    return RedirectToAction("TrocaObrigatoriaSenha");
+                }
+
+                DateTime dataHoraBrasilia = LibDateTime.getDataHoraBrasilia();
+                string senhaAntiga = regUsuario.senha;
+
+                using (var transaction = ctx.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var historico = new g_usuarios_senhas_historico
+                        {
+                            id_usuario = idUsuario,
+                            senha = senhaAntiga,
+                            sequencia = (ctx.g_usuarios_senhas_historico.Where(h => h.id_usuario == idUsuario).Count() + 1),
+                            datahora_troca = dataHoraBrasilia,
+                            id_usuario_cadastro = idUsuario,
+                            datahora_cadastro = dataHoraBrasilia
+                        };
+                        ctx.g_usuarios_senhas_historico.Add(historico);
+
+                        regUsuario.senha = vm.NovaSenha;
+                        regUsuario.datahora_ultima_troca = dataHoraBrasilia;
+                        regUsuario.datahora_proxima_troca = dataHoraBrasilia.AddDays(90);
+                        regUsuario.datahora_alteracao = dataHoraBrasilia;
+                        regUsuario.id_usuario_alteracao = idUsuario;
+                        ctx.Entry(regUsuario).State = EntityState.Modified;
+
+                        var logLogin = new g_usuarios_login_logs
+                        {
+                            id_usuario = idUsuario,
+                            id_cliente = 0,
+                            login_datahora = dataHoraBrasilia,
+                            login_ip = Request.ServerVariables["REMOTE_ADDR"] ?? "",
+                            log = "TROCA_OBRIGATORIA_CONCLUIDA",
+                            id_usuario_cadastro = idUsuario,
+                            datahora_cadastro = dataHoraBrasilia,
+                            id_usuario_alteracao = idUsuario,
+                            id_coligada = idColigada,
+                            id_filial = idFilial
+                        };
+                        ctx.g_usuarios_login_logs.Add(logLogin);
+
+                        ctx.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+
+                LimparSessionTrocaObrigatoria();
+                TempData["Info"] = "Senha alterada com sucesso. Efetue o login com a nova senha.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                String msgErro = LibExceptions.getExceptionShortMessage(ex);
+                TempData["Error"] = "Erro ao alterar senha [" + msgErro + "]";
+                if (ctx != null) ctx.Dispose();
+                return RedirectToAction("TrocaObrigatoriaSenha");
+            }
+            finally
+            {
+                ctx?.Dispose();
+            }
+        }
+
+        public ActionResult TrocaObrigatoriaSenhaCancelar()
+        {
+            LimparSessionTrocaObrigatoria();
+            return RedirectToAction("Index");
+        }
+
+        private void LimparSessionTrocaObrigatoria()
+        {
+            Session.Remove("TrocaObrigatoria_IdUsuario");
+            Session.Remove("TrocaObrigatoria_Login");
+            Session.Remove("TrocaObrigatoria_Database");
+            Session.Remove("TrocaObrigatoria_IdColigada");
+            Session.Remove("TrocaObrigatoria_IdFilial");
+        }
+        #endregion
+
+        #region Logout
+        public ActionResult Logout()
+        {
+            bool porInatividade = "inactivity".Equals(Request.QueryString["reason"], StringComparison.OrdinalIgnoreCase);
+            if (porInatividade)
+                TempData["Info"] = "A sessão foi encerrada devido à inatividade (15 minutos de inatividade). Por favor, faça login novamente.";
+
+            // Captura URL de saída antes de limpar cache/sessão; sempre chama logout para não deixar sessão órfã.
+            string enderecoSaida = string.Empty;
+            try
+            {
+                if (CachePersister.userIdentity != null)
+                    enderecoSaida = CachePersister.userIdentity.UrlSair.EmptyIfNull().ToString().Trim();
+            }
+            catch (Exception) { }
+            CachePersister.logout();
+            if (enderecoSaida.Length > 0)
+                return Redirect(enderecoSaida);
+            return RedirectToAction("Index");
+        }
+        #endregion
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region setTenants
+        public List<cstTenant> SetTenants()
+        {
+            var allTenants = new List<cstTenant>();
+
+            cstTenant tenant1 = new cstTenant
+            {
+                subDominio = "localhost",
+                ImgLogoSubdominio = "logoMicrosoft.png",
+                database = "GdiPlataformEntities_localhost",
+                GoogleTag = "G-J35JG2KXZL",
+                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-J35JG2KXZL",
+            };
+            allTenants.Add(tenant1);
+
+            cstTenant tenant2 = new cstTenant
+            {
+                subDominio = "gdidigital",
+                ImgLogoSubdominio = "logoGdi.png",
+                database = "GdiPlataformEntities_gdi_producao",
+                GoogleTag = "G-F73ZPQ7GLY",
+                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
+            };
+            allTenants.Add(tenant2);
+
+            cstTenant tenant3 = new cstTenant
+            {
+                subDominio = "gdidigitalhomologacao",
+                ImgLogoSubdominio = "logoGdi.png",
+                database = "GdiPlataformEntities_gdi_homologacao",
+                GoogleTag = "G-B3BWYET1V4",
+                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
+            };
+            allTenants.Add(tenant3);
+
+            cstTenant tenant4 = new cstTenant
+            {
+                subDominio = "aeroflightx",
+                ImgLogoSubdominio = "logoGdi.png",
+                database = "GdiPlataformEntities_gdi_producao",
+                GoogleTag = "G-F73ZPQ7GLY",
+                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
+            };
+            allTenants.Add(tenant4);
+
+            cstTenant tenant5 = new cstTenant
+            {
+                subDominio = "homologacao",
+                ImgLogoSubdominio = "logoGdi.png",
+                database = "GdiPlataformEntities_gdi_homologacao",
+                GoogleTag = "G-B3BWYET1V4",
+                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
+            };
+            allTenants.Add(tenant5);
+
+            return allTenants;
+        }
+        #endregion
+    }
+}
+

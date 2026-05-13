@@ -1,0 +1,258 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "GcComexImportacoesModalInvoicesItensEspelhoDigital" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-1 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Importação", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-7">
+                            @Html.DropDownList("Importação", ViewBag.ComboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = "edit_importacao", @data_container = "body", @class = "form-control", @onchange = "jsAjaxPesquisarItens();" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-7">
+                            @Html.DropDownList("Clientes", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "edit_cliente", @data_container = "body", @class = "form-control", @onchange = "jsAjaxPesquisarItens();" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("OS", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-3">
+                            @Html.DropDownList("OS", ViewBag.comboNotes as List<SelectListItem>, htmlAttributes: new { @id = "edit_os", @class = "form-control", @data_container = "body", @onchange = "jsAjaxPesquisarItens();" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarItens()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexImportacoesModalInvoicesItensEspelhoDigital">
+                                <thead>
+                                    <tr>
+                                        <th style="font-size:14px; width:4%">[x]</th>
+                                        <th style="font-size:14px; width:4%">Item</th>
+                                        <th style="font-size:14px; width:4%">Qty.</th>
+                                        <th style="font-size:14px; width:56%X">Descrição</th>
+                                        <th style="font-size:14px; width:6%">Unit</th>
+                                        <th style="font-size:14px; width:6%">R$ Total</th>
+                                        <th style="font-size:14px; width:20%">Cliente</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnFechar" title="Fechar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-regular fa-window-close me-2" aria-hidden="true"></i>Fechar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar Itens Importados</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var oTableInvoicesItens;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            jsCreateOTableInvoicesItens();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateOTableInvoicesItens()
+    {
+        try
+        {
+
+            if (oTableInvoicesItens == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                oTableInvoicesItens = $('#dtGcComexImportacoesModalInvoicesItensEspelhoDigital').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosInvoicesItensEspelhoDigital", "Movimentos",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomField01: emptyIfNull($('#edit_cliente').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#edit_os').val()).toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 12,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "56%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "6%", orderable: false, className: 'text-sm-end', targets: [4] },
+                    { "width": "6%", orderable: false, className: 'text-sm-end', targets: [5] },
+                    { "width": "20%", orderable: false, className: 'text-sm-center', targets: [6] }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+
+                order: [[1, 'asc']],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registros encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate: {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateOTableInvoicesItens] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxPesquisarItens()
+    {
+        try
+        {
+            document.getElementById("yesFilterField").value = "*";
+            $("#dtGcComexImportacoesModalInvoicesItensEspelhoDigital").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarItens] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSalvarDados()
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(oTableInvoicesItens, "Item");
+            if (!selectedIds || selectedIds.length == 0) {
+                LibMessageAlert("Atenção", "Selecione os itens!");
+            }
+            else
+            {
+                LibMessageProcessando("Carregando itens importação . . .")
+                var dataForm =
+                {
+                    record_g_movimento:
+                    {
+                        'id_movimento': '@Model.id_movimento',
+                        'informacoes_adicionais': selectedIds
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxCarregarItensImportacao", "Movimentos", new { area = "gc" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result)
+                    {
+                        LibMessageProcessandoHide();
+                        if (result.success == true)
+                        {
+                            GdiSwal2.alert({
+                                title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                                centerVertical: true,
+                                message: result.msg,
+                                callback: function ()
+                                {
+                                    $("#dtGcMovimentosCreatePedido").DataTable().draw(false);
+                                    document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                    GdiSwal2.hideAll();
+                                }
+                            })
+                        }
+                        else
+                        {
+                            GdiAjaxNotifyInconsistencias(result.msg);
+                        }
+                    },
+                    error: function (result)
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>
+
+
+
+

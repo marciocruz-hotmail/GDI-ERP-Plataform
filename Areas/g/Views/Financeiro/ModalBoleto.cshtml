@@ -1,0 +1,66 @@
+@using GdiPlataform.Security
+@using GdiPlataform.Lib;
+@{Layout = null;}
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalBoletoGFinanceiro" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="row">
+                    <div class="col-sm-12 m-1 p-1">
+                        <P align=center>
+                            @ViewBag.EncodedHtml
+                        </P>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnFechar" title="Fechar" class="btn btn-outline-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-regular fa-window-close me-2" aria-hidden="true"></i>Fechar</button>
+                <button type="button" name="btnOpenPDF" title="Gerar Boleto (PDF)" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="OpenPDFBoleto()"><i class="fa-regular fa-file-pdf me-2" aria-hidden="true"></i>Gerar Boleto (PDF)</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function OpenPDFBoleto()
+    {
+        try
+        {
+            window.open('@Url.Action("GerarBoletoPDF", "Financeiro", new { area = "g" })/@ViewBag.idFinanceiro')
+        }
+        catch (e)
+        {
+            GdiSwal2.hideAll();
+            GdiAjaxNotifyInconsistencias(e.message.toString());
+        }
+    };
+
+
+</script>
+
+
+
+
+
+

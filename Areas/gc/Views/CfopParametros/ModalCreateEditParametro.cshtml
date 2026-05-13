@@ -1,0 +1,179 @@
+@model GdiPlataform.Db.gc_cfop_parametros
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditParametro" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_cfop_parametro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados dos Parâmetros</div>
+                        <div class="card-body m-1 p-1" style="height: 100%">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("descricao", "Descrição", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control", @onkeypress = "jsGcCfopParametrosKeyPressed(event);" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Dentro UF</div>
+                        <div class="card-body m-1 p-1" style="height: 100%">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Contribuinte - Revenda", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_dentrouf_contribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Contribuinte - Consumidor", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_dentrouf_contribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Não Contribuinte - Revenda", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_dentrouf_naocontribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Não Contribuinte - Consumidor", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_dentrouf_naocontribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Fora UF</div>
+                        <div class="card-body m-1 p-1" style="height: 100%">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Contribuinte - Revenda", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_forauf_contribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Contribuinte - Consumidor", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_forauf_contribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Não Contribuinte - Revenda", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_forauf_naocontribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Não Contribuinte - Consumidor", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.id_cfop_forauf_naocontribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Confirmar Lançamento" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsAjaxCreateEditParametro()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Parâmetro</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditParametro()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#FormModalCreateEditParametro');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditParametro", "CfopParametros", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function () {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        $("#dtGcCfopParametros").DataTable().draw(false);
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+
+
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEditParametro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsGcCfopParametrosKeyPressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            jsCheckInputs();
+        }
+    }
+
+</script>
+
+

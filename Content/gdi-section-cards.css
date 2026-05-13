@@ -1,0 +1,21 @@
+/* Substitui wrappers callout/callout-* (AdminLTE 4 pinta o bloco inteiro com *-bg-subtle).
+   Combinar com .card.shadow-sm; faixa lateral com variáveis Bootstrap (tema claro/escuro).
+   Não usar .border-start nestes cards dentro de outro .card — AdminLTE força 1px cinza. */
+.card.gdi-section-accent-success {
+  border-left: 4px solid var(--bs-success) !important;
+}
+.card.gdi-section-accent-warning {
+  border-left: 4px solid var(--bs-warning) !important;
+}
+.card.gdi-section-accent-info {
+  border-left: 4px solid var(--bs-info) !important;
+}
+.card.gdi-section-accent-secondary {
+  border-left: 4px solid var(--bs-secondary) !important;
+}
+.card.gdi-section-accent-danger {
+  border-left: 4px solid var(--bs-danger) !important;
+}
+.card.gdi-section-accent-primary {
+  border-left: 4px solid var(--bs-primary) !important;
+}

@@ -1,0 +1,421 @@
+@model GdiPlataform.Db.gc_estoque_lotes
+@using GdiPlataform.Security
+@{
+    Layout = "~/Views/Shared/_Modal.cshtml";
+}
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGcEstoqueLotes" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_estoque_lote)
+                @Html.HiddenFor(model => model.ativo)
+                @Html.HiddenFor(model => model.id_movimento_origem)
+                @Html.HiddenFor(model => model.id_arquivo_ged)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.HiddenFor(model => model.datahora_alteracao)
+                @Html.HiddenFor(model => model.id_usuario_alteracao)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-1">
+                        <div class="card-body m-0 p-1">
+                            <div class="card shadow-sm gdi-section-accent-success m-0 p-1">
+                                <h5>Dados do Lote</h5>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("id_importacao", "Importacao", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-8 text-sm-start">
+                                        @Html.DropDownListFor(model => model.id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("id_produto", "Produto", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-10 text-sm-start">
+                                        @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("codigo_lote", "Lote Ini.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.EditorFor(model => model.codigo_lote, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("codigo_serial", "Serial", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.EditorFor(model => model.codigo_serial, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("data_validade", "Validade", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @* id do .input-group distinto do input para Tempus Dominus *@
+                                        <div class='input-group date' id='ig_gc_est_lote_modal_val'>
+                                            @Html.TextBoxFor(model => model.data_validade, "{0:dd/MM/yyyy}", new { @class = "form-control", type = "text" })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("saldo_01_disponivel", "Saldo BH", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.saldo_01_disponivel, "{0:0}", new { htmlAttributes = new { @class = "form-control text-sm-end" } })
+                                    </div>
+                                    @Html.Label("saldo_03_disponivel", "Saldo SP", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.saldo_03_disponivel, "{0:0}", new { htmlAttributes = new { @class = "form-control text-sm-end" } })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card shadow-sm gdi-section-accent-warning m-0 p-1" id="divDocsEstoqueLote" style="@(Model.id_estoque_lote > 0 ? "" : "display:none;")">
+                                <h5>Documentos</h5>
+                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcEstoqueLotesGed">
+                                        <thead>
+                                            <tr>
+                                                <th>@Html.Raw("Id.")</th>
+                                                <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                                <th>@Html.Raw("Tipo")</th>
+                                                <th>@Html.Raw("Descri&ccedil;&atilde;o")</th>
+                                                <th>@Html.Raw("Arquivo")</th>
+                                                <th>@Html.Raw("Data")</th>
+                                                <th>@Html.Raw("Usu&aacute;rio")</th>
+                                                <th><i class="fa-solid fa-paperclip" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Anexo"></i></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                    <div class="card-body text-sm-center m-0 p-1">
+                                        <div class="row justify-content-center">
+                                            <div class="col-6" style="text-align:center">
+                                                <button type="button" name="btnUploadFileEstoqueLotes" title="Anexar Documentos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFileEstoqueLotes()"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Incluir Anexos</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueiaEdicao as string))
+                {
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Fechar
+                    </button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxSaveEstoqueLote()" class="btn btn-success float-end d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar
+                    </button>
+                }
+                else
+                {
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Fechar
+                    </button>
+                    <button type="button" name="btnSair" title="Sair" class="btn btn-info float-end d-inline-flex align-items-center gap-2" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Sair
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var TableEstoqueLotesGed;
+
+    $(function ()
+    {
+        try {
+            jsDatepicker('#ig_gc_est_lote_modal_val');
+            jsInitModal();
+            TableEstoqueLotesGed = null;
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary() == null) ? "" : @Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsAjaxSaveEstoqueLote()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+
+            if ($('#id_produto').val() == null || $('#id_produto').val() === "" || $('#id_produto').val() === "0") {
+                hasError = true;
+                msgError += "Campo <b>Produto</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#codigo_lote').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Código Lote</b> é de preenchimento obrigatório!<br/>";
+            }
+
+            if (hasError) {
+                LibMessageAlert("Atenção", msgError);
+                return;
+            }
+
+            LibMessageProcessando("");
+            var form = $('#FormModalCreateEditGcEstoqueLotes');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxSaveRecord", "EstoqueLotes", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success === true)
+                    {
+                        if (result.id_estoque_lote && parseInt(result.id_estoque_lote) > 0)
+                        {
+                            $("#dtGcEstoqueLotesGed").DataTable().draw(false);
+                            $("#dtGcEstoqueLotes").DataTable().draw(false);
+                            yesDestroyModal('#FormModalCreateEditGcEstoqueLotes');
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                    else
+                    {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxSaveEstoqueLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalUploadFileEstoqueLotes()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+
+            if ($('#id_produto').val() == null || $('#id_produto').val() === "" || $('#id_produto').val() === "0") {
+                hasError = true;
+                msgError += "Campo <b>Produto</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#codigo_lote').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Código Lote</b> é de preenchimento obrigatório!<br/>";
+            }
+
+            if (hasError) {
+                LibMessageAlert("Atenção", msgError);
+                return;
+            }
+
+            LibMessageProcessando("");
+            var form = $('#FormModalCreateEditGcEstoqueLotes');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxSaveRecord", "EstoqueLotes", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success === true)
+                    {
+                        yesDestroyModal('#ModalCreateEditEstoqueLotes');
+                        $("#mainModal").load('@Url.Action("ModalUploadAnexoEstoqueLotes", "EstoqueLotes", new { area = "gc" })?IdEstoqueLote=' + $('#id_estoque_lote').val().toString(), function () {
+                            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                        });
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxSaveEstoqueLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+
+    function Old_jsModalUploadFileEstoqueLotes()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            yesDestroyModal('#ModalCreateEditEstoqueLotes');
+            $("#mainModal").load('@Url.Action("ModalUploadAnexoEstoqueLotes", "EstoqueLotes", new { area = "gc" })?IdEstoqueLote=' + $('#id_estoque_lote').val().toString(), function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileEstoqueLotes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+function jsCreateTable() {
+    try
+    {
+        $.fn.dataTable.ext.errMode = 'none';
+        if (TableEstoqueLotesGed == null) {
+            TableEstoqueLotesGed = $('#dtGcEstoqueLotesGed')
+                .on('error.dt', function (e, settings, techNote, message) {
+                    GdiDtNotifyLoadFailure(message);
+                })
+                .DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetGedEstoqueLotes", "EstoqueLotes", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_estoque_lote').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        {
+                            "width": "4%", orderable: false, className: 'text-sm-center', targets: [1],
+                            data: null, defaultContent: "",
+                            render: function (data, type, row, meta) {
+                                return '<button type="button" name="btnDesativarAnexo" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar o Anexo ' + data[3] + '" class="btn btn-outline-danger btn-sm btnDesativarAnexo d-inline-flex align-items-center gap-2" onclick="jsDesativarAnexo(' + data[0] + ');"><i class="fa-solid fa-power-off"></i></button>';
+                            }
+                        },
+                        { "width": "26%", orderable: false, className: 'text-sm-start', targets: [2] },
+                        { "width": "24%", orderable: false, className: 'text-sm-start', targets: [3] },
+                        { "width": "24%", orderable: false, className: 'text-sm-start', targets: [4] },
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [5] },
+                        { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                        {
+                            "width": "4%", orderable: false, className: 'text-sm-center', targets: [7],
+                            data: null, defaultContent: "",
+                            render: function (data, type, row, meta) {
+                                return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir anexo ' + data[3] + '" class="btn btn-outline-info btn-sm btnDownloadFile d-inline-flex align-items-center gap-2" onclick="jsAbrirAnexo(' + data[0] + ');"><i class="fa-regular fa-file-lines"></i></button>';
+                            }
+                        }
+                    ],
+                    order: [[0, 'asc']],
+                    language:
+                    {
+                        sEmptyTable: 'Nenhum registro encontrado',
+                        sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                        sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                        sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                        sInfoPostFix: '',
+                        sInfoThousands: '.',
+                        sLengthMenu: '_MENU_ registros por página',
+                        sZeroRecords: 'Nenhum registro encontrado',
+                        sSearch: 'Pesquisar',
+                        oPaginate:
+                        {
+                            sNext: '>',
+                            sPrevious: '<',
+                            sFirst: '<<',
+                            sLast: '>>'
+                        },
+                        select: {
+                            rows: {
+                                0: "",
+                                1: " [ %d registro selecionado ] ",
+                                _: " [ %d registros selecionados ] "
+                            }
+                        }
+                    },
+                    oAria: {
+                        sSortAscending: ': Ordenar colunas de forma ascendente',
+                        sSortDescending: ': Ordenar colunas de forma descendente'
+                    }
+                });
+        }
+        else {
+            TableEstoqueLotesGed.draw(false);
+        }
+    }
+    catch (err) {
+        LibMessageError("Atenção", "[tabGED_tab] " + (err && err.message ? err.message.toString() : String(err)));
+    }
+}
+
+    function jsAbrirAnexo(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+
+
+</script>

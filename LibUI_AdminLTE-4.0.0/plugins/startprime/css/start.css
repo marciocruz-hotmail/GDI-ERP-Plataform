@@ -1,0 +1,1002 @@
+﻿.main-content {
+}
+
+.label-pill {
+    padding-right: .6em;
+    padding-left: .6em;
+    border-radius: 10rem;
+}
+
+.tableBlue {
+    border: 1px solid #d9e3e5;
+}
+
+    .tableBlue table {
+        border-spacing: 1px;
+        padding: 1px;
+    }
+
+    .tableBlue th, .tableBlue td {
+        border: 1px solid #d9e3e5;
+    }
+
+.trBlue1 {
+    background: #ECF1F7;
+    color: #1C4F90;
+    font-weight: bold;
+    text-align: left;
+}
+
+
+.trGray1 {
+    background: #e6e6e6;
+    color: #1C4F90;
+    font-weight: bold;
+    text-align: left;
+}
+
+.trGray2 {
+    background: #f1f1f1;
+    color: #6D6465;
+    font-weight: bold;
+    text-align: left;
+}
+
+.trWhite1 {
+    background: #FFFFFF;
+    color: #1C1C1C;
+    text-align: left;
+}
+
+tituloRespostaConsulta {
+    font-size: 18px;
+    padding: 0 0 3px 0;
+    margin: 10px 0 0;
+    color: #A7763C;
+    display: inline-block;
+    border-bottom: 1px #cdcdcd solid;
+    width: 100%;
+}
+
+    tituloRespostaConsulta span {
+        float: left;
+    }
+
+.protocol {
+    background: #F0F4F5;
+    padding: 5px 15px;
+    color: #B6192C;
+}
+
+.captionBlue1 {
+    background: #ECF1F7;
+    color: #1C4F90;
+    font-weight: bold;
+    text-align: left;
+    border: 1px solid #D9E3E5;
+    border-bottom: 0;
+    padding: 4px;
+    caption-side: top;
+}
+
+.trYellow1 {
+    background: #FFFBED;
+}
+
+td.BoletoCodigoBanco {
+    font-size: 6mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: center;
+    vertical-align: bottom;
+    border-bottom: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    padding-bottom: 1mm;
+}
+
+td.BoletoLogo {
+    border-bottom: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    text-align: center;
+    height: 10mm;
+}
+
+td.BoletoLinhaDigitavel {
+    font-size: 4 mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom;
+    border-bottom: 0.30mm solid #000000;
+    padding-bottom: 1mm;
+}
+
+td.BoletoTituloEsquerdo {
+    font-size: 0.2cm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    border-right: 0.30mm solid #000000;
+    text-align: left;
+}
+
+td.BoletoTituloDireito {
+    font-size: 2mm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    text-align: left;
+}
+
+td.BoletoValorEsquerdo {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    text-align: center;
+    border-right: 0.30mm solid #000000;
+    font-weight: bold;
+    border-bottom: 0.30mm solid #000000;
+    padding-top: 0.5mm;
+}
+
+td.BoletoValorDireito {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    text-align: right;
+    padding-right: 3mm;
+    padding-top: 0.8mm;
+    border-bottom: 0.30mm solid #000000;
+    font-weight: bold;
+}
+
+td.BoletoTituloSacado {
+    font-size: 2mm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    vertical-align: top;
+    padding-top: 0.30mm;
+    text-align: left;
+}
+
+td.BoletoValorSacado {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    text-align: left;
+}
+
+td.BoletoTituloSacador {
+    font-size: 2mm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    vertical-align: bottom;
+    padding-bottom: 0.8mm;
+    border-bottom: 0.30mm solid #000000;
+}
+
+td.BoletoValorSacador {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    vertical-align: bottom;
+    padding-bottom: 0.30mm;
+    border-bottom: 0.30mm solid #000000;
+    font-weight: bold;
+    text-align: left;
+}
+
+td.BoletoPontilhado {
+    border-top: 0.3mm dashed #000000;
+    font-size: 1mm;
+}
+
+ul.BoletoInstrucoes {
+    font-size: 3mm;
+    font-family: verdana, arial;
+}
+
+td.BoletoLinhaSolida {
+    border-top: 0.30mm solid #000000;
+    font-size: 1mm;
+}
+
+td.BoletoLineBlank {
+    border-top: 2mm solid #ffffff;
+    font-size: 1mm;
+}
+
+ul.BoletoExtrato {
+    font-size: 3mm;
+    font-family: verdana, arial;
+}
+
+td.BoletoExtratoTitulo {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    padding-left: 0.30mm;
+    text-align: center;
+    vertical-align: bottom;
+    border-top: 0.30mm solid #000000;
+    border-left: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoHeaderQtd {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    border-bottom: 0.30mm solid #000000;
+    border-left: 0.30mm solid #000000;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoHeaderDescricao {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: left;
+    vertical-align: bottom;
+    border-bottom: 0.30mm solid #000000;
+    border-left: 0.30mm solid #000000;
+    padding-left: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoHeaderUnit {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    border-bottom: 0.30mm solid #000000;
+    border-left: 0.30mm solid #000000;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoHeaderTotal {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    border-bottom: 0.30mm solid #000000;
+    border-left: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoLineQtd {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    border-left: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoLineDescricao {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    FONT-STYLE: italic;
+    text-align: left;
+    vertical-align: bottom;
+    border-left: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    padding-left: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoLineUnit {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    border-left: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoExtratoLineTotal {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    border-left: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+td.BoletoHeader1 {
+    font-size: 0.2cm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    border-top: 0.30mm solid #000000;
+    border-left: 0.30mm solid #000000;
+    text-align: left;
+}
+
+td.BoletoHeader2 {
+    font-size: 0.2cm;
+    font-family: arial, verdana;
+    border-top: 0.30mm solid #000000;
+    padding-left: 0.30mm;
+    text-align: left;
+}
+
+td.BoletoHeader3 {
+    font-size: 0.2cm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    border-top: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    text-align: left;
+}
+
+td.BoletoHeader4 {
+    font-size: 0.2cm;
+    font-family: arial, verdana;
+    padding-left: 0.30mm;
+    border-left: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    text-align: left;
+}
+
+td.BoletoCedenteTop {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    padding-left: 0.30mm;
+    border-right: 0.30mm solid #000000;
+    text-align: left;
+}
+
+td.BoletoCedenteBottom {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    padding-left: 0.30mm;
+    border-right: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    text-align: left;
+}
+
+td.BoletoHeaderLine1 {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    text-align: center;
+    border-left: 0.30mm solid #000000;
+    font-weight: bold;
+    padding-top: 0.5mm;
+}
+
+td.BoletoHeaderLine2 {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    text-align: center;
+    font-weight: bold;
+    padding-top: 0.5mm;
+}
+
+td.BoletoHeaderLine3 {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    text-align: center;
+    border-right: 0.30mm solid #000000;
+    font-weight: bold;
+    padding-top: 0.5mm;
+}
+
+td.BoletoHeaderLine4 {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    text-align: center;
+    border-left: 0.30mm solid #000000;
+    border-right: 0.30mm solid #000000;
+    border-bottom: 0.30mm solid #000000;
+    font-weight: bold;
+    padding-top: 0.5mm;
+}
+
+td.BoletoLogoEmpresa {
+    text-align: center;
+    height: 10mm;
+}
+
+td.BoletoCabecalho {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: center;
+    vertical-align: bottom;
+    padding-bottom: 1mm;
+}
+
+td.BoletoSubTotal {
+    font-size: 3mm;
+    font-family: arial, verdana;
+    font-weight: bold;
+    FONT-STYLE: italic;
+    text-align: right;
+    vertical-align: bottom;
+    padding-right: 2mm;
+    padding-bottom: 1mm;
+}
+
+.crudCss input.text-box {
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 2em;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.homeImg {
+    padding: 5px;
+    position: absolute;
+    background-image: url(../../../Images/servidor.jpg);
+    background-size: cover;
+}
+
+.divIndexLogin {
+    height: 100%;
+}
+
+.fullscreen {
+    width: 100%;
+    height: 100vh;
+    padding: 40vh;
+}
+
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
+
+    .bs-callout h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+
+    .bs-callout p:last-child {
+        margin-bottom: 0;
+    }
+
+    .bs-callout code {
+        border-radius: 3px;
+    }
+
+    .bs-callout + .bs-callout {
+        margin-top: -5px;
+    }
+
+.bs-callout-default {
+    border-left-color: #777;
+}
+
+    .bs-callout-default h4 {
+        color: #777;
+    }
+
+.bs-callout-primary {
+    border-left-color: #428bca;
+}
+
+    .bs-callout-primary h4 {
+        color: #428bca;
+    }
+
+.bs-callout-success {
+    border-left-color: #5cb85c;
+}
+
+    .bs-callout-success h4 {
+        color: #5cb85c;
+    }
+
+.bs-callout-danger {
+    border-left-color: #d9534f;
+}
+
+    .bs-callout-danger h4 {
+        color: #d9534f;
+    }
+
+.bs-callout-warning {
+    border-left-color: #f0ad4e;
+}
+
+    .bs-callout-warning h4 {
+        color: #f0ad4e;
+    }
+
+.bs-callout-info {
+    border-left-color: #5bc0de;
+}
+
+    .bs-callout-info h4 {
+        color: #5bc0de;
+    }
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
+
+    .btn-circle.btn-xl {
+        width: 70px;
+        height: 70px;
+        padding: 10px 16px;
+        border-radius: 35px;
+        font-size: 24px;
+        line-height: 1.33;
+    }
+
+    .btn-circle.btn-lg {
+        width: 140px;
+        height: 140px;
+        padding: 10px 16px;
+        border-radius: 70px;
+        font-size: 50px;
+        line-height: 1.33;
+    }
+
+.modal-full {
+    min-width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+    .modal-full .modal-content {
+        min-height: 95%;
+    }
+
+.lbl {
+    font-weight: normal;
+    color: red;
+}
+
+/* Contém tabelas largas (ex.: DataTables) sem estourar o layout — evita width:5000px legado */
+.scroll-modal-horizontal,
+.scroll-body-horizontal {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Card em flex (BS5): permite encolher e exibir scroll horizontal do filho .table-responsive */
+.app-wrapper .app-main .card > .card-body {
+    min-width: 0;
+}
+
+/* Colunas / modal: cadeia flex não corta o scroll horizontal (:has ignorado em browsers sem suporte) */
+@supports selector(:has(*)) {
+    .app-wrapper .app-main .row > [class*="col-"]:has(.scroll-body-horizontal) {
+        min-width: 0;
+    }
+
+    .modal-body:has(.scroll-body-horizontal) {
+        min-width: 0;
+    }
+}
+
+/* Wrapper padrão do DataTables respeita o card/modal */
+.dataTables_wrapper {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.dataTables_wrapper .dataTables_scroll {
+    max-width: 100%;
+}
+
+/* Fora de .gdi-dt-scroll-host: a tabela pode crescer com as colunas; o scroll fica no wrapper */
+.scroll-body-horizontal > table,
+.scroll-body-horizontal .dataTables_wrapper table,
+.scroll-body-horizontal table.dataTable {
+    width: max-content;
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Contém DataTable dentro de card/col sem estourar o viewport (flex + gutters BS5) */
+.gdi-dt-scroll-host {
+    max-width: 100%;
+    overflow-x: auto;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Com .gdi-dt-scroll-host, o scroll horizontal fica só no host (filho não duplica overflow-x). */
+.gdi-dt-scroll-host > .scroll-body-horizontal {
+    overflow-x: visible;
+}
+
+/* DataTables BS5: o layout (info/paginação etc.) usa .row com margens negativas do Bootstrap,
+   maior que o .dt-container e dispara scroll horizontal residual. O datatables.css só corrige
+   sob div.table-responsive; aqui aplica-se a qualquer instância (Areas g/gc/qa/a, modais, callout).
+   .dt-container é classe reservada do DataTables — seguro como regra global. */
+div.dt-container > .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* API legada .dataTable() / layout antigo: wrapper sem .dt-container */
+div.dataTables_wrapper > .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* DataTables: evitar que conteúdo longo estoure a largura do container.
+   Usa table-layout: fixed + truncamento por padrão; colunas que precisam
+   quebrar podem receber a classe utilitária .dt-wrap */
+.gdi-dt-scroll-host .scroll-body-horizontal table,
+.gdi-dt-scroll-host .scroll-body-horizontal table.dataTable,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable {
+    table-layout: fixed;
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+.gdi-dt-scroll-host .scroll-body-horizontal th,
+.gdi-dt-scroll-host .scroll-body-horizontal td,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable th,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+/* Permite quebra de linha em colunas específicas quando necessário */
+.dt-wrap {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.nav > li > a {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+/* Bootstrap 5 form-switch — variantes (substitui custom-switch-on-success / AdminLTE 3) */
+
+.form-check-input.switch-success:checked {
+    background-color: var(--bs-success);
+    border-color: var(--bs-success);
+}
+
+.form-switch-lg .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    margin-top: 0.1em;
+}
+
+.form-switch-lg .form-check-label {
+    padding-left: 0.5em;
+}
+
+@media (max-width: 768px) {
+    /* Força remover qualquer borda em tabelas borderless (inclui overrides do AdminLTE) */
+    .table.table-borderless th,
+    .table.table-borderless td,
+    .table.table-borderless thead th,
+    .table.table-borderless tbody td,
+    .table.table-borderless tbody th {
+        border: 0 !important;
+    }
+
+    .table.table-borderless,
+    .table.table-borderless * {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+}
+
+/* Home (/): preencher toda a área útil do .app-main (só com .gdi-home-page-root na view) */
+.app-main:has(.gdi-home-page-root) {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+.app-main:has(.gdi-home-page-root) .app-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.app-main:has(.gdi-home-page-root) .app-content > .container-fluid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.gdi-home-page-root {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.gdi-home-page-root .gdi-home-main-visual {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Imagem inteira visível: estica à caixa (não mantém proporção). Evita corte de object-fit: cover. */
+.gdi-home-page-root .gdi-home-main-visual img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+    object-fit: fill;
+    object-position: center;
+    opacity: 0.5;
+}
+
+/* Layout principal (AdminLTE layout-fixed): o documento não cresce além da viewport —
+   o scroll vertical fica só em .app-main (evita barra no body + barra no main). */
+@media (min-width: 992px) {
+    body.layout-fixed.sidebar-expand-lg .app-wrapper {
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+        overflow: hidden;
+    }
+    body.layout-fixed.sidebar-expand-lg .app-main {
+        min-height: 0;
+    }
+}
+
+/* Menu lateral central: ícone + rótulo sem utilitário gap (alinha às abas sem gap-2) */
+.app-sidebar .sidebar-wrapper .sidebar-menu .nav-link,
+.app-sidebar .sidebar-wrapper .nav-treeview .nav-link {
+    gap: 0 !important;
+}
+
+/* Cinto de segurança: evita scroll horizontal do documento */
+html, body {
+    overflow-x: hidden;
+}
+
+/*
+ * Tempus Dominus 6 + Bootstrap 5 / AdminLTE 4: popup acima de modais e tabelas.
+ */
+.tempus-dominus-widget.show {
+    z-index: 1070 !important;
+}
+
+.modal .tempus-dominus-widget.show {
+    z-index: 1080 !important;
+}
+
+/* Overlay global de processamento (substitui bootstrap-waitingfor / BS3 modal) — BS5 spinner + backdrop */
+.gdi-busy-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    pointer-events: auto;
+}
+
+.gdi-busy-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.gdi-busy-panel {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: rgba(33, 37, 41, 0.92);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+    max-width: min(420px, 90vw);
+}
+
+.gdi-busy-message {
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+/*
+ * Select2 4 + select2-bootstrap-5-theme: ajustes finos AdminLTE 4 / BS5
+ * (o tema cobre a maior parte; isto alinha tokens e z-index com modais).
+ */
+/* Fechado: texto sempre à esquerda (evita herdar text-end / RTL de ancestrais) */
+.select2-container--bootstrap-5,
+.select2-container--bootstrap-5 .select2-selection,
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered,
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered .select2-selection__placeholder {
+    text-align: left !important;
+    direction: ltr;
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered {
+    justify-content: flex-start !important;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+    text-align: left !important;
+    direction: ltr;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+    border-color: var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    min-height: calc(1.5em + 0.75rem + 2px);
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    line-height: var(--bs-body-line-height, 1.5);
+    color: var(--bs-body-color, #212529);
+}
+
+/* Validação (jQuery Validate / MVC): espelhar erro no contentor Select2 (além do <select> oculto) */
+.select2-container--bootstrap-5.is-invalid .select2-selection,
+select.select2-hidden-accessible.is-invalid + .select2-container--bootstrap-5 .select2-selection,
+select.select2-hidden-accessible.input-validation-error + .select2-container--bootstrap-5 .select2-selection {
+    border-color: var(--bs-danger, #dc3545);
+}
+
+select.select2-hidden-accessible.is-invalid ~ .field-validation-error,
+select.select2-hidden-accessible.input-validation-error ~ .field-validation-error {
+    display: block;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb, 13, 110, 253), 0.25);
+}
+
+.select2-dropdown {
+    border-color: var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, 0.375rem);
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: var(--bs-primary, #0d6efd);
+    color: var(--bs-light, #fff);
+}
+
+/* Lista aberta acima de navbar/cards; dentro de modal o dropdownParent costuma ser o próprio .modal */
+.select2-container--open {
+    z-index: 1060;
+}
+
+.modal .select2-container--open {
+    z-index: 2000;
+}
+
+/* Lista do Select2 (irmã do container) acima do conteúdo do diálogo — evita overlay “comer” cliques no campo de pesquisa */
+.modal .select2-dropdown {
+    z-index: 2055;
+}
+
+/* ============================================================
+   Modernização Visual — BS5 / AdminLTE 4
+   Aplicado globalmente.
+   ============================================================ */
+
+/* 1. Alinhamento vertical dos labels (substitui margin-top inline em labels) */
+.col-form-label {
+    padding-top: .45rem;
+    padding-bottom: .25rem;
+}
+
+/* 2. Cabeçalho de seção padronizado */
+.section-header {
+    background: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+    padding: .35rem .75rem;
+    font-size: .85rem;
+    font-weight: 600;
+    border-radius: var(--bs-border-radius-sm);
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+/* 3. Header/footer de modal, card-title e card-footer — tema BS */
+.modal-header,
+.modal-footer,
+.card-title,
+.card-footer {
+    background: var(--bs-tertiary-bg) !important;
+}
+
+/* 4. Separador vertical entre grupos de botões (toolbar) */
+.vr {
+    align-self: stretch;
+    opacity: .2;
+}
+
+/* ============================================================
+   Modernização Visual — Onda 1 (complemento)
+   BS5 / AdminLTE 4 — GDI ERP Plataform
+   Blocos 1a/1b (.col-form-label, .vr) já definidos acima.
+   ============================================================ */
+
+/* 1c. Espaçamento duplo ícone + texto: gap-2 já define o espaço (Font Awesome) */
+.d-inline-flex.gap-2 > i[class*="fa-"] {
+    margin-right: 0 !important;
+}
+
+/* 1d. Destaque de menu — substitui color:#1A5276 hardcoded */
+.text-accent-menu {
+    color: var(--bs-primary);
+    font-weight: 600;
+}
+

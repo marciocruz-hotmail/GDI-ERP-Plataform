@@ -1,0 +1,104 @@
+@model GdiPlataform.Db.gc_cfop
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcCfopCreateEdit" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_cfop)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-body m-0 p-0" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                            <div class="section-header"><i class="fa-solid fa-receipt me-1" aria-hidden="true"></i>Dados do CFOP</div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Ativo", "Ativo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(model => model.ativo, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Número", "Número", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.numero, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Descrição", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("nfe_devolucao", "Nota Devolução.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(model => model.nfe_devolucao, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Cfop",new { Area = "gc" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+
+            if (isEmpty($('#numero').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Número</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#descricao').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Descrição</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (hasError) { LibMessageAlert("Atenção", msgError); }
+            else {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#FormGcCfopCreateEdit").submit();
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>

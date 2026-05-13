@@ -1,0 +1,329 @@
+@model IEnumerable<GdiPlataform.Db.gc_movimentos>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="IndexPedido" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_MovimentosCompras_*")) || (CachePersister.userIdentity.Roles.Contains("gc_MovimentosCompras_Create")))
+                {
+                    <button type="button" name="btnNovoCotacao" title="Nova Cotação" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("CreateCotacaoCompra", "MovimentosCompras", new { Area = "gc" })')"><i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i>Cotação</button>
+                    <button type="button" name="btnNovoPedido" title="Novo Pedido" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("CreatePedidoCompra", "MovimentosCompras", new { Area = "gc" })')"><i class="fa-solid fa-boxes me-2" aria-hidden="true"></i>Pedido</button>
+                }
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_MovimentosCompras_*")) || (CachePersister.userIdentity.Roles.Contains("gc_MovimentosCompras_Processos")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsAjaxAtualizarDatasets()"><i class="fa-solid fa-sync-alt me-2" aria-hidden="true"></i>Sincronizar Cadastros</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("N", "Id/Código", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.Editor("edit_numero_cotacao", "edit_numero_cotacao", new { htmlAttributes = new { @class = "form-control", @onkeypress = "keypressed(event);", type = "text" } })
+                        </div>
+                        <div class="col-sm-3">
+                            @* id do .input-group distinto do input (Editor) para Tempus Dominus *@
+                            <div class='input-group date' id='ig_gc_compras_idx_d1'>
+                                @Html.Editor("edit_data1", "edit_data1", new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class='input-group date' id='ig_gc_compras_idx_d2'>
+                                @Html.Editor("edit_data2", "edit_data2", new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-8">
+                            @Html.DropDownList("Cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "edit_cliente", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Posição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.DropDownList("Posicao", ViewBag.comboMovimentosPosicao as List<SelectListItem>, htmlAttributes: new { @id = "edit_posicao", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                        </div>
+                        @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.DropDownList("Tipo", ViewBag.comboTiposMovimentos as List<SelectListItem>, htmlAttributes: new { @id = "edit_tipo", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                        </div>
+                        @Html.Label("Status", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.DropDownList("Status", ViewBag.comboStatusMovimentos as List<SelectListItem>, htmlAttributes: new { @id = "edit_status", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                        </div>
+                        <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTableGCIndexCompras">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>@Html.Encode("Id.")</th>
+                                <th><i class="fa-solid fa-boxes" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Tipo (Cotação/Pedido/OS)"></i></th>
+                                <th><i class="fa-solid fa-shopping-cart" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Status (Aberto/Fechado)"></i></th>
+                                <th><i class="fa-solid fa-map-pin" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Posição"></i></th>
+                                <th>@Html.Encode("Cli/For")</th>
+                                <th>@Html.Encode("Solicitante")</th>
+                                <th>@Html.Encode("Data")</th>
+                                <th><i class="fa-regular fa-calendar-alt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Status Prazos"></i></th>
+                                <th><i class="fa-solid fa-cart-plus" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens"></i></th>
+                                <th>@Html.Encode("Valor")</th>
+                                <th><i class="fa-regular fa-edit" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Cotação/Pedido/OS"></i></th>
+                            </tr>
+                        </thead>
+                        <tfoot align="right">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var otableGCIndexCompras;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsDatepickerFirstDayMonth('#ig_gc_compras_idx_d1');
+            jsDatepickerToday('#ig_gc_compras_idx_d2');
+            jsCreateOtableGCIndexCompras();
+            gdiAplicarFoco('#edit_numero_cotacao', true);
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarMovimentos()
+        }
+    }
+
+    function jsCreateOtableGCIndexCompras()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGCIndexPedido = $('#dataTableGCIndexCompras').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                },
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    LibMessageProcessandoHide();
+                    gdiAplicarFoco('#edit_numero_cotacao', true);
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosCompras","MovimentosCompras",new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_numero_cotacao').val()).toString(),
+                        yesCustomField02: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_compras_idx_d1')),
+                        yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_compras_idx_d2')),
+                        yesCustomField04: emptyIfNull($('#edit_cliente').val()).toString(),
+                        yesCustomField05: emptyIfNull($('#edit_posicao').val()).toString(),
+                        yesCustomField06: emptyIfNull($('#edit_tipo').val()).toString(),
+                        yesCustomField07: emptyIfNull($('#edit_status').val()).toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "40%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "7%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "7%", orderable: false, className: 'text-sm-center', targets: [7] },
+                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [8] },
+                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [9] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [10] },
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [11], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCIndexPedidoEditRow" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Cotação/Pedido/OS Nº ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGCIndexPedidoEditRow d-inline-flex align-items-center" onclick="jsGCIndexPedidoEditRow(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dataTableGCIndexCompras tbody').on('dblclick', 'tr td', function () {
+                var data = otableGCIndexPedido.row($(this).closest('tr')).data();
+                jsGCIndexComprasEditRow(data[1]);
+
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsCreateOtableGCIndexCompras] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsAjaxAtualizarDatasets(TableName, columnName)
+    {
+        try {
+            LibMessageProcessando("Sincronizando Cadastros . . .");
+            var dataForm = null;
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxAtualizarDatasets", "Movimentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        LibMessageProcessandoHide();
+                                        location.reload();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxAtualizarDatasets] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+

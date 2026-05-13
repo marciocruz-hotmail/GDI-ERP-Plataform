@@ -1,0 +1,450 @@
+@model GdiPlataform.Areas.gc.Models.cstPainelComercialGerencial
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="GcIndexFinanceiroLancamentos" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <form class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-warning m-1 p-1" style="height:100%;">
+                        <div class="card-header m-1 p-1" style="height:100%; background-color: #FCF3CF"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>Pedidos por Status</div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosAprovados", "1 - Aprovados", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosAprovados, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            @Html.Label("QtdPedidosFaturados", "3 - Faturados", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosFaturados, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            @Html.Label("QtdPedidosExpedidos", "5 - Expedidos", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosExpedidos, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosSeparados", "2 - Separados", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosSeparados, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            @Html.Label("QtdPedidosNotaFiscal", "4 - Nota Fiscal", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosNotaFiscal, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            @Html.Label("QtdPedidosEntregues", "6 - Entregues", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosEntregues, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <form class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-info m-1 p-1" style="height:100%;">
+                        <div class="card-header m-1 p-1" style="height:100%; background-color:#D6EAF8"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>Pedidos por Vendedor [Processamento | Diário | Mensal]</div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            <div class="col-sm-2">
+                                <div class="card-header m-0 p-1 bg-body-secondary"><b>Vendedor</b></div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="card-header m-0 p-1 bg-body-secondary"><b>Qtd. Processamento</b></div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="card-header m-0 p-1 bg-body-secondary"><b>Qtd. Diário</b></div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="card-header m-0 p-1 bg-body-secondary"><b>Qtd. Mensal</b></div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="card-header m-0 p-1 bg-body-secondary"><b>R$ Mensal</b></div>
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoAndre", "André", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoAndre, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioAndre, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesAndre, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesAndre, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoCarlos", "Carlos", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoCarlos, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioCarlos, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesCarlos, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesCarlos, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoDaniel", "Daniel", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoDaniel, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioDaniel, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesDaniel, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesDaniel, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoGustavo", "Gustavo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoGustavo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioGustavo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesGustavo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesGustavo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoJoao", "João", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoJoao, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioJoao, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesJoao, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesJoao, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoPaulo", "Paulo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoPaulo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioPaulo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesPaulo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesPaulo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoVivian", "Vivian", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoVivian, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioVivian, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesVivian, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesVivian, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoDeborah", "Deborah", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoDeborah, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioDeborah, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesDeborah, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesDeborah, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoDeborah", "Leonardo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoLeonardo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioLeonardo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesLeonardo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosMesLeonardo, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("QtdPedidosProcessamentoTOTAL", "Total", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosProcessamentoTOTAL, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosDiarioTOTAL, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.QtdPedidosMesTOTAL, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                            <div class="col-sm-2">
+                                @Html.EditorFor(model => model.ValorPedidosGeralMes, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <form class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-success m-1 p-1" style="height:100%;">
+                        <div class="card-header m-1 p-1" style="height:100%; background-color:#ABEBC6"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>Pedidos por Período</div>
+
+
+                        <div class="card-body text-sm-center m-1 p-0">
+
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                <div class="col-sm-4">
+                                    <div class="card-header m-0 p-1 bg-body-secondary"><b>GDI</b></div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="card-header m-0 p-1 bg-body-secondary"><b>SC</b></div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="card-header m-0 p-1 bg-body-secondary"><b>Total</b></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.TextPedidosGDIHoje, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                                </div>
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.TextPedidosSCHoje, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                                </div>
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.TextPedidosGeralHoje, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                                </div>
+                            </div>
+
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.TextPedidosGDIMes, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                                </div>
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.TextPedidosSCMes, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                                </div>
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.TextPedidosGeralMes, new { htmlAttributes = new { @class = "form-control text-sm-end", @readonly = "readonly" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var OTableGcFinanceiroLancamentosIndex;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressed(e) {
+        if (e.keyCode == 13) { e.preventDefault(); jsAjaxPesquisarFinanceiroLancamentos(); }
+    }
+
+    function jsCreateTableGcFinanceiroLancamentosIndex()
+    {
+        try
+        {
+            if (OTableGcFinanceiroLancamentosIndex == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                OTableGcFinanceiroLancamentosIndex = $('#DtGcFinanceiroLancamentosIndex').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); jsUpdateDataView(json.yesDisplayField01, json.yesFilterOnOff) }).DataTable({
+                    "drawCallback": function (settings) {
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    },
+                    "footerCallback": function (row, data, start, end, display) {
+                        var api = this.api(), data;
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+                        LibMessageProcessandoHide();
+                    },
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosLancamentos","FinanceiroLancamentos",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesCustomField01: emptyIfNull($('#Field_Text_01').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#Field_Text_02').val()).toString(),
+                            yesCustomField03: emptyIfNull($('#Field_Text_03').val()).toString(),
+                            yesCustomField04: emptyIfNull($('#Field_Text_04').val()).toString(),
+                            yesCustomField05: emptyIfNull($('#Field_Text_05').val()).toString(),
+                            yesCustomField06: emptyIfNull($('#Field_Text_06').val()).toString(),
+                            yesCustomField07: emptyIfNull($('#Field_Text_07').val()).toString(),
+                            yesCustomField08: emptyIfNull($('#hide_gerencial:checked').val()).toString(),
+                            @* View sem campos de período: evita jsDatepickerGetDate em seletores inexistentes *@
+                            yesCustomField09: '',
+                            yesCustomField10: '',
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 100,
+                scrollX: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "2%", visible: false, targets: [0] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [1], render: DataTable.render.select() },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [6] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [7] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [8] },
+                    { "width": "42%", orderable: false, className: 'text-sm-start', targets: [9] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [10] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [11] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGcFinanceiroLancamentosEditRow" title="Editar Lançamento Nº ' + data[2] + '" class="btn btn-outline-warning btn-sm p-1 btnGcFinanceiroLancamentosEditRow d-inline-flex align-items-center" onclick="jsGcFinanceiroLancamentosEditRow(' + data[2] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+                ],
+                "createdRow": function (row, data, dataIndex) {
+                    var c = data[0];
+                    if (c != null && String(c).trim() !== '') {
+                        row.classList.add('gdi-row-tinted');
+                        row.style.setProperty('--gdi-row-bg', String(c).trim());
+                    }
+                },
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+                $('#DtGcFinanceiroLancamentosIndex tbody').on('dblclick', 'tr td', function () {
+                    var data = OTableGcFinanceiroLancamentosIndex.row($(this).closest('tr')).data();
+                    jsGcFinanceiroLancamentosEditRow(data[2]);
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsAjaxPesquisarFinanceiroLancamentos()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            document.getElementById("yesFilterField").value = "*";
+            $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarFinanceiroLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>
+
+
+

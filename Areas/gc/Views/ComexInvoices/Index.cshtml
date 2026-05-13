@@ -1,0 +1,180 @@
+@model IEnumerable<GdiPlataform.Db.gc_comex_invoices>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexInvoices_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexInvoices_Actioncreate")))
+                {<button type="button" name="btnRegistroNovo" title="Importar Invoice" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsCreateInvoice()"><i class="fa-regular fa-file-excel fa-lg me-2" aria-hidden="true"></i>Importar Invoice</button> }
+                else
+                { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-file-excel fa-lg me-2" aria-hidden="true"></i>Importar Invoice</button>}
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexInvoices">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Encode("Id.")</th>
+                                    <th>@Html.DisplayName("Invoice")</th>
+                                    <th>@Html.DisplayName("Itens")</th>
+                                    <th>@Html.DisplayName("Total")</th>
+                                    <th>@Html.DisplayName("Data/Hora")</th>
+                                    <th><i class="fa-regular fa-folder-open" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Invoice"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableGcComexInvoices;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTableGcComexInvoices();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTableGcComexInvoices()
+    {
+        try
+        {
+            if (otableGcComexInvoices == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGcComexInvoices = $('#dtGcComexInvoices')
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); })
+                    .DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDados","ComexInvoices",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "50%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "14%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [6], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditRow" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Invoice Nº ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnEditRow d-inline-flex align-items-center" onclick="jsEditarInvoice(' + data[1] + ');"><i class="fa-regular fa-folder-open"></i></button>' } }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[1, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsCreateInvoice(id)
+    {
+        try
+        {
+            $("#mainModal").load('@Url.Action("ModalCreateInvoice", "ComexInvoices", new { area = "gc" })?id=' + id, function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsCreateInvoice] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsEditarInvoice(id)
+    {
+        try
+        {
+            $("#mainModal").load('@Url.Action("ModalOpenInvoice", "ComexInvoices", new { area = "gc" })?id=' + id, function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsEditarInvoice] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+</script>
+
+
+

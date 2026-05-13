@@ -1,0 +1,276 @@
+@model GdiPlataform.Db.gc_financeiro_lancamentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewFinanceiroMovimentos" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="scroll-modal-horizontal" style="width:100%">
+                <div class="modal-header m-0 p-1">
+                    <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                    @Html.HiddenFor(model => model.id_movimento)
+                    <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                    <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                    <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                    <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="modal-body m-0 p-0">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="card-body m-0 p-0" style="max-width: 100%; overflow-x: auto; ">
+                            @if (Model.id_movimento > 0)
+                            {
+                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtGcFinanceiroLancamentosModalViewFinanceiroMovimentos">
+                                        <thead>
+                                            <tr>
+                                                <th>@Html.Encode("Id.")</th>
+                                                <th><i class="fa-solid fa-plus-minus" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Crédito/Débito"></i></th>
+                                                <th><i class="fa-solid fa-clipboard-check" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Status (Aberto/Parcial/Liquidado/Cancelado)"></i></th>
+                                                <th>@Html.Encode("Pagto.")</th>
+                                                <th>@Html.Encode("Venc.")</th>
+                                                <th>@Html.Encode("Doc.")</th>
+                                                <th>@Html.Encode("Obs")</th>
+                                                <th>@Html.Encode("R$ Total")</th>
+                                                <th>@Html.Encode("R$ Pago")</th>
+                                                <th><i class="fa-solid fa-barcode" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Boleto"></i></th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot align="right">
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnOK" class="btn btn-success d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var OtableGcFinanceiroLancamentosModalViewFinanceiroMovimentos;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            jsCreateTable();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            OtableGcFinanceiroLancamentosModalViewFinanceiroMovimentos = $('#DtGcFinanceiroLancamentosModalViewFinanceiroMovimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                },
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    LibMessageProcessandoHide();
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosLancamentosByMovimento", "FinanceiroLancamentos",new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: "",
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 100,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "11%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "11%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "11%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "29%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "11%", orderable: false, className: 'text-sm-end', targets: [7] },
+                { "width": "11%", orderable: false, className: 'text-sm-end', targets: [8] },
+                {
+                    "width": "4%", orderable: false, className: 'text-sm-center', targets: [9], data: null, defaultContent: "", render: function (data, type, row, meta)
+                    {
+                        if (data[10] === '') {
+                        }
+                        else
+                        {
+                            return '<button type="button" name="btnFinanceiroBoleto" data-bs-toggle="tooltip" data-bs-placement="top" title="Boleto Id: ' + data[0] + '" class="btn btn-outline-info btn-sm btnFinanceiroBoleto d-inline-flex align-items-center gap-2" onclick="jsFinanceiroLancamentoBoleto(' + data[0] + ');"><i class="fa-solid fa-barcode"></i></button>'
+                        }
+                    }
+                },
+                { "width": "0%", visible: false, orderable: false, className: 'text-sm-center', targets: [10] }
+            ],
+            order: [[1, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsEditRow(id)
+    {
+        try {
+            LibMessageProcessando("Processando . . .");
+            $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=' + id, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPesquisarLancamentos()
+    {
+        try
+        {
+            LibMessageProcessando('Pesquisando lançamentos . . .');
+            document.getElementById("yesFilterField").value = "*";
+            $("#DtGcFinanceiroLancamentosModalViewFinanceiroMovimentos").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCreateLancamento()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateLancamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFinanceiroLancamentoBoleto(idFinanceiroLancamento)
+    {
+        try
+        {
+            LibMessageProcessando("Processando . . .")
+            var dataForm =
+            {
+                view_record_gc_financeiro_lancamentos:
+                {
+                    'id_lancamento': idFinanceiroLancamento,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxFinanceiroBoletoGCPDF", "FinanceiroLancamentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFinanceiroLancamentoBoleto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+
+

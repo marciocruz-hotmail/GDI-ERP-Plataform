@@ -1,0 +1,117 @@
+@model GdiPlataform.Db.gc_comex_importacoes_itens
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcEstoqueModalRecebimentoComexObs" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_importacao_item)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        <div class="col-sm-12">
+                            @Html.EditorFor(model => model.recebido_obs, new { htmlAttributes = new { @class = "form-control", maxlength = "80", data_autofocus = "select" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        <div class="col-sm-12 text-sm-start" style="margin-top:7px;">
+                            <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                @Html.CheckBoxFor(model => model.recebido_naoconformidade, new { @class = "form-check-input", role = "switch" })
+                                <span class="form-check-label ms-1 mb-0">Não Conformidade?</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-outline-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Baixar Lançamento" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Salvar Obs</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).ready(function () {
+    });
+
+    function jsCheckInputs()
+    {
+        try
+        {
+            if (isEmpty($('#recebido_obs').val().toString().trim()))
+            {
+                GdiAjaxNotifyInconsistencias("Informe a <b>Observação</b>!");
+                $('#recebido_obs').focus();
+            }
+            else
+            {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando("")
+            var form = $('#FormGcEstoqueModalRecebimentoComexObs');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalRecebimentoComexObs", "Estoque", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        jsAutoSave();
+                        GdiSwal2.hideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+
+
+
+

@@ -1,0 +1,135 @@
+@model GdiPlataform.Db.gc_parametros_difal
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcFinanceiroParametroDifalCreateEdit" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_parametro_difal)
+                    @Html.HiddenFor(model => model.id_uf)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-body m-0 p-0" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                            <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados do Difal</div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("sigla", "Sigla", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.sigla, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("estado", "Estado", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.EditorFor(model => model.estado, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                            <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Difal Geral</div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <div class="form-group row text-sm-start m-0 p-0">
+                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                        <div class="form-check form-switch d-flex justify-content-end">
+                                            @Html.CheckBoxFor(model => model.difal_geral_calcular, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("difal_geral_calcular", "Difal Geral - Calcular", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                </div>
+                                <div class="form-group row text-sm-start m-0 p-0">
+                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                        <div class="form-check form-switch d-flex justify-content-end">
+                                            @Html.CheckBoxFor(model => model.difal_geral_zerar, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("difal_geral_zerar", "Difal Geral - Zerar", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                </div>
+                                <div class="form-group row text-sm-start m-0 p-0">
+                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                        <div class="form-check form-switch d-flex justify-content-end">
+                                            @Html.CheckBoxFor(model => model.difal_geral_naoinformar, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("difal_geral_naoinformar", "Difal Geral - Não Informar", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                            <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Difal Combustíveis</div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <div class="form-group row text-sm-start m-0 p-0">
+                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                        <div class="form-check form-switch d-flex justify-content-end">
+                                            @Html.CheckBoxFor(model => model.difal_comb_calcular, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("difal_comb_calcular", "Difal Combustíveis - Calcular", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                </div>
+                                <div class="form-group row text-sm-start m-0 p-0">
+                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                        <div class="form-check form-switch d-flex justify-content-end">
+                                            @Html.CheckBoxFor(model => model.difal_comb_zerar, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("difal_comb_zerar", "Difal Combustíveis - Zerar", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                </div>
+                                <div class="form-group row text-sm-start m-0 p-0">
+                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                        <div class="form-check form-switch d-flex justify-content-end">
+                                            @Html.CheckBoxFor(model => model.difal_comb_naoinformar, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("difal_comb_naoinformar", "Difal Combustíveis - Não Informar", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","FinanceiroParametroDifal",new { Area = "gc" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try
+        {
+            LibMessageProcessando("Salvando Dados . . .")
+            $("#FormGcFinanceiroParametroDifalCreateEdit").submit();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>

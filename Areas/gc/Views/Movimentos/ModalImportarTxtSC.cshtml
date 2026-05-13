@@ -1,0 +1,148 @@
+@model GdiPlataform.Areas.gc.Models.cstUploadList
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalImportarTxtSC" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
+    <b>@Html.Raw(@ViewBag.Title)</b></h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-1">
+                    <div style="text-align:center" class="form-group">
+                        <div class="row justify-content-center m-0 p-0">
+                            <div class="col-10 m-0 p-1">
+                                <div class="form-group row text-center m-0 p-0">
+                                    @Html.Label("PN", "PartNumber  Description (Ex: PN+2Espaços+Descrição)", htmlAttributes: new { @class = "col-form-label" })
+                                </div>
+                            </div>
+                            <div class="col-2 m-0 p-1">
+                                <div class="form-group row text-sm-center m-0 p-0">
+                                    @Html.Label("Fob", "Fob US$", htmlAttributes: new { @class = "col-form-label" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center m-0 p-0">
+                            <div class="col-10 m-0 p-1">
+                                <div class="form-group row text-end m-0 p-0">
+                                    @Html.TextAreaFor(model => model.List1, new { @class = "form-control", @id = "List1", @rows = "15" })
+                                </div>
+                            </div>
+                            <div class="col-2 m-0 p-1">
+                                <div class="form-group row text-end m-0 p-0">
+                                    @Html.TextAreaFor(model => model.List2, new { @class = "form-control", @id = "List2", @rows = "15" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center m-0 p-0">
+                            <div class="col-10 m-0 p-1">
+                                <div class="form-group row text-center m-0 p-0">
+                                    @Html.Label("lineCounter", "Itens: 0", htmlAttributes: new { @class = "col-form-label", @id = "lineCounter" })
+                                </div>
+                            </div>
+                            <div class="col-1">
+                            </div>
+                            <div class="col-2">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Processar Lista</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try
+        {
+            LibMessageProcessando("Processando Lista . . .");
+            var form = $('#FormModalImportarTxtSC');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalImportarTxtSC", "Movimentos", new { Area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar:
+                                {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dtGcMovimentosCreatePedido").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString())
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    $("#List1").on("keyup mouseup", function ()
+    {
+
+        let count = 0
+        const a = document.querySelector("#List1")
+        for (let i = 0; i < a.value.length; i++) {
+            if (a.value[i] == '\n') {
+                count++
+            }
+        }
+
+        $("#lineCounter").text("Itens: " + count);
+    });
+
+</script>
+
+
+

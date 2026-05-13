@@ -1,0 +1,642 @@
+@model GdiPlataform.Db.g_atendimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormEditGAtendimentos" }))
+{
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-title m-0 p-1">
+                    <h4>@Html.Raw(@ViewBag.Title)</h4>
+                    @Html.HiddenFor(model => model.id_atendimento)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                </div>
+                <div class="card-header m-0 p-1" style="height:100%;">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-body m-0 p-0" style="height: 100%">
+                    <div class="card-body m-0 p-0" style="height:100%;">
+                        <form class="form-horizontal m-0 p-0">
+
+                            <div class="card shadow-sm gdi-section-accent-success m-1 p-0" style="height:100%;">
+                                <div class="card-header m-0 p-0 bg-success-subtle" style="height:100%;"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i><b>Informações do Atendimento</b></div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("solicitacao", "Categoria", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-5 col-form-label text-start" style="margin-top:5px;">
+                                            @Html.Raw(ViewBag.MsgCategoria)
+                                        </div>
+                                        @Html.Label("concluido", "Finalizado", htmlAttributes: new { @class = "control-labexl col-sm-1", @style = "margin-top:5px;" })
+                                        <div class="col-sm-1 text-sm-start">
+                                            <div class="form-check form-switch" style="margin-top:10px;">
+                                                @Html.CheckBoxFor(model => model.concluido, new { @class = "form-check-input", role = "switch" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("solicitacao", "Solicitação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-8 col-form-label text-start" style="margin-top:5px;">
+                                            @Html.Raw(Model.solicitacao)
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("descrição", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-8 col-form-label text-start" style="margin-top:5px;">
+                                            @Html.Raw(Model.descricao)
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("anotacoes", "Anotações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-8">
+                                            @Html.TextAreaFor(model => model.anotacoes, 4, 60, new { @class = "form-control", data_autofocus = "true" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("responsavel_id_departamento", "Responsável", htmlAttributes: new { @class = "col-form-label col-sm-2" })
+                                        <div class="col-sm-3">
+                                            @Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                                        </div>
+                                        @Html.Label("responsavel_id_usuario", "Operador", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.DropDownListFor(model => model.responsavel_id_usuario, ViewBag.ComboUsuariosAtendimentoResponsavel as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card shadow-sm gdi-section-accent-warning m-1 mt-2 p-0" style="height:100%;">
+                                <div class="card-header m-0 p-0 bg-warning-subtle" style="height:100%;"><i class="fa-solid fa-pen-to-square me-2" aria-hidden="true"></i><b>Dados Adicionais</b></div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("param_numero_pedido", "Nº Pedido", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.param_numero_pedido, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("param_numero_nf", "Nº Nota Fiscal", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.param_numero_nf, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("param_limite_credito", "R$ Limite Crédito", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.param_limite_credito, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("param_id_vendedor", "Vendedor", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-4">
+                                            @Html.DropDownListFor(model => model.param_id_vendedor, ViewBag.ComboVendedores as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("param_id_cliente", "Cliente", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-10">
+                                            @Html.DropDownListFor(model => model.param_id_cliente, ViewBag.ComboClientes as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("param_id_produto", "Produto", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-10">
+                                            @Html.DropDownListFor(model => model.param_id_produto, ViewBag.ComboProdutosServicos as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="card shadow-sm gdi-section-accent-warning m-1 mt-2 p-0">
+                            <div class="card-header m-0 p-0 bg-warning-subtle" style="height:100%;"><i class="fa-solid fa-list-check me-2" aria-hidden="true"></i><b>Atividades do Atendimento</b>
+                                <button type="button" name="btnCadastrarAtividades" title="Incluir Atividade" onclick="jsModalCreateEditAtividade(0)" class="btn btn-sm btn-outline-secondary float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-list-check me-2" aria-hidden="true"></i>Incluir Tarefa</button>
+                            </div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGAtendimentoAtividades">
+                                    <thead>
+                                        <tr>
+                                            <th style="font-size:14px; width:5%">Id.</th>
+                                            <th style="font-size:14px; width:5%">Status</th>
+                                            <th style="font-size:14px; width:70%">Atividade</th>
+                                            <th style="font-size:14px; width:8%">Dt. SLA</th>
+                                            <th style="font-size:14px; width:8%">Dt. Fim</th>
+                                            <th style="font-size:14px; width:4%">E.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 mt-2 p-0">
+                            <div class="card-header m-0 p-2 d-flex align-items-center flex-wrap gap-2 bg-body-secondary">
+                                <span class="d-inline-flex align-items-center"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i><b>Anexos do Atendimento</b></span>
+                                <button type="button" name="btnAnexarArquivos" title="Anexar Arquivos" onclick="jsModalUploadFileAtendimentos(0)" class="btn btn-sm btn-outline-secondary ms-auto d-inline-flex align-items-center gap-2"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Anexar Arquivos</button>
+                            </div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGAtendimentosGed">
+                                    <thead>
+                                        <tr>
+                                            <th>@Html.Raw("Id.")</th>
+                                            <th>@Html.Raw("Tipo")</th>
+                                            <th>@Html.Raw("Descrição")</th>
+                                            <th>@Html.Raw("Arquivo")</th>
+                                            <th>@Html.Raw("Data")</th>
+                                            <th>@Html.Raw("Usuário")</th>
+                                            <th><i class="fa-solid fa-paperclip" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Anexo"></i></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 mt-2 p-0">
+                            <div class="card-header m-0 p-2 d-flex align-items-center bg-body-secondary">
+                                <i class="fa-solid fa-clipboard-list me-2" aria-hidden="true"></i><b>Logs do Atendimento</b>
+                            </div>
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGAtendimentosLogs">
+                                    <thead>
+                                        <tr>
+                                            <th style="font-size:14px; width:5%">Id.</th>
+                                            <th style="font-size:14px; width:15%">Data</th>
+                                            <th style="font-size:14px; width:80%">Log do Atendimento</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Fechar" class="btn btn-info d-inline-flex align-items-center gap-2" onclick="window.location.href='@Url.Action("", "Atendimentos", new { area = "g" })'" value="Redirect"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Fechar</button>
+                    @if (Model.id_atendimento > 0 && Model.concluido == false)
+                    {
+                        <button type="button" name="btnSaveEditAtendimento" id="btnSaveEditAtendimento" title="Salvar" onclick="jsAjaxCreateEditAtendimento()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    var TableAtendimentos;
+    var TableAtividades;
+    var TableGed;
+    var TableLogs;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            jsCreateTableAtividades();
+            jsCreateTableGed();
+            jsCreateTableLogs();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).ready(function ()
+    {
+        GetLookupCategorias();
+    });
+
+    $('#responsavel_id_departamento').change(function () {
+        try
+        {
+            GetLookupCategorias();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[responsavel_id_departamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function GetLookupCategorias() {
+        try {
+            var idDepartamento = $("#responsavel_id_departamento").val();
+            var $ddl = $("#id_atendimento_categoria");
+
+            $ddl.html("<option value='0' selected>Carregando...</option>");
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxGetLookupCategorias", "Atendimentos", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ record_g_departamentos: { id_departamento: idDepartamento } }),
+                dataType: "json",
+                success: function (lista) {
+
+                    // coloque selected no 0 no HTML
+                    var options = "<option value='0' selected>[ Selecione a Categoria ]</option>";
+
+                    $.each(lista, function (index, item) {
+                        options += "<option value='" + item.id_atendimento_categoria + "'>" +
+                                   item.nome +
+                                   "</option>";
+                    });
+
+                    $ddl.html(options);
+
+                    // seleciona a 1ª categoria real, se existir
+                    if (lista && lista.length > 0)
+                    {
+                        $ddl.val(String(lista[0].id_atendimento_categoria));
+                    } else
+                    {
+                        $ddl.val('0');
+                    }
+                },
+                error: function (xhr) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(xhr.responseText || xhr.statusText);
+                }
+            });
+        } catch (err) {
+            LibMessageError("Atenção", "[GetLookupCategorias] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCreateTableAtividades()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            TableAtividades = $('#dtGAtendimentoAtividades').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("getDadosAtividades", "Atendimentos", new { area = "g" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomIdPK: $('#id_atendimento').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 10,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "5%", orderable: false, className: 'text-center', targets: [0] },
+                    { "width": "5%", orderable: false, className: 'text-center', targets: [1] },
+                    { "width": "70%", orderable: false, className: 'text-left', targets: [2] },
+                    { "width": "8%", orderable: false, className: 'text-center', targets: [3] },
+                    { "width": "8%", orderable: false, className: 'text-center', targets: [4] },
+                    { "width": "4%", orderable: false, className: 'text-center dt-no-row-select', targets: [5], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" name="btnEditarAtividade" title="Editar Atividade ( ' + data[2] + ' )" class="btn btn-outline-warning btn-sm p-1 btnEditarAtividade d-inline-flex align-items-center" onclick="jsModalCreateEditAtividade(' + data[0] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Nenhum registro encontrado',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d Registro selecionado ] ",
+                            _: " [ %d Registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dtGAtendimentoAtividades tbody').on('dblclick', 'tr td', function () {
+                var data = TableAtividades.row($(this).closest('tr')).data();
+                jsModalCreateEditAtividade(data[0]);
+            });
+            TableAtividades.columns.adjust();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTableAtividades] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalCreateEditAtividade(IdAtendimentoAtividade)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var IdAtendimento = $('#id_atendimento').val().toString();
+            $("#mainModal").load('@Url.Action("ModalCreateEditAtividade", "Atendimentos", new { area = "g" })?IdAtendimento=' + IdAtendimento + '&IdAtendimentoAtividade=' + IdAtendimentoAtividade, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e,{keyboard:false,backdrop:'static'}).show();}
+            })
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "Erro [jsCreateEditAtividade] (" + (err && err.message ? err.message.toString() : String(err)) + ")");
+        }
+    };
+
+
+    function jsCreateTableGed()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGcMovimentosGed = $('#dtGAtendimentosGed').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosGedAtendimento", "Atendimentos", new { area = "g" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomIdPK: $('#id_atendimento').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 100,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                    { "width": "26%", orderable: false, className: 'text-sm-start', targets: [1] },
+                    { "width": "26%", orderable: false, className: 'text-sm-start', targets: [2] },
+                    { "width": "26%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [6], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir anexo ' + data[3] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + data[0] + ');"><i class="fa-regular fa-file-lines"></i></button>' } }
+                ],
+                order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabGED_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsCreateTableLogs()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            TableAtendimentos = $('#dtGAtendimentosLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("getDadosAtendimentosLogs", "Atendimentos", new { area = "g" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomIdPK: $('#id_atendimento').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 10,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "5%", orderable: false, className: 'text-center', targets: [0] },
+                    { "width": "10%", orderable: false, className: 'text-center', targets: [1] },
+                    { "width": "85%", orderable: false, className: 'text-left', targets: [2] }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Nenhum registro encontrado',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d Registro selecionado ] ",
+                            _: " [ %d Registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            TableAtendimentos.columns.adjust();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[dtGAtendimentosLogs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsAjaxCreateEditAtendimento()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#FormEditGAtendimentos');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditAtendimento", "Atendimentos", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                                LibMessageProcessando("");
+                                window.location.href = '@Url.Action("Index", "Atendimentos", new { area = "g" })';
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEditAtendimento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsDownloadFile(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalUploadFileAtendimentos()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalUploadFileAtendimentos", "Atendimentos", new { area = "g" })?IdAtendimento=' +@Model.id_atendimento+"&tag=FormEditGAtendimentos", function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileAtendimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>

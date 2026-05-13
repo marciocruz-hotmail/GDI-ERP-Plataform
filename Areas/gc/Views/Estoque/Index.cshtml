@@ -1,0 +1,339 @@
+@model GdiPlataform.Db.gc_estoque_inventario
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Create")))
+                {
+                    <button type="button" name="btnTransferenciaLocaisEstoque" title="Transferência Gerencial - Entre Locais de Estoques" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsModalTransferenciaGerencial()"><i class="fa-solid fa-truck-arrow-right me-2" aria-hidden="true"></i>Transferência Gerencial</button>
+                }
+                <button type="button" name="btnViewFichaEstoqueProduto" title="Produtos - Ficha Estoque" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalViewFichaPosicaoEstoque(oTableEstoque, 'Id.')"><i class="fa-solid fa-warehouse me-2" aria-hidden="true"></i>Produtos - Ficha Estoque</button>
+                <button type="button" name="btnRelatorioPosicaoEstoque" title="Relatório - Estoque Atual" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsRelatorioPosicaoEstoque()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Relatório - Estoque Atual</button>
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("produto", "Item:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-8 text-sm-start">
+                            @Html.DropDownList("id_produto_servico", ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @id = "id_produto_servico", @class = "form-control", @title = "Item", @onchange = "jsAjaxPesquisarEstoque();", @onblur = "jsAjaxPesquisarEstoque();" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarEstoque()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtEstoque">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Encode("Id.")</th>
+                                    <th>@Html.DisplayName("Produto")</th>
+                                    <th>@Html.DisplayName("Fob")</th>
+                                    <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque BH"></i><br />BH</th>
+                                    <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque SP"></i><br />SP</th>
+                                    <th>@Html.DisplayName("Fob BH")</th>
+                                    <th>@Html.DisplayName("Fob SP")</th>
+                                </tr>
+                            </thead>
+                            <tfoot align="right">
+                                <tr>
+                                    <th align="right" colspan="6"></th>
+                                    <th align="right">@Html.Label("label_Valor_estoque_bh", "R$", htmlAttributes: new { @id = "label_Valor_estoque_bh" })</th>
+                                    <th align="right">@Html.Label("label_Valor_estoque_sp", "R$", htmlAttributes: new { @id = "label_Valor_estoque_sp" })</th>
+                                </tr>
+                            </tfoot>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var oTableEstoque;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            oTableEstoque = $('#dtEstoque')
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('xhr.dt', function (e, settings, json, xhr)
+                {
+                    document.getElementById("label_Valor_estoque_bh").innerHTML = json.yesDisplayField01;
+                    document.getElementById("label_Valor_estoque_sp").innerHTML = json.yesDisplayField02;
+                    GdiDtNotifyJsonErrorMessage(json); 
+                })
+                .DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                },
+                "footerCallback": function (row, data, start, end, display) {
+                    LibMessageProcessandoHide();
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosEstoque", "Estoque", new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#id_produto_servico').val()).toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "62%", orderable: false, className: 'text-sm-start', targets: [2] },
+                { "width": "6%", orderable: false, className: 'text-sm-end', targets: [3] },
+                { "width": "5%", orderable: false, className: 'text-sm-end', targets: [4] },
+                { "width": "5%", orderable: false, className: 'text-sm-end', targets: [5] },
+                { "width": "7%", orderable: false, className: 'text-sm-end', targets: [6] },
+                { "width": "7%", orderable: false, className: 'text-sm-end', targets: [7] }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxPesquisarEstoque() {
+        try {
+            LibMessageProcessando('Pesquisando Itens . . .');
+            $("#dtEstoque").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalTransferenciaGerencial(id)
+    {
+        try
+        {
+            $("#mainModal").load('@Url.Action("ModalTransferenciaGerencial", "Estoque", new { area = "gc" })', function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalTransferenciaGerencial] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalViewFichaPosicaoEstoque(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalViewFichaEstoqueProduto", "Produtos", new { Area = "g" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFichaEstoqueProduto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFinanceiroInfo(idFinanceiro)
+    {
+        try {
+            LibMessageProcessando();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("AjaxFinanceiroInfo", "Financeiro", new { area = "g" })' + "?id=" + idFinanceiro,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Informações Financeiras</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFinanceiroInfo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRelatorioPosicaoEstoque()
+    {
+        try
+        {
+            LibMessageProcessando();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("AjaxRelatorioPosicaoEstoque", "Estoque", new { area = "gc" })' + "?id=0" ,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+
+
+</script>

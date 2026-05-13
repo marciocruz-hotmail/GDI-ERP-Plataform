@@ -1,0 +1,163 @@
+@model GdiPlataform.Areas.gc.Models.cstUploadFiles
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "GcMovimentosComprasModalImportarExcelSC" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div style="text-align:center" class="form-group">
+                        <div class="form-group row text-sm-end m-0 pt-1">
+
+                        </div>
+
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("IdMovimentoTipo", "Tipo", new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-8 text-sm-start">
+                                @Html.DropDownListFor(model => model.IdMovimentoTipo, ViewBag.comboMovimentosTipos as List<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("Arquivo xlsx", new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-8 text-sm-start">
+                                <input type="file" class="form-control" id="customFileXLSX" onchange="jsFileInputChange(this)">
+                                <div class="form-text" id="customFileXLSX_info"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Processar Arquivo</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCheckInputs()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+            if (isEmpty($('#customFileXLSX').val().toString().trim())) {
+                hasError = true;
+                msgError += " - Arquivo XLSX não foi selecionado!<br/>";
+            }
+            if (hasError) { LibMessageAlert("Atenção", msgError); }
+            else {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[checkInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try
+        {
+            LibMessageProcessando("Processando Arquivo . . .");
+            var formData = new FormData();
+            var totalFilesXLSX = document.getElementById("customFileXLSX").files.length;
+            for (var i = 0; i < totalFilesXLSX; i++)
+            {
+                var fileXLSX = document.getElementById("customFileXLSX").files[i];
+                formData.append("FilesourceXLXS", fileXLSX);
+            }
+            formData.append("IdMovimentoTipo", $('#IdMovimentoTipo').val().toString());
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalImportarExcelSC", "MovimentosCompras", new { Area = "gc" })',
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar:
+                                {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dtGcMovimentosCreatePedidoCompra").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-regular fa-window-close' style='color:#ff0000'>&nbsp&nbsp</i><b>Erro no Processamento</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function () {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString())
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+
+</script>
+
+

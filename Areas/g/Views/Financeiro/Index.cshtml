@@ -1,0 +1,568 @@
+@model GdiPlataform.Areas.g.Models.cstFinanceiroIndex
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="Financeiro" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>
+                <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>
+                @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_Actionrun")))
+                {
+                    <div class="btn-group" role="group">
+                        @{int qtdMenusTitulos = 0; }
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_VisualizarBoleto")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalBoleto(otableFinanceiro, 'Id.')"><i class="fa-regular fa-file me-2" aria-hidden="true"></i>Boleto - Visualizar</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_VisualizarBoleto")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalNotaDebito(otableFinanceiro, 'Id.')"><i class="fa-regular fa-file me-2" aria-hidden="true"></i>Nota Débito - Visualizar</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_EditarTitulo")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalEditarTitulo(otableFinanceiro, 'Id.')"><i class="fa-solid fa-tasks me-2" aria-hidden="true"></i>Editar Título Financeiro</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_ProrrogarVencimentoTitulo")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalProrrogarVencimentoTitulo(otableFinanceiro, 'Id.')"><i class="fa-regular fa-calendar-plus me-2" aria-hidden="true"></i>Alterar Data Vencimento</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_CancelarTitulo")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarTitulos(otableFinanceiro, 'Id.')"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Cancelar Título</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_BaixarTitulo")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalBaixarTitulos(otableFinanceiro, 'Id.')"><i class="fa-solid fa-stamp me-2" aria-hidden="true"></i>Baixar Título - (Cancelar Lançamentos)</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_GerarRemessaBoletosBancarios")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalGerarRemessaBoletosBancarios(otableFinanceiro, 'Id.')" title="Gerar Remessa - Boletos Bancários (Títulos Abertos)"><i class="fa-regular fa-file me-2" aria-hidden="true"></i>Gerar Remessa - Boletos Bancários (Títulos Abertos)</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-header m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-6">
+                            @Html.DropDownListFor(model => model.FinanceiroIndex_id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                        <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFinanceiro()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Pesquisar</button>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+
+                        @Html.Label("Período", new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @* id do .input-group distinto do input (EditorFor) para Tempus Dominus *@
+                            <div class='input-group date' id='ig_g_financeiro_idx_d1'>
+                                @Html.EditorFor(model => model.FinanceiroIndex_data1, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class='input-group date' id='ig_g_financeiro_idx_d2'>
+                                @Html.EditorFor(model => model.FinanceiroIndex_data2, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        @Html.Label("Status", new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.DropDownListFor(model => model.FinanceiroIndex_id_financeiro_status, ViewBag.comboFinanceiroStatus as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGFinanceiro">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Label("", "Id.")</th>
+                                    <th>@Html.DisplayName("Status")</th>
+                                    <th>@Html.Label("", "Id. Cliente")</th>
+                                    <th>@Html.DisplayName("Cliente")</th>
+                                    <th>@Html.Label("", "Dt. Proc.")</th>
+                                    <th>@Html.Label("", "Dt. Venc.")</th>
+                                    <th>@Html.DisplayName("R$ Valor Liquido")</th>
+                                    <th>@Html.DisplayName("R$ Valor Bruto")</th>
+                                    <th>@Html.DisplayName("Tipo Geração")</th>
+                                </tr>
+                            </thead>
+                            <tfoot align="right">
+                                <tr>
+                                    <th align="right" colspan="7">Valor Total</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableFinanceiro;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_g_financeiro_idx_d1');
+            jsDatepicker('#ig_g_financeiro_idx_d2');
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+        });
+
+    function currencyFormat(num)
+    {
+        try
+        {
+            return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[currencyFormat] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                            typeof i === 'number' ?
+                            i : 0;
+                    };
+                    var valorLiquido = api.column(7).data().reduce(function (a, b) { return intVal(a) + intVal(b); }, 0);
+                    $(api.column(7).footer()).html((valorLiquido / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
+                    var valorBruto = api.column(8).data().reduce(function (a, b) { return intVal(a) + intVal(b); }, 0);
+                    $(api.column(8).footer()).html((valorBruto / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
+                    LibMessageProcessandoHide();
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDados","Financeiro",new { Area = "g" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#FinanceiroIndex_id_cliente').val()).toString(),
+                        yesCustomField02: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_g_financeiro_idx_d1')),
+                        yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_g_financeiro_idx_d2')),
+                        yesCustomField04: emptyIfNull($('#FinanceiroIndex_id_financeiro_status').val()).toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 50,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "32%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [7] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [8] },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [9] },
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            jsAjaxPesquisarFinanceiro();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function modalTransferirContaCaixa()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("modalTransferirContaCaixa", "Financeiro", new { Area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[modalTransferirContaCaixa] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function ajaxEnviarBoletosEmail()
+    {
+        try {
+            LibMessageProcessando("Enviando Email...");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ajaxEnviarBoletosEmail", "Financeiro", new { Area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString())
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[ajaxEnviarBoletosEmail] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxPesquisarFinanceiro()
+    {
+        try
+        {
+            LibMessageProcessando("Pesquisando Títulos . . .");
+            document.getElementById("yesFilterField").value = "*";
+            $("#dtGFinanceiro").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCancelarTitulos(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf("Em Cobrança") > -1) { selectedStatus = selectedStatus.replace("Em Cobrança", "").trim(); }
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Título a ser CANCELADO!")
+            }
+            else if (selectedStatus != "")
+            {
+                LibMessageAlert("Atenção", "Opção disponível apenas para Títulos com status [Em Cobrança]!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("ModalCancelarTitulos", "Financeiro", new { area = "g" })?idFinanceiro=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Título!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarTitulos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalBaixarTitulos(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf("Aberto") > -1) { selectedStatus = selectedStatus.replace("Aberto", "").trim(); }
+            while (selectedStatus.indexOf("Fechado") > -1) { selectedStatus = selectedStatus.replace("Fechado", "").trim(); }
+            while (selectedStatus.indexOf("Em Edição") > -1) { selectedStatus = selectedStatus.replace("Em Edição", "").trim(); }
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Título a ser BAIXADO!")
+            }
+            else if (selectedStatus != "")
+            {
+                LibMessageAlert("Atenção", "Opção disponível apenas para Títulos com status [Em Cobrança]!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("ModalBaixarTitulos", "Financeiro", new { area = "g" })?idFinanceiro=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Título!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalBaixarTitulos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalProrrogarVencimentoTitulo(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf("Aberto") > -1) { selectedStatus = selectedStatus.replace("Aberto", "").trim(); }
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Título a ser <b>Prorrogado</b>!")
+            }
+            else if (selectedStatus != "")
+            {
+                LibMessageAlert("Atenção", "Opção disponível apenas para Títulos <b>Em Aberto</b>!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("ModalProrrogarVencimentoTitulo", "Financeiro", new { area = "g" })?idFinanceiro=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Título!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalProrrogarVencimentoTitulo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalGerarRemessaBoletosBancarios()
+    {
+        try
+        {
+            $("#mainModal").load('@Url.Action("ModalGerarRemessaBoletosBancarios", "Financeiro", new { Area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalGerarRemessaBoletosBancarios] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+
+    }
+
+    function jsModalEditarTitulo(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf("Aberto") > -1) { selectedStatus = selectedStatus.replace("Aberto", "").trim(); }
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Título a ser <b>Editado</b>")
+            }
+            else if (selectedStatus != "")
+            {
+                LibMessageAlert("Atenção", "Opção disponível apenas para Títulos com status [Em Aberto]!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("ModalEditarTitulo", "Financeiro", new { area = "g" })?idFinanceiro=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Título!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalEditarTitulo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalBoleto(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Título!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    windowLoading(true, 1);
+                    $("#mainModal").load('@Url.Action("ModalBoleto", "Financeiro", new { area = "g" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Título!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalBoleto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalNotaDebito(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Título!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    windowLoading(true, 1);
+                    $("#mainModal").load('@Url.Action("ModalNotaDebito", "Financeiro", new { area = "g" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Título!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalNotaDebito] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>

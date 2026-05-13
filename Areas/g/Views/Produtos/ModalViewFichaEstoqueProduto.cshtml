@@ -1,0 +1,151 @@
+@model GdiPlataform.Db.g_produtos
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewFichaEstoqueProduto" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.id_produto)
+            </div>
+            <div class="modal-body m-0 p-2">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtFichaEstoqueProduto">
+                        <thead>
+                            <tr>
+                                <th>@Html.Raw("Id.")</th>
+                                <th>@Html.Raw("Data/Hora")</th>
+                                <th>@Html.Raw("Referência")</th>
+                                <th>@Html.Raw("Est.")</th>
+                                <th>@Html.Raw("Qtd. BH")</th>
+                                <th>@Html.Raw("Saldo. BH")</th>
+                                <th>@Html.Raw("Qtd. SP")</th>
+                                <th>@Html.Raw("Saldo. SP")</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsCloseModal()"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSair" title="Sair" class="btn btn-secondary float-end d-inline-flex align-items-center gap-2" onclick="jsCloseModal()"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Sair</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            jsCreateOTableFichaProduto();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCloseModal()
+    {
+        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+        GdiSwal2.hideAll();
+    }
+
+    function jsCreateOTableFichaProduto()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            oTableGcMovimentosCreatePedido = $('#dtFichaEstoqueProduto').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).dataTable({
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetFichaEstoqueProduto", "produtos", new { area = "g" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesCustomIdPK: $('#id_produto').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [0] },
+                { "width": "14%", orderable: false, className: 'text-sm-start', targets: [1] },
+                { "width": "34%", orderable: false, className: 'text-sm-start', targets: [2] },
+                { "width": "6%", orderable: false, className: 'text-sm-end', targets: [3] },
+                { "width": "10%", orderable: false, className: 'text-sm-end', targets: [4] },
+                { "width": "10%", orderable: false, className: 'text-sm-end', targets: [5] },
+                { "width": "10%", orderable: false, className: 'text-sm-end', targets: [6] },
+                { "width": "10%", orderable: false, className: 'text-sm-end', targets: [7] }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+            language:
+            {
+                sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                sInfoPostFix: '',
+                sInfoThousands: '.',
+                sLengthMenu: '_MENU_ registros por página',
+                sZeroRecords: 'Nenhum registro encontrado',
+                sSearch: 'Pesquisar',
+                oPaginate:
+                {
+                    sNext: '>',
+                    sPrevious: '<',
+                    sFirst: '<<',
+                    sLast: '>>'
+                },
+            select: {
+                rows: {
+                    0: "",
+                    1: " [ %d registro selecionado ] ",
+                    _: " [ %d registros selecionados ] "
+                }
+            }
+            },
+            oAria: {
+                sSortAscending: ': Ordenar colunas de forma ascendente',
+                sSortDescending: ': Ordenar colunas de forma descendente'
+            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>
+
+
+

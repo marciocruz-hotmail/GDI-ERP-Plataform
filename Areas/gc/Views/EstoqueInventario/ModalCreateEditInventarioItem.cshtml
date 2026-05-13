@@ -1,0 +1,154 @@
+@model GdiPlataform.Db.gc_estoque_inventario_item
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ModalCreateEditInventarioItem" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_inventario_item)
+                @Html.HiddenFor(model => model.id_inventario)
+                @Html.HiddenFor(model => model.id_local_estoque)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                    <div class="form-group row text-sm-end m-1 p-1">
+                        @Html.Label("produto", "Item:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-10 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-1">
+                        @Html.Label("qtd", "Quantidade:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.qtd_disponivel, new { htmlAttributes = new { @class = "form-control", data_autofocus = "select" } })
+                        </div>
+                        @Html.Label("qtd_disponivel_anterior", "Estoque:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.qtd_disponivel_anterior, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-1">
+                        @Html.Label("id_estoque_area", "Área:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_estoque_area, ViewBag.comboEstoqueEnderecoArea as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                        @Html.Label("id_estoque_secao", "Seção:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_estoque_secao, ViewBag.comboEstoqueEnderecoSecao as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-1">
+                        @Html.Label("id_estoque_corredor", "Corredor:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_estoque_corredor, ViewBag.comboEstoqueEnderecoCorredor as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                        @Html.Label("id_estoque_prateleira", "Prateleira:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_estoque_prateleira, ViewBag.comboEstoqueEnderecoPrateleira as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-1">
+                        @Html.Label("obs", "Obs.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-10">
+                            @Html.EditorFor(model => model.obs, new { htmlAttributes = new { @class = "form-control", @id = "obs", maxlength = "30" } })
+                        </div>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    <button type="button" name="btnSalvar" title="Confirmar Item" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Item</button>
+                }
+
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            $('#qtd_disponivel_anterior').attr('disabled', true);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).ready(function () {
+    });
+
+    function jsCheckInputs()
+    {
+        try
+        {
+            var msgError = "";
+            if (isEmpty($('#qtd_disponivel').val().toString().trim()))
+            {
+                msgError += "O campo <b>Qtd</b> é de preenchimento obrigatório!" + "<br/>";
+            }
+            if ((isEmpty($('#id_produto').val().toString().trim())) || ($('#id_produto').val().toString().trim() == "0") || ($('#id_produto').val().toString().trim() == "-1"))
+            {
+                msgError += "O campo <b>Produto</b> é de preenchimento obrigatório!"+"<br/>";
+            }
+            if (msgError.trim().length > 0) { LibMessageAlert("Atenção", msgError); }
+            else
+            {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try
+        {
+            LibMessageProcessando("Atualizando Itens . . .");
+            var form = $('#ModalCreateEditInventarioItem');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditInventarioItem", "EstoqueInventario", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        $("#dtGcInventarioItem").DataTable().draw(false);
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>
+

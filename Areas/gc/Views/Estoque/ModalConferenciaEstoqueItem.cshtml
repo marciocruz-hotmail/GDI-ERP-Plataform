@@ -1,0 +1,321 @@
+@model GdiPlataform.Areas.gc.Models.CstPedidoConferenciaEntradaLote
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ModalConferenciaEstoqueItem" }))
+{
+    @* Select2 + modal scrollável: mesmo padrão que ModalPedidoInsertEditItem (dropdownParent #mainModal, overflow no open). *@
+    <style type="text/css">
+        #ModalConferenciaEstoqueItem .modal-body {
+            overflow-x: visible;
+        }
+    </style>
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>@Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_movimento_item)
+                @Html.AntiForgeryToken()
+            </div>
+
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-2 p-0" style="height:100%;">
+                        <div class="card-header m-0 p-2 bg-body-secondary">
+                            <b>Informações do Item</b><br />@Html.Raw(ViewBag.TituloAuxiliar)
+                        </div>
+                        <div class="card-body m-0 p-0" style="height: 100%">
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                            <div class="form-group row text-sm-end m-1 p-0">
+                                @Html.Label("quantidade", "Qtd NF:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.item_quantidade, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("receb_import_qtd_disponivel", "Qtd OK.:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.item_qtd_disponivel, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("receb_import_qtd_falta", "Qtd Falta.:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.item_qtd_falta, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("receb_import_qtd_quarentena", "Qtd NC.:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.item_qtd_quarentena, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-1 p-0">
+                                @Html.Label("recebimento_peso_unit", "Peso Unit:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.item_peso_unit, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("recebimento_peso_total", "Peso Total:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.item_peso_total, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("receb_import_obs", "Obs.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-5">
+                                    @Html.EditorFor(model => model.item_obs, new { htmlAttributes = new { @class = "form-control", @id = "obs", maxlength = "30" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-2 p-0" style="height:100%;">
+                        <div class="tab-content" id="crud-tabs-content">
+
+                            <div class="card-header m-0 p-2 bg-body-secondary">
+                                <b>Lotes dos Itens</b>&nbsp;&nbsp;&nbsp;[ Para cada lote, informe quantidade]
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link active" data-bs-toggle="pill" id="tabLotes01a10_tab" href="#tabLotes01a10" role="tab" aria-controls="tabLotes01a10" aria-selected="true"><i class="fa-solid fa-boxes-stacked fa-sm me-1" aria-hidden="true"></i>Lotes 01-10</a></li>
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" data-bs-toggle="pill" id="tabLotes11a20_tab" href="#tabLotes11a20" role="tab" aria-controls="tabLotes11a20" aria-selected="false"><i class="fa-solid fa-boxes-stacked fa-sm me-1" aria-hidden="true"></i>Lotes 11-20</a></li>
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" data-bs-toggle="pill" id="tabLotes21a30_tab" href="#tabLotes21a30" role="tab" aria-controls="tabLotes21a30" aria-selected="false"><i class="fa-solid fa-boxes-stacked fa-sm me-1" aria-hidden="true"></i>Lotes 21-30</a></li>
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" data-bs-toggle="pill" id="tabLotes31a40_tab" href="#tabLotes31a40" role="tab" aria-controls="tabLotes31a40" aria-selected="false"><i class="fa-solid fa-boxes-stacked fa-sm me-1" aria-hidden="true"></i>Lotes 31-40</a></li>
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" data-bs-toggle="pill" id="tabLotes41a50_tab" href="#tabLotes41a50" role="tab" aria-controls="tabLotes41a50" aria-selected="false"><i class="fa-solid fa-boxes-stacked fa-sm me-1" aria-hidden="true"></i>Lotes 41-50</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body m-0 p-0">
+                                @{
+                                    var tipoModel = Model.GetType();
+                                }
+
+                                <!-- tabLotes01a10 - Início -->
+                                <div class="tab-pane fade show active m-0 p-0" id="tabLotes01a10" role="tabpanel" aria-labelledby="tabLotes01a10_tab">
+                                    @for (int i = 1; i <= 10; i++)
+                                    {
+                                        var loteNum = i.ToString("D2");
+                                        var loteId = "id_estoque_lote_" + loteNum;
+                                        var loteQtd = "lote" + loteNum + "_qtd";
+                                        var loteConf = "lote" + loteNum + "_conferido";
+                                        var loteIdValor = Convert.ToInt32(tipoModel.GetProperty(loteId)?.GetValue(Model) ?? 0);
+                                        var loteQtdValor = Convert.ToInt32(tipoModel.GetProperty(loteQtd)?.GetValue(Model) ?? 0);
+                                        var loteConfValor = Convert.ToBoolean(tipoModel.GetProperty(loteConf)?.GetValue(Model) ?? false);
+                                        <div class="form-group row text-sm-end m-0 pt-1" style="margin-top:4px!important;">
+                                            @Html.Label(loteId, "Lote " + loteNum, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, "Value", "Text", loteIdValor), new { @class = "form-control select-modal-fix", @id = loteId, @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                                            </div>
+                                            @Html.Label(loteQtd, "Qtd", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.TextBox(loteQtd, loteQtdValor, new { @class = "form-control", @id = loteQtd, @type = "number", @min = "0", @step = "1", @placeholder = "0" })
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check">
+                                                    @Html.CheckBox(loteConf, loteConfValor, new { @class = "form-check-input", @id = loteConf })
+                                                    <label class="form-check-label" for="@loteConf">Lote @loteNum Conferido?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- tabLotes11a20 - Início -->
+                                <div class="tab-pane fade m-0 p-0" id="tabLotes11a20" role="tabpanel" aria-labelledby="tabLotes11a20_tab">
+                                    @for (int i = 11; i <= 20; i++)
+                                    {
+                                        var loteNum = i.ToString("D2");
+                                        var loteId = "id_estoque_lote_" + loteNum;
+                                        var loteQtd = "lote" + loteNum + "_qtd";
+                                        var loteConf = "lote" + loteNum + "_conferido";
+                                        var loteIdValor = Convert.ToInt32(tipoModel.GetProperty(loteId)?.GetValue(Model) ?? 0);
+                                        var loteQtdValor = Convert.ToInt32(tipoModel.GetProperty(loteQtd)?.GetValue(Model) ?? 0);
+                                        var loteConfValor = Convert.ToBoolean(tipoModel.GetProperty(loteConf)?.GetValue(Model) ?? false);
+                                        <div class="form-group row text-sm-end m-0 pt-1" style="margin-top:4px!important;">
+                                            @Html.Label(loteId, "Lote " + loteNum, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, "Value", "Text", loteIdValor), new { @class = "form-control select-modal-fix", @id = loteId, @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                                            </div>
+                                            @Html.Label(loteQtd, "Qtd", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.TextBox(loteQtd, loteQtdValor, new { @class = "form-control", @id = loteQtd, @type = "number", @min = "0", @step = "1", @placeholder = "0" })
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check">
+                                                    @Html.CheckBox(loteConf, loteConfValor, new { @class = "form-check-input", @id = loteConf })
+                                                    <label class="form-check-label" for="@loteConf">Lote @loteNum Conferido?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+
+                                <!-- tabLotes21a30 - Início -->
+                                <div class="tab-pane fade m-0 p-0" id="tabLotes21a30" role="tabpanel" aria-labelledby="tabLotes21a30_tab">
+                                    @for (int i = 21; i <= 30; i++)
+                                    {
+                                        var loteNum = i.ToString("D2");
+                                        var loteId = "id_estoque_lote_" + loteNum;
+                                        var loteQtd = "lote" + loteNum + "_qtd";
+                                        var loteConf = "lote" + loteNum + "_conferido";
+                                        var loteIdValor = Convert.ToInt32(tipoModel.GetProperty(loteId)?.GetValue(Model) ?? 0);
+                                        var loteQtdValor = Convert.ToInt32(tipoModel.GetProperty(loteQtd)?.GetValue(Model) ?? 0);
+                                        var loteConfValor = Convert.ToBoolean(tipoModel.GetProperty(loteConf)?.GetValue(Model) ?? false);
+                                        <div class="form-group row text-sm-end m-0 pt-1" style="margin-top:4px!important;">
+                                            @Html.Label(loteId, "Lote " + loteNum, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, "Value", "Text", loteIdValor), new { @class = "form-control select-modal-fix", @id = loteId, @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                                            </div>
+                                            @Html.Label(loteQtd, "Qtd", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.TextBox(loteQtd, loteQtdValor, new { @class = "form-control", @id = loteQtd, @type = "number", @min = "0", @step = "1", @placeholder = "0" })
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check">
+                                                    @Html.CheckBox(loteConf, loteConfValor, new { @class = "form-check-input", @id = loteConf })
+                                                    <label class="form-check-label" for="@loteConf">Lote @loteNum Conferido?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+
+                                <!-- tabLotes31a40 - Início -->
+                                <div class="tab-pane fade m-0 p-0" id="tabLotes31a40" role="tabpanel" aria-labelledby="tabLotes31a40_tab">
+                                    @for (int i = 31; i <= 40; i++)
+                                    {
+                                        var loteNum = i.ToString("D2");
+                                        var loteId = "id_estoque_lote_" + loteNum;
+                                        var loteQtd = "lote" + loteNum + "_qtd";
+                                        var loteConf = "lote" + loteNum + "_conferido";
+                                        var loteIdValor = Convert.ToInt32(tipoModel.GetProperty(loteId)?.GetValue(Model) ?? 0);
+                                        var loteQtdValor = Convert.ToInt32(tipoModel.GetProperty(loteQtd)?.GetValue(Model) ?? 0);
+                                        var loteConfValor = Convert.ToBoolean(tipoModel.GetProperty(loteConf)?.GetValue(Model) ?? false);
+                                        <div class="form-group row text-sm-end m-0 pt-1" style="margin-top:4px!important;">
+                                            @Html.Label(loteId, "Lote " + loteNum, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, "Value", "Text", loteIdValor), new { @class = "form-control select-modal-fix", @id = loteId, @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                                            </div>
+                                            @Html.Label(loteQtd, "Qtd", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.TextBox(loteQtd, loteQtdValor, new { @class = "form-control", @id = loteQtd, @type = "number", @min = "0", @step = "1", @placeholder = "0" })
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check">
+                                                    @Html.CheckBox(loteConf, loteConfValor, new { @class = "form-check-input", @id = loteConf })
+                                                    <label class="form-check-label" for="@loteConf">Lote @loteNum Conferido?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+
+                                <!-- tabLotes41a50 - Início -->
+                                <div class="tab-pane fade m-0 p-0" id="tabLotes41a50" role="tabpanel" aria-labelledby="tabLotes41a50_tab">
+                                    @for (int i = 41; i <= 50; i++)
+                                    {
+                                        var loteNum = i.ToString("D2");
+                                        var loteId = "id_estoque_lote_" + loteNum;
+                                        var loteQtd = "lote" + loteNum + "_qtd";
+                                        var loteConf = "lote" + loteNum + "_conferido";
+                                        var loteIdValor = Convert.ToInt32(tipoModel.GetProperty(loteId)?.GetValue(Model) ?? 0);
+                                        var loteQtdValor = Convert.ToInt32(tipoModel.GetProperty(loteQtd)?.GetValue(Model) ?? 0);
+                                        var loteConfValor = Convert.ToBoolean(tipoModel.GetProperty(loteConf)?.GetValue(Model) ?? false);
+                                        <div class="form-group row text-sm-end m-0 pt-1" style="margin-top:4px!important;">
+                                            @Html.Label(loteId, "Lote " + loteNum, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, "Value", "Text", loteIdValor), new { @class = "form-control select-modal-fix", @id = loteId, @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                                            </div>
+                                            @Html.Label(loteQtd, "Qtd", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.TextBox(loteQtd, loteQtdValor, new { @class = "form-control", @id = loteQtd, @type = "number", @min = "0", @step = "1", @placeholder = "0" })
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check">
+                                                    @Html.CheckBox(loteConf, loteConfValor, new { @class = "form-check-input", @id = loteConf })
+                                                    <label class="form-check-label" for="@loteConf">Lote @loteNum Conferido?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                            </div><!-- /card-body -->
+                        </div><!-- /tab-content -->
+                    </div><!-- /section lotes -->
+
+                </div><!-- /form-horizontal -->
+            </div><!-- /modal-body -->
+
+
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    <button type="button" name="btnSalvar" title="Confirmar Item" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check-to-slot fa-lg me-2" aria-hidden="true"></i>Item Conferido</button>
+                }
+
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    #crud-tabs-content .card-body > .tab-pane {
+        display: none;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #crud-tabs-content .card-body > .tab-pane.active {
+        display: block;
+    }
+</style>
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            $('#item_quantidade').attr('readonly', 'readonly');
+            gdiConferenciaLotesTabsSelect2Init('#ModalConferenciaEstoqueItem', '#mainModal');
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try
+        {
+            LibMessageProcessando("Atualizando Itens . . .");
+            var form = $('#ModalConferenciaEstoqueItem');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxConferenciaEstoqueItem", "Estoque", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        $("#dtGcRecebimentoEstoque").DataTable().draw(false);
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+
+

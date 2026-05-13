@@ -1,0 +1,309 @@
+@model GdiPlataform.Domain.ContextoModel
+@using GdiPlataform.Security
+@{
+    var counterNavbarItemsMessage = 0;
+    var counterNavbarItemsTask = 0;
+    var counterNavbarItemsAlert = 0;
+    var counterNavbarItemsAtividades = 0;
+}
+
+
+<!-- Header (AdminLTE 4) -->
+<nav class="app-header navbar navbar-expand bg-body">
+    <div class="container-fluid">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Alternar menu lateral">
+                    <i class="bi bi-list"></i>
+                </a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav ms-auto">
+            @if (CachePersister.userIdentity.alerts_qtd > 0)
+            {
+                <li class="nav-item d-flex align-items-center me-2">
+                    <span class="badge text-bg-danger">@Html.Raw(CachePersister.userIdentity.alerts_msg)</span>
+                </li>
+            }
+
+            <!-- MESSAGES - START -->
+            @if (Model.allNavbarItemMessage.Count() > 0)
+            {
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                        <i class="fa-regular fa-comments"></i>
+                        <span class="navbar-badge badge text-bg-danger">@Model.allNavbarItemMessage.Count().ToString()</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end">
+                        @foreach (var childMessageN1 in Model.allNavbarItemMessage.OrderBy(message1 => message1.Id))
+                        {
+                            counterNavbarItemsMessage++;
+                            <a href=@childMessageN1.href class="dropdown-item">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <h3 class="dropdown-item-title">
+                                            @childMessageN1.nameHeader
+                                            <span class="float-end fs-7 text-danger"><i class="fa-solid fa-star"></i></span>
+                                        </h3>
+                                        <p class="fs-7">@childMessageN1.message</p>
+                                        <p class="fs-7 text-secondary"><i class="fa-regular fa-clock me-1"></i>@childMessageN1.reference</p>
+                                    </div>
+                                </div>
+                            </a>
+                            if (counterNavbarItemsMessage < Model.allNavbarItemMessage.Count())
+                            {
+                                <div class="dropdown-divider"></div>
+                            }
+                        }
+                    </div>
+                </li>
+            }
+            <!-- MESSAGES - END -->
+            <!-- ALERTS - START -->
+            @if (Model.allNavbarItemAlert.Count() > 0)
+            {
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="navbar-badge badge text-bg-danger">@Model.allNavbarItemAlert.Count().ToString()</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end">
+                        @foreach (var childAlertN1 in Model.allNavbarItemAlert.OrderBy(alert1 => alert1.Id))
+                        {
+                            counterNavbarItemsAlert++;
+                            <a href=@childAlertN1.href class="dropdown-item">
+                                <i class="@childAlertN1.iconClass me-2"></i> @childAlertN1.message
+                                <span class="float-end text-secondary fs-7">@childAlertN1.reference</span>
+                            </a>
+                            if (counterNavbarItemsAlert < Model.allNavbarItemAlert.Count())
+                            {
+                                <div class="dropdown-divider"></div>
+                            }
+                        }
+                    </div>
+                </li>
+            }
+            <!-- ALERTS - END -->
+            <!-- ATIVIDADES - START -->
+            @if (Model.allNavbarItemAtividade.Count() > 0)
+            {
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span class="navbar-badge badge text-bg-danger">@Model.allNavbarItemAtividade.Count().ToString()</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end">
+                        @foreach (var childAtividadeN1 in Model.allNavbarItemAtividade.OrderBy(atividade => atividade.Id))
+                        {
+                            counterNavbarItemsAtividades++;
+                            <a href=@childAtividadeN1.href class="dropdown-item">
+                                <i class="@childAtividadeN1.iconClass me-2"></i> @childAtividadeN1.message
+                                <span class="float-end text-secondary fs-7">@childAtividadeN1.reference</span>
+                            </a>
+                            if (counterNavbarItemsAtividades < Model.allNavbarItemAtividade.Count())
+                            {
+                                <div class="dropdown-divider"></div>
+                            }
+                        }
+                    </div>
+                </li>
+            }
+            <!-- ATIVIDADES - END -->
+            <!-- SERVER TASKS - START -->
+            @if (Model.allNavbarItemTask.Count() > 0)
+            {
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                        <i class="fa-solid fa-hard-drive"></i>
+                        <span class="navbar-badge badge text-bg-danger">
+                            @Model.allNavbarItemTask.Count().ToString()
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-end">
+                        @foreach (var childTaskN1 in Model.allNavbarItemTask.OrderBy(message1 => message1.Id))
+                        {
+                            counterNavbarItemsTask++;
+                            <a href=@childTaskN1.href class="dropdown-item">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <h3 class="dropdown-item-title">
+                                            <strong>@childTaskN1.Name</strong>
+                                        </h3>
+                                        <p class="fs-7 text-secondary">@childTaskN1.Message</p>
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar @childTaskN1.progressBarType progress-bar-striped progress-bar-animated" role="progressbar"
+                                                 aria-valuenow="@childTaskN1.ValueNow" aria-valuemin="@childTaskN1.valueMin" aria-valuemax="@childTaskN1.valueMax" style="width: @childTaskN1.ValueNow%">
+                                                @childTaskN1.ValueNow%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            if (counterNavbarItemsTask < Model.allNavbarItemTask.Count())
+                            {
+                                <div class="dropdown-divider"></div>
+                            }
+                        }
+                    </div>
+                </li>
+            }
+            <!-- SERVER TASKS - END -->
+            <!-- USER MENU - START -->
+            <li class="nav-item dropdown user-menu">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
+                    <i class="fa fa-user fa-fw"></i>&nbsp;&nbsp;@Model.userIdentity.Username
+                </a>
+                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa fa-database me-2"></i>Ambiente
+                            <span class="float-end text-secondary fs-7">@Model.userIdentity.AmbienteDatabase</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa fa-building me-2"></i> Empresa
+                            <span class="float-end text-secondary fs-7">@Model.userIdentity.NomeColigada</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa fa-cubes me-2"></i> Filial
+                            <span class="float-end text-secondary fs-7">@Model.userIdentity.FilialNome</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa-regular fa-address-card me-2"></i> Perfil
+                            <span class="float-end text-secondary fs-7">@Model.userIdentity.PerfilNome</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa fa-hashtag me-2"></i> Versão
+                            <span class="float-end text-secondary fs-7">@Model.versaoPlataforma</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa-solid fa-tag me-2"></i> Tag
+                            <span class="float-end text-secondary fs-7">@CachePersister.userIdentity.GoogleTag</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa-solid fa-text-width me-2"></i> Width;Height
+                            <span class="float-end text-secondary fs-7">@CachePersister.userIdentity.DisplayScreenWidth;@CachePersister.userIdentity.DisplayScreenHeight</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a href="#" onclick="jsYesShowNavigator(); return false;" class="dropdown-item">
+                            <i class="fa-solid fa-tablet-alt me-2"></i>&nbsp;Dados Device
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a href="#" onclick="jsModalUsuarioTrocarSenha(); return false;" class="dropdown-item">
+                            <i class="fa fa-user-lock me-2"></i>&nbsp;Trocar Senha
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <a href="@Url.Action("Logout","UserIdentity", new { area = "" })" class="dropdown-item">
+                            <i class="fa fa-sign-out-alt me-2"></i>&nbsp;Sair do Sistema
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+            <!-- USER MENU - END -->
+
+        </ul>
+    </div>
+</nav>
+<!-- Sidebar (AdminLTE 4) -->
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    <div class="sidebar-brand">
+        <a class="brand-link" href="#">
+            <img style="max-width:50%; max-height:40px; margin-top: -7px; margin-left: 1px;" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoMicrosoft.png" alt="Microsoft" />
+            <img style="max-width:40%; max-height:40px; margin-top: -7px; margin-left: 3px;" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoAws.png" alt="AWS" />
+        </a>
+    </div>
+
+    <div class="sidebar-brand">
+        <a class="brand-link d-flex align-items-center justify-content-center py-2 px-3" href="#">
+            <img src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/@Model.userIdentity.ImgLogoSubdominio"
+                 alt="Logo"
+                 style="max-width: 100%; max-height: 48px; width: auto; height: auto; object-fit: contain; display: block;" />
+        </a>
+    </div>
+
+
+    <div class="sidebar-wrapper">
+        <nav class="mt-2">
+            <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" aria-label="Navegação principal" data-accordion="false">
+
+                @foreach (var childN1 in Model.allNavbarItemMenu.OrderBy(i1 => i1.Ordem))
+                {
+                    if (childN1.level == 1)
+                    {
+                        if (childN1.isParent == false)
+                        {
+
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a href="#" class="d-flex align-items-center nav-link">
+                                    <i class="nav-icon @string.Join(" ", (childN1.imageClass ?? "").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.Equals(x, "me-2", StringComparison.OrdinalIgnoreCase)))"></i>
+                                    <p>
+                                        @childN1.nameOption
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @foreach (var childN2 in Model.allNavbarItemMenu.Where(i2 => i2.parentId == childN1.Id).OrderBy(i2 => i2.nameOption))
+                                    {
+                                        if (childN2.isParent == false)
+                                        {
+                                            <li class="nav-item">
+                                                <a href="@Url.Action(childN2.action, childN2.controller,  new { area = @childN2.area })" class="d-flex align-items-center nav-link">
+                                                    <i class="fa-solid fa-caret-right nav-icon"></i>
+                                                    <p>@childN2.nameOption</p>
+                                                </a>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    }
+                }
+            </ul>
+        </nav>
+    </div>
+</aside>
+
+<script type="text/javascript">
+    function jsModalUsuarioTrocarSenha()
+    {
+        var el = document.getElementById('mainModal');
+        $(el).load('@Url.Action("ModalUsuarioTrocarSenha", "Usuarios", new { area = "g" })?id=1', function () {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                bootstrap.Modal.getOrCreateInstance(el).show();
+            }
+        });
+    }
+</script>
+

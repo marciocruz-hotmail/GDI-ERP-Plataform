@@ -1,0 +1,435 @@
+@model GdiPlataform.Db.g_produtos_controle
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcEstoqueControleCreateEdit" }))
+{
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_produto_controle)
+                @Html.HiddenFor(model => model.ativo)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                    <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                    <!-- Abas exibidas somente em modo de edição -->
+                    @if (Model.id_produto_controle > 0)
+                    {
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabAfericao_tab" data-bs-toggle="pill" href="#tabAfericao" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Aferições</a></li>
+                    }
+                </ul>
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="tab-content" id="crud-tabs-content">
+
+
+
+                        <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <div class="card shadow-sm gdi-section-accent-success m-2 p-1">
+                                    <h5>Produto/Item/Equipamento</h5>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("serial", "Serial", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.serial, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("lote", "Lote", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.lote, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("Data Validade", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @* id do .input-group distinto do input para Tempus Dominus *@
+                                            <div class='input-group date' id='ig_gc_est_ctrl_d_val'>
+                                                @Html.EditorFor(model => model.data_validade, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("id_produto", "Part Number:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-9 text-sm-start">
+                                            @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("id_produto_familia", "Família", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-6 text-sm-start">
+                                            @Html.DropDownListFor(model => model.id_produto_familia, ViewBag.comboProdutosFamilia as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("id_produto_status", "Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-4 text-sm-start">
+                                            @Html.DropDownListFor(model => model.id_produto_status, ViewBag.comboProdutosStatus as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card shadow-sm gdi-section-accent-warning m-2 p-2">
+                                    <h5>Dados do Recebimento</h5>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("recebimento_data", "Data Rec.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            <div class='input-group date' id='ig_gc_est_ctrl_rec_data'>
+                                                @Html.EditorFor(model => model.recebimento_data, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </div>
+                                        @Html.Label("recebimento_invoice", "Invoice Rec.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.recebimento_invoice, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("recebimento_os", "OS Rec.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.recebimento_os, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="card shadow-sm gdi-section-accent-warning m-2 p-2">
+                                    <h5>Dados da Saída</h5>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("saida_data", "Data Saída", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            <div class='input-group date' id='ig_gc_est_ctrl_saida_data'>
+                                                @Html.EditorFor(model => model.saida_data, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </div>
+                                        @Html.Label("saida_nf", "NF Saída", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.saida_nf, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aba Medição - INÍCIO -->
+                        <div class="tab-pane fade" id="tabAfericao" role="tabpanel" aria-labelledby="tabAfericao_tab">
+                            <div class="card-body m-0 p-1" style="height: 100%">
+                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtEstoqueControleMedicoes">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id.</th>
+                                                    <th>Data/Hora</th>
+                                                    <th>Tensão</th>
+                                                    <th><i class="fa-solid fa-trash-alt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir"></i></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-body text-sm-center m-0 p-1">
+                                    <button type="button" name="btnCreateMedicao" onclick="jsModalCreateMedicao()" title="Registrar Medição/Aferição" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Registrar&nbspMedição/Aferição</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Aba Medição - FIM -->
+
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","EstoqueControle",new { Area = "gc" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxSaveRecord()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+<script type="text/javascript">
+    var otableAfericoes;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_gc_est_ctrl_d_val');
+            jsDatepicker('#ig_gc_est_ctrl_rec_data');
+            jsDatepicker('#ig_gc_est_ctrl_saida_data');
+            jsInitForm();
+            
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+
+            if (isEmpty($('#serial').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Serial</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (hasError) { LibMessageAlert("Atenção", msgError); }
+            else
+            {
+                jsAjaxSaveRecord();
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxSaveRecord()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#FormGcEstoqueControleCreateEdit');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxSaveRecord", "EstoqueControle", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    if (result.success == true)
+                    {
+                        LibMessageProcessandoHide();
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            size: 'extra-large',
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                        jsYesCancelRecord('@Url.Action("","EstoqueControle",new { Area = "gc" })')
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.msg);
+               }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxSavePedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    $('#tabAfericao_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableAfericoes == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableAfericoes = $('#dtEstoqueControleMedicoes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosMedicoes", "EstoqueControle", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_produto_controle').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 10,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "10%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "40%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "40%", orderable: false, className: 'text-sm-center', targets: [2] },
+                        { "width": "10%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [3], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnCancelMedicao" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelar Medição/Aferição ' + data[0] + '" class="btn btn-outline-danger btn-sm p-1 btnCancel d-inline-flex align-items-center" onclick="jsConfirmaCancelamentoMedicao(' + data[0] + ');"><i class="fa-solid fa-trash-alt"></i></button>' } }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[tabAfericao_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsModalCreateMedicao()
+    {
+        try {
+            var idProdutoControle = $('#id_produto_controle').val().toString();
+            $("#mainModal").load('@Url.Action("ModalCreateMedicao", "EstoqueControle", new { area = "gc" })?id=' + idProdutoControle, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalCreateMedicao] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsConfirmaCancelamentoMedicao(id)
+    {
+        GdiSwal2.dialog({
+            title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            closeButton: false,
+            message: 'Deseja <b>CANCELAR</b> a Medição Nº ' + id + ' ?' + '</br></br>' + '<b>ATENÇÃO:</b></br> O Log dessa operação será armazenado no banco de dados do ERP para futuras consultas!',
+            centerVertical: true,
+            onEscape: false,
+            backdrop: true,
+            size: 'large',
+            buttons:
+            {
+                confirm:
+                {
+                    label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmo o Cancelamento da Medição',
+                    className: 'btn-outline-success',
+                    callback: function () {
+                        jsCancelamentoMedicao(id);
+                        GdiSwal2.hideAll();
+                    }
+                },
+                cancel:
+                {
+                    label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Desistir',
+                    className: 'btn-outline-warning',
+                    callback: function () {
+                        GdiSwal2.hideAll();
+                    }
+                }
+            }
+        })
+    }
+
+    function jsCancelamentoMedicao(id)
+    {
+        LibMessageProcessando("")
+        var dataForm =
+        {
+            view_g_produtos_medicoes:
+            {
+                'id_produto_medicao': id,
+            }
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AjaxCancelamentoMedicao", "EstoqueControle", new { area = "gc" })',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(dataForm),
+            dataType: "json",
+            success: function (result)
+            {
+                LibMessageProcessandoHide();
+                if (result.success == true)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function () {
+                                $("#dtEstoqueControleMedicoes").DataTable().draw(false);
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                }
+                else
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                }
+            },
+            error: function (result)
+            {
+                GdiAjaxNotifyInconsistencias(result.toString());
+            }
+        });
+    };
+
+
+
+
+</script>

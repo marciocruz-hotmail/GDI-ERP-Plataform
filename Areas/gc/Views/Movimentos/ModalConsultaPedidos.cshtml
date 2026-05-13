@@ -1,0 +1,232 @@
+@model GdiPlataform.Areas.gc.Models.cstModalRelatorio
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidosHistorico" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto;">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <div class="form-horizontal m-0 p-0">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                                <div class="col-sm-9">
+                                    @Html.DropDownListFor(model => model.Field_Int_01, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "z-index:99;" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("produto", "Part Number:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-9 text-sm-start">
+                                    @Html.DropDownListFor(model => model.Field_Int_02, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "margin-top:5px; overflow:visible;" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Período", new { @class = "col-sm-1 col-form-label" })
+                                <div class="col-sm-2">
+                                    @* id do .input-group distinto do input (EditorFor) para Tempus Dominus *@
+                                    <div class='input-group date' id='ig_gc_modal_consulta_pedidos_d1'>
+                                        @Html.EditorFor(model => model.Field_Data_01, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                    </div>
+                                </div>
+                                @Html.Label("à", new { @class = "col-sm-1 col-form-label text-sm-center" })
+                                <div class="col-sm-2">
+                                    <div class='input-group date' id='ig_gc_modal_consulta_pedidos_d2'>
+                                        @Html.EditorFor(model => model.Field_Data_02, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                                    <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarPedidos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                            </div>
+                        </div>
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcModalPedidosHistorico">
+                            <thead>
+                                <tr>
+                                    <th>@Html.Encode("Id.")</th>
+                                    <th><i class="fa-solid fa-boxes" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Tipo (Cotação/Pedido/OS)"></i></th>
+                                    <th>@Html.Encode("Cli/For")</th>
+                                    <th>@Html.Encode("Consultor")</th>
+                                    <th>@Html.Encode("Data")</th>
+                                    <th>@Html.Encode("Valor")</th>
+                                </tr>
+                            </thead>
+                            <tfoot align="right">
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var otableGcModalPedidosHistorico;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_gc_modal_consulta_pedidos_d1');
+            jsDatepicker('#ig_gc_modal_consulta_pedidos_d2');
+            jsInitModal();
+            jsCreateOtableGcModalPedidosHistorico();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxPesquisarPedidos() {
+        try
+        {
+            LibMessageProcessando("");
+            $("#dtGcModalPedidosHistorico").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarPedidos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCreateOtableGcModalPedidosHistorico()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGCIndexPedido = $('#dtGcModalPedidosHistorico').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                },
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    LibMessageProcessandoHide();
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetRelatorioConsultaPedidos","Movimentos",new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#Field_Int_01').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#Field_Int_02').val()).toString(),
+                        yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_modal_consulta_pedidos_d1')),
+                        yesCustomField04: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_modal_consulta_pedidos_d2')),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 10,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "62%", orderable: false, className: 'text-sm-start', targets: [2] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [5] }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dataTableGCIndexPedido tbody').on('dblclick', 'tr td', function () {
+                var data = otableGCIndexPedido.row($(this).closest('tr')).data();
+                jsGCIndexPedidoEditRow(data[1]);
+
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsCreateOtableGCIndexPedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>
+
+
+

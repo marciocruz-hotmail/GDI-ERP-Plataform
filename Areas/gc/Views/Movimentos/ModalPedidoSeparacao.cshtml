@@ -1,0 +1,585 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoSeparacao" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.id_cliente)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    @if (Model.id_movimento > 0)
+                    {
+                        <div class="card-body m-0 p-0" style="height: 100%">
+
+                            @if (!string.IsNullOrEmpty(ViewBag.MsgCompetenciaBloqueada as string))
+                            {
+                                <div class="col-sm-12 text-sm-start m-0 p-0">
+                                    @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgCompetenciaBloqueada as string, "danger"))
+                                </div>
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                                {
+                                    <div class="col-sm-12 text-sm-start m-0 p-0">
+                                        @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                                    </div>
+                                }
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0" style="height:100%;">
+                                    <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Separação</div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("movimento_separado", "Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3 text-sm-start" style="margin-top:5px;">
+                                            <div class="form-check form-switch form-switch-lg">
+                                                @Html.CheckBoxFor(model => model.movimento_separado, htmlAttributes: new { @class = "form-check-input switch-success", @id = "movimento_separado", role = "switch" })
+                                                <label class="form-check-label" for="movimento_separado" id="label_movimento_separado">Não Separado / Separado</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("volumes", "Volumes", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.frete_qvol, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("especie", "Espécie", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.frete_esp, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("marca", "Marca", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.frete_marca, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("numeracao", "Numeração", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.frete_nvol, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("pesol", "Peso Líq.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.frete_pesol, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("pesob", "Peso Bruto", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.frete_pesob, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("pesol", "Altura", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.frete_dimensao_altura, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("pesol", "Largura", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.frete_dimensao_largura, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("pesol", "Comprimento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.frete_dimensao_profundidade, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("obs_separacao", "Obs", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-10">
+                                            @Html.TextAreaFor(model => model.obs_separacao, new { @class = "form-control", @id = "obs", @rows = "3", @title = "Informações adicionais da separação", @placeholder = "Informações adicionais da separação" })
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(ViewBag.MsgHistorico as string))
+                                    {
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("historico", "Histórico", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-10">
+                                                @Html.TextArea("historico", (String)ViewBag.MsgHistorico, new { @class = "form-control", @id = "hist", @rows = "3", @readonly = true })
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+
+                                if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                                {
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Itens do Pedido</div>
+                                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtPedidoSeparacaoLotes">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>@Html.Encode("Qtd")</th>
+                                                        <th>@Html.Encode("Item")</th>
+                                                        <th><i class="fa-solid fa-dolly" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Separado"></i></th>
+                                                        <th><i class="fa-solid fa-box-open"></i></th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string) && string.IsNullOrEmpty(ViewBag.MsgCompetenciaBloqueada as string))
+                {
+                    <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsChecklistSeparacao()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Status do Pedido</button>
+                }
+                else if (!string.IsNullOrEmpty(ViewBag.MsgCompetenciaBloqueada as string))
+                {
+                    <button type="button" id="btnSalvar" name="btnFecharCompetencia" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsConfirmacaoFechamentoCompetenciaEstoque()"><i class="fa-solid fa-warehouse me-2" aria-hidden="true"></i>Executar Fechamento de Estoque da Competência Anterior</button>
+                }
+
+            </div>
+        </div>
+    </div>
+}
+<div id="containerModalPedidoSeparacaoLotes" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+
+<script type="text/javascript">
+    var OTablePedidoSeparacaoLotes = null;
+
+    $(function ()
+    {
+        try
+        {
+            @* Tempus: datepickers primeiro; inputs com id contendo _validade *@
+            var elements = document.body.getElementsByClassName('form-control');
+            for (var i = 0; i < elements.length; i++) {
+                if (elements[i].id.includes('_validade')) {
+                    jsDatepicker("#" + elements[i].id);
+                }
+            }
+            jsInitModal();
+            JsCreateTablePedidoSeparacaoLotes();
+            if ($("#movimento_separado").is(':checked')) { $("#label_movimento_separado").html("Separado"); } else { $("#label_movimento_separado").html("Não Separado"); };
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).off('change.pedSepStatus', '#movimento_separado').on('change.pedSepStatus', '#movimento_separado', function () {
+        $("#label_movimento_separado").html("Não Separado");
+        if ($(this).is(':checked')) {
+            $("#label_movimento_separado").html("Separado");
+        }
+    });
+
+    function JsPedidoSeparacaoLotesAdjustColumns()
+    {
+        var $tbl = $('#DtPedidoSeparacaoLotes');
+        if (!$tbl.length || !$.fn.dataTable || !$.fn.dataTable.isDataTable($tbl))
+        {
+            return;
+        }
+        var api = $tbl.DataTable();
+        window.setTimeout(function () {
+            if (!$tbl.is(':visible')) {
+                return;
+            }
+            api.columns.adjust();
+        }, 100);
+    }
+
+    function JsDestroyTablePedidoSeparacaoLotes()
+    {
+        try
+        {
+            var $tbl = $('#DtPedidoSeparacaoLotes');
+            if ($tbl.length && $.fn.dataTable && $.fn.dataTable.isDataTable($tbl))
+            {
+                $tbl.off('error.dt.pedSepLot');
+                $tbl.find('tbody').off('click.pedSepLoteTr');
+                $tbl.find('tbody').off('dblclick.pedSepLoteDbl');
+                $tbl.DataTable().destroy();
+            }
+            OTablePedidoSeparacaoLotes = null;
+        }
+        catch (err)
+        {
+            console.error('[ModalPedidoSeparacao] JsDestroyTablePedidoSeparacaoLotes: ' + err.message);
+        }
+    }
+
+    function JsCreateTablePedidoSeparacaoLotes()
+    {
+        try
+        {
+            var $tbl = $('#DtPedidoSeparacaoLotes');
+            if ($tbl.length === 0)
+            {
+                return;
+            }
+
+            if ($.fn.dataTable && $.fn.dataTable.isDataTable($tbl))
+            {
+                var api = $tbl.DataTable();
+                api.ajax.reload(function () {
+                    JsPedidoSeparacaoLotesAdjustColumns();
+                }, false);
+                return;
+            }
+
+            $.fn.dataTable.ext.errMode = 'none';
+            OTablePedidoSeparacaoLotes = $tbl.off('error.dt.pedSepLot').on('error.dt.pedSepLot', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).dataTable({
+                    initComplete: function ()
+                    {
+                        var api = this.api();
+                        window.setTimeout(function () { api.columns.adjust(); }, 0);
+                    },
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosItensSeparacao", "Movimentos", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: '@Model.id_movimento',
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: false,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: true,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { orderable: false, visible: false, width: '0%', targets: [0] },
+                        { orderable: false, className: 'text-sm-center', width: '5%', targets: [1] },
+                        { orderable: false, className: 'text-sm-start', width: '80%', targets: [2] },
+                        { orderable: false, className: 'text-sm-center', width: '5%', targets: [3] },
+                        { orderable: false, className: 'text-sm-center', width: '5%', targets: [4], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnSeparacaoLotes" title="Informar lote" class="btn btn-outline-info btn-sm btnSeparacaoLotes d-inline-flex align-items-center gap-2" onclick="jsAbrirModalPedidoSeparacaoLotes(' + data[0] + ');"><i class="fa-solid fa-box-open"></i></button>' } }
+                    ],
+                    order: [[1, 'asc']],
+
+                        language:
+                        {
+                            sEmptyTable: 'Nenhum registro encontrado',
+                            sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                            sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                            sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                            sInfoPostFix: '',
+                            sInfoThousands: '.',
+                            sLengthMenu: '_MENU_ registros por página',
+                            sZeroRecords: 'Nenhum registro encontrado',
+                            sSearch: 'Pesquisar',
+                            oPaginate:
+                            {
+                                sNext: '>',
+                                sPrevious: '<',
+                                sFirst: '<<',
+                                sLast: '>>'
+                            },
+                            select: {
+                                rows: {
+                                    "0": "",
+                                    "1": " [ 1 registro selecionado ] ",
+                                    "_": " [ %d registros selecionados ] "
+                                }
+                            }
+                        },
+                    oAria: {
+                        sSortAscending: ': Ordenar colunas de forma ascendente',
+                        sSortDescending: ': Ordenar colunas de forma descendente'
+                    }
+                });
+                $tbl.find('tbody').off('dblclick.pedSepLoteDbl').on('dblclick.pedSepLoteDbl', 'tr td', function () {
+                    var data = $tbl.DataTable().row($(this).closest('tr')).data();
+                    if (data && data.length > 0) {
+                        jsAbrirModalPedidoSeparacaoLotes(data[0]);
+                    }
+                });
+
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+
+    function jsChecklistSeparacao()
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<b>" + '@CachePersister.userIdentity.Username' +"</b>  você confirma a conferência de todos os itens do checklist abaixo?",
+                message:
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Itens/PNs, Lotes, Seriais, Quantidades?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Fechamento seguro com fita reforçada?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Componentes protegidos adequadamente?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Caplugs aplicados(quando aplicável)?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Espaços vazios preenchidos?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Componentes sem movimento excessivo(teste de balanço)?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas externas aplicadas corretamente?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas internas(packing list) incluídas?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Código de barras legível e escaneável?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Símbolos de manuseio aplicados quando necessário?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação técnica incluída?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Peso e dimensões registrados?<br/>' +
+                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Conformidade com manual do cliente(se aplicável)',
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons:
+                {
+                    cancelar:
+                    {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function ()
+                        {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar:
+                    {
+                        label: '<i class="fa-regular fa-square-check me-2" aria-hidden="true"></i>SIM, o checklist foi conferido',
+                        className: 'btn-outline-success',
+                        callback: function ()
+                        {
+                            jsSendForm();
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsChecklistSeparacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try
+        {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando();
+            var form = $('#FormModalPedidoSeparacao');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalPedidoSeparacao", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAbrirModalPedidoSeparacaoLotes(idMovimentoItem)
+    {
+        try
+        {
+            var idMovimento = @Model.id_movimento
+            var url = '@Url.Action("ModalPedidoSeparacaoLotes", "Movimentos", new { area = "gc" })' + '?idMovimento=' + idMovimento + '&idMovimentoItem=' + idMovimentoItem;
+            LibMessageProcessando("");
+            $('#containerModalPedidoSeparacaoLotes').load(url, function () {
+                LibMessageProcessandoHide();
+                var el = document.getElementById('containerModalPedidoSeparacaoLotes');
+                if (el) {
+                    var m = bootstrap.Modal.getOrCreateInstance(el, { backdrop: false, keyboard: false });
+                    m.show();
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAbrirModalPedidoSeparacaoLotes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    
+    $(document).off('hidden.bs.modal.modalPedidoSeparacaoLotes').on('hidden.bs.modal.modalPedidoSeparacaoLotes', '#containerModalPedidoSeparacaoLotes', function (e)
+    {
+        if (e.target !== this) {
+            return;
+        }
+        var $c = $(this);
+        var refreshParent = !!$c.data('pedSepLotesRefreshParent');
+        $c.removeData('pedSepLotesRefreshParent');
+        $c.empty();
+        if ($('.modal:visible').length) {
+            $('body').addClass('modal-open');
+        }
+        if (refreshParent)
+        {
+            if (!$('#FormModalPedidoSeparacao').length || !$('#DtPedidoSeparacaoLotes').length) {
+                return;
+            }
+            JsCreateTablePedidoSeparacaoLotes();
+            window.setTimeout(function () { JsPedidoSeparacaoLotesAdjustColumns(); }, 250);
+        }
+    });
+
+    $(document).off('hidden.bs.modal.modalPedidoSeparacaoMain').on('hidden.bs.modal.modalPedidoSeparacaoMain', '#mainModal', function (e) {
+        if (e.target !== this) {
+            return;
+        }
+        if (!$('#FormModalPedidoSeparacao').length) {
+            return;
+        }
+        JsDestroyTablePedidoSeparacaoLotes();
+    });
+
+    function jsConfirmacaoFechamentoCompetenciaEstoque()
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                message: 'Deseja Realmente Executar O Fechamento de Estoque da Competência Anterior?',
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons:
+                {
+                    cancelar:
+                    {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function () {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar:
+                    {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function () {
+                            jsFechamentoCompetenciaEstoque();
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsConfirmacaoFechamentoCompetenciaEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFechamentoCompetenciaEstoque()
+    {
+        try
+        {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando();
+            var form = $('#FormModalPedidoSeparacao');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxFechamentoCompetenciaEstoque", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFechamentoCompetenciaEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

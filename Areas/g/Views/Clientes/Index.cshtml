@@ -1,0 +1,457 @@
+@model IEnumerable<GdiPlataform.Db.g_clientes>
+@using GdiPlataform.Security
+@using GdiPlataform.Lib
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1 d-flex flex-wrap align-items-center gap-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("g_Clientes_*")) || (CachePersister.userIdentity.Roles.Contains("g_Clientes_Actioncreate")))
+                {
+                    if (CachePersister.userIdentity.record_g_parametros.api_sintegra_ativo)
+                    {
+                        <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalNovoCadastroRoboSintegra()"><i class="fa fa-plus" aria-hidden="true"></i>Novo</button>
+                    }
+                    else
+                    {
+                        <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Clientes",new { Area = "g" })')"><i class="fa fa-plus" aria-hidden="true"></i>Novo</button>
+                    }
+                }
+                else
+                { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-success disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus" aria-hidden="true"></i>Novo</button>}
+                @if ((CachePersister.userIdentity.Roles.Contains("g_Clientes_*")) || (CachePersister.userIdentity.Roles.Contains("g_Clientes_Actionupdate")))
+                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableCliente, 'Id.', '@Url.Action("Edit", "Clientes", new { Area = "g" })/')"><i class="fa-regular fa-edit" aria-hidden="true"></i>Editar</button> }
+                else
+                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-warning disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit" aria-hidden="true"></i>Editar</button>}
+                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()"><i class="fa-solid fa-filter" aria-hidden="true"></i>Filtro Avançado</button>
+                @if ((CachePersister.userIdentity.Roles.Contains("g_Clientes_*")) || (CachePersister.userIdentity.Roles.Contains("g_Clientes_AtualizarVendedorConsultor")) || (CachePersister.userIdentity.Roles.Contains("g_Clientes_AtualizarLimiteCredito")) || (CachePersister.userIdentity.IdPerfil == -800) || (CachePersister.allSistemas.FirstOrDefault(p => p.id_sistema == 3)?.ativo ?? false))
+                {
+                    int qtdMenus = 0;
+                    <div class="vr mx-1 align-self-stretch"></div>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Clientes_*")) || (CachePersister.userIdentity.Roles.Contains("g_Clientes_AtualizarVendedorConsultor")))
+                            {
+                                <a class="dropdown-item d-flex align-items-center" href="#" onclick="jsModalAtualizarVendedorConsultor(otableCliente, 'Id.')"><i class="fa-solid fa-image-portrait" aria-hidden="true"></i>Alterar Vendedor/Consultor</a>
+                                qtdMenus += 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Clientes_*")) || (CachePersister.userIdentity.Roles.Contains("g_Clientes_AtualizarLimiteCredito")))
+                            {
+                                if (qtdMenus > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="dropdown-item d-flex align-items-center" href="#" onclick="jsModalAtualizarLimiteCredito(otableCliente, 'Id.')"><i class="fa-regular fa-credit-card fa-lg" aria-hidden="true"></i>Atualizar Limite Crédito</a>
+                                qtdMenus += 1;
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto;">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" id="dtGClientes">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>Id.</th>
+                                    <th>Tipo</th>
+                                    <th>Nome / Razão Social</th>
+                                    <th>Consultor</th>
+                                    <th>CPF/CNPJ</th>
+                                    <th>Dt. Cad.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableCliente;
+
+	$(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableCliente = $('#dtGClientes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); if (json && json.yesFilterOnOff !== undefined && json.yesFilterOnOff !== null) { btnFiltro(json.yesFilterOnOff); } }).DataTable({
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDados","Clientes", new { Area = "g" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
+                        yesFilterText: $('#yesFilterText').val().toString(),
+                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString()
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "50%", orderable: false, targets: [3] },
+                { "width": "10%", orderable: false, targets: [4] },
+                { "width": "14%", orderable: false, targets: [5] },
+                { "width": "10%", orderable: false, targets: [6] }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'desc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dtGClientes tbody').on('dblclick', 'tr td', function () {
+                var data = otableCliente.row($(this).closest('tr')).data();
+                if (data) { JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Clientes",new { Area = "g" })'); }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsRunFiltroAvancado(FilterAdvancedText)
+    {
+        try {
+            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
+            $("#dtGClientes").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFiltroAvancado()
+    {
+        try {
+            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
+                document.getElementById("yesFilterField").value = "*";
+                document.getElementById("yesFilterOperador").value = "";
+                document.getElementById("yesFilterText").value = "";
+                document.getElementById("yesFilterAdvancedText").value = "";
+                $("#dtGClientes").DataTable().draw(false);
+            }
+            else
+            {
+                try
+                {
+                    $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "Clientes", new { Area = "g" })?id=g_Clientes_Index', function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                catch (e)
+                {
+                    LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (e && e.message ? e.message.toString() : String(e)));
+                }
+            };
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFiltroDefault()
+    {
+        try {
+            if (document.getElementById("btnFiltroDefault").innerHTML.indexOf("Remover") > 0) {
+                document.getElementById("yesFilterField").value = "*";
+                document.getElementById("yesFilterOperador").value = "";
+                document.getElementById("yesFilterText").value = "";
+                document.getElementById("yesFilterAdvancedText").value = "";
+                $("#dtGClientes").DataTable().draw(false);
+
+            }
+            else {
+                try
+                {
+                    $("#mainModal").load('@Url.Action("ModalFiltroGenericoView", "Filtros", new { Area = "a" })?id=g_Clientes_Index', function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                catch (e)
+                {
+                    LibMessageError("Atenção", "[jsModalFiltroDefault] " + (e && e.message ? e.message.toString() : String(e)));
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFiltroDefault] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRunFiltroDefault(filterField, filterOperador, filterText)
+    {
+        try {
+            document.getElementById("yesFilterField").value = filterField;
+            document.getElementById("yesFilterOperador").value = filterOperador;
+            document.getElementById("yesFilterText").value = filterText;
+            document.getElementById("yesFilterAdvancedText").value = "";
+            $("#dtGClientes").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRunFiltroDefault] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalSolicitarBloqueioLogon(TableName, columnName, urlEdit)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione os registros!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalSolicitarBloqueioLogon", "Requisicoes", new { area = "g" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalSolicitarBloqueioLogon] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalEditStatusCredor(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("ModalEditStatusCredor", "Clientes", new { Area = "g" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalEditStatusCredor] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalValidarPefinOnLine()
+    {
+        $("#mainModal").load('@Url.Action("ModalValidarPefinOnLine", "Clientes", new { Area = "g" })?id=1', function () {
+            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+        })
+    }
+
+    function jsModalNovoCadastroRoboSintegra()
+    {
+        $("#mainModal").load('@Url.Action("CreateSintegra", "Clientes", new { Area = "g" })?id=1', function () {
+            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+        })
+    }
+
+    function jsModalAtualizarVendedorConsultor(TableName, columnName, urlEdit)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    GdiSwal2.dialog({
+                        title: "<i class='fa-solid fa-question me-2' style='color:#ff9900'></i><b>Confirmação</b>",
+                        closeButton: false,
+                        message: "Deseja REALMENTE atualizar os dados do Vendedor/Consultor do cliente?" + "<br/><br/>" + "ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
+                        centerVertical: true,
+                        onEscape: false,
+                        backdrop: true,
+                        buttons:
+                        {
+                            cancelar:
+                            {
+                                label: '<i class="fa fa-undo me-2"></i>Cancelar',
+                                className: 'btn-outline-warning',
+                                callback: function ()
+                                {
+                                    GdiSwal2.hideAll();
+                                }
+                            },
+                            confirmar: {
+                                label: '<i class="fa-solid fa-save me-2"></i>Confirmar',
+                                className: 'btn-outline-success',
+                                callback: function ()
+                                {
+                                    LibMessageProcessando("");
+                                    $("#mainModal").load('@Url.Action("ModalAtualizarVendedorConsultor", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
+                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                                    });
+                                    GdiSwal2.hideAll();
+                                }
+                            }
+                        }
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalAtualizarVendedorConsultor] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalAtualizarLimiteCredito(TableName, columnName, urlEdit)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    GdiSwal2.dialog({
+                        title: "<i class='fa-solid fa-question me-2' style='color:#ff9900'></i><b>Confirmação</b>",
+                        closeButton: false,
+                        message: "Deseja REALMENTE atualizar o Limite de Crédito do cliente?" + "<br/><br/>" + "ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
+                        centerVertical: true,
+                        onEscape: false,
+                        backdrop: true,
+                        buttons:
+                        {
+                            cancelar:
+                            {
+                                label: '<i class="fa fa-undo me-2"></i>Cancelar',
+                                className: 'btn-outline-warning',
+                                callback: function ()
+                                {
+                                    GdiSwal2.hideAll();
+                                }
+                            },
+                            confirmar: {
+                                label: '<i class="fa-solid fa-save me-2"></i>Confirmar',
+                                className: 'btn-outline-success',
+                                callback: function ()
+                                {
+                                    LibMessageProcessando("");
+                                    $("#mainModal").load('@Url.Action("ModalAtualizarLimiteCredito", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
+                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                                    });
+                                    GdiSwal2.hideAll();
+                                }
+                            }
+                        }
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalAtualizarLimiteCredito] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>

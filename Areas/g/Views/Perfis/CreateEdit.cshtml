@@ -1,0 +1,193 @@
+@model GdiPlataform.Areas.g.Models.cstViewPerfisAcessosModel
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gPerfis" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.g_perfis.id_perfil)
+                    @Html.HiddenFor(model => model.g_perfis.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.g_perfis.datahora_cadastro)
+                    @Html.HiddenFor(model => model.g_perfis.id_coligada)
+                    @Html.HiddenFor(model => model.g_perfis.id_filial)
+                </div>
+                <div class="card-header m-0 p-1">
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-body m-1 p-0" style="height: 100%">
+                    <div class="form-horizontal m-1 p-0">
+
+                        <div class="card-body m-1 p-0" style="height: 100%">
+                            <div class="card shadow-sm gdi-section-accent-info m-1 p-0">
+                                <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Nome do Perfil</div>
+                                <div class="form-group row text-sm-end m-1 p-1">
+                                    @Html.LabelFor(model => model.g_perfis.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.EditorFor(model => model.g_perfis.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Dados - Fim -->
+                        @if ((CachePersister.userIdentity.Administrador == true) && (Model.g_perfis.id_perfil > 0))
+                        {
+                            <div class="card-body m-1 p-0" style="height: 100%">
+                                <!-- BACKOFFICE -->
+                                @if (CachePersister.allSistemas.Where(p => p.id_sistema == 2).SingleOrDefault().ativo)
+                                {
+                                    <br />
+                                    <div class="card shadow-sm gdi-section-accent-info m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Backoffice</div>
+                                        <div class="card-body m-0 p-1" style="height: 100%">
+                                            <table class="table table-striped table-bordered compact" style="width: 100%" align="center">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 5%" class="text-center">Ativo</th>
+                                                        <th style="width: 60%" class="text-start">Processo</th>
+                                                        <th style="width: 5%" class="text-center">Visualizar</th>
+                                                        <th style="width: 5%" class="text-center">Inserir</th>
+                                                        <th style="width: 5%" class="text-center">Editar</th>
+                                                        <th style="width: 5%" class="text-center">Excluir</th>
+                                                        <th style="width: 5%" class="text-center">Executar</th>
+                                                        <th style="width: 5%" class="text-center">Gerente</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (int i = 0; i < Model.allCstPerfisAcessos.Count; i++)
+                                                    {
+
+
+                                                        if (Model.allCstPerfisAcessos[i].id_sistema == 2)
+                                                        {
+                                                            <tr>
+                                                                @Html.HiddenFor(model => model.allCstPerfisAcessos[i].id_sistema_controller)
+                                                                <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].ativo, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                <td style="text-align:left; vertical-align:middle; margin:1px; padding:1px;">@Html.Raw(Model.allCstPerfisAcessos[i].title_perfil.ToString())</td>
+                                                                @if (Model.allCstPerfisAcessos[i].is_crud == true)
+                                                                {
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_read, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_create, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_update, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_delete, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                }
+                                                                <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_run, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_manager, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+
+
+
+                                <!-- GESTÃO COMERCIAL -->
+                                @if (CachePersister.allSistemas.Where(p => p.id_sistema == 6).SingleOrDefault().ativo)
+                                {
+                                    <br/>
+                                    <div class="card shadow-sm gdi-section-accent-info m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-handshake me-1" aria-hidden="true"></i>Gestão Comercial</div>
+                                        <div class="card-body m-0 p-0" style="height: 100%">
+                                            <table class="table table-striped table-bordered compact" style="width: 100%" align="center">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 5%" align="center">Ativo</th>
+                                                        <th style="width: 60%">Processo</th>
+                                                        <th style="width: 5%" align="center">Visualizar</th>
+                                                        <th style="width: 5%" align="center">Inserir</th>
+                                                        <th style="width: 5%" align="center">Editar</th>
+                                                        <th style="width: 5%" align="center">Excluir</th>
+                                                        <th style="width: 5%" align="center">Executar</th>
+                                                        <th style="width: 5%" align="center">Gerente</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (int i = 0; i < Model.allCstPerfisAcessos.Count; i++)
+                                                    {
+                                                        if (Model.allCstPerfisAcessos[i].id_sistema == 6)
+                                                        {
+                                                            <tr>
+                                                                @Html.HiddenFor(model => model.allCstPerfisAcessos[i].id_sistema_controller)
+                                                                <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].ativo, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                <td style="text-align:left; vertical-align:middle; margin:1px; padding:1px;">@Html.Raw(Model.allCstPerfisAcessos[i].title_perfil.ToString())</td>
+                                                                @if (Model.allCstPerfisAcessos[i].is_crud == true)
+                                                                {
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_read, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_create, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_update, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                    <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_delete, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                }
+                                                                <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_run, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                                <td style="text-align:center; vertical-align:middle; margin:1px; padding:1px;"><div class="form-check form-switch d-flex justify-content-center">@Html.CheckBoxFor(model => model.allCstPerfisAcessos[i].action_manager, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Perfis",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+     </div>
+</div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try {
+            if (isEmpty($('#g_perfis_nome').val().toString().trim())) {
+                LibMessageAlert("Atenção", "Campo <b>Nome do Perfil</b> é de preenchimento obrigatório!<br/>");
+            }
+            else {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#formCreateEdit_gPerfis").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

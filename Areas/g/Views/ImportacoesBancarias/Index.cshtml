@@ -1,0 +1,51 @@
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-3 mx-auto d-block" style="float:none"></div>
+    <div class="col-lg-6 mx-auto d-block" style="float:none">
+        <div class="card text-sm-center">
+            <div class="card-header m-0 p-1 text-sm-center">
+                <h4>Importações - Bancárias</h4>
+                <h4>Selecione a Importação Desejada</h4>
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    @if ((CachePersister.userIdentity.Roles.Contains("g_ImportacoesBancarias_*")) || (CachePersister.userIdentity.Roles.Contains("g_ImportacoesBancarias_ImportarCnabBoletos")))
+                    {
+                        <div class="form-group row"><button type="button" name="btnImportarCnabBoletos" title="CNAB - Importar Retorno Boletos Bancários" class="btn btn-outline-secondary btn-lg w-100 mx-auto d-block d-inline-flex align-items-center gap-2" onclick="jsModalImportarCnabBoletos()"><i class="fa fa-upload fa-fw me-2" aria-hidden="true"></i>CNAB - Importar Retorno Boletos Bancários</button></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 mx-auto d-block" style="float:none"></div>
+</div>
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsModalImportarCnabBoletos()
+    {
+        try
+        {
+            $("#mainModal").load('@Url.Action("ModalImportarCnabBoletos", "ImportacoesBancarias", new { Area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarCnabBoletos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>

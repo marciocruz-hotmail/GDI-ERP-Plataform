@@ -1,0 +1,276 @@
+@model GdiPlataform.Db.g_atendimentos
+@using GdiPlataform.Security
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.urlEditRow = Url.Action("Edit", "Atendimentos", new { Area = "g" });
+}
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormIndexGAtendimentos" }))
+{
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-title m-0 p-1">
+                    <h4>@Html.Raw(@ViewBag.Title)</h4>
+                    <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                    <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                    <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                    <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                </div>
+                <div class="card-header m-0 p-1" style="height:100%;">
+                    @if ((CachePersister.userIdentity.Roles.Contains("g_Atendimentos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Atendimentos_Actioncreate")))
+                    {
+                        <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsCreateNewAtendimento(0)"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>
+                    }
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+
+                <div class="card-body m-0 p-1">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("N", "Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                            <div class="col-sm-1">
+                                @Html.EditorFor(model => model.id_atendimento, new { htmlAttributes = new { @class = "form-control", @onkeypress = "keypressed(event);", type = "text", data_autofocus = "select" } })
+                            </div>
+                            @Html.Label("Solicitante", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                            <div class="col-sm-2">
+                                @Html.DropDownListFor(model => model.solicitacao_id_usuario, ViewBag.ComboUsuariosAtendimentoSolicitante as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                            </div>
+                            @Html.Label("Status", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                            <div class="col-sm-2">
+                                @Html.DropDownListFor(model => model.id_status, ViewBag.ComboGAtendimentosStatus as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("Departamento", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                            <div class="col-sm-3">
+                                @Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                            </div>
+
+                            @Html.Label("id_responsavel", "Responsável", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                            <div class="col-sm-3">
+                                @Html.DropDownListFor(model => model.responsavel_id_usuario, ViewBag.ComboUsuariosAtendimentoResponsavel as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                            </div>
+                            <div class="col-sm-1 text-sm-start" style="margin-bottom:2px">
+                                <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Atendimentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarAtendimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body m-0 p-1" style="height: 100%">
+                    <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGAtendimentos">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>@Html.Encode("Id.")</th>
+                                <th>@Html.Encode("Solicitante")</th>
+                                <th>@Html.Encode("Atendimento")</th>
+                                <th>@Html.Encode("Departamento")</th>
+                                <th>Responsável</th>
+                                <th>@Html.Encode("Status")</th>
+                                <th><i class="fa-regular fa-calendar-alt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Data Abertura"></i></th>
+                                <th><i class="fa-solid fa-stopwatch" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Tempo"></i></th>
+                                <th>Hidden</th>
+                                <th><i class="fa fa-edit" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var TableAtendimentos;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateoTableAtendimentos();
+            gdiAplicarFoco('#id_atendimento', true);
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarAtendimentos()
+        }
+    }
+
+    function jsAjaxPesquisarAtendimentos()
+    {
+        try
+        {
+            LibMessageProcessando('Pesquisando Atendimentos. . .');
+            document.getElementById("yesFilterField").value = "*";
+            $("#dtGAtendimentos").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarAtendimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsCreateoTableAtendimentos()
+    {
+        try
+        {
+            var form = $('#FormIndexGAtendimentos');
+            $.fn.dataTable.ext.errMode = 'none';
+            TableAtendimentos = $('#dtGAtendimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "footerCallback": function (row, data, start, end, display)
+                {
+                    LibMessageProcessandoHide();
+                    gdiAplicarFoco('#id_atendimento', true);
+                },
+
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("getDadosAtendimentos","Atendimentos", new { Area = "g" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#id_atendimento').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#solicitacao_id_usuario').val()).toString(),
+                        yesCustomField03: emptyIfNull($('#id_status').val()).toString(),
+                        yesCustomField04: emptyIfNull($('#responsavel_id_departamento').val()).toString(),
+                        yesCustomField05: emptyIfNull($('#responsavel_id_usuario').val()).toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 15,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-center', targets: [0], render: DataTable.render.select() },
+                { "width": "6%", orderable: false, className: 'text-center', targets: [1] },
+                { "width": "10%", orderable: false, className: 'text-center', targets: [2] },
+                { "width": "37%", orderable: false, className: 'text-left', targets: [3] },
+                { "width": "10%", orderable: false, className: 'text-left', targets: [4] },
+                { "width": "10%", orderable: false, className: 'text-left', targets: [5] },
+                { "width": "10%", orderable: false, className: 'text-center', targets: [6] },
+                { "width": "4%", orderable: false, className: 'text-center', targets: [7] },
+                { "width": "5%", orderable: false, className: 'text-center', targets: [8] },
+                { "width": "0%", visible: false, targets: [9] },
+                { "width": "4%", orderable: false, className: 'text-center dt-no-row-select', targets: [10], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" name="btnEditRow" title="Editar Atendimento ( ' + data[1] + ' )" class="btn btn-outline-warning btn-sm p-1 btnEditRow d-inline-flex align-items-center" onclick="jsEditAtendimento(' + data[1] + ');"><i class="fa fa-edit"></i></button>' } }
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                var st = data[9];
+                if (st === 1 || st === '1') {
+                    row.classList.add('table-warning');
+                } else if (st === 2 || st === '2') {
+                    row.classList.add('gdi-row-tinted');
+                    row.style.setProperty('--gdi-row-bg', '#f0b27a');
+                } else if (st === 3 || st === '3') {
+                    row.classList.add('table-success');
+                } else if (st === 4 || st === '4') {
+                    row.classList.add('table-danger');
+                }
+            },
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'desc']],
+            language:
+            {
+                sEmptyTable: 'Nenhum registro encontrado',
+                sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                sInfoEmpty: 'Nenhum registro encontrado',
+                sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                sInfoPostFix: '',
+                sInfoThousands: '.',
+                sLengthMenu: '_MENU_ registros por página',
+                sZeroRecords: 'Nenhum registro encontrado',
+                sSearch: 'Pesquisar',
+                oPaginate: {
+                    sNext: '>',
+                    sPrevious: '<',
+                    sFirst: '<<',
+                    sLast: '>>'
+                },
+            select: {
+                rows: {
+                    0: "",
+                    1: " [ %d Registro selecionado ] ",
+                    _: " [ %d Registros selecionados ] "
+                }
+            }
+            },
+            oAria: {
+                sSortAscending: ': Ordenar colunas de forma ascendente',
+                sSortDescending: ': Ordenar colunas de forma descendente'
+            }
+            });
+            $('#dtGAtendimentos tbody').on('dblclick', 'tr td', function ()
+            {
+                var data = TableAtendimentos.row($(this).closest('tr')).data();
+                jsEditAtendimento(data[1]);
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateoTableAtendimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function JsCreateNewAtendimento(id)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateNewAtendimento", "Atendimentos", new { area = "g" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e,{keyboard:false,backdrop:'static'}).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[JsCreateNewAtendimento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsEditAtendimento(id) {
+        try
+        {
+            LibMessageProcessando();
+            $(window.document.location).attr('href', '@ViewBag.urlEditRow' + "/" + id);
+        }
+        catch (e) {
+            LibMessageError("Atenção", "Erro [jsEditRow] (" + (e != null ? String(e) : "") + ")");
+        }
+    }
+
+
+
+</script>

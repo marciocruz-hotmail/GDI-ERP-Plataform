@@ -1,0 +1,255 @@
+@model IEnumerable<GdiPlataform.Db.gc_estoque_lotes>
+@using GdiPlataform.Security
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_EstoqueLotes_*")) || (CachePersister.userIdentity.Roles.Contains("gc_EstoqueLotes_Actioncreate")))
+                {
+                    <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsCreateLote()"><i class="fa fa-plus me-2" aria-hidden="true"></i>Registrar Novo Lote</button>
+                }
+            </div>
+
+
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("codigo_lote", "Lote", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.Editor("edit_codigo_lote", "Lote", new { htmlAttributes = new { @class = "form-control", @onkeypress = "keypressed(event);", type = "text" } })
+                        </div>
+                        @Html.Label("codigo_serial", "Serial", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.Editor("codigo_serial", "Serial", new { htmlAttributes = new { @class = "form-control", @onkeypress = "keypressed(event);", type = "text" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Produto", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-8">
+                            @Html.DropDownList("Produto", ViewBag.comboProdutos as List<SelectListItem>, htmlAttributes: new { @id = "edit_produto", @onchange = "jsAjaxPesquisarLotes();", @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Importação", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-7">
+                            @Html.DropDownList("Importação", ViewBag.ComboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = "edit_importacao", @onchange = "jsAjaxPesquisarLotes();", @class = "form-control" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarLotes()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto;">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcEstoqueLotes">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Encode("Id.")</th>
+                                    <th>@Html.DisplayName("PN")</th>
+                                    <th>@Html.DisplayName("Lote")</th>
+                                    <th>@Html.DisplayName("Validade")</th>
+                                    <th>@Html.DisplayName("Serial")</th>
+                                    <th>@Html.DisplayName("Importação")</th>
+                                    <th>@Html.DisplayName("Produto")</th>
+                                    <th>@Html.DisplayName("Saldo BH")</th>
+                                    <th>@Html.DisplayName("Saldo SP")</th>
+                                    <th><i class="fa-regular fa-edit" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Lote"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var dtGcEstoqueLotes;
+
+    $(function () {
+        try {
+            jsInitForm();
+            jsCreateTable();
+            gdiAplicarFoco('#edit_codigo_lote', true);
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary() == null) ? "" : @Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressed(e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            jsAjaxPesquisarLotes()
+        }
+    }
+
+    function jsCreateTable()
+    {
+        try {
+            $.fn.dataTable.ext.errMode = 'none';
+            dtGcEstoqueLotes = $('#dtGcEstoqueLotes')
+
+                .on('error.dt', function (e, settings, techNote, message) {
+                    GdiDtNotifyLoadFailure(message);
+                })
+                .on('xhr.dt', function (e, settings, json, xhr) {
+                    if (GdiDtNotifyJsonErrorMessage(json)) { }
+                    else if (json && json.yesFilterOnOff !== undefined) {
+                        btnFiltro(json.yesFilterOnOff);
+                    }
+                })
+                .DataTable({
+                "footerCallback": function (row, data, start, end, display) {
+                    LibMessageProcessandoHide();
+                    gdiAplicarFoco('#edit_codigo_lote', true);
+                },
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDados","EstoqueLotes",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesCustomField01: emptyIfNull($('#edit_codigo_lote').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#edit_codigo_serial').val()).toString(),
+                            yesCustomField03: emptyIfNull($('#edit_produto').val()).toString(),
+                            yesCustomField04: emptyIfNull($('#edit_importacao').val()).toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "10%", orderable: false, className: 'text-sm-start', targets: [2] },
+                    { "width": "10%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "8%", orderable: false, className: 'text-sm-start', targets: [4] },
+                    { "width": "10%", orderable: false, className: 'text-sm-start', targets: [5] },
+                    { "width": "7%", orderable: false, className: 'text-sm-start', targets: [6] },
+                    { "width": "26%", orderable: false, className: 'text-sm-start', targets: [7] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [8] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [9] },
+                    {
+                        "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [10],
+                        data: null,
+                        defaultContent: "",
+                        render: function (data, type, row, meta) {
+                            return '<button type="button" title="Editar Lote Nº' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 d-inline-flex align-items-center" onclick="jsEditLote(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                        }
+                    }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[1, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dtGcEstoqueLotes tbody').on('dblclick', 'tr td', function () {
+                var data = dtGcEstoqueLotes.row($(this).closest('tr')).data();
+                jsEditLote(data[1]);
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCreateLote() {
+        try {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("Create", "EstoqueLotes", new { area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        } catch (err) {
+            LibMessageError("Atenção", "[jsCreateLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsEditLote(id) {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("Edit", "EstoqueLotes", new { area = "gc" })?id=' + id, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsEditLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPesquisarLotes()
+    {
+        try
+        {
+            LibMessageProcessando('Pesquisando Lotes . . .');
+            document.getElementById("yesFilterField").value = "*";
+            $("#dtGcEstoqueLotes").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarLotes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+

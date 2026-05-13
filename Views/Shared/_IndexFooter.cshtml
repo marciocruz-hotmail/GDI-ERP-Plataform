@@ -1,0 +1,12 @@
+@model GdiPlataform.Domain.ContextoModel
+@using GdiPlataform.Security
+<footer class="app-footer">
+    <i class="fa fa-user fa-fw" title="Usuário"></i>&nbsp;@Model.userIdentity.Username&emsp;&emsp;
+    <i class="fa-regular fa-address-card" title="Perfil"></i>&nbsp;@Model.userIdentity.PerfilNome&emsp;&emsp;
+    <i class="fa fa-building me-2" title="Empresa"></i>&nbsp;@Model.userIdentity.NomeColigada&emsp;&emsp;
+    <i class="fa fa-cubes me-2" title="Filial"></i>&nbsp;@Model.userIdentity.FilialNome&nbsp;&nbsp;@Model.userIdentity.FilialCnpj&emsp;&emsp;
+    <i class="fa-solid fa-shield-halved" title="Acesso ao ERP"></i>&nbsp;@Model.userIdentity.DataHoraUltimoLogin&emsp;&emsp;
+    <i class="fa-solid fa-warehouse" title="Competência Estoque"></i>&nbsp;&nbsp;@Model.userIdentity.GcEstoqueCompetenciaAtual&emsp;&emsp;
+    <i class="fa fa-clock" title="Tempo restante da sessão"></i>&nbsp;&nbsp;<span id="sessionCountdown">15:00</span>&emsp;&emsp;
+    <div class="float-end d-none d-sm-inline-block"><i class="fa fa-hashtag me-2" title="Versão"></i>@ViewBag.Version</div>
+</footer>

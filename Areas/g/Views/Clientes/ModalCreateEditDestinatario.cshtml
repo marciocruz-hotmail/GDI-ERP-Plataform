@@ -1,0 +1,212 @@
+@model GdiPlataform.Db.g_clientes_destinatarios
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalCreateEditDestinatario" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_cliente_destinatario)
+                @Html.HiddenFor(model => model.id_cliente)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-2">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("ativo", "Ativo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                            <div class="form-check form-switch">
+                                @Html.CheckBoxFor(model => model.ativo, new { @class = "form-check-input", role = "switch" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("nome", "Nome", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("razao_social", "Razão Social", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.EditorFor(model => model.razao_social, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("email", "Email", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("telefone_1", "Telefone (1)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.telefone_1, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                        @Html.Label("telefone_2", "Telefone (2)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.telefone_2, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("cnpj", "CNPJ", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.cnpj, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                        @Html.Label("id_indicador_ie", "Indicador IE", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.DropDownListFor(model => model.id_indicador_ie, ViewBag.comboIndicadorIE as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("inscricao_estadual", "Inscr. Estadual", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.inscricao_estadual, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                        @Html.Label("inscricao_municipal", "Inscr. Municipal", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.inscricao_municipal, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("cpf", "CPF", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.cpf, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("endereco_com", "Endereço", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.EditorFor(model => model.endereco_com, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("endereco_com_numero", "Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.endereco_com_numero, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                        @Html.Label("endereco_com_complemento", "Complem.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4">
+                            @Html.EditorFor(model => model.endereco_com_complemento, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("bairro_com", "Bairro", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.EditorFor(model => model.bairro_com, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("id_cidade_com", "Cidade", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("cep_com", "CEP", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4">
+                            @Html.EditorFor(model => model.cep_com, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                        @Html.Label("id_uf_com", "UF", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (Model.id_cliente_destinatario > 0)
+                {<button type="button" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Atualizar Dados</button> }
+                else
+                { <button type="button" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Cadastrar Novo Destinatário</button>}
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCheckInputs()
+    {
+        try
+        {
+            if ((isEmpty($('#nome').val().toString().trim())) || (isEmpty($('#endereco_com').val().toString().trim())) || (isEmpty($('#bairro_com').val().toString().trim()))) {
+                yesMessageAlertSmall("Atenção", "Preencha corretamente os campos");
+            }
+            else {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando("Cadastrando Contato . . .")
+            var form = $('#formModalCreateEditDestinatario');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditDestinatario", "Clientes", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                $("#dataTables-Destinatarios").DataTable().draw(false);
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>

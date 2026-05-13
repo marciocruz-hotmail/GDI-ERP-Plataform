@@ -1,0 +1,112 @@
+@model GdiPlataform.Db.gc_estoque_inventario
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalFinalizarInventario" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_inventario)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-0">
+                        <div class="card-body m-0 p-0" style="height: 100%">
+                            @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                            {
+                                <br/>
+                                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                                <br/>
+                            }
+                            else
+                            {
+                                <br/>
+                                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgProcessamento as string, "info"))
+                                <br/>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {<button type="button" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmo o fechamento do inventário</button>}
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando();
+            var form = $('#FormModalFinalizarInventario');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalFinalizarInventario", "EstoqueInventario", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dtGcInventario").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>
+
+
+
+
+

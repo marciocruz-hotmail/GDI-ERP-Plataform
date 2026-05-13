@@ -1,0 +1,136 @@
+@model GdiPlataform.Db.gc_comex_produtos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGcComexProdutos" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.ativo)
+                @Html.HiddenFor(model => model.id_comex_produto)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-01">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-1">
+                        <div class="card-body m-1 p-1" style="height: 100%">
+
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("pn", "PN", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.pn, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("pn_auxiliar", "PN Auxiliar", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.pn_auxiliar, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("pn_variacoes", "Variações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.pn_variacao1, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("manufacturer", "Fabricante", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.manufacturer, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("description", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10">
+                                    @Html.EditorFor(model => model.description, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("traducao", "Tradução", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10">
+                                    @Html.EditorFor(model => model.traducao, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("fob1_dollar", "Fob", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.fob1_dollar, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("ncm", "NCM", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.ncm, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("unidade_medida", "Unidade", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.unidade_medida, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("produto", "Part Number:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10 text-sm-start">
+                                    @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxCreateEdit()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEdit()
+    {
+        try
+        {
+            LibMessageProcessando("Atualizando Comex Produto . . .");
+            var form = $('#FormModalCreateEditGcComexProdutos');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEdit", "ComexProdutos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        $("#dtGcComexProdutos").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEdit] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+

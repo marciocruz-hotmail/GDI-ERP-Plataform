@@ -1,0 +1,281 @@
+@model IEnumerable<GdiPlataform.Db.ged_arquivos>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="IndexGed" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            @if ((CachePersister.userIdentity.Roles.Contains("qa_GedSGQ_IndexDocsSGQ_*")) || (CachePersister.userIdentity.Roles.Contains("qa_GedSGQ_IndexDocsSGQ_Actioncreate")))
+            {
+                <div class="card-header m-0 p-1">
+
+                    <button type="button" name="btnRegistroNovo" title="Upload Arquivo" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalUploadFileGed()"><i class="fa-solid fa-cloud-arrow-up me-2" aria-hidden="true"></i>Upload Arquivo</button>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsDesativarGed(otableGed, 'Id.')"><i class="fa-solid fa-building-lock me-2" aria-hidden="true"></i><b style='color: #cc0000'>Desativar arquivo GED</b></a>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-2" })
+                        <div class="col-sm-8">
+                            @Html.DropDownList("Tipo", ViewBag.ComboGedTiposFiltro as List<SelectListItem>, htmlAttributes: new { @id = "edit_arquivo_tipo", @class = "form-control", @onchange = "jsAjaxPesquisarGedArquivos();", data_autofocus = "true" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Período", htmlAttributes: new { @class = "col-form-label col-sm-2" })
+                        <div class="col-sm-2">
+                            @* id do .input-group distinto do input (Editor) para Tempus Dominus *@
+                            <div class='input-group date' id='ig_qa_docssgq_d1'>
+                                @Html.Editor("edit_data1", "edit_data1", new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class='input-group date' id='ig_qa_docssgq_d2'>
+                                @Html.Editor("edit_data2", "edit_data2", new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarGedArquivos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTableGedArquivos">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>@Html.Raw("Id.")</th>
+                                <th>@Html.Raw("Descrição")</th>
+                                <th>@Html.Raw("Palavras Chaves")</th>
+                                <th>@Html.Raw("Tipo")</th>
+                                <th>@Html.Raw("Versão")</th>
+                                <th>@Html.Raw("Data")</th>
+                                <th>@Html.Raw("Usuário")</th>
+                                <th><i class="fa-solid fa-cloud-download-alt" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Arquivo"></i></th>
+                            </tr>
+                        </thead>
+                        <tfoot align="right">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableGedArquivos;
+
+	$(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_qa_docssgq_d1');
+            jsDatepicker('#ig_qa_docssgq_d2');
+            jsInitModal();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                },
+                "footerCallback": function (row, data, start, end, display)
+                {
+                    var api = this.api(), data;
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    LibMessageProcessandoHide();
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosDocsSGQ", "GedSGQ", new { Area = "qa" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_arquivo_tipo').val()).toString(),
+                        yesCustomField02: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_qa_docssgq_d1')),
+                        yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_qa_docssgq_d2')),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "36%", orderable: false, className: 'text-sm-start', targets: [2] },
+                { "width": "36%", orderable: false, className: 'text-sm-start', targets: [3] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [7] },
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" title="Download Arquivo Id: ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + data[1] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' }}
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalUploadFileGed()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalUploadFileGed", "Ged", new { area = "g" })?dGed=0&IdTipo=8&IdTipoPai=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsEditFile()
+    {
+        LibMessageAlert("Atenção", "jsEditFile");
+    }
+
+    function jsDownloadFile(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+</script>
+

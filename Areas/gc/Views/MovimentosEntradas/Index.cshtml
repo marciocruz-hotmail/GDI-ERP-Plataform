@@ -1,0 +1,524 @@
+@model IEnumerable<GdiPlataform.Db.gc_movimentos>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_MovimentosEntradas_*")) || (CachePersister.userIdentity.Roles.Contains("gc_MovimentosEntradas_Default")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="NFe Importação">
+                            <i class="fa-solid fa-passport me-2" aria-hidden="true"></i>NFe Importação
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportarNFImportacao()"><i class="fa-solid fa-upload fa-lg me-2" aria-hidden="true"></i>Upload (XML e Danfe)</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsFormProcessarNFImportacao(oTableMovimentosEntrada, 'Id.')"><i class="fa-solid fa-tasks fa-lg me-2" aria-hidden="true"></i>Processar XML</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalNFEntradaGerarNF(oTableMovimentosEntrada, 'Id.')"><i class="fa-regular fa-file-alt fa-lg me-2" aria-hidden="true"></i>Notas Fiscais Nacionais - Gerar Nova</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalViewNotasFiscais(oTableMovimentosEntrada, 'Id.')"><i class="fa-solid fa-folder fa-lg me-2" aria-hidden="true"></i>Notas Fiscais Nacionais - Gerenciamento</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalNFEntradaCancelar(oTableMovimentosEntrada, 'Id.')"><i class="fa-solid fa-trash-alt fa-lg me-2" aria-hidden="true"></i>Cancelar Upload/Processamento</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidoCartaCorrecao(oTableMovimentosEntrada, 'Id.')"><i class="fa-solid fa-eraser fa-lg me-2" aria-hidden="true"></i>Carta de Correção - Gerar Nova</a>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalViewCartaCorrecaoNF(oTableMovimentosEntrada, 'Id.')"><i class="fa-regular fa-folder fa-lg me-2" aria-hidden="true"></i>Carta de Correção - Visualizar</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidoTransferirFilial(oTableMovimentosEntrada, 'Id.')"><i class="fa-solid fa-truck-arrow-right fa-lg me-2" aria-hidden="true"></i>Transferência Filial SP</a>
+                        </div>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop2" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="NFe Compra Nacional">
+                            <i class="fa-solid fa-shop me-2" aria-hidden="true"></i>NFe Compra Nacional
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop2">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportarNFCompraNacional()"><i class="fa-solid fa-upload fa-lg me-2" aria-hidden="true"></i>1 - Upload/Processamento - NFe Compra Nacional</a>
+                        </div>
+                    </div>
+
+
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop3" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="NFe Devolução">
+                            <i class="fa-solid fa-arrow-rotate-left me-2" aria-hidden="true"></i>NFe Devolução
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop3">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportarNFDevolucao()"><i class="fa-solid fa-upload fa-lg me-2" aria-hidden="true"></i>1 - Upload/Processamento - NFe Devolução</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                    <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGcMovimentosIndexEntrada">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>@Html.Encode("Id.")</th>
+                                <th>@Html.Encode("NF")</th>
+                                <th>@Html.Encode("Cli/For")</th>
+                                <th>@Html.Encode("Filial")</th>
+                                <th>@Html.Encode("CD")</th>
+                                <th>@Html.Encode("Data")</th>
+                                <th>@Html.Encode("Itens")</th>
+                                <th>@Html.Encode("R$ Valor")</th>
+                                <th>Hidden</th>
+                                <th>Hidden</th>
+                                <th>Hidden</th>
+                                <th><i class="fa-regular fa-file-pdf fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Danfe/PDF"></i></th>
+                                <th><i class="fa-regular fa-file-code fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="XML"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var oTableMovimentosEntrada;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            if (oTableMovimentosEntrada == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                oTableMovimentosEntrada = $('#dtGcMovimentosIndexEntrada')
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff); }).DataTable({
+                    "drawCallback": function (settings) {
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    },
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosMovimentosEntradas", "MovimentosEntradas",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesFilterOperador: $('#yesFilterOperador').val().toString(),
+                            yesFilterText: $('#yesFilterText').val().toString(),
+                            yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "7%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "49%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "5%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "5%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "5%", orderable: false, className: 'text-sm-center', targets: [6] },
+                    { "width": "5%", orderable: false, className: 'text-sm-end', targets: [7] },
+                    { "width": "7%", orderable: false, className: 'text-sm-end', targets: [8] },
+                    { "width": "0%", visible: false, targets: [9] },
+                    { "width": "0%", visible: false, targets: [10] },
+                    { "width": "0%", visible: false, targets: [11] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row, meta) { if (data[10] != '0') { return '<button type="button" name="btnPDF" data-bs-toggle="tooltip" data-bs-placement="top" title="Danfe/PDF" class="btn btn-outline-info btn-sm p-1 btnPDF d-inline-flex align-items-center" onclick="jsDownloadFileS3(' + data[10] + ');"><i class="fa-regular fa-file-pdf"></i></button>' } } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [13], data: null, defaultContent: "", render: function (data, type, row, meta) { if (data[11] != '0') { return '<button type="button" name="btnXML" data-bs-toggle="tooltip" data-bs-placement="top" title="XML" class="btn btn-outline-info btn-sm p-1 btnXML d-inline-flex align-items-center" onclick="jsDownloadFileS3(' + data[11] + ');"><i class="fa-regular fa-file-code"></i></button>' } } },
+                ],
+                "createdRow": function (row, data, dataIndex) {
+                    var st = data[9];
+                    if (st === 1 || st === '1') {
+                        row.classList.add('table-success');
+                    } else if (st === 0 || st === '0') {
+                        row.classList.add('table-warning');
+                    } else if (st === 9 || st === '9') {
+                        row.classList.add('gdi-row-tinted');
+                        row.style.setProperty('--gdi-row-bg', '#f0b27a');
+                    }
+                },
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalImportarNFImportacao()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalImportarNFImportacao", "MovimentosEntradas", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarNFImportacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFormProcessarNFImportacao(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a NF!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    window.location = '@Url.Action("FormProcessarNFImportacao", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + selectedIds;
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(uma) NF!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFormProcessarNFImportacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalNFEntradaGerarNF(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a NF!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalNFEntradaGerarNF", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(uma) NF!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalNFEntradaGerarNF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalViewNotasFiscais(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a NF!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalViewNotasFiscais", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(uma) NF!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalViewNotasFiscais] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalNFEntradaCancelar(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a NF!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalNFEntradaCancelar", "MovimentosEntradas", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(uma) NF!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalNFEntradaCancelar] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalPedidoCartaCorrecao(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoCartaCorrecao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoCartaCorrecao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalViewCartaCorrecaoNF(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalViewCartaCorrecao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalViewCartaCorrecaoNF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalImportarNFCompraNacional()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalImportarNFCompraNacional", "MovimentosEntradas", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarNFCompraNacional] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalImportarNFDevolucao()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalImportarNFDevolucao", "MovimentosEntradas", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarNFDevolucao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFormProcessarNFDevolucao(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a NF!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    window.location = '@Url.Action("FormProcessarNFDevolucao", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + selectedIds;
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(uma) NF!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFormProcessarNFDevolucao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsDownloadFileS3(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+
+    function jsModalPedidoTransferirFilial(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoTransferirFilial", "MovimentosEntradas", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoTransferirFilial] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+
+
+
+

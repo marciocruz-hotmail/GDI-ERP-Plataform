@@ -1,0 +1,279 @@
+@model GdiPlataform.Db.gc_movimentos_nf
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoNotaFiscal" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-alt fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5><br />
+                @Html.HiddenFor(model => model.param_zerar_difal)
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.param_reducao_bc)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card-body m-0 p-0" style="height: 100%">
+                        @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                        {
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                        }
+                        else
+                        {
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgLancamentosFinanceiros as string, "danger"))
+                            <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                <div class="section-header"><i class="fa-solid fa-note-sticky me-1" aria-hidden="true"></i>Notas Fiscais</div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("cliente", "Cliente", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:0px;" })
+                                    <div class="col-sm-6 text-sm-start">
+                                        @Html.Label("cliente", (string)@ViewBag.ClienteNome, htmlAttributes: new { @class = "col-form-label text-sm-start", @style = "margin-top:0px;" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("endereco", "Endereço", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:0px;" })
+                                    <div class="col-sm-8 text-sm-start">
+                                        @Html.Label("endereco", (string)@ViewBag.ClienteEndereco1, htmlAttributes: new { @class = "col-form-label", @style = "margin-top:0px;" })
+                                    </div>
+                                </div>
+                                @if (Model.id_lancamento_financeiro_difal == 1)
+                                {
+                                    <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                        @Html.Label("difal", "Difal", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:0px;" })
+                                        @Html.Raw(ViewBag.MsgInfoDifal)
+                                    </div>
+                                }
+                                @if (Model.id_cfop > 0)
+                                {
+                                    <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                        @Html.Label("id_cfop", "CFOP", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                        <div class="col-sm-8">
+                                            @Html.DropDownListFor(model => model.id_cfop, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @onfocus = "jsSetDadosInfoComplementar();", @onchange = "jsSetDadosInfoComplementar();", @onblur = "jsSetDadosInfoComplementar();" })
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                        @Html.Label("id_cfop_operacao", "Operação", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                        <div class="col-sm-8">
+                                            @Html.DropDownListFor(model => model.id_cfop_operacao, ViewBag.comboCfopOperacoes as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @onfocus = "jsSetDadosInfoComplementar();", @onchange = "jsSetDadosInfoComplementar();", @onblur = "jsSetDadosInfoComplementar();" })
+                                        </div>
+                                    </div>
+                                }
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("id_cliente_destinatario", "Destinatário", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(model => model.id_cliente_destinatario, ViewBag.ComboDestinatarios as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("id_transportadora", "Transportadora", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(model => model.id_transportadora, ViewBag.comboTransportadora as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.transportadora_cotacao, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("id_frete_responsavel", "Frete (Responsável)", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("frete_valor", "Frete (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_valor, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", data_autofocus = "true" } })
+                                    </div>
+                                    @Html.Label("volumes", "Volumes", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_qvol, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("especie", "Espécie", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_esp, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("marca", "Marca", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_marca, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("numeracao", "Numeração", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_nvol, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("pesol", "Peso Líq.", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_pesol, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("pesob", "Peso Bruto", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_pesob, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("pesol", "Altura", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_dimensao_altura, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("pesol", "Largura", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_dimensao_largura, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("pesol", "Profundidade", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.frete_dimensao_profundidade, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("nf_chave_referenciada", "NF Referência", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-8">
+                                        @Html.EditorFor(model => model.nf_chave_referenciada, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-0 p-0">
+                                    @Html.Label("informacoes", "Informações Adicionais", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:2px;" })
+                                    <div class="col-sm-10">
+                                        @Html.TextAreaFor(model => model.informacoes_adicionais, new { @class = "form-control", @rows = "6" })
+                                    </div>
+                                </div>
+                            </div>
+                            if (!string.IsNullOrEmpty(ViewBag.MsgHistorico as string))
+                            {
+                                <div class="card-body m-0 p-0" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 mt-2 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Histórico</div>
+                                        <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                            <div class="col-sm-12">
+                                                @Html.TextArea("historico", (String)ViewBag.MsgHistorico, new { @class = "form-control", @id = "hist", @rows = "5", @readonly = true })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Gerar Nova NF</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            jsSetDadosInfoComplementar();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSetDadosInfoComplementar()
+    {
+        try
+        {
+            if ($("#id_cfop_operacao").val() > 0)
+            {
+                var dataForm =
+                {
+                    view_gc_cfop_operacoes:
+                    {
+                        'id_cfop_operacao': $("#id_cfop_operacao").val(),
+                        'ativo': $("#param_reducao_bc").val(),
+                        'tag1': $("#id_movimento").val(),
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxDadosInfoComplementares", "Movimentos", new { area = "gc" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result)
+                    {
+                        document.getElementById("informacoes_adicionais").value = result.informacoes;
+                    },
+                    error: function (result)
+                    {
+                        LibMessageError("Atenção", result && result.msg != null ? String(result.msg) : (result && result.statusText ? String(result.statusText) : "Erro na requisição."));
+                    }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsSetDadosInfoComplementar] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsSendForm()
+    {
+        try {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando("Faturando Pedido - Gerando NF . . .")
+            var form = $('#FormModalPedidoNotaFiscal');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalPedidoNotaFiscal", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+
+

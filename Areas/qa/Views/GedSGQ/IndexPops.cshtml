@@ -1,0 +1,117 @@
+@model IEnumerable<GdiPlataform.Db.ged_arquivos>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="IndexGed" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="card shadow-sm gdi-section-accent-secondary m-2 p-0">
+                    <div class="section-header"><i class="fa-solid fa-handshake me-1" aria-hidden="true"></i>Comercial</div>
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="col-sm-12 ms-1 p-0"><b>Processo Comercial</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(10491); return false;">Da Cotação à Entrega - Fluxograma (FL-COM-001)</a></div>
+                        <div class="col-sm-12 ms-1 p-0"><b>Frete</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(10489); return false;">Cotação de Frete Terceirizado - Infográfico (DOC-COM-001)</a></div>
+                        <div class="col-sm-12 ms-1 mt-2 p-0"><b>Fornecedores > Qualificação e Avaliação</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9282); return false;">Procedimento (PR-QA-004)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9282); return false;">Formulário (FOR-QA-004)</a></div>
+                    </div>
+                </div>
+                <div class="card shadow-sm gdi-section-accent-secondary m-2 p-0">
+                    <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Expedição/Estoque</div>
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="col-sm-12 ms-1 p-0"><b>Recebimento de Materiais</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9264); return false;">Procedimento (PR-QA-005)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(10488); return false;">Checklist (CHK-QA-003)</a></div>
+                        <div class="col-sm-12 ms-1 mt-2 p-0"><b>Separação e Expedição de Materiais</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9263); return false;">Separação e Expedição - Procedimento (PR-QA-016)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9261); return false;">Separação - Checklist (CHK-QA-001)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9262); return false;">Expedição - Checklist (CHK-QA-002)</a></div>
+                        <div class="col-sm-12 ms-1 mt-2 p-0"><b>Peças Falsificadas - Prevenção</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(10490); return false;">Procedimento - (PR-QA-011)</a></div>
+                        <div class="col-sm-12 ms-1 mt-2 p-0"><b>Inspeção do Primeiro Artigo (FAI)</b></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9267); return false;">Procedimento - (PR-QA-019)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9268); return false;">FORM1 - (FOR-QA-001)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9269); return false;">FORM2 - (FOR-QA-002)</a></div>
+                        <div class="col-sm-12 ms-5 p-0"><a href="#" onclick="jsDownloadFile(9270); return false;">FORM3 - (FOR-QA-003)</a></div>
+                    </div>
+                </div>
+
+
+                <div id="tree"></div>
+
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableGedArquivos;
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsDownloadFile(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+</script>
+

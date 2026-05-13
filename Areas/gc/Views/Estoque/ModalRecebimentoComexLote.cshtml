@@ -1,0 +1,170 @@
+@model GdiPlataform.Db.gc_comex_importacoes_itens_lotes
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcEstoqueModalRecebimentoComexLote" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="scroll-modal-horizontal" style="width:100%">
+                <div class="modal-header m-0 p-1">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_importacao_item_lote)
+                    @Html.HiddenFor(model => model.id_importacao_item)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                            <table class="display table-striped table-bordered compact" style="width:100%" id="DtGcEstoqueFormComexRecebimentoMateriais">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40%; text-align: center; font-size: 14px;">@Html.Encode("Lote")</th>
+                                        <th style="width: 20%; text-align: center; font-size: 14px;">@Html.Encode("Qtd")</th>
+                                        <th style="width: 40%; text-align: center; font-size: 14px;">@Html.Encode("Venc.")</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote01_numero, new { htmlAttributes = new { @class = "form-control", maxlength = "20", data_autofocus = "select" } })</td>
+                                        <td style="width: 20%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote01_qtd, new { htmlAttributes = new { @class = "form-control" } })</td>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">
+                                            <div class='input-group date' id='ig_comex_lote01_venc'>
+                                                @Html.EditorFor(model => model.lote01_data_validade, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote2_numero, new { htmlAttributes = new { @class = "form-control", maxlength = "20" } })</td>
+                                        <td style="width: 20%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote2_qtd, new { htmlAttributes = new { @class = "form-control" } })</td>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">
+                                            <div class='input-group date' id='ig_comex_lote02_venc'>
+                                                @Html.EditorFor(model => model.lote2_data_validade, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote3_numero, new { htmlAttributes = new { @class = "form-control", maxlength = "20" } })</td>
+                                        <td style="width: 20%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote3_qtd, new { htmlAttributes = new { @class = "form-control" } })</td>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">
+                                            <div class='input-group date' id='ig_comex_lote03_venc'>
+                                                @Html.EditorFor(model => model.lote3_data_validade, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote4_numero, new { htmlAttributes = new { @class = "form-control", maxlength = "20" } })</td>
+                                        <td style="width: 20%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote4_qtd, new { htmlAttributes = new { @class = "form-control" } })</td>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">
+                                            <div class='input-group date' id='ig_comex_lote04_venc'>
+                                                @Html.EditorFor(model => model.lote4_data_validade, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote5_numero, new { htmlAttributes = new { @class = "form-control", maxlength = "20" } })</td>
+                                        <td style="width: 20%; text-align: center; font-size: 14px; font-weight: normal">@Html.EditorFor(model => model.lote5_qtd, new { htmlAttributes = new { @class = "form-control" } })</td>
+                                        <td style="width: 40%; text-align: center; font-size: 14px; font-weight: normal">
+                                            <div class='input-group date' id='ig_comex_lote05_venc'>
+                                                @Html.EditorFor(model => model.lote5_data_validade, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-outline-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Baixar Lançamento" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Salvar Lotes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_comex_lote01_venc');
+            jsDatepicker('#ig_comex_lote02_venc');
+            jsDatepicker('#ig_comex_lote03_venc');
+            jsDatepicker('#ig_comex_lote04_venc');
+            jsDatepicker('#ig_comex_lote05_venc');
+            jsInitModal();
+            $("input[type='text']").on("click", function () {
+                $(this).select();
+            });
+            $("input").focus(function () {
+                $(this).select();
+            });
+            $("input").focusin(function () {
+                $(this).select();
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).ready(function () {
+    });
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando("")
+            var form = $('#FormGcEstoqueModalRecebimentoComexLote');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalRecebimentoComexLote", "Estoque", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        if (result.success == true)
+                        {
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            jsAutoSave();
+                            GdiSwal2.hideAll();
+                        }
+                        else {
+                            GdiAjaxNotifyInconsistencias(result.msg)
+                        }
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>
+
+
+
+
+

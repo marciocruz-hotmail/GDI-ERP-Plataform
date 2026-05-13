@@ -1,0 +1,1165 @@
+@model GdiPlataform.Db.g_clientes
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gClientes" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_cliente)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabDocs_tab" data-bs-toggle="pill" href="#tabDocs" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-file-lines fa-sm" aria-hidden="true"></i>Docs</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabEndereco_tab" data-bs-toggle="pill" href="#tabEndereco" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-location-dot fa-sm" aria-hidden="true"></i>Endereço</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabComercial_tab" data-bs-toggle="pill" href="#tabComercial" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-handshake fa-sm" aria-hidden="true"></i>Comercial</a></li>
+                        @if (Model.id_cliente > 0)
+                        {
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabGcDestinatarios_tab" data-bs-toggle="pill" href="#tabGcDestinatarios" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-truck fa-sm" aria-hidden="true"></i>Destinatários</a></li>
+                        }
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabFaturamento_tab" data-bs-toggle="pill" href="#tabFaturamento" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-file-invoice-dollar fa-sm" aria-hidden="true"></i>Faturamento</a></li>
+                        @if (Model.id_cliente > 0)
+                        {
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabAudit_tab" data-bs-toggle="pill" href="#tabAudit" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-magnifying-glass-arrow-right fa-sm" aria-hidden="true"></i>Audit</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-1" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <!-- Dados - Início -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados do Cliente/Fornecedor</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.ativo, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch form-switch-lg">
+                                                    @Html.CheckBoxFor(model => model.ativo, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.Label("is_cliente", "Cliente?", htmlAttributes: new { @class = "col-sm-1 col-form-label text-sm-end" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.is_cliente, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.Label("is_fornecedor", "Fornecedor?", htmlAttributes: new { @class = "col-sm-2 col-form-label text-sm-end" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.is_fornecedor, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.razao_social, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.EditorFor(model => model.razao_social, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.nome_fantasia, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.EditorFor(model => model.nome_fantasia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("data_cadastro", "Data Cadastro", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                <div class="input-group" id="ig_data_cadastro" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                                    @Html.EditorFor(model => model.data_cadastro, new { htmlAttributes = new { @class = "form-control tempus-dominus-input", type = "text", data_td_target = "#ig_data_cadastro" } })
+                                                    <span class="input-group-text" data-td-target="#ig_data_cadastro" data-td-toggle="datetimepicker" role="button" tabindex="0"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
+                                                </div>
+                                            </div>
+                                            @Html.Label("contrato", "Nº Contrato", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.contrato, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("identificador", "CHE", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.identificador, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("obs", "Obs", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.TextAreaFor(model => model.obs, new { @class = "form-control", @rows = "2" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("email_notificacao", "Emails Notificações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.TextAreaFor(model => model.email_notificacao, new { @class = "form-control", @rows = "2" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-people-group me-1" aria-hidden="true"></i>Contatos do Cliente/Fornecedor</div>
+                                        @if (Model.id_cliente == 0)
+                                        {
+                                            <div class="card-body text-sm-center m-1 p-0">
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("contato_principal", "Contato", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-3">
+                                                        @Html.EditorFor(model => model.contato_principal, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                    @Html.Label("contato_principal_setor", "Setor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.contato_principal_setor, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                    @Html.Label("tipo", "Tipo", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.contato_principal_tipo, ViewBag.ComboGcClientesContatosTipos as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+												<div class="form-group row text-sm-end m-0 pt-1">
+													@Html.Label("telefone_principal", "Telefone", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+													<div class="col-sm-3">
+														@Html.EditorFor(model => model.telefone_principal, new { htmlAttributes = new { @class = "form-control" } })
+													</div>
+													@Html.Label("email_principal", "Email", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+													<div class="col-sm-5">
+														@Html.EditorFor(model => model.email_principal, new { htmlAttributes = new { @class = "form-control" } })
+													</div>
+												</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="card-body text-sm-center m-1 p-0">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTables-Contatos">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id.</th>
+                                                            <th><i class="fa-solid fa-toggle-on fa-lg" style="color:#008000; cursor:pointer " data-bs-toggle="tooltip" data-bs-placement="top" title="Ativo/Inativo"></i></th>
+                                                            <th>Tipo</th>
+                                                            <th>Contato</th>
+                                                            <th>Setor</th>
+                                                            <th>Telefone</th>
+                                                            <th>Email</th>
+                                                            <th>Dt. Cad.</th>
+                                                            <th>Usuário</th>
+                                                            <th><i class="fa-regular fa-edit fa-lg" style="color:#B7950B; cursor: pointer " data-bs-toggle="tooltip" data-bs-placement="top" title="Editar"></i></th>
+                                                            <th><i class="fa-solid fa-power-off fa-lg" style="color:#cc0000; cursor: pointer " data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="card-body text-sm-center m-0 p-1">
+                                                <button type="button" name="btnCadastrarContato" onclick="jsModalCadastrarContato()" title="Cadastrar Novo Contato" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Cadastrar Novo Contato</button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- Dados - Fim -->
+                            <!-- Aba Docs - Início -->
+                            <div class="tab-pane fade" id="tabDocs" role="tabpanel" aria-labelledby="tabDocs_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-people-group me-1" aria-hidden="true"></i>Pessoa Física</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.cpf, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.cpf, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.data_nasc, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                <div class="input-group" id="ig_data_nasc" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                                    @Html.EditorFor(model => model.data_nasc, new { htmlAttributes = new { @class = "form-control tempus-dominus-input", type = "text", data_td_target = "#ig_data_nasc" } })
+                                                    <span class="input-group-text" data-td-target="#ig_data_nasc" data-td-toggle="datetimepicker" role="button" tabindex="0"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.matricula, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.matricula, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.rg, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.rg, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-people-group me-1" aria-hidden="true"></i>Pessoa Jurídica</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.cnpj, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.cnpj, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.id_indicador_ie, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.DropDownListFor(model => model.id_indicador_ie, ViewBag.comboIndicadorIE as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.inscricao_estadual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.inscricao_estadual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.inscricao_municipal, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.inscricao_municipal, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.constituicao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                <div class="input-group" id="ig_constituicao" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                                    @Html.EditorFor(model => model.constituicao, new { htmlAttributes = new { @class = "form-control tempus-dominus-input", type = "text", data_td_target = "#ig_constituicao" } })
+                                                    <span class="input-group-text" data-td-target="#ig_constituicao" data-td-toggle="datetimepicker" role="button" tabindex="0"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
+                                                </div>
+                                            </div>
+                                            @Html.LabelFor(model => model.inicio_atividade, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                <div class="input-group" id="ig_inicio_atividade" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                                    @Html.EditorFor(model => model.inicio_atividade, new { htmlAttributes = new { @class = "form-control tempus-dominus-input", type = "text", data_td_target = "#ig_inicio_atividade" } })
+                                                    <span class="input-group-text" data-td-target="#ig_inicio_atividade" data-td-toggle="datetimepicker" role="button" tabindex="0"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Docs - Fim -->
+                            <!-- Aba Endereço - Início -->
+                            <div class="tab-pane fade" id="tabEndereco" role="tabpanel" aria-labelledby="tabEndereco_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>Endereço</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.endereco_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.endereco_com, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("endereco_com_numero", "Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.endereco_com_numero, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("endereco_com_complemento", "Complem.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.endereco_com_complemento, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.bairro_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.bairro_com, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.id_cidade_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.cep_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.cep_com, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.id_uf_com, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Pais", "Pais", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.DropDownListFor(model => model.id_pais, ViewBag.comboPais as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Endereço - Fim -->
+                            <!-- Aba Comercial - Início -->
+                            <div class="tab-pane fade" id="tabComercial" role="tabpanel" aria-labelledby="tabComercial_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados Comerciais</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.id_vendedor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownListFor(model => model.id_vendedor, ViewBag.comboVendedor as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("model.param_gc_transportadora", "Transportadora?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.param_gc_transportadora, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.Label("model.gc_produtor_rural", "Produtor Rural?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.gc_produtor_rural, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.Label("model.gc_consultor_aviacao", "Consultor Aviação?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.gc_consultor_aviacao, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("model.param_gc_pedidos_oc", "Obrigatório OC nos Pedidos", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.param_gc_pedidos_oc, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                </div>
+                            </div>
+                            <!-- Aba Comercial - Fim -->
+                            <!-- Aba Faturamento - Início -->
+                            <div class="tab-pane fade" id="tabFaturamento" role="tabpanel" aria-labelledby="tabFaturamento_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Parâmetros</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("id_pagrec_condicao", "Condição Pagto.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-4">
+                                                @Html.DropDownListFor(model => model.id_pagrec_condicao, ViewBag.comboPagRecCondicoes as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                            @Html.Label("id_frete_responsavel", "Frete (Responsável)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-4">
+                                                @Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("id_cfop_venda", "CFOP (Venda)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownListFor(model => model.id_cfop_venda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("obs_financeira", "Obs Financeira", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.TextAreaFor(model => model.obs_financeira, new { @class = "form-control", @rows = "2" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-file-invoice-dollar me-1" aria-hidden="true"></i>Cobrança</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.id_conta_caixa, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContaCaixa as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                            @Html.LabelFor(model => model.valor_despesas_cobranca, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.valor_despesas_cobranca, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.faturamento_boleto, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.faturamento_boleto, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.LabelFor(model => model.faturamento_debito_conta, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.faturamento_debito_conta, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.boleto_impresso, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.boleto_impresso, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.LabelFor(model => model.boleto_email, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.boleto_email, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Email (Boleto)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.email_boleto, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Email (Nfe)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.email_nfe, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-building-columns me-1" aria-hidden="true"></i>Conta Corrente (Débito/Crédito)</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.banco, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.banco, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.operacao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.operacao, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.agencia, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.agencia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.dv_agencia, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.dv_agencia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.conta, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.conta, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.dv_conta, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.dv_conta, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                        <div class="section-header"><i class="fa-solid fa-receipt me-1" aria-hidden="true"></i>Impostos / Notas Fiscais e Débitos</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.iss_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.iss_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.iss_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                            @Html.LabelFor(model => model.ir_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.ir_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.ir_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.pis_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.pis_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.pis_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                            @Html.LabelFor(model => model.cofins_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.cofins_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.cofins_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.csll_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.csll_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.csll_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                            @Html.LabelFor(model => model.nf_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.nf_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.nf_tipo, ViewBag.comboNFTipo as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.pcc_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.pcc_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.pcc_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                            @Html.LabelFor(model => model.inss_percentual, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.inss_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @Html.DropDownListFor(model => model.inss_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.param_gdc_emitir_nota_debito, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.param_gdc_emitir_nota_debito, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.LabelFor(model => model.param_gdc_emitir_nota_fiscal, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.param_gdc_emitir_nota_fiscal, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Optante Simples", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.optante_simples, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Faturamento - Fim -->
+
+                            <!-- Sistema GC (Gestão Comercial) Ativo -->
+                            @if ((CachePersister.allSistemas.Where(p => p.id_sistema == 6).SingleOrDefault().ativo) && (Model.id_cliente > 0))
+                            {
+                                <!-- Aba Destinatários - INÍCIO -->
+                                <div class="tab-pane fade" id="tabGcDestinatarios" role="tabpanel" aria-labelledby="tabGcDestinatarios_tab">
+                                    <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTables-Destinatarios">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id.</th>
+                                                            <th>Nome</th>
+                                                            <th>Doc.</th>
+                                                            <th>Cidade/UF</th>
+                                                            <th><i class="fa-regular fa-edit" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Destinatário"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                                <div class="card-body text-sm-center m-0 p-1">
+                                                    <button type="button" name="btnCadastrarDestinatario" onclick="jsModalCadastrarDestinatario()" title="Cadastrar Novo Destinatário" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Cadastrar Novo Destinatário</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba Destinatários - FIM -->
+                            }
+
+                            <!-- Aba AUDIT - INÍCIO -->
+                            <div class="tab-pane fade" id="tabAudit" role="tabpanel" aria-labelledby="tabAudit_tab">
+                                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                    <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAudit">
+                                                <thead>
+                                                    <tr>
+                                                        <th>@Html.Raw("Dt/Hora")</th>
+                                                        <th>@Html.Raw("Audit Trail")</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba AUDIT - FIM -->
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Clientes",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    @if ((CachePersister.userIdentity.IdPerfil != -800) || (Model.id_cliente == 0))
+                    {
+                        <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var otableContatos;
+    var otableDestinatarios;
+    var otableGClientesAudit;
+    var otableGcTarefasCliente;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_data_cadastro');
+            jsDatepicker('#ig_data_nasc');
+            jsDatepicker('#ig_constituicao');
+            jsDatepicker('#ig_inicio_atividade');
+            jsInitForm();
+            jsSetCampos();
+            TableCreateContatos();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSetCampos()
+    {
+        try
+        {
+            if (@Model.id_cliente > 0) {
+                $('#cpf').attr('readonly', 'readonly');
+                $('#cnpj').attr('readonly', 'readonly');
+                $('#id_vendedor').attr('disabled', true);
+            }
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsSetCampos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCadastrarContato()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var IdCliente = $('#id_cliente').val().toString();
+            $("#mainModal").load('@Url.Action("ModalCreateEditContato", "Clientes", new { area = "g" })?IdCliente=' + IdCliente + '&IdContato=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalCadastrarContato] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalEditarContato(IdContato)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditContato", "Clientes", new { area = "g" })?IdCliente=0&IdContato=' + IdContato, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalEditarContato] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalDesativarContato(IdContato)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalDesativarContato", "Clientes", new { area = "g" })?&IdContato=' + IdContato, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalEditarContato] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+
+    function TableCreateContatos()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableContatos = $('#dataTables-Contatos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosContatos", "Clientes", new { area = "g" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesCustomIdPK: $('#id_cliente').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 10,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "8%", orderable: false, className: 'text-sm-start', targets: [2] },
+                { "width": "8%", orderable: false, className: 'text-sm-start', targets: [3] },
+                { "width": "10%", orderable: false, className: 'text-sm-start', targets: [4] },
+                { "width": "15%", orderable: false, className: 'text-sm-start', targets: [5] },
+                { "width": "20%", orderable: false, className: 'text-sm-start', targets: [6] },
+                { "width": "10%", orderable: false, className: 'text-sm-start', targets: [7] },
+                { "width": "10%", orderable: false, className: 'text-sm-start', targets: [8] },
+                { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [9], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditarContato" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Contato" class="btn btn-outline-warning btn-sm p-1 btnEditarContato d-inline-flex align-items-center" onclick="jsModalEditarContato(' + data[0] + ');"><i class="fa-regular fa-edit"></i></button>' } },
+                { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [10], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDesativarContato" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Contato" class="btn btn-outline-danger btn-sm p-1 btnDesativarContato d-inline-flex align-items-center" onclick="jsModalDesativarContato(' + data[0] + ');"><i class="fa-solid fa-power-off"></i></button>' } }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dataTables-Contatos tbody').on('dblclick', 'tr td', function () {
+                var data = otableGCIndexPedido.row($(this).closest('tr')).data();
+                jsGCIndexPedidoEditRow(data[1]);
+
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[dataTables-Contatos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    $('#tabGcDestinatarios_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableDestinatarios == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableDestinatarios = $('#dataTables-Destinatarios').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosDestinatarios", "Clientes", new { area = "g" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_cliente').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 10,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "5%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "35%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [2] },
+                        { "width": "30%", orderable: false, className: 'text-sm-center', targets: [3] },
+                        { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [4], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" title="Editar Destinatário ' + data[0] + '" class="btn btn-outline-warning btn-sm p-1 d-inline-flex align-items-center" onclick="jsModalEditarDestinatario(' + data[0] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[tabGcDestinatarios_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsRemoverContato(idContato, contato)
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                closeButton: false,
+                message: "Deseja <b>REALMENTE</b> remover o Contato <b>" + contato + "</b> ?" + "<br/><br/>" + "<b>Atenção:</b> O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons: {
+                    cancelar: {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function ()
+                        {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar: {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function ()
+                        {
+                            jsSendRemoverContato(idContato);
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRemoverContato] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendRemoverContato(idContato)
+    {
+        LibMessageProcessando("");
+        try
+        {
+            var dataForm =
+            {
+                record_g_clientes_contatos:
+                {
+                    'id_contato': idContato
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxRemoverContato", "Clientes", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTables-Contatos").DataTable().draw(false);
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsSendRemoverContato] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalCadastrarDestinatario()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var idCliente = $('#id_cliente').val().toString();
+            $("#mainModal").load('@Url.Action("ModalCadastrarDestinatario", "Clientes", new { area = "g" })?idCliente=' + idCliente, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalCadastrarDestinatario] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalEditarDestinatario(idDestinatario) {
+        try {
+            $("#mainModal").load('@Url.Action("ModalEditarDestinatario", "Clientes", new { area = "g" })?idDestinatario=' + idDestinatario, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsModalEditarDestinatario] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsSalvarDados()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+            if (isEmpty($('#nome').val().toString().trim()))
+            {
+                hasError = true;
+                msgError += "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#razao_social').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Razão Social</b> é de preenchimento obrigatório!<br/>";
+            }
+            if ((isEmpty($('#cpf').val().toString().trim())) && (isEmpty($('#cnpj').val().toString().trim())))
+            {
+                hasError = true;
+                msgError += "Campo <b>CPF ou CNPJ</b> é de preenchimento obrigatório!<br/>";
+            }
+            if ((!isEmpty($('#cnpj').val().toString().trim())) && (isEmpty($('#razao_social').val().toString().trim()))) {
+                hasError = true;
+                msgError += "Campo <b>Razão Social</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#endereco_com').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Endereço</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#bairro_com').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Bairro</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#cep_com').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>CEP</b> é de preenchimento obrigatório!<br/>";
+            }
+
+            if (hasError) { LibMessageAlert("Atenção", msgError); }
+            else
+            {
+                $('#id_vendedor').attr('disabled', false);
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#formCreateEdit_gClientes").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    $('#tabAudit_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableGClientesAudit == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGClientesAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetAuditTrail", "Audit", new { area = "a" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_cliente').val().toString(),
+                                yesCustomField01: "g_clientes",
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 20,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "85%", orderable: false, className: 'text-sm-start', targets: [1] }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabAudit_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsModalCreateEditTarefa(IdTarefa)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditGcTarefa", "Tarefas", new { Area = "gc" })?IdTarefa=' + IdTarefa+'&IdCliente='+@Model.id_cliente, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarTxtSC] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>

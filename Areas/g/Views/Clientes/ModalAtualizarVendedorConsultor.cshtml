@@ -1,0 +1,105 @@
+@model GdiPlataform.Db.g_clientes
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalAtualizarVendedorConsultor" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_cliente)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-2">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.LabelFor(model => model.id_vendedor, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(model => model.id_vendedor, ViewBag.comboVendedor as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.LabelFor(model => model.id_vendedor2, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(model => model.id_vendedor2, ViewBag.comboVendedor as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.LabelFor(model => model.id_vendedor3, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(model => model.id_vendedor3, ViewBag.comboVendedor as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnExec" title="Alterar Status Pefin" class="btn btn-success float-end d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try
+        {
+            var form = $('#formModalAtualizarVendedorConsultor');
+            LibMessageProcessando("");
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalAtualizarVendedorConsultor", "Clientes", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>

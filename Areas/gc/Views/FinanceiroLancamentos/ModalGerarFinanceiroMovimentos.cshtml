@@ -1,0 +1,425 @@
+@model GdiPlataform.Db.gc_movimentos_financeiros
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalFinanceiroPedido" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.id_movimento_financeiro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-1">
+                    <div class="card-body m-0 p-0" style="height: 100%">
+                        @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                        {
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                        }
+                        else
+                        {
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Concat(
+                                AlertMsgItem.Maybe(ViewBag.MsgAdvertencia as string, "warning"),
+                                AlertMsgItem.Maybe(ViewBag.ObsFinanceiraCliente as string, "warning", "<b>Obs Financeira:</b> "),
+                                AlertMsgItem.Maybe(ViewBag.MsgHistorico as string, "warning", "<b>Obs Pedido:</b> ")))
+
+                            <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0" style="height:100%;">
+                                <div class="section-header"><i class="fa-solid fa-file-invoice-dollar me-1" aria-hidden="true"></i>Lançamentos Financeiros</div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_1", "Pagto 1", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_1, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v1'>
+                                            @Html.EditorFor(model => model.data_vencimento_1, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_1", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_1, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_2", "Pagto 2", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_2, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v2'>
+                                            @Html.EditorFor(model => model.data_vencimento_2, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_2", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_2, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_3", "Pagto 3", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_3, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v3'>
+                                            @Html.EditorFor(model => model.data_vencimento_3, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_3", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_3, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_4", "Pagto 4", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_4, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v4'>
+                                            @Html.EditorFor(model => model.data_vencimento_4, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_4", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_4, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_5", "Pagto 5", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_5, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v5'>
+                                            @Html.EditorFor(model => model.data_vencimento_5, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_5", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_5, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_6", "Pagto 6", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_6, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v6'>
+                                            @Html.EditorFor(model => model.data_vencimento_6, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_6", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_6, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_7", "Pagto 7", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_7, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v7'>
+                                            @Html.EditorFor(model => model.data_vencimento_7, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_7", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_7, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                    @Html.Label("id_pagrec_tipo_8", "Pagto 8", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.id_pagrec_tipo_8, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control", @data_container = "body" })
+                                    </div>
+                                    @Html.Label("Venc", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        <div class='input-group date' id='ig_gc_fin_mov_gen_v8'>
+                                            @Html.EditorFor(model => model.data_vencimento_8, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                        </div>
+                                    </div>
+                                    @Html.Label("valor_total_8", "R$", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.valor_total_8, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                @if ((!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string)) || (Model == null) || (Model.id_movimento_financeiro > 0))
+                {
+                    <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                }
+                else
+                {
+                    <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Gerar Lançamentos Financeiros</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_gc_fin_mov_gen_v1');
+            jsDatepicker('#ig_gc_fin_mov_gen_v2');
+            jsDatepicker('#ig_gc_fin_mov_gen_v3');
+            jsDatepicker('#ig_gc_fin_mov_gen_v4');
+            jsDatepicker('#ig_gc_fin_mov_gen_v5');
+            jsDatepicker('#ig_gc_fin_mov_gen_v6');
+            jsDatepicker('#ig_gc_fin_mov_gen_v7');
+            jsDatepicker('#ig_gc_fin_mov_gen_v8');
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando();
+            var form = $('#FormModalFinanceiroPedido');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalGerarFinanceiroMovimentos", "FinanceiroLancamentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            size: 'large',
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsFinanceiroInfo(idFinanceiro)
+    {
+        try {
+            LibMessageProcessando();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("AjaxFinanceiroInfo", "Financeiro", new { area = "g" })' + "?id=" + idFinanceiro,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Informações Financeiras</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFinanceiroInfo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFinanceiroBoleto(idFinanceiro)
+    {
+        try {
+            LibMessageProcessando();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("AjaxFinanceiroBoletoGCPDF", "FinanceiroLancamentos", new { area = "gc" })' + "?id=" + idFinanceiro,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFinanceiroBoleto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFinanceiroCancelamento(idFinanceiro)
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                message: 'Deseja Realmente CANCELAR o título financeiro Id: <b>' + idFinanceiro + '<b> ?',
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons:
+                {
+                    cancelar:
+                    {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function () {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar:
+                    {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function () {
+                            jsFinanceiroCancelamentoExecutar(idFinanceiro);
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFinanceiroCancelamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFinanceiroCancelamentoExecutar(idFinanceiro)
+    {
+        try {
+            LibMessageProcessando();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("AjaxFinanceiroCancelamento", "Financeiro", new { area = "g" })' + "?id=" + idFinanceiro,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Informações Financeiras</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFinanceiroCancelamentoExecutar] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+

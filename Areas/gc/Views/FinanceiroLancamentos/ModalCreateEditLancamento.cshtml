@@ -1,0 +1,635 @@
+@model GdiPlataform.Db.gc_financeiro_lancamentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+
+<style>
+    /* Modal específico: Pedido Insert/Edit Item */
+    #ModalCreateEditLancamento .modal-content {
+        max-height: calc(100vh - 2rem); /* evita estourar a viewport */
+    }
+
+    #ModalCreateEditLancamento .modal-body {
+        overflow-y: auto; /* scroll manual */
+        max-height: calc(100vh - 170px); /* ajuste fino: header+footer */
+        overflow-x: visible; /* ajuda com componentes horizontais */
+    }
+</style>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ModalCreateEditLancamento" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_lancamento)
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.id_movimento_nf)
+                @Html.HiddenFor(model => model.ativo)
+                @Html.HiddenFor(model => model.id_lancamento_tributos)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-1">
+                        <div class="card-header m-1 p-1">
+                            <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                                <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-coins fa-sm" aria-hidden="true"></i>Lançamento</a></li>
+                                @if (Model.id_lancamento > 0)
+                                {
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabDocs_tab" data-bs-toggle="pill" href="#tabDocs" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-folder-plus fa-sm" aria-hidden="true"></i>Complemento</a></li>
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabGED_tab" data-bs-toggle="pill" href="#tabGED" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-paperclip fa-sm" aria-hidden="true"></i>Anexos</a></li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="card-body m-0 p-0" style="height: 100%">
+                            <div class="tab-content" id="crud-tabs-content">
+
+                                <!-- Dados - Início -->
+                                <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+
+
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-invoice-dollar me-1" aria-hidden="true"></i>Lançamento Financeiro</div>
+                                        <div class="card-body m-0 p-1" style="height: 100%">
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("Conta Caixa", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-6">
+                                                    @Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContasCaixa as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                                @if (CachePersister.userIdentity.param_contacaixa_gc_has_gerencial == true)
+                                                {
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:10px">
+                                                        <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                            @Html.CheckBoxFor(model => model.gerencial, new { @class = "form-check-input", role = "switch" })
+                                                            <span class="form-check-label ms-1 mb-0">Gerencial?</span>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    @Html.HiddenFor(model => model.gerencial)
+                                                }
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("tipo_pag_rec", "Pag/Rec", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-3">
+                                                    @Html.DropDownListFor(model => model.tipo_pag_rec, ViewBag.comboDebitoCredito as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                                @Html.Label("status", "Status", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.DropDownListFor(model => model.id_financeiro_status, ViewBag.comboFinanceiroStatus as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                                <div class="col-sm-2 text-sm-start" style="margin-top:10px">
+                                                    <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                        @Html.CheckBoxFor(model => model.is_adiantamento, new { @class = "form-check-input", role = "switch" })
+                                                        <span class="form-check-label ms-1 mb-0">Adiantamento?</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("id_pag_rec_tipo", "Tipo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-3">
+                                                    @Html.DropDownListFor(model => model.id_pag_rec_tipo, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                                @Html.Label("parcela", "Parcela", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.parcela_atual, new { htmlAttributes = new { @class = "form-control", maxlength = "3" } })
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.parcela_total, new { htmlAttributes = new { @class = "form-control", maxlength = "3" } })
+                                                </div>
+                                                <div class="col-sm-2 text-sm-start" style="margin-top:10px">
+                                                    <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                        @Html.CheckBoxFor(model => model.fixo, new { @class = "form-check-input", role = "switch" })
+                                                        <span class="form-check-label ms-1 mb-0">Recorrente?</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("data_pagamento", "Pagto.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @* id do .input-group distinto do input para Tempus Dominus *@
+                                                    <div class='input-group date' id='ig_gc_fin_lanc_modal_pag'>
+                                                        @Html.EditorFor(model => model.data_pagamento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                    </div>
+                                                </div>
+                                                @Html.Label("seq", "Seq.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.ordem_pagamento, new { htmlAttributes = new { @class = "form-control", maxlength = "3" } })
+                                                </div>
+                                                @Html.Label("venc", "Venc.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    <div class='input-group date' id='ig_gc_fin_lanc_modal_venc'>
+                                                        @Html.EditorFor(model => model.data_vencimento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                    </div>
+                                                </div>
+                                                @Html.Label("#", "Cor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.DropDownListFor(model => model.id_tablerow_color, ViewBag.comboRowColors as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("Cliente/Fornecedor", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-7">
+                                                    @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("Classe Financeira", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-7">
+                                                    @Html.DropDownListFor(model => model.id_classificacao_financeira, ViewBag.comboGClassificacaoFinanceira as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-7">
+                                                    @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                                @Html.Label("doc", "Doc.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.EditorFor(model => model.numero_documento, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("R$ Pago", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.EditorFor(model => model.valor_pago, new { htmlAttributes = new { @class = "form-control", @onkeypress = "jsGcFinanceiroLancamentosKeyPressed(event);" } })
+                                                </div>
+                                                @Html.Label("R$ Total", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.EditorFor(model => model.valor_total, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("valor_multa", "R$ Multa", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.valor_multa, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                                @Html.Label("valor_juros", "R$ Juros", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.valor_juros, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                                @Html.Label("valor_descontos", "R$ Desc.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.valor_descontos, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                                @Html.Label("valor_encargos", "R$ Enc.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.valor_encargos, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+                                            @if (Model.id_lancamento_tributos == 0) // Se não tiver lançamentos de tributos, botão é liberado
+                                            {
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("tag_provisao_imposto_reduzido", "Impostos", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-4 text-sm-start" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                            @Html.CheckBoxFor(model => model.tag_provisao_imposto_reduzido, new { @class = "form-check-input", role = "switch" })
+                                                            <span class="form-check-label ms-1 mb-0">Provisão ICMS Reduzido</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4 text-sm-start" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                            @Html.CheckBoxFor(model => model.tag_provisao_imposto_normal, new { @class = "form-check-input", role = "switch" })
+                                                            <span class="form-check-label ms-1 mb-0">Provisão ICMS Normal</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("linha_digitavel_pagamento", "Linha Dig.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-7">
+                                                    @Html.EditorFor(model => model.linha_digitavel_pagamento, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Dados - Fim -->
+
+                                @if (Model.id_lancamento > 0)
+                                {
+                                    <!-- Dados - Início -->
+                                    <div class="tab-pane fade" id="tabDocs" role="tabpanel" aria-labelledby="tabDocs_tab">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-receipt me-1" aria-hidden="true"></i>Informações Complementares</div>
+                                            <div class="card-body m-0 p-1" style="height: 100%">
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("Adiantamento (1)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.DropDownListFor(model => model.id_lancamento_adiantamento, ViewBag.comboAdiantamentos as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("Adiantamento (2)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.DropDownListFor(model => model.id_lancamento_adiantamento2, ViewBag.comboAdiantamentos as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("negociacao", "Negociação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-4 text-sm-start" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                            @Html.CheckBoxFor(model => model.negociacao, new { @class = "form-check-input", role = "switch" })
+                                                            <span class="form-check-label ms-1 mb-0">Lançamento Financeiro em Negociação</span>
+                                                        </div>
+                                                    </div>
+                                                    @Html.Label("negociacao_data_limite", "Data", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        <div class='input-group date' id='ig_gc_fin_lanc_modal_neg_lim'>
+                                                            @Html.EditorFor(model => model.negociacao_data_limite, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                            <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Dados - Fim -->
+
+
+                                    <!-- Aba GED - INÍCIO -->
+                                    <div class="tab-pane fade" id="tabGED" role="tabpanel" aria-labelledby="tabGED_tab">
+                                        <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                            <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                                <div class="card-header m-0 mb-1 p-0" style="height:100%; text-align:right ">
+                                                    <button type="button" name="btnUploadAnexoFinanceiro" title="Anexar Documentos" class="btn btn-info btn-sm d-inline-flex align-items-center gap-2" onclick="jsModalUploadAnexoFinanceiro()"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Incluir Anexos</button>
+                                                </div>
+                                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGedGcLancamentos">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>@Html.Raw("Id.")</th>
+                                                                <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                                                <th>@Html.Raw("Descrição")</th>
+                                                                <th>@Html.Raw("Arquivo")</th>
+                                                                <th>@Html.Raw("Data")</th>
+                                                                <th>@Html.Raw("Usuário")</th>
+                                                                <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Aba GED - FIM -->
+
+
+
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <div class="col-4 m-0 p-1" style="text-align:left">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                </div>
+                <div class="col-4 m-0 p-1" style="text-align:center">
+                    @if ((Model.id_lancamento > 0) && (Model.tipo_pag_rec == 2) && (Model.id_financeiro_status == 3))
+                    {
+                        <button type="button" name="btnLiquidar" title="Liquidar" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsAjaxLiquidarLancamento()"><i class="fa-solid fa-sack-dollar me-2" aria-hidden="true"></i>Liquidar Lançamento</button>
+                    }
+                </div>
+                <div class="col-4 m-0 p-1" style="text-align:right">
+                    <button type="button" id="btnSalvar" name="btnSalvar" title="Confirmar Lançamento" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsAjaxCreateEditLancamento()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Lançamento</button>
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var otableGedGcLancamentos;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_gc_fin_lanc_modal_venc');
+            jsDatepicker('#ig_gc_fin_lanc_modal_pag');
+            jsDatepicker('#ig_gc_fin_lanc_modal_neg_lim');
+            jsInitModal();
+            otableGedGcLancamentos = null;
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditLancamento()
+    {
+        try
+        {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando("Atualizando Lançamento . . .");
+            var form = $('#ModalCreateEditLancamento');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEditLancamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxLiquidarLancamento()
+    {
+        try
+        {
+            LibMessageProcessando("Liquidando Lançamento . . .");
+            var form = $('#ModalCreateEditLancamento');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxLiquidarLancamento", "FinanceiroLancamentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxLiquidarLancamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    $('#tabGED_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableGedGcLancamentos == null) {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGedGcLancamentos = $('#dtGedGcLancamentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetGedLancamentos", "FinanceiroLancamentos", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_lancamento').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDesativarAnexo" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar o Anexo ' + data[3] + '" class="btn btn-outline-danger btn-sm btnDesativarAnexo d-inline-flex align-items-center gap-2" onclick="jsDesativarAnexo(' + data[0] + ');"><i class="fa-solid fa-power-off"></i></button>' } },
+                        { "width": "35%", orderable: false, className: 'text-sm-center', targets: [2] },
+                        { "width": "35%", orderable: false, className: 'text-sm-center', targets: [3] },
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [4] },
+                        { "width": "12%", orderable: false, className: 'text-sm-center', targets: [5] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [6], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnAbrirAnexo" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Anexo ' + data[2] + '" class="btn btn-outline-info btn-sm btnAbrirAnexo d-inline-flex align-items-center gap-2" onclick="jsAbrirAnexo(' + data[0] + ');"><i class="fa-regular fa-file-lines"></i></button>' } }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+
+            }
+            else {
+
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabGED_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsModalUploadAnexoFinanceiro()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            yesDestroyModal('#ModalCreateEditLancamento');
+            $("#mainModal").load('@Url.Action("ModalUploadAnexoFinanceiro", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=' + $('#id_lancamento').val().toString(), function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAbrirAnexo(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsDesativarAnexo(id)
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                message: "Deseja REALMENTE DESATIVAR esse arquivo anexo ?" + "<br/><br/>" + "<b>Atenção:</b> O Log dessa operação ficará armazenado no banco de dados para futuras auditorias!",
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons: {
+                    cancelar: {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function () {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar: {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function ()
+                        {
+                            jsAjaxDesativarAnexo(id);
+                        }
+                    }
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxDesativarAnexo(id)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var dataForm =
+            {
+                ModalGedArquivo:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDesativarAnexo", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        $("#dtGedGcLancamentos").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsGcFinanceiroLancamentosKeyPressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            jsCheckInputs();
+        }
+    }
+
+</script>
+
+
+

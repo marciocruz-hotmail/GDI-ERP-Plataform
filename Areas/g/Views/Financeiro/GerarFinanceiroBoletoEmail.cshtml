@@ -1,0 +1,145 @@
+@model GdiPlataform.Areas.g.Models.cstFinanceiroBoletos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_LayoutBoletoBancario.cshtml"; }
+<P align=center>
+    <TABLE cellSpacing=0 cellPadding=0 border=0 class=Boleto>
+        <TR>
+            <TD style='width: 0.9cm'></TD>
+            <TD style='width: 1cm'></TD>
+            <TD style='width: 1.9cm'></TD>
+            <TD style='width: 0.5cm'></TD>
+            <TD style='width: 1.3cm'></TD>
+            <TD style='width: 0.8cm'></TD>
+            <TD style='width: 1cm'></TD>
+            <TD style='width: 1.9cm'></TD>
+            <TD style='width: 1.9cm'></TD>
+            <TD style='width: 3.8cm'></TD>
+            <TD style='width: 3.8cm'></TD>
+        <tr>
+            <td colspan=11>
+                <ul class=BoletoInstrucoes>
+                    <li>Imprima em papel A4 ou Carta</li>
+                    <li>Utilize margens mínimas a direita e a esquerda - 005</li>
+                    <li>Recorte na linha pontilhada</li>
+                    <li>Não rasure o código de barras</li>
+                </ul>
+            </td>
+        </tr>
+        <TR>
+            <TD colspan=11 height=60 valign=top>&nbsp;</TD>
+        </TR>
+        <tr><td colspan=11 class=BoletoPontilhado>&nbsp;</td></tr>
+        <TR>
+            <TD colspan=4 class=BoletoLogo><img src='@Model.ELogoBanco'></TD>
+            <TD colspan=2 class=BoletoCodigoBanco>@Model.ECodBanco</TD>
+            <TD colspan=6 class=BoletoLinhaDigitavel>@Model.ELinhaDigitavel</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 class=BoletoTituloEsquerdo>Local de Pagamento</TD>
+            <TD class=BoletoTituloDireito>Vencimento</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 class=BoletoValorEsquerdo style='text-align: left; padding-left : 0.1cm'>@Model.ELocalPagamento</TD>
+            <TD class=BoletoValorDireito>@Model.EDataVencimento</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 class=BoletoTituloEsquerdo>Cedente</TD>
+            <TD class=BoletoTituloDireito>Agência/Código do Cedente</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 class=BoletoValorEsquerdo style='text-align: left; padding-left : 0.1cm'>@Model.ECedenteNome</TD>
+            <TD class=BoletoValorDireito>@Model.EAgenciaCodCedente</TD>
+        </TR>
+        <TR>
+            <TD colspan=3 class=BoletoTituloEsquerdo>Data do Documento</TD>
+            <TD colspan=4 class=BoletoTituloEsquerdo>Número do Documento</TD>
+            <TD class=BoletoTituloEsquerdo>Espécie</TD>
+            <TD class=BoletoTituloEsquerdo>Aceite</TD>
+            <TD class=BoletoTituloEsquerdo>Data do Processamento</TD>
+            <TD class=BoletoTituloDireito>Nosso Número</TD>
+        </TR>
+        <TR>
+            <TD colspan=3 class=BoletoValorEsquerdo>@Model.EDataDocumento</TD>
+            <TD colspan=4 class=BoletoValorEsquerdo>@Model.ENumeroDocumento</TD>
+            <TD class=BoletoValorEsquerdo>@Model.EEspecieDoc</TD>
+            <TD class=BoletoValorEsquerdo>@Model.EAceite</TD>
+            <TD class=BoletoValorEsquerdo>@Model.EDataProcessamento</TD>
+            <TD class=BoletoValorDireito>@Model.ENossoNumeroDV</TD>
+        </TR>
+        <TR>
+            <TD colspan=3 class=BoletoTituloEsquerdo>Uso do Banco</TD>
+            <TD colspan=2 class=BoletoTituloEsquerdo>Carteira</TD>
+            <TD colspan=2 class=BoletoTituloEsquerdo>Moeda</TD>
+            <TD colspan=2 class=BoletoTituloEsquerdo>Quantidade</TD>
+            <TD class=BoletoTituloEsquerdo>(x) Valor</TD>
+            <TD class=BoletoTituloDireito>(=) Valor do Documento</TD>
+        </TR>
+        <TR>
+            <TD colspan=3 class=BoletoValorEsquerdo>&nbsp;</TD>
+            <TD colspan=2 class=BoletoValorEsquerdo>@Model.ECarteira</TD>
+            <TD colspan=2 class=BoletoValorEsquerdo>@Model.EEspecieMoeda</TD>
+            <TD colspan=2 class=BoletoValorEsquerdo>&nbsp;</TD>
+            <TD class=BoletoValorEsquerdo>&nbsp;</TD>
+            <TD class=BoletoValorDireito>@Model.EValorTotal</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 class=BoletoTituloEsquerdo>Instruco</TD>
+            <TD class=BoletoTituloDireito>(-) Desconto</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 rowspan=9 class=BoletoValorEsquerdo style='text-align: left; vertical-align:top; padding-left : 0.1cm'>@Model.EMensagemCaixa</TD>
+            <TD class=BoletoValorDireito>&nbsp;</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoTituloDireito>(-) Outras Deduções/Abatimento</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoValorDireito>&nbsp;</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoTituloDireito>(+) Mora/Multa/Juros</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoValorDireito>&nbsp;</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoTituloDireito>(+) Outros Acréscimos</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoValorDireito>&nbsp;</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoTituloDireito>(=) Valor Cobrado</TD>
+        </TR>
+        <TR>
+            <TD class=BoletoValorDireito>&nbsp;</TD>
+        </TR>
+        <TR>
+            <TD rowspan=3 Class=BoletoTituloSacado>Sacado:</TD>
+            <TD colspan=8 Class=BoletoValorSacado>@Model.ENomeSacado</TD>
+            <TD colspan=2 Class=BoletoValorSacado>@Model.EDocSacado</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 Class=BoletoValorSacado>@Model.EEnderecoSacado</TD>
+        </TR>
+        <TR>
+            <TD colspan=10 Class=BoletoValorSacado>@Model.ECidadeSacado&nbsp;&nbsp;&nbsp;@Model.ECepSacado</TD>
+        </TR>
+        <TR>
+            <TD colspan=2 Class=BoletoTituloSacador>Sacador / Avalista:</TD>
+            <TD colspan=9 Class=BoletoValorSacador>&nbsp;</TD>
+        </TR>
+        <TR>
+            <TD colspan=11 class=BoletoTituloDireito style='text-align: right; padding-right: 0.1cm'>Ficha de Compensação - Autenticação Mecânica</TD>
+        </TR>
+        <TR>
+            <TD colspan=11 height=60 valign=top>
+                <img src='@Model.EImgBarCode'>
+            </TD>
+
+        </TR>
+        <tr><td colspan=11 class=BoletoPontilhado>&nbsp;</td></tr>
+    </TABLE>
+</P>
+
+

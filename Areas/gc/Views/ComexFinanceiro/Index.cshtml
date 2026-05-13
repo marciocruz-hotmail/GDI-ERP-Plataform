@@ -1,0 +1,278 @@
+@model IEnumerable<GdiPlataform.Db.gc_comex_financeiro>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="GcIndexFinanceiroLancamentos" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexFinanceiro_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexFinanceiro_Actioncreate")))
+                {
+                    <button type="button" name="btnNovoPagamento" title="Novo Pagamento" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateEditGcComexFinanceiro()"><i class="fa-solid fa-money-bills me-2" aria-hidden="true"></i>Novo Lançamento</button>
+                }
+
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexFinanceiro_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexFinanceiro_Actionrun")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarComexFinanceiro(OTableDtGcComexFinanceiroIndex, 'Id.')"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i><b>Cancelar</b>&nbsp;Lançamento</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Importação", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-3">
+                            @Html.DropDownList("Importacao", ViewBag.comboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = "edit_importacao", @class = "form-control", @onchange = "jsAjaxPesquisarComexFinanceiro();" })
+                        </div>
+                        @Html.Label("Invoice", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-3">
+                            @Html.DropDownList("Invoice", ViewBag.comboComexInvoices as List<SelectListItem>, htmlAttributes: new { @id = "edit_invoice", @class = "form-control", @onchange = "jsAjaxPesquisarComexFinanceiro();" })
+                        </div>
+                        <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pagamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarComexFinanceiro()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                        <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                            @Html.Label("label_saldo", "R$", htmlAttributes: new { @id = "label_saldo" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtGcComexFinanceiroIndex">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>Id.</th>
+                                <th><i class="fa-solid fa-plus-minus" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Crédito/Débito"></i></th>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Importação</th>
+                                <th>Invoice</th>
+                                <th>@Html.Encode("Valor (R$)")</th>
+                                <th><i class="fa-regular fa-edit" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Pagamento"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var OTableDtGcComexFinanceiroIndex;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTableDtGcComexFinanceiroIndex();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTableDtGcComexFinanceiroIndex()
+    {
+        try
+        {
+            if (OTableDtGcComexFinanceiroIndex == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                OTableDtGcComexFinanceiroIndex = $('#DtGcComexFinanceiroIndex')
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { } else if (json && json.yesFilterOnOff !== undefined) { btnFiltro(json.yesFilterOnOff); } }).DataTable({
+                "drawCallback": function (settings) { LibMessageProcessandoHide(); },
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosPagamentos","ComexFinanceiro",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesCustomField01: emptyIfNull($('#edit_importacao').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#edit_invoice').val()).toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 100,
+                scrollX: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "32%", orderable: false, className: 'text-sm-start', targets: [4] },
+                    { "width": "18%", orderable: false, className: 'text-sm-start', targets: [5] },
+                    { "width": "16%", orderable: false, className: 'text-sm-start', targets: [6] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [7] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnModalCreateEditGcComexFinanceiro" title="Editar Pagamento Nº ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnModalCreateEditGcComexFinanceiro d-inline-flex align-items-center" onclick="jsModalCreateEditGcComexFinanceiro(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+                $('#DtGcComexFinanceiroIndex tbody').on('dblclick', 'tr td', function () {
+                    var data = OTableDtGcComexFinanceiroIndex.row($(this).closest('tr')).data();
+                    jsModalCreateEditGcComexFinanceiro(data[1]);
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalCreateEditGcComexFinanceiro()
+    {
+        try
+        {
+            LibMessageProcessando("Processando . . .");
+            $("#mainModal").load('@Url.Action("ModalCreateEditGcComexFinanceiro", "ComexFinanceiro", new { area = "gc" })?IdFinanceiro=-' + emptyIfNull($('#edit_invoice').val()).toString(), function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateEditGcComexFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCreateEditGcComexFinanceiro(id)
+    {
+        try
+        {
+            LibMessageProcessando("Processando . . .");
+            $("#mainModal").load('@Url.Action("ModalCreateEditGcComexFinanceiro", "ComexFinanceiro", new { area = "gc" })?IdFinanceiro=' + id, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateEditGcComexFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPesquisarComexFinanceiro()
+    {
+        try
+        {
+            LibMessageProcessando('Pesquisando Lançamentos. . .');
+            document.getElementById("yesFilterField").value = "*";
+            $("#DtGcComexFinanceiroIndex").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarComexFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsViewSaldoContaImportacao(json)
+    {
+        try
+        {
+            document.getElementById("label_saldo").innerHTML = json.yesDisplayField01;
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", err && err.message ? String(err.message) : String(err));
+        }
+    }
+
+    function jsModalCancelarComexFinanceiro(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalCancelarComexFinanceiro", "ComexFinanceiro", new { area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarComexFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+
+</script>
+
+
+

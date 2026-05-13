@@ -1,0 +1,65 @@
+Atue como especialista em SQL Server, modelagem de banco de dados e scripts de migração estrutural seguros.
+
+Vou anexar o script atual de criação da tabela [tablename].
+
+Sua tarefa é gerar um novo script SQL Server completo, seguro e blindado para alteração estrutural dessa tabela, seguindo rigorosamente as instruções abaixo:
+
+Objetivo:
+Criar uma nova versão da tabela atual, com a inclusão dos novos campos informados, migrar integralmente os dados da tabela original para a nova estrutura e substituir a tabela antiga pela nova, preservando a integridade do banco.
+
+Requisitos obrigatórios do script:
+1. Utilizar como base a estrutura atual da tabela anexada.
+2. Criar uma tabela temporária ou tabela auxiliar com a mesma estrutura da tabela original, já incorporando os novos campos solicitados.
+3. Incluir os novos campos exatamente conforme especificado, por exemplo:
+   - [XXXX] [YYYYY]
+4. Manter na definição de cada coluna todas as propriedades originais que existirem no script fonte, como:
+   - tipo de dado
+   - tamanho
+   - null / not null
+   - identity
+   - default
+   - constraints
+5. Copiar todos os dados da tabela original para a tabela temporária, garantindo compatibilidade entre os campos antigos e os novos.
+6. Para novos campos definidos como NULL, criar também uma constraint DEFAULT coerente, para evitar inconsistências futuras.
+7. Validar a existência de todos os objetos antes de criar, alterar, apagar ou renomear, incluindo:
+   - tabelas
+   - constraints default
+   - conflito de nome da PK
+   - primary keys
+   - foreign keys
+   - índices
+   - objetos temporários ou auxiliares
+8. Após a cópia dos dados, remover com segurança a tabela antiga e renomear a tabela temporária para assumir o nome da tabela principal.
+9. O script deve conter limpeza prévia e limpeza final de objetos temporários, evitando deixar qualquer resíduo no banco.
+10. O script deve analisar e tratar pontos cegos que possam deixar objetos soltos, órfãos ou duplicados no banco, como:
+    - constraints com nomes fixos já existentes
+    - índices remanescentes
+    - tabelas auxiliares de execuções anteriores
+    - conflitos de rename
+    - dependências não removidas
+11. O script deve ser idempotente na medida do possível, ou seja, preparado para evitar falhas por objetos já existentes de execuções anteriores.
+12. Implementar o código com abordagem defensiva e segura, priorizando consistência e previsibilidade.
+13. Sempre que necessário, usar IF EXISTS / IF NOT EXISTS para validação dos objetos.
+14. Organizar o script em blocos lógicos, com comentários objetivos, por exemplo:
+    - limpeza inicial
+    - criação da tabela auxiliar
+    - criação dos novos campos
+    - cópia dos dados
+    - remoção de constraints antigas
+    - remoção da tabela original
+    - rename da nova tabela
+    - recriação de índices e constraints, se aplicável
+    - limpeza final
+15. Analisar o script original e identificar riscos técnicos ou fragilidades estruturais que possam comprometer a execução.
+16. Entregar um script final blindado, pronto para execução em SQL Server.
+17. Escreva cada bloco autocontido com tratamento de erro local.
+18. Adicione uma limpeza por nome global antes de criar qualquer constraint
+
+Formato da resposta esperado:
+- Apresente primeiro uma análise técnica breve dos riscos e pontos de atenção identificados.
+- Em seguida, entregue o script SQL Server completo.
+- Inclua comentários no script explicando apenas o necessário para manutenção futura.
+- Não simplifique a solução.
+- Não omita validações de segurança.
+- Não entregue apenas um exemplo genérico.
+- Gere o script final já adaptado à estrutura real da tabela anexada.

@@ -1,0 +1,204 @@
+@model GdiPlataform.Db.gc_financeiro_lancamentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalFinanceiroViewAnexos" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-invoice-dollar fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_lancamento)
+                @Html.HiddenFor(model => model.id_cliente)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card-body m-0 p-0" style="height: 100%">
+                        <div class="table-responsive scroll-body-horizontal m-0 p-0" style="width:100%">
+                            <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtModalFinanceiroViewAnexos">
+                                        <thead>
+                                            <tr>
+                                                <th>@Html.Raw("Id.")</th>
+                                                <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                                <th>@Html.Raw("Tipo")</th>
+                                                <th>@Html.Raw("Descrição")</th>
+                                                <th>@Html.Raw("Arquivo")</th>
+                                                <th>@Html.Raw("Data")</th>
+                                                <th>@Html.Raw("Usuário")</th>
+                                                <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSair" title="Sair" class="btn btn-info d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Sair</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var oTableModalFinanceiroViewAnexos;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            CreateTableModalFinanceiroViewAnexos();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function CreateTableModalFinanceiroViewAnexos()
+    {
+        try
+        {
+            oTableModalFinanceiroViewAnexos = $('#dtModalFinanceiroViewAnexos').DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetGedFinanceiro", "FinanceiroLancamentos", new { area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomIdPK: $('#id_lancamento').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 100,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDesativarAnexo" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar o Anexo ' + data[3] + '" class="btn btn-outline-danger btn-sm btnDesativarAnexo d-inline-flex align-items-center gap-2" onclick="jsDesativarAnexo(' + data[0] + ');"><i class="fa-solid fa-power-off"></i></button>' } },
+                    { "width": "26%", orderable: false, className: 'text-sm-start', targets: [2] },
+                    { "width": "24%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "24%", orderable: false, className: 'text-sm-start', targets: [4] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir anexo ' + data[3] + '" class="btn btn-outline-info btn-sm btnDownloadFile d-inline-flex align-items-center gap-2" onclick="jsDownloadFile(' + data[0] + ');"><i class="fa-regular fa-file-lines"></i></button>' } }
+                ],
+                order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[CreateTableModalFinanceiroViewAnexos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsDownloadFile(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsDesativarAnexo(id)
+    {
+        GdiAjaxNotifyInconsistencias("Operação não permitida");
+    }
+
+    function jsAjaxDesativarAnexo(id)
+    {
+        GdiAjaxNotifyInconsistencias("Operação não permitida");
+    };
+
+</script>
+

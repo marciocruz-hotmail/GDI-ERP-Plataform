@@ -1,0 +1,278 @@
+@using GdiPlataform.Security
+@{
+    ViewBag.Title = "Parâmetros";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+            </div>
+            <div class="card-header m-0 p-1">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAParametros">
+                                <thead>
+                                    <tr>
+                                        <th>Id.</th>
+                                        <th>Nome</th>
+                                        <th>Sigla</th>
+                                        <th>Ativo</th>
+                                        <th>ON</th>
+                                        <th>OFF</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableAParametros;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            if (otableAParametros == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableAParametros = $('#dtAParametros').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosSistemas", "Parametros", new { area = "a" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [0] },
+                    { "width": "40%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "20%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" name="btnSistemaON" title="Ativar Sistema [' + data[1] + ']" class="btn btn-success btn-sm btnSistemaON d-inline-flex align-items-center gap-2" onclick="jsSistemaON(' + data[0] + ',\'' + data[1] + '\');"><i class="fa fa-plus"></i></button>' } },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [5], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" name="btnSistemaOFF" title="Desativar Sistema [' + data[1] + ']" class="btn btn-danger btn-sm btnSistemaOFF d-inline-flex align-items-center gap-2" onclick="jsSistemaOFF(' + data[0] + ',\'' + data[1] + '\');"><i class="fa fa-minus"></i></button>' } },
+                ],
+                order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                    }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsSistemaON(idSistema, sistema)
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                message: 'Deseja Realmente ATIVAR o sistema <b>' + sistema + '<b> ?',
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons:
+                {
+                    cancelar:
+                    {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function ()
+                        {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar:
+                    {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function ()
+                        {
+                            jsSendAtivarSistema(idSistema);
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSistemaON] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSistemaOFF(idSistema, sistema)
+    {
+        try {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                message: 'Deseja Realmente DESATIVAR o sistema <b>' + sistema + '<b> ?',
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons: {
+                    cancelar: {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function ()
+                        {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar:
+                    {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function ()
+                        {
+                            jsSendDesativarSistema(idSistema);
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSistemaOFF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendAtivarSistema(idSistema)
+    {
+
+    };
+
+    function jsSendDesativarSistema(idSistema)
+    {
+        try {
+            LibMessageProcessando("Desativando Sistema . . .");
+            var dataForm =
+            {
+                record_a_sistemas:
+                {
+                    'id_sistema': idSistema,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDesativarSistema", "Parametros", new { area = "a" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        otableAParametros.draw(false);
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendDesativarSistema] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>
+
+

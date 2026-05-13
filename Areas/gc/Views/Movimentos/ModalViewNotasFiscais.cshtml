@@ -1,0 +1,629 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewNotasFiscais" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-alt fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_movimento)
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    @if (Model.id_movimento > 0)
+                    {
+                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTableGCViewNotasFiscais">
+                                    <thead>
+                                        <tr>
+                                            <th>[x]</th>
+                                            <th>Id.</th>
+                                            <th>Status</th>
+                                            <th>CFOP</th>
+                                            <th>Número</th>
+                                            <th>Data/Hora</th>
+                                            <th>Itens</th>
+                                            <th>R$ Valor</th>
+                                            <th><i class="fa-regular fa-file-pdf fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Danfe/PDF"></i></th>
+                                            <th><i class="fa-regular fa-file-code fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="XML"></i></th>
+                                            <th><i class="fa-solid fa-file-invoice fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Informações"></i></th>
+                                            <th><i class="fa-solid fa-stamp" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Termo Convênio ICMS"></i></th>
+                                            <th><i class="fa-regular fa-file-code fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="XML Envio Sefaz"></i></th>
+                                            <th><i class="fa-solid fa-trash-alt fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelar"></i></th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot align="right">
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" id="btnAtualizarDados" name="btnAtualizarDados" onclick="jsAtualizarDadosNotasFicais()" title="Atualizar" class="btn btn-outline-secondary me-auto d-inline-flex align-items-center gap-2"><i class="fa-solid fa-sync-alt me-2" aria-hidden="true"></i>Atualizar</button>
+                <button type="button" name="btnOK" class="btn btn-success d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>OK</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var otableNotaFiscalPedido;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            jsCreateTable();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableNotaFiscalPedido = $('#dataTableGCViewNotasFiscais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                },
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetNotaFiscalPedido", "Movimentos", new { area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomField01: '@Model.id_movimento',
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 10,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: true,
+                aoColumnDefs: [
+                    { orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { orderable: false, className: 'text-sm-center', targets: [1, 2, 3, 4, 5, 6, 7] },
+                    { orderable: false, className: 'text-sm-center text-nowrap dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnPDF" data-bs-toggle="tooltip" data-bs-placement="top" title="Danfe/PDF da NF Nº ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnPDF d-inline-flex align-items-center" onclick="jsPDFNotaFiscal(' + data[1] + ');"><i class="fa-regular fa-file-pdf"></i></button>' } },
+                    { orderable: false, className: 'text-sm-center text-nowrap dt-no-row-select', targets: [9], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnXML" data-bs-toggle="tooltip" data-bs-placement="top" title="XML da NF Nº' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnXML d-inline-flex align-items-center" onclick="jsXMLNotaFiscal(' + data[1] + ');"><i class="fa-regular fa-file-code"></i></button>' } },
+                    { orderable: false, className: 'text-sm-center text-nowrap dt-no-row-select', targets: [10], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnInfo" data-bs-toggle="tooltip" data-bs-placement="top" title="Informações da NF Nº ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnInfo d-inline-flex align-items-center" onclick="jsInfoNotaFiscal(' + data[1] + ');"><i class="fa-solid fa-file-invoice"></i></button>' } },
+                    { orderable: false, className: 'text-sm-center text-nowrap dt-no-row-select', targets: [11], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnTermoConvenioICMSPDF" data-bs-toggle="tooltip" data-bs-placement="top" title="Termo Convênio ICMS NF Nº ' + data[1] + '" class="btn btn-outline-secondary btn-sm p-1 btnTermoConvenioICMSPDF d-inline-flex align-items-center" onclick="jsAjaxReportTermoConvenioICMSPDF(' + data[1] + ');"><i class="fa-solid fa-stamp"></i></button>' } },
+                    { orderable: false, className: 'text-sm-center text-nowrap dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnXMLEnvioSefaz" data-bs-toggle="tooltip" data-bs-placement="top" title="XML Envio Sefaz da NF Nº' + data[1] + '" class="btn btn-outline-secondary btn-sm p-1 btnXMLEnvioSefaz d-inline-flex align-items-center" onclick="jsAjaxGetXMLEnvioSefaz(' + data[1] + ');"><i class="fa-regular fa-file-code"></i></button>' } },
+                    { orderable: false, className: 'text-sm-center text-nowrap dt-no-row-select', targets: [13], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnCancel" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelar NF Nº ' + data[1] + '" class="btn btn-outline-danger btn-sm p-1 btnCancel d-inline-flex align-items-center" onclick="jsCancelamentoNF_Step1(' + data[1] + ');"><i class="fa-solid fa-trash-alt"></i></button>' } }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+
+                order: [[0, 'desc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhuma NF',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ NF ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 NF',
+                    sInfoFiltered: ' (Filtrados de _MAX_ NF)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ Resultados por página',
+                    sZeroRecords: 'Nenhuma NF',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: 'Próximo',
+                        sPrevious: 'Anterior',
+                        sFirst: 'Primeiro',
+                        sLast: 'Último'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d NF selecionada ] ",
+                            _: " [ %d NF selecionadas ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function YesDownloadFileXML(data, name = 'file', type = 'text/plain')
+    {
+        const { createElement } = document
+        const { URL: { createObjectURL, revokeObjectURL }, setTimeout } = window
+
+        const blob = new Blob([data], { type })
+        const url = createObjectURL(blob)
+
+        const anchor = createElement('a')
+        anchor.setAttribute('href', url)
+        anchor.setAttribute('download', name)
+        anchor.click()
+
+        setTimeout(() => { revokeObjectURL(url) }, 100)
+    }
+
+    function jsPDFNotaFiscal(id)
+    {
+        LibMessageProcessando("Processando . . .")
+        var dataForm =
+        {
+            view_record_gc_movimento_nf:
+            {
+                'id_movimento_nf': id,
+            }
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AjaxPDFNotaFiscal", "Movimentos", new { area = "gc" })',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(dataForm),
+            dataType: "json",
+            success: function (result)
+            {
+                LibMessageProcessandoHide();
+                if (result.success == true)
+                {
+                    window.open(result.msg, '_blank').focus();
+                }
+                else
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                }
+            },
+            error: function (result)
+            {
+                GdiAjaxNotifyInconsistencias(result.toString());
+            }
+        });
+    };
+
+    function jsXMLNotaFiscal(id)
+    {
+        LibMessageProcessando("Processando . . .")
+        var dataForm =
+        {
+            view_record_gc_movimento_nf:
+            {
+                'id_movimento_nf': id,
+            }
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AjaxXMLNotaFiscal", "Movimentos", new { area = "gc" })',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(dataForm),
+            dataType: "json",
+            success: function (result)
+            {
+                LibMessageProcessandoHide();
+                if (result.success == true)
+                {
+                    window.open(result.msg, '_blank').focus();
+                }
+                else
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                }
+            },
+            error: function (result)
+            {
+                GdiAjaxNotifyInconsistencias(result.toString());
+            }
+        });
+    };
+
+    function jsInfoNotaFiscal(id)
+    {
+        LibMessageProcessando("Processando . . .")
+        var dataForm =
+        {
+            view_record_gc_movimento_nf:
+            {
+                'id_movimento_nf': id,
+            }
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AjaxInfoNotaFiscal", "Movimentos", new { area = "gc" })',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(dataForm),
+            dataType: "json",
+            success: function (result)
+            {
+                LibMessageProcessandoHide();
+                if (result.success == true)
+                {
+                    GdiSwal2.dialog({
+                        title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        closeButton: false,
+                        message: result.msg,
+                        centerVertical: true,
+                        onEscape: false,
+                        backdrop: true,
+                        buttons: {
+                            confirmar: {
+                                label: '&nbsp;OK',
+                                className: 'btn btn-info',
+                                callback: function () {
+                                    GdiSwal2.hideAll();
+                                }
+                            }
+                        }
+                    })
+                }
+                else
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                }
+            },
+            error: function (result)
+            {
+                GdiAjaxNotifyInconsistencias(result.toString());
+            }
+        });
+    };
+
+
+    function jsAtualizarDadosNotasFicais()
+    {
+        $('#btnAtualizarDados').attr('disabled', true);
+        $("#dataTableGCViewNotasFiscais").DataTable().draw(false);
+    }
+
+    function jsAjaxReportTermoConvenioICMSPDF(id)
+    {
+        try
+        {
+            LibMessageProcessando("Processando . . .")
+            var dataForm =
+            {
+                view_record_gc_movimento_nf:
+                {
+                    'id_movimento_nf': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxReportTermoConvenioICMSPDF", "Movimentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxReportTermoConvenioICMSPDF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxGetXMLEnvioSefaz(id)
+    {
+        try
+        {
+            LibMessageProcessando("Processando . . .")
+            var dataForm =
+            {
+                view_record_gc_movimento_nf:
+                {
+                    'id_movimento_nf': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxGetXMLEnvioSefaz", "Movimentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxGetXMLEnvioSefaz] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCancelamentoNF_Step1(id) {
+        Swal.fire({
+            title: "Confirmação",
+            html:
+                "Deseja <b>CANCELAR</b> a NFº " + id + " ?" +
+                "<br><br>" +
+                "<b>ATENÇÃO:</b><br>" +
+                "Para CANCELAMENTOS após 24 Horas da autorização, deve-se antes, executar os procedimentos de cancelamento extemporâneo de NF-e via SIARE!",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-save me-2"></i>Confirmo o Cancelamento da NF',
+            cancelButtonText: '<i class="fa-solid fa-rotate-left me-2"></i>Desistir',
+            reverseButtons: true,
+            buttonsStyling: false,
+            allowEscapeKey: false,
+            customClass: {
+                confirmButton: "btn btn-outline-success ms-2",
+                cancelButton: "btn btn-outline-warning"
+            }
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                jsCancelamentoNF_Step2(id);
+            }
+        });
+    }
+
+    function jsCancelamentoNF_Step2(id) {
+        Swal.fire({
+            title: "Confirmação",
+            html:
+                "Deseja <b>REALMENTE CANCELAR</b> a NFº " + id + " ?" +
+                "<br><br>" +
+                "<b>ATENÇÃO:</b><br>" +
+                "Para CANCELAMENTOS após 24 Horas da autorização, CERTIFIQUE-SE de já ter sido executado os procedimentos de cancelamento extemporâneo de NF-e via SIARE!" +
+                "<br><br>" +
+                "<b>***** A Partir dessa ação a Nota Fiscal será cancelada DEFINITIVAMENTE *****</b>!",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-save me-2"></i>Confirmo o Cancelamento da NF',
+            cancelButtonText: '<i class="fa-solid fa-rotate-left me-2"></i>Desistir',
+            reverseButtons: true,
+            buttonsStyling: false,
+            allowEscapeKey: false,
+            customClass: {
+                confirmButton: "btn btn-outline-success ms-2",
+                cancelButton: "btn btn-outline-warning"
+            }
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                jsCancelamentoNF_Step3(id);
+            }
+        });
+    }
+
+
+    function jsCancelamentoNF_Step3(id) {
+        try {
+            Swal.fire({
+                target: document.querySelector(".modal.show") || document.body,
+                title: "Informe a Justificatica do Cancelamento",
+                input: "text",
+                inputPlaceholder: "Digite a justificativa do cancelamento",
+                showCancelButton: true,
+                confirmButtonText: "Confirmar",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true,
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-outline-success ms-2",
+                    cancelButton: "btn btn-outline-warning"
+                },
+                inputValidator: function (value) {
+                    if (!value || value.trim() === "") {
+                        return "Informe a justificativa.";
+                    }
+                }
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    jsCancelamentoNF_Step4(id, result.value.trim());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInputSiare] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCancelamentoNF_Step4(id, obs) {
+        try {
+            Swal.fire({
+                target: document.querySelector(".modal.show") || document.body,
+                title: "Informe o nº do protocolo do Siare",
+                html: "(ou 0 se menor que 24 horas da autorização)",
+                input: "text",
+                inputPlaceholder: "Nº do protocolo ou 0",
+                showCancelButton: true,
+                confirmButtonText: "Confirmar",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true,
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-outline-success ms-2",
+                    cancelButton: "btn btn-outline-warning"
+                },
+                inputValidator: function (value) {
+                    if (!value || value.trim() === "") {
+                        return "Informe o nº do protocolo (ou 0 se menor que 24 horas da autorização).";
+                    }
+                }
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    jsCancelamentoNF_Step5(id, obs, result.value.trim());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInputSiare] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsCancelamentoNF_Step5(id, obs, siare)
+    {
+        LibMessageProcessando("Solicitando Cancelamento . . .")
+        var dataForm =
+        {
+            view_record_gc_movimento_nf:
+            {
+                'id_movimento_nf': id,
+                'justificativa_cancelamento': obs,
+                'protocolo_cancelamento_siare': siare,
+            }
+        };
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("AjaxCancelNotaFiscal", "Movimentos", new { area = "gc" })',
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(dataForm),
+            dataType: "json",
+            success: function (result)
+            {
+                LibMessageProcessandoHide();
+                if (result.success == true)
+                {
+                    GdiSwal2.dialog({
+                        title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        closeButton: false,
+                        message: result.msg,
+                        centerVertical: true,
+                        onEscape: false,
+                        backdrop: true,
+                        buttons: {
+                            confirmar: {
+                                label: '&nbsp;OK',
+                                className: 'btn btn-info',
+                                callback: function () {
+                                    GdiSwal2.hideAll();
+                                }
+                            }
+                        }
+                    })
+                }
+                else
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg);
+                }
+            },
+            error: function (result)
+            {
+                GdiAjaxNotifyInconsistencias(result.toString());
+            }
+        });
+    };
+
+
+</script>
+
+

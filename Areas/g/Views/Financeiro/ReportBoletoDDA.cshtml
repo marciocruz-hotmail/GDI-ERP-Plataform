@@ -1,0 +1,93 @@
+@model GdiPlataform.Areas.g.Models.cstFinanceiroBoletos
+@using GdiPlataform.Security
+@using GdiPlataform.Lib;
+@using GdiPlataform.Security
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css" rel="stylesheet" />
+    <title></title>
+    <style type="text/css">
+        table tr.page-break {
+            page-break-after: always
+        }
+    </style>
+</head>
+<body>
+    <br/>
+    <div class="row">
+        <div class="col-lg-10" style="margin:10px;padding:10px">
+            <table class="table" style="border:0px">
+                <thead>
+                    <tr>
+                        <th style="width: 20%; vertical-align:middle;">
+                            <p class="float-center">
+                                <h4>
+                                    <img src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoGdi.png" style="height:100px;width:200px;" />
+                                </h4>
+                            </p>
+                        </th>
+                        <th style="width: 60%; vertical-align:middle; text-align:center">
+                            <p style="font-size:30px; color:#4D5656">@Model.EDadosCabecalho1</p>
+                        </th>
+                        <th style="width: 20%; vertical-align:middle; text-align:center">
+                            <p class="float-center">
+                                <h4>
+                                    <img src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logo237.png" style="height:100px;width:150px;" />
+                                </h4>
+                            </p>
+                        </th>
+                    <tr>
+                </thead>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; padding-left:20px; margin:5px; padding:5px"><b>Dados do Beneficiário</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Razão Social:</b> @Model.ECedenteNome</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Endereço:</b> @Model.ECedenteComplemento1</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Cidade:</b> @Model.ECedenteComplemento2</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <tr><td colspan=8 class=BoletoPontilhado>&nbsp;</td></tr>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; margin:5px; padding:5px"><b>Dados do Cliente</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Nome:</b> @Model.EClienteNome</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>CPF/CNPJ:</b> @Model.EClienteDocumento</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Endereço:</b> @Model.EClienteEndereco</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Cidade:</b> @Model.EClienteEnderecoCidadeUF</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <tr><td colspan=8 class=BoletoPontilhado>&nbsp;</td></tr>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; margin:5px; padding:5px"><b>Dados do Boleto</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Data Vencimento:</b> @Model.EDataVencimento</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Nº Boleto:</b> @Model.ENossoNumeroDV</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Documento:</b> @Model.ENumeroDocumento</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>R$ Valor:</b> @Model.EValorBruto</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <tr><td colspan=8 class=BoletoPontilhado>&nbsp;</td></tr>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; margin:5px; padding:5px"><b>Mensagem de Instrução</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Html.Raw(@Model.EMensagemCaixa)</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 class=BoletoPontilhado>&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; margin:5px; padding:5px"><b>Linha Digitável</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; margin:0px; padding:0px"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.ELinhaDigitavel</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:20px; color:#4D5656; margin:5px; padding:5px"><b>Código de Barras</b></TD></TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+                <TR>
+                    <TD colspan=12 height=60 valign=top>
+                        <img src="@Model.EImgBarCode" alt="" height="50" width="500" />
+                    </TD>
+                </TR>
+                <TR><TD colspan=10 style="border:0px; font-size:18px; color:#4D5656; margin:0px; padding:0px">&nbsp;</TD></TR>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+

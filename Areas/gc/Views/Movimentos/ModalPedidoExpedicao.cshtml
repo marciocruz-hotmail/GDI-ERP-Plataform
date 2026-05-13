@@ -1,0 +1,378 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoExpedicao" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    @if (Model.id_movimento > 0)
+                    {
+                        <div class="card-body m-0 p-0" style="height: 100%">
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0" style="height:100%;">
+
+                            <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Dados da Expedição</div>
+
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("movimento_expedido", "Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-3 text-sm-start" style="margin-top:5px;">
+                                    <div class="form-check form-switch form-switch-lg">
+                                        @Html.CheckBoxFor(model => model.movimento_expedido, htmlAttributes: new { @class = "form-check-input switch-success", @id = "movimento_expedido", role = "switch" })
+                                        <label class="form-check-label" for="movimento_expedido" id="label_movimento_expedido">Não Expedido / Expedido</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("datahora_expedicao", "Expedição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-3">
+                                    @* id do .input-group distinto do input para Tempus Dominus *@
+                                    <div class='input-group date' id='ig_gc_mov_modal_ped_exped'>
+                                        @Html.EditorFor(model => model.datahora_expedicao, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                    </div>
+                                </div>
+                                @Html.Label("datahora_entrega_previsao", "Entrega", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-3">
+                                    <div class='input-group date' id='ig_gc_mov_modal_ped_entrega_prev'>
+                                        @Html.EditorFor(model => model.datahora_entrega_previsao, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("obs_expedicao", "Obs", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10">
+                                    @Html.TextAreaFor(model => model.obs_expedicao, new { @class = "form-control", @id = "obs", @rows = "3", @title = "Informações adicionais da expedição", @placeholder = "Informações adicionais da expedição", data_autofocus = "true" })
+                                </div>
+                            </div>
+
+                            <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Frete Principal</div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("frete1_transportadora", "Transp.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10">
+                                    @Html.DropDownList("frete1_transportadora", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = "id_transportadora", @data_container = "body", @class = "form-control", @title = "Transportadora" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("frete1_documento", "Nº Cotação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.frete1_documento, new { htmlAttributes = new { @class = "form-control", @title = "Nº Cotação", @placeholder = "Nº Cotação" } })
+                                </div>
+                                @Html.Label("frete1_rastreio", "Nº Rastreio", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.frete1_rastreio, new { htmlAttributes = new { @class = "form-control", @title = "Nº Rastreio", @placeholder = "Nº Rastreio" } })
+                                </div>
+                                @Html.Label("frete1_custo", "Custo (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.frete1_custo, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete" } })
+                                </div>
+                            </div>
+
+                            <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Frete Complementar</div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("frete2_transportadora", "Transp.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10">
+                                    @Html.DropDownList("frete2_transportadora", ViewBag.comboTransportadoraComplementar as List<SelectListItem>, htmlAttributes: new { @id = "frete2_transportadora", @data_container = "body", @class = "form-control", @title = "Transportadora Complementar" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("frete2_documento", "Nº Cotação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.frete2_documento, new { htmlAttributes = new { @class = "form-control", @title = "Nº Cotação", @placeholder = "Nº Cotação Complementar" } })
+                                </div>
+                                @Html.Label("frete2_rastreio", "Nº Rastreio", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.frete2_rastreio, new { htmlAttributes = new { @class = "form-control", @title = "Nº Rastreio", @placeholder = "Nº Rastreio Complementar" } })
+                                </div>
+                                @Html.Label("frete2_custo", "Custo (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.frete2_custo, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete" } })
+                                </div>
+                            </div>
+                            <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>@Html.Raw((String)ViewBag.QtdItensPedido)</div>
+                            <div class="modal-body m-0 p-0">
+                                <div class="form-horizontal m-0 p-0">
+                                    <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtPedidoExpedicaoItens">
+                                            <thead>
+                                                <tr>
+                                                    <th style="font-size:12px;">@Html.Encode("Qtd")</th>
+                                                    <th style="font-size:12px;">@Html.Encode("Produto")</th>
+                                                    <th style="font-size:12px;">@Html.Encode("R$ Unit")</th>
+                                                    <th style="font-size:12px;">@Html.Encode("R$ Total")</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+
+                        if (!string.IsNullOrEmpty(ViewBag.MsgHistorico as string))
+                        {
+
+                            <div class="card-body m-0 p-0" style="height: 100%">
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 mt-2 p-0" style="height:100%;">
+                                    <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Histórico</div>
+                                    <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                        <div class="col-sm-12">
+                                            @Html.TextArea("historico", (String)ViewBag.MsgHistorico, new { @class = "form-control", @id = "hist", @rows = "5", @readonly = true })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsChecklistExpedicao()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Status do Pedido</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var oTablePedidoExpedicaoItens;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_gc_mov_modal_ped_exped');
+            jsDatepicker('#ig_gc_mov_modal_ped_entrega_prev');
+            jsInitModal();
+            if ($("#movimento_expedido").is(':checked')) { $("#label_movimento_expedido").html("Expedido"); } else { $("#label_movimento_expedido").html("Não Expedido"); };
+            jsCreateOTablePedidoExpedicaoItens();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $("#movimento_expedido").change(function () {
+        $("#label_movimento_expedido").html("Não Expedido");
+        if ($(this).is(':checked')) {
+            $("#label_movimento_expedido").html("Expedido");
+        }
+    });
+
+
+    function jsChecklistExpedicao()
+    {
+        try
+        {
+            GdiSwal2.dialog({
+                title: "<b>" + '@CachePersister.userIdentity.Username' +"</b>  você confirma a conferência de todos os itens do checklist abaixo?",
+                message:
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Faturamento concluído(NF- e emitida e autorizada)?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Status no ERP: Liberado para Expedição?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>DANFE impresso disponível?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação fiscal completa?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Transportadora contratada e confirmada?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Todos os volumes do pedido estão presentes?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Volumes numerados corretamente(1 de X, 2 de X, etc.)?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Embalagens íntegras, sem danos?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas externas legíveis e bem fixadas?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Símbolos de manuseio visíveis?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Peso e dimensões conferem com registrado no ERP?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>DANFE corresponde ao pedido?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Número da NF nas etiquetas corresponde ao DANFE?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação técnica completa dentro da embalagem?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Envelope com documentação preparado?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Packing list incluso em todos os volumes?<br/>' +
+                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Artigos perigosos identificados e com documentação específica(se aplicável)',
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons:
+                {
+                    cancelar:
+                    {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function ()
+                        {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar:
+                    {
+                        label: '<i class="fa-regular fa-square-check me-2" aria-hidden="true"></i>SIM, o checklist foi conferido',
+                        className: 'btn-outline-success',
+                        callback: function ()
+                        {
+                            jsSendForm();
+                            GdiSwal2.hideAll();
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSistemaON] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsSendForm()
+    {
+        try {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando();
+            var form = $('#FormModalPedidoExpedicao');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalPedidoExpedicao", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsCreateOTablePedidoExpedicaoItens()
+    {
+        try
+        {
+            if (oTablePedidoExpedicaoItens == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                oTableGcMovimentosCreatePedido = $('#DtPedidoExpedicaoItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosModalItensComValor", "Movimentos", new { area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomIdPK: $('#id_movimento').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 30,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                    { "width": "80%", orderable: false, className: 'text-sm-start', targets: [1] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [2] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [3] }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[1, 'asc']],
+
+                language:
+                {
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>
+
+

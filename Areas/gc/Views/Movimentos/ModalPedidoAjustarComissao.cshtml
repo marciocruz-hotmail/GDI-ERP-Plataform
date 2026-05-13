@@ -1,0 +1,142 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ModalPedidoAjustarComissao" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
+    @Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.id_cliente)
+                @Html.HiddenFor(model => model.tag)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-1">
+                        <div class="card-body m-0 p-1" style="height: 100%">
+                            @if (Model.id_movimento > 0)
+                            {
+                                if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                                {
+                                    @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                                }
+                                else
+                                {
+                                    <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                        @Html.Label("Vendedor(1)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-5">
+                                            @Html.DropDownList("comissao1_vendedor", ViewBag.comboVendedores as List<SelectListItem>, htmlAttributes: new { @id = "comissao1_vendedor", @data_container = "body", @class = "form-control" })
+                                        </div>
+                                        @Html.Label("comissao1_taxa", "Part (%)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                        <div class="col-sm-1">
+                                            @Html.EditorFor(model => model.comissao1_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("comissao1_valor", "Part (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.comissao1_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 mt-1 p-0">
+                                        @Html.Label("Vendedor(2)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-5">
+                                            @Html.DropDownList("comissao2_vendedor", ViewBag.comboVendedores as List<SelectListItem>, htmlAttributes: new { @id = "comissao2_vendedor", @data_container = "body", @class = "form-control" })
+                                        </div>
+                                        @Html.Label("comissao2_taxa", "Part (%)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                        <div class="col-sm-1">
+                                            @Html.EditorFor(model => model.comissao2_percentual, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.Label("comissao2_valor", "Part (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.comissao2_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Ajuste Comissão</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando();
+            var form = $('#ModalPedidoAjustarComissao');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalPedidoAjustarComissao", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = true;
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>
+

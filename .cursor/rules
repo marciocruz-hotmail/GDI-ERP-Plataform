@@ -1,0 +1,177 @@
+# GDI-ERP-Plataform — Cursor Rules
+# Projeto: GDI Aviação | ERP Plataform
+# Stack: ASP.NET MVC .NET Framework 4.7.2 + SQL Server + Bootstrap 5 + AdminLTE 4
+
+---
+
+## IDENTIDADE DO PROJETO
+
+- **Framework:** ASP.NET MVC — .NET Framework 4.7.2
+- **Banco de dados:** SQL Server (via Entity Framework ou ADO.NET — respeite o padrão já adotado no projeto)
+- **Frontend:** Bootstrap 5 + AdminLTE 4 + FontAwesome 7.2.0
+- **Componentes JS:** DataTables (datatables.net-bs5 2.3.2) + SweetAlert2 + Tempus Dominus 6.9.4
+- **Deploy:** Publicação via Visual Studio (Publish) para servidor Windows remoto (IIS)
+- **Linguagem de resposta:** Português brasileiro
+
+---
+
+## MEMÓRIA E CONTEXTO DO PROJETO — LEIA SEMPRE PRIMEIRO
+
+### 1. Histórico de intervenções (obrigatório em toda sessão)
+**OBRIGATÓRIO:** Antes de qualquer análise, investigação, implementação ou correção, leia:
+
+```
+.cursor/CHANGELOG-DEV.md
+```
+
+Este arquivo contém o histórico real do projeto: decisões técnicas tomadas, problemas já resolvidos, padrões estabelecidos, armadilhas conhecidas e arquivos críticos mapeados. É sua principal fonte de contexto sobre a evolução do sistema. Nunca ignore ou contradiga decisões registradas nele sem justificativa explícita.
+
+### 2. Documentos de contexto técnico (consulte quando relevante)
+
+A pasta `.cursor/context/` contém documentos técnicos de referência do projeto. Consulte o documento adequado **antes de agir** sempre que a intervenção tocar as áreas descritas:
+
+| Arquivo | Quando consultar |
+|---------|-----------------|
+| `.cursor/context/migracao-472-481.md` | Ao tocar `Robos/`, `Web.config`, NuGet, TLS/SSL, `targetFramework` ou `ComexImportacoesController.cs` |
+
+> Novos documentos serão adicionados à pasta `context/` conforme o projeto evoluir.
+> Sempre verifique se existe um documento de contexto relevante antes de agir em áreas críticas.
+
+---
+
+## REGISTRO OBRIGATÓRIO APÓS CADA INTERVENÇÃO
+
+Após TODA intervenção (análise, implementação, correção, refatoração autorizada), registre obrigatoriamente no arquivo `.cursor/CHANGELOG-DEV.md` uma entrada no seguinte formato:
+
+```
+---
+### [YYYY-MM-DD] — <Título curto da intervenção>
+**Tipo:** Correção | Implementação | Análise | Refatoração
+**Arquivos tocados:**
+- `Controllers/XxxController.cs`
+- `Views/Xxx/Index.cshtml`
+- `Scripts/xxx.js`
+
+**Problema / Demanda:**
+Descrição objetiva do que motivou a intervenção.
+
+**O que foi feito:**
+Descrição objetiva da solução aplicada e por quê essa abordagem foi escolhida.
+
+**Decisões técnicas relevantes:**
+- Decisão 1 e justificativa
+- Decisão 2 e justificativa
+
+**O que foi evitado e por quê:**
+- Item evitado → razão
+
+**Impactos conhecidos:**
+Quais outras partes do sistema foram verificadas e o resultado dessa verificação.
+
+**Atenção para próximas intervenções:**
+Alertas, dependências frágeis ou pontos de atenção que futuras intervenções devem considerar.
+---
+```
+
+O registro deve ser **mínimo e objetivo** — sem prolixidade. O objetivo é que o Cursor (e o desenvolvedor) consigam entender rapidamente o histórico sem ler código.
+
+---
+
+## REGRAS INEGOCIÁVEIS — LEIA ANTES DE QUALQUER AÇÃO
+
+### 1. ANALISE ANTES DE AGIR
+Antes de propor ou aplicar qualquer correção:
+- Leia `.cursor/CHANGELOG-DEV.md` para entender o contexto acumulado do projeto
+- Verifique se a intervenção toca alguma área coberta por documentos em `.cursor/context/` e leia o documento relevante
+- Leia e entenda completamente o erro ou comportamento reportado
+- Localize o arquivo, método, view ou query exatos onde o problema ocorre
+- Mapeie todos os Controllers, Views, Models, Helpers e scripts JS que referenciam o trecho afetado
+- Identifique a causa raiz antes de agir — não corrija sintomas
+
+### 2. CIRURGIA, NÃO DEMOLIÇÃO
+- Altere APENAS o que for estritamente necessário para resolver o problema
+- NUNCA refatore, renomeie, reorganize ou "melhore" código fora do escopo da correção
+- NUNCA remova métodos, propriedades, ViewBags, ViewData ou rotas existentes sem certeza absoluta de que não são usados em nenhum outro lugar
+- NUNCA altere layouts Razor (_Layout.cshtml, _PartialViews) sem verificar todas as views que os utilizam
+- Se identificar algo que "poderia melhorar" fora do escopo, registre como observação no CHANGELOG-DEV.md — não altere
+
+### 3. RESPEITE A STACK — SEM EXCEÇÕES
+- Não introduza bibliotecas JS, pacotes NuGet ou dependências não listadas acima sem aprovação explícita
+- Não substitua nem misture versões das libs já definidas (Bootstrap 5, AdminLTE 4, DataTables bs5 2.3.2, SweetAlert2, Tempus Dominus 6.9.4)
+- Mantenha o padrão MVC já adotado: Controllers finos, lógica em Services/Helpers quando já existir essa separação
+- Siga as convenções de nomenclatura, estrutura de pastas e padrões de código já presentes no projeto
+- Queries e acesso a dados: mantenha o padrão já utilizado no projeto (Entity Framework ou ADO.NET direto — não misture)
+- Para SQL Server: respeite tipos de dados, índices e stored procedures existentes; não altere schema sem necessidade explícita
+
+### 4. ANÁLISE DE IMPACTO OBRIGATÓRIA
+Antes de confirmar qualquer solução, verifique obrigatoriamente:
+- Esta mudança afeta algum outro Controller, Action, View ou rota?
+- Existe algum outro lugar no projeto onde o mesmo problema ocorre e também precisa ser corrigido?
+- A correção impacta o comportamento de alguma funcionalidade já existente e em produção?
+- Partial views, layouts e scripts compartilhados foram verificados?
+- O Model ou ViewModel alterado é usado em outras Views ou Controllers?
+
+### 5. CHECKLIST DE BUILD E DEPLOY (Visual Studio Publish → IIS Windows)
+Ao final de qualquer correção, valide obrigatoriamente:
+
+**Compilação:**
+- [ ] O projeto compila sem erros e sem warnings novos introduzidos pela correção
+- [ ] Todos os using, namespaces e referências estão corretos para .NET Framework 4.7.2
+- [ ] Nenhum pacote NuGet novo foi adicionado sem estar disponível no servidor de produção
+
+**Arquivos para publicação:**
+- [ ] Views (.cshtml) alteradas estão salvas e serão incluídas no publish
+- [ ] Arquivos estáticos alterados (CSS, JS, imagens em /Content ou /Scripts) estão salvos
+- [ ] Web.config ou connectionStrings.config foram considerados — alterações de config precisam de atenção especial no servidor remoto
+- [ ] Bundles (BundleConfig.cs) foram atualizados se novos arquivos CSS/JS foram adicionados
+- [ ] App_Start, Filters e RouteConfig não foram alterados inadvertidamente
+
+**Banco de dados:**
+- [ ] Scripts SQL de alteração de schema (se houver) estão prontos para execução manual no SQL Server de produção
+- [ ] Migrations (se usadas) foram geradas e revisadas antes do deploy
+- [ ] Nenhuma string de conexão hardcoded foi introduzida no código
+
+**IIS / Servidor Windows:**
+- [ ] A correção não depende de permissões de pasta ou configurações de IIS que possam diferir entre dev e produção
+- [ ] Sessão, autenticação e autorização (Authorize, roles) não foram afetadas
+
+---
+
+## FORMATO DE RESPOSTA OBRIGATÓRIO
+
+Sempre responda nesta ordem:
+
+### 🔍 Diagnóstico
+Qual é o problema real, onde está e qual a causa raiz identificada.
+
+### 📁 Arquivos afetados
+Lista completa de arquivos que serão alterados (Controllers, Views, Models, JS, CSS, SQL, etc.).
+
+### ⚠️ Análise de impacto
+O que mais pode ser afetado pela mudança. Outros Controllers, Views ou scripts que dependem do trecho alterado.
+
+### ✅ Solução
+O que exatamente será alterado, com o código da correção.
+
+### 🚀 Atenção para o Publish (Visual Studio → IIS)
+Arquivos, configurações de Web.config, scripts SQL ou passos adicionais necessários para o deploy funcionar corretamente no servidor Windows.
+
+### 🔒 O que NÃO foi alterado e por quê
+Liste explicitamente o que foi preservado e a razão, especialmente se havia risco de alterar inadvertidamente.
+
+### 📝 Registro no CHANGELOG-DEV.md
+Apresente o bloco de registro já formatado e pronto para ser inserido no topo da seção de histórico do CHANGELOG-DEV.md.
+
+---
+
+## LEMBRETES RÁPIDOS
+
+- Views Razor são .cshtml — respeite a sintaxe @Html.*, @Url.*, @model, @ViewBag
+- AdminLTE 4 usa estrutura de cards, sidebars e componentes próprios — não substitua por componentes Bootstrap puros se o padrão do projeto usa AdminLTE
+- DataTables deve ser inicializado via JS seguindo o padrão já adotado no projeto (ajax, serverSide, ou client-side)
+- SweetAlert2 é o padrão para confirmações e alertas — não use alert() ou confirm() nativos
+- Tempus Dominus 6.9.4 é o datepicker padrão — não substitua por outro
+- Datas e horas no SQL Server: atenção ao tipo (datetime, datetime2, date) já definido nas tabelas existentes
+- Sempre consulte `.cursor/CHANGELOG-DEV.md` antes de agir — é a principal fonte de contexto do projeto
+- Sempre verifique `.cursor/context/` para documentos técnicos relevantes à área sendo alterada
+- Não replicar padrão Ssl3 em código novo — usar apenas Tls12 ou Tls12|Tls13

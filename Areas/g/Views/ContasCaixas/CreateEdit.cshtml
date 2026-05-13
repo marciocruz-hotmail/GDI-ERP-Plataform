@@ -1,0 +1,341 @@
+@model GdiPlataform.Db.g_contas_caixas
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gContasCaixas" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_conta_caixa)
+                    @Html.HiddenFor(model => model.nossonumero)
+                    @Html.HiddenFor(model => model.inicial_nossonumero)
+                    @Html.HiddenFor(model => model.id_processamento)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabEndereco_tab" data-bs-toggle="pill" href="#tabEndereco" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-location-dot fa-sm" aria-hidden="true"></i>Endereço</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabConta_tab" data-bs-toggle="pill" href="#tabConta" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-coins fa-sm" aria-hidden="true"></i>Conta</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabParametros_tab" data-bs-toggle="pill" href="#tabParametros" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-sliders fa-sm" aria-hidden="true"></i>Parâmetros</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabMensagem_tab" data-bs-toggle="pill" href="#tabMensagem" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-envelope fa-sm" aria-hidden="true"></i>Mensagem</a></li>
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-2" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Conta</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("is_gerencial", "Conta Gerencial", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.is_gerencial, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("boleto_emissao", "Boleto (Emissão)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.boleto_emissao, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.Label("boleto_emissao", "Boleto (Cnab)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.boleto_cnab_retorno, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Empresa</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.razao_social, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.EditorFor(model => model.razao_social, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.nome_fantasia, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.EditorFor(model => model.nome_fantasia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.cnpj, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.cnpj, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+
+                                            @Html.LabelFor(model => model.telefone, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.telefone, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Endereço (Início) -->
+                            <div class="tab-pane fade" id="tabEndereco" role="tabpanel" aria-labelledby="tabEndereco_tab">
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>Dados do Endereço</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.endereco_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.endereco_com, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.bairro_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.bairro_com, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.id_cidade_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.cep_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.cep_com, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.id_uf_com, htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Endereço (Fim) -->
+                            <!-- Aba Conta (Início) -->
+                            <div class="tab-pane fade" id="tabConta" role="tabpanel" aria-labelledby="tabConta_tab">
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Conta</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.banco, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.banco, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.agencia, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.agencia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.dv_agencia, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.dv_agencia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.conta, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.conta, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.dv_conta, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.dv_conta, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.codigo_empresa, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.codigo_empresa, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.codigo_convenio, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.codigo_convenio, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.carteira, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.carteira, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.operacao, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.operacao, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.especie_moeda, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.especie_moeda, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.versao_layout, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.versao_layout, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.aceite, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.aceite, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Conta (Fim) -->
+                            <!-- Aba Parametros (Início) -->
+                            <div class="tab-pane fade" id="tabParametros" role="tabpanel" aria-labelledby="tabParametros_tab">
+
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Parâmetros da Conta</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.desconto_fixo, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.desconto_fixo, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.desconto_dia, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.desconto_dia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.multa_fixo, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.multa_fixo, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.LabelFor(model => model.multa_dia, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.multa_dia, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.protesto_automatico, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.protesto_automatico, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.LabelFor(model => model.protesto_dias, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start">
+                                                @Html.EditorFor(model => model.protesto_dias, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.contra_apresentacao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.contra_apresentacao, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                            @Html.LabelFor(model => model.valor_zerado, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                                <div class="form-check form-switch">
+                                                    @Html.CheckBoxFor(model => model.valor_zerado, new { @class = "form-check-input", role = "switch" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.local_pagamento, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.EditorFor(model => model.local_pagamento, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.logotipo_url, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.EditorFor(model => model.logotipo_url, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Parametros (Fim) -->
+                            <!-- Aba Mensagem (Início) -->
+                            <div class="tab-pane fade" id="tabMensagem" role="tabpanel" aria-labelledby="tabMensagem_tab">
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Mensagem</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.mensagem_cliente, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.TextAreaFor(model => model.mensagem_cliente, new { @class = "form-control", @rows = "4" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.LabelFor(model => model.mensagem_caixa, htmlAttributes: new { @class = " col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.TextAreaFor(model => model.mensagem_caixa, new { @class = "form-control", @rows = "4" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Mensagem (Fim) -->
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","ContasCaixas",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try {
+            if (isEmpty($('#nome').val().toString().trim()))
+            {
+                LibMessageAlert("Atenção", "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>");
+            }
+            else
+            {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#formCreateEdit_gContasCaixas").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+

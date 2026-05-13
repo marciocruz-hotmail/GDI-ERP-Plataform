@@ -1,0 +1,1637 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcMovimentosCreatePedido" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-1">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <input type="hidden" id="yesTipoSolicitacao" value="" name="yesTipoSolicitacao" />
+                    @Html.HiddenFor(model => model.id_movimento)
+                    @Html.HiddenFor(model => model.notifica_contatos_ids)
+                    @Html.HiddenFor(model => model.id_contato)
+                    @Html.HiddenFor(model => model.notifica_contatos_emails)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-body m-0 p-0" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgInfo as string, (ViewBag.MsgTipo as string) ?? "danger"))
+                        <div class="card-header m-0 p-1">
+                            <ul class="nav nav-tabs" id="pedidos-tabs" role="tablist">
+                                <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="pedidos-tabs" aria-selected="true"><i class="fa-solid fa-clipboard-check fa-lg me-2" aria-hidden="true"></i>Cotação/Pedido</a></li>
+                                <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabFrete_tab" data-bs-toggle="pill" href="#tabFrete" role="tab" aria-controls="pedidos-tabs" aria-selected="false"><i class="fa-solid fa-truck fa-lg me-2" aria-hidden="true"></i>Frete</a></li>
+                                <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabDadosComplementares_tab" data-bs-toggle="pill" href="#tabDadosComplementares" role="tab" aria-controls="pedidos-tabs" aria-selected="false"><i class="fa-solid fa-folder-plus me-2" aria-hidden="true"></i>Complemento</a></li>
+                                <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabFornecedorCotacao_tab" data-bs-toggle="pill" href="#tabFornecedorCotacao" role="tab" aria-controls="pedidos-tabs" aria-selected="false"><i class="fa-solid fa-boxes-packing me-2" aria-hidden="true"></i>Fornecedor</a></li>
+                                <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabInvoice_tab" data-bs-toggle="pill" href="#tabInvoice" role="tab" aria-controls="pedidos-tabs" aria-selected="false"><i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i>Invoice/SO</a></li>
+                                @if (@Model.id_movimento > 0)
+                                {
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabGED_tab" data-bs-toggle="pill" href="#tabGED" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-paperclip fa-lg me-2" aria-hidden="true"></i>Anexos</a></li>
+                                    if (@Model.id_movimento_posicao >= 6)
+                                    {
+                                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabPosVenda_tab" data-bs-toggle="pill" href="#tabPosVenda" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-medal me-2" aria-hidden="true"></i>Pós-Venda</a></li>
+                                    }
+                                    <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabAudit_tab" data-bs-toggle="pill" href="#tabAudit" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-magnifying-glass-arrow-right me-2" aria-hidden="true"></i>Audit</a></li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="tab-content" id="pedidos-tabs-content">
+
+                            <!-- Dados - Início -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card-body m-0 p-0" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Cotação/Pedido</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Tipo", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownList("id_movimento_tipo", ViewBag.comboTiposMovimentosCreateEdit as List<SelectListItem>, htmlAttributes: new { @id = "id_movimento_tipo", @class = "form-control", @title = "Cotação/Pedido/OS" })
+                                            </div>
+                                            @Html.Label("Vendedor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownList("id_vendedor", ViewBag.comboVendedores as List<SelectListItem>, htmlAttributes: new { @id = "id_vendedor", @class = "form-control", @title = "Vendedor" })
+                                            </div>
+                                            @Html.Label("Finalidade", "Finalidade", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownList("id_cfop_finalidade", ViewBag.comboCfopFinalidade as List<SelectListItem>, htmlAttributes: new { @id = "id_cfop_finalidade", @class = "form-control", @title = "Finalidade" })
+                                            </div>
+                                            @Html.Label("Estoque", "Estoque", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownList("id_local_estoque", ViewBag.comboLocaisEstoqueOrders as List<SelectListItem>, htmlAttributes: new { @id = "id_local_estoque", @class = "form-control", @title = "Estoque" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Data Venc", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @* id do .input-group distinto do input (data_vencimento) para Tempus Dominus *@
+                                                <div class='input-group date' id='ig_gc_mov_form_ped_create_venc'>
+                                                    @Html.EditorFor(model => model.data_vencimento, new { htmlAttributes = new { @class = "form-control", type = "text", @title = "Data de Vencimento" } })
+                                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                </div>
+                                            </div>
+                                            @Html.Label("Moeda", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownList("id_moeda", ViewBag.comboMoedas as List<SelectListItem>, htmlAttributes: new { @id = "id_moeda", @class = "form-control" })
+                                            </div>
+                                            @Html.Label("cotacao_dolar_venda", "US$. Pedido", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.cotacao_dolar_venda, new { htmlAttributes = new { @class = "form-control", @title = "Cotação Dolar do Pedido", @placeholder = "Cotação Dolar do Pedido" } })
+                                            </div>
+                                            @Html.Label("cotacao_dolar_oficial_venda", "US$. Oficial", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.cotacao_dolar_oficial_venda, new { htmlAttributes = new { @class = "form-control", @title = "Cotação Dolar Dia", @placeholder = "Cotação Dolar Dia" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("PagrecCondicao", "Pagto.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownList("id_pagrec_condicao", ViewBag.comboPagRecCondicoes as List<SelectListItem>, htmlAttributes: new { @id = "id_pagrec_condicao", @class = "form-control" })
+                                            </div>
+                                            @Html.Label("valor_total_adiantamento", "Adiant. (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.valor_total_adiantamento, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Adiantamento" } })
+                                            </div>
+                                            @Html.Label("id_cfop_operacao", "Operação", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList("id_cfop_operacao", ViewBag.comboGcCfopOperacao as List<SelectListItem>, htmlAttributes: new { @id = "id_cfop_operacao", @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Cliente", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownList("id_cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "id_cliente", @class = "form-control", @onfocus = "jsSetDadosCliente();", @onchange = "jsSetDadosCliente();", @onblur = "jsSetDadosCliente();" })
+                                            </div>
+                                            <div class="col-sm-2 mt-1">
+                                                <div class="form-check form-switch form-switch-lg">
+                                                    @Html.CheckBoxFor(model => model.has_beneficio_aviacao, htmlAttributes: new { @class = "form-check-input switch-success", @id = "has_beneficio_aviacao", role = "switch" })
+                                                    <label class="form-check-label" for="has_beneficio_aviacao" id="label_has_beneficio_aviacao">Benefício Aviação</label>
+                                                </div>
+                                            </div>
+                                            @Html.Label("prefixo", "Prefixo", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.aeronave_prefixo, new { htmlAttributes = new { @class = "form-control", @title = "Prefixo da Aeronave", @placeholder = "Prefixo da Aeronave" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("id_cliente_destinatario", "Destinatário", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownList("id_cliente_destinatario", ViewBag.comboClienteDestinatarios as List<SelectListItem>, htmlAttributes: new { @id = "id_cliente_destinatario", @class = "form-control" })
+                                            </div>
+                                            <div class="col-sm-2">
+                                                &nbsp;
+                                            </div>
+                                            @Html.Label("OC", "O.C.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.oc_numero, new { htmlAttributes = new { @class = "form-control", @title = "Nº da Ordem de Compra", @placeholder = "Nº da Ordem de Compra" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("obs", "Obs. Cotação", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.TextAreaFor(model => model.obs, new { @class = "form-control", @id = "obs", @rows = "2", @title = "Informações adicionais (internas)", @placeholder = "Informações adicionais (internas)" })
+                                            </div>
+                                            @Html.Label("informacoes_complementares_nf", "Obs. NF", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.TextAreaFor(model => model.informacoes_complementares_nf, new { @class = "form-control", @id = "informacoes_complementares_nf", @rows = "2", @title = "Informações complementares para a nota fiscal", @placeholder = "Informações complementares para a nota fiscal" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-body m-0 p-0" style="height: 100%">
+                                    <div class="card-body m-0 p-0" style="max-width: 100%; overflow-x: auto; ">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Itens da Cotação/Pedido</div>
+                                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcMovimentosCreatePedido">
+                                                    <thead>
+                                                        <tr>
+                                                            <th align="center" vertical-align="middle">[x]</th>
+                                                            <th>@Html.DisplayName("Id")</th>
+                                                            <th>@Html.DisplayName("Nº")</th>
+                                                            <th>@Html.DisplayName("Qtd")</th>
+                                                            <th>@Html.DisplayName("Produto")</th>
+                                                            <th>@Html.DisplayName("Unit")</th>
+                                                            <th>@Html.DisplayName("Total")</th>
+                                                            <th><i class="fa-solid fa-copy"></i></th>
+                                                            <th><i class="fa-regular fa-edit"></i></th>
+                                                            <th><i class="fa fa-trash"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tfoot align="right">
+                                                        <tr>
+                                                            <th align="right" colspan="6"></th>
+                                                            <th align="right">@Html.Label("label_total_pedido", "R$", htmlAttributes: new { @id = "label_total_pedido" })</th>
+                                                            <th align="right" colspan="3"></th>
+                                                        </tr>
+                                                    </tfoot>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body text-sm-center m-1 p-0">
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+
+                                                @if ((Model.id_movimento_posicao == 0) && (@Model.movimento_nf == false) && (Model.id_movimento == 0))
+                                                {
+                                                    <div class="btn-group" role="group">
+                                                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Carregar">
+                                                            <i class="fa-solid fa-file-import me-2" aria-hidden="true"></i>Carregar
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalSelecionarItensImportacao()"><i class="fa-solid fa-passport me-2" aria-hidden="true"></i>Adicionar Itens Importação</a>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportarExcelSC()"><i class="fa-regular fa-file-excel me-2" aria-hidden="true"></i>Importar Excel - Southern Cross</a>
+                                                            <div class="dropdown-divider"></div>
+                                                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportarTxtSC()"><i class="fa-regular fa-file-excel me-2" aria-hidden="true"></i>Importar Lista Itens</a>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="col-4">
+                                                @if ((Model.id_movimento_posicao == 0) && (@Model.movimento_nf == false))
+                                                {
+                                                    <button type="button" name="btnInserirItem" title="Inserir Itens" onclick="jsModalInserirItem()" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Inserir Itens</button>
+                                                }
+                                            </div>
+                                            <div class="col-4">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Dados - Fim -->
+                            <!-- Aba Frete - Início -->
+                            <div class="tab-pane fade" id="tabFrete" role="tabpanel" aria-labelledby="tabFrete_tab">
+                                <div class="card-body m-0 p-0" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Frete Principal</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("frete_valor", "Destacado (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete_valor, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete" } })
+                                            </div>
+                                            @Html.Label("frete_gerencial", "Gerencial (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete_gerencial, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete Gerencial" } })
+                                            </div>
+                                            @Html.Label("frete1_custo", "Custo (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete1_custo, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete" } })
+                                            </div>
+                                            @Html.Label("id_frete_responsavel", "Resp.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("frete1_transportadora", "Transp.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList("frete1_transportadora", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = "id_transportadora", @class = "form-control", @title = "Transportadora" })
+                                            </div>
+                                            @Html.Label("frete1_documento", "Nº Cotação", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete1_documento, new { htmlAttributes = new { @class = "form-control", @title = "Nº Cotação", @placeholder = "Nº Cotação" } })
+                                            </div>
+                                            @Html.Label("frete1_rastreio", "Nº Rastreio", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete1_rastreio, new { htmlAttributes = new { @class = "form-control", @title = "Nº Rastreio", @placeholder = "Nº Rastreio" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("frete_observacoes", "Observações", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.TextAreaFor(model => model.frete_observacoes, new { @class = "form-control", @id = "frete_observacoes", @rows = "2", @title = "Informações/Justificativas referente ao Frete", @placeholder = "Informações/Justificativas referente ao Frete" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Frete Complementar</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("frete2_transportadora", "Transp.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-5">
+                                                @Html.DropDownList("frete2_transportadora", ViewBag.comboTransportadoraComplementar as List<SelectListItem>, htmlAttributes: new { @id = "frete2_transportadora", @class = "form-control", @title = "Transportadora Complementar" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("frete2_custo", "Custo (R$)", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete2_custo, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete" } })
+                                            </div>
+                                            @Html.Label("frete2_documento", "Nº Cotação", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete2_documento, new { htmlAttributes = new { @class = "form-control", @title = "Nº Cotação", @placeholder = "Nº Cotação Complementar" } })
+                                            </div>
+                                            @Html.Label("frete2_rastreio", "Nº Rastreio", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.frete2_rastreio, new { htmlAttributes = new { @class = "form-control", @title = "Nº Rastreio", @placeholder = "Nº Rastreio Complementar" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Frete - Fim -->
+                            <!-- Aba Dados Complementares - Início -->
+                            <div class="tab-pane fade" id="tabDadosComplementares" role="tabpanel" aria-labelledby="tabDadosComplementares_tab">
+                                <div class="card-body m-0 p-0" style="height: 100%">
+
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header mb-2"><i class="fa-solid fa-note-sticky me-1" aria-hidden="true"></i>Negociação Específica (Observações)</div>
+                                        <div class="form-group row text-sm-end m-1 p-0 mb-2">
+                                            @Html.Label("obs_negociacao", "Obs", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(model => model.obs_negociacao, new { @class = "form-control", @id = "obs_negociacao", @rows = "5", @title = "Negociação Específica (Observações)", @placeholder = "Negociação Específica (Observações)" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header mb-2"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados Aeronave / ANAC</div>
+                                        <div class="form-group row text-sm-end m-1 p-0 mb-2">
+                                            @Html.Label("aeronave_modelo", "Modelo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.aeronave_modelo, new { htmlAttributes = new { @class = "form-control", @title = "Modelo Aeronave" } })
+                                            </div>
+                                            @Html.Label("aeronave_serie", "Série", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.aeronave_serie, new { htmlAttributes = new { @class = "form-control", @title = "Série da Aeronave" } })
+                                            </div>
+                                            @Html.Label("aeronave_registro", "Protocolo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.aeronave_registro, new { htmlAttributes = new { @class = "form-control", @title = "Registro da Aeronave" } })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header mb-2"><i class="fa-solid fa-receipt me-1" aria-hidden="true"></i>Dados da NFe</div>
+                                        <div class="form-group row text-sm-end m-1 p-0 mb-2">
+                                            @Html.Label("nf_chave_referenciada", "Chave NFe Referência", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.EditorFor(model => model.nf_chave_referenciada, new { htmlAttributes = new { @class = "form-control", @title = "Nome do cliente na Invoice" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba DadosComplementares - Fim -->
+                            <!-- Aba Fornecedor Cotacao - Início -->
+                            <div class="tab-pane fade" id="tabFornecedorCotacao" role="tabpanel" aria-labelledby="tabFornecedorCotacao_tab">
+                                <div class="card-body m-0 p-0" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Cotação no Fornecedor</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-2">
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-check form-switch form-switch-lg">
+                                                    @Html.CheckBoxFor(model => model.fornecedor_cotacao_solicitar, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_solicitar", role = "switch" })
+                                                    <label class="form-check-label" for="fornecedor_cotacao_solicitar" id="label_fornecedor_cotacao_solicitar">Solicitar Cotação Fornecedor</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check form-switch form-switch-lg">
+                                                    @Html.CheckBoxFor(model => model.fornecedor_cotacao_solicitada, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_solicitada", role = "switch" })
+                                                    <label class="form-check-label" for="fornecedor_cotacao_solicitada" id="label_fornecedor_cotacao_solicitada">Cotação Solicitada?</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check form-switch form-switch-lg">
+                                                    @Html.CheckBoxFor(model => model.fornecedor_cotacao_respondida, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_respondida", role = "switch" })
+                                                    <label class="form-check-label" for="fornecedor_cotacao_respondida" id="label_fornecedor_cotacao_respondida">Cotação Respondida?</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-check form-switch form-switch-lg">
+                                                    @Html.CheckBoxFor(model => model.fornecedor_cotacao_aprovada, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_aprovada", role = "switch" })
+                                                    <label class="form-check-label" for="fornecedor_cotacao_aprovada" id="label_fornecedor_cotacao_aprovada">Cotação Aprovada?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("fornecedor_cotacao_email", "Email Fornecedor", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.EditorFor(model => model.fornecedor_cotacao_email, new { htmlAttributes = new { @class = "form-control", @title = "Nome do cliente na Invoice" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("fornecedor_cotacao_obs", "Observações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-8">
+                                                @Html.TextAreaFor(model => model.fornecedor_cotacao_obs, new { @class = "form-control", @id = "frete_observacoes", @rows = "5", @title = "Informações/Justificativas/Observações para a Cotação no Fornecedor", @placeholder = "Informações/Justificativas/Observações para a Cotação no Fornecedor" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Fornecedor Cotacao - Fim -->
+                            <!-- Aba Invoice - Início -->
+                            <div class="tab-pane fade" id="tabInvoice" role="tabpanel" aria-labelledby="tabInvoice_tab">
+                                <div class="card-body m-0 p-0" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados das Invoices do cliente</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("invoice1_cliente", "Cliente", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.invoice1_cliente, new { htmlAttributes = new { @class = "form-control", @title = "Nome do cliente na Invoice" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("id_importacao", "Importação Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownList("id_importacao", ViewBag.ComboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = "id_importacao", @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("invoice1_numero", "Invoice Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.invoice1_numero, new { htmlAttributes = new { @class = "form-control", @title = "Invoice 1" } })
+                                            </div>
+                                            @Html.Label("salesorder1_numero", "Sales Order Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.salesorder1_numero, new { htmlAttributes = new { @class = "form-control", @title = "Sales Order 1" } })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("invoice2_numero", "Invoice Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.invoice2_numero, new { htmlAttributes = new { @class = "form-control", @title = "Invoice 2" } })
+                                            </div>
+                                            @Html.Label("salesorder2_numero", "Sales Order Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.salesorder2_numero, new { htmlAttributes = new { @class = "form-control", @title = "Sales Order 2" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("invoice3_numero", "Invoice Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.invoice3_numero, new { htmlAttributes = new { @class = "form-control", @title = "Invoice 3" } })
+                                            </div>
+                                            @Html.Label("salesorder3_numero", "Sales Order Nº", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.salesorder3_numero, new { htmlAttributes = new { @class = "form-control", @title = "Sales Order 3" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("valor_fob_scross", "FOB SCross (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.valor_fob_scross, new { htmlAttributes = new { @class = "form-control", @title = "FOB SCross (US$)" } })
+                                            </div>
+                                            @Html.Label("valor_fob_brasil", "FOB Brasil (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.valor_fob_brasil, new { htmlAttributes = new { @class = "form-control", @title = "FOB Brasil (US$)" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("cotacao_dolar_compra", "Cotação (US$) Compra", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.cotacao_dolar_compra, new { htmlAttributes = new { @class = "form-control", @title = "Cotação (US$) Compra" } })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba Invoice - Fim -->
+                            <!-- Aba GED - INÍCIO -->
+                            <div class="tab-pane fade" id="tabGED" role="tabpanel" aria-labelledby="tabGED_tab">
+                                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Anexos</div>
+                                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcMovimentosGed">
+                                                <thead>
+                                                    <tr>
+                                                        <th>@Html.Raw("Id.")</th>
+                                                        <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                                        <th>@Html.Raw("Tipo")</th>
+                                                        <th>@Html.Raw("Descrição")</th>
+                                                        <th>@Html.Raw("Arquivo")</th>
+                                                        <th>@Html.Raw("Data")</th>
+                                                        <th>@Html.Raw("Usuário")</th>
+                                                        <th><i class="fa-solid fa-paperclip" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Anexo"></i></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                            <div class="card-body text-sm-center m-0 p-1">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-6" style="text-align:center">
+                                                        <button type="button" name="btnUploadFilePedidos" title="Anexar Documentos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFilePedidos()"><i class="fa-solid fa-cloud-arrow-up fa-lg me-2" aria-hidden="true"></i>Anexar Documentos</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba GED - FIM -->
+                            <!-- Aba POSVENDA - INÍCIO -->
+                            <div class="tab-pane fade" id="tabPosVenda" role="tabpanel" aria-labelledby="tabPosVenda_tab">
+                                <div class="card-body m-0 p-0" style="max-width: 100%; overflow-x: auto; ">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-handshake me-1" aria-hidden="true"></i>Pós-Venda do Pedido</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("id_contato", "Contato", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.DropDownListFor(model => model.id_contato, ViewBag.ComboClientesContatos as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @onchange = "jsSetDadosContato();", @onblur = "jsSetDadosContato();" })
+                                            </div>
+                                            @Html.Label("contato_telefone", "Pessoa de Contato", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.contato_nome, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("contato_telefone", "Telefone/Celular", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.contato_telefone, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("email", "E-mail", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.EditorFor(model => model.contato_email, new { htmlAttributes = new { @class = "form-control", @title = "E-mail", @placeholder = "E-mail" } })
+                                            </div>
+                                            @Html.Label("datahora_contato", "Data Contato", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            <div class="col-sm-2">
+                                                <div class='input-group date' id='ig_gc_mov_form_ped_create_contato'>
+                                                    @Html.EditorFor(model => model.posvenda_datahora_contato, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+                                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Checklist de Recebimento</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_pedido_recebido, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_pedido_recebido"><b>Pedido Recebido?</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_recebimento_conforme_combinado, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_recebimento_conforme_combinado"><b>Conforme Combinado?</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_mercadoria_estado_fisico_ok, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_mercadoria_estado_fisico_ok"><b>Estado Físico OK?</b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_itens_correspondem_pedido_nf, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_itens_correspondem_pedido_nf"><b>Itens x Pedido/NF?</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_informacoes_tecnicas_ok, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_informacoes_tecnicas_ok"><b>Informações Técnicas OK?</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_documentacao_correta, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_documentacao_correta"><b>Documentação Correta?</b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-10 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_houve_dificuldade_documentacao, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_houve_dificuldade_documentacao"><b>Dificuldade na Documentação?</b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("observacao_recebimento_pedido", "Obs Recebimento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(model => model.posvenda_observacao_recebimento_pedido, new { @class = "form-control", @id = "observacao_recebimento_pedido", @rows = "3", @title = "Observações do recebimento", @placeholder = "Observações do recebimento" })
+                                            </div>
+                                        </div>
+
+
+                                        <div class="section-header"><i class="fa-solid fa-note-sticky me-1" aria-hidden="true"></i>Notas Avaliações (1 a 5)</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("posvenda_nota_avaliacao_prazo_entrega", "Prazo Entrega?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.posvenda_nota_avaliacao_prazo_entrega, new { htmlAttributes = new { @class = "form-control", @title = "Nota prazo de entrega" } })
+                                            </div>
+                                            @Html.Label("posvenda_nota_avaliacao_clareza_informacoes_comerciais", "Informações Comerciais?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.posvenda_nota_avaliacao_clareza_informacoes_comerciais, new { htmlAttributes = new { @class = "form-control", @title = "Nota clareza das informações comerciais" } })
+                                            </div>
+                                            @Html.Label("posvenda_nota_avaliacao_atendimento_equipe", "Atendimento Equipe?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.posvenda_nota_avaliacao_atendimento_equipe, new { htmlAttributes = new { @class = "form-control", @title = "Nota atendimento da equipe" } })
+                                            </div>
+                                            @Html.Label("posvenda_nota_avaliacao_geral", "Nota Geral?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.posvenda_nota_avaliacao_geral, new { htmlAttributes = new { @class = "form-control", @title = "Nota geral" } })
+                                            </div>
+                                        </div>
+                                        <div class="section-header"><i class="fa-solid fa-receipt me-1" aria-hidden="true"></i>Não Conformidade e Melhoria</div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_pedido_nao_conforme, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_pedido_nao_conforme"><b>Apresentou Não Conformidade?</b></label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                            </div>
+                                            <div class="col-sm-2 text-sm-start">
+                                                <div class="form-check form-switch mt-1">
+                                                    @Html.CheckBoxFor(model => model.posvenda_cliente_sugeriu_melhoria, new { @class = "form-check-input", role = "switch" })
+                                                    <label class="form-check-label" for="posvenda_cliente_sugeriu_melhoria"><b>Cliente Sugeriu Melhoria?</b></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("posvenda_descricao_nao_conformidade", "Descrição Não Conformidade", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(model => model.posvenda_descricao_nao_conformidade, new { @class = "form-control", @id = "descricao_nao_conformidade", @rows = "3", @title = "Descrição da não conformidade", @placeholder = "Descrição da não conformidade" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("posvenda_descricao_sugestao_melhoria", "Sugestão Melhoria", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(model => model.posvenda_descricao_sugestao_melhoria, new { @class = "form-control", @id = "descricao_sugestao_melhoria", @rows = "3", @title = "Sugestão de melhoria", @placeholder = "Sugestão de melhoria" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("posvenda_observacoes_internas", "Observações Internas", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(model => model.posvenda_observacoes_internas, new { @class = "form-control", @id = "observacoes_internas", @rows = "3", @title = "Observações internas", @placeholder = "Observações internas" })
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+
+                                <div class="card-body text-sm-center m-1 p-0">
+                                    <div class="row justify-content-center">
+                                        <button type="button" name="btnSavePosVenda" title="Nova Tarefa" onclick="jsAjaxPosVendaPedido()" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa-solid fa-medal me-2" aria-hidden="true"></i>Salvar Avaliação Pós-Venda</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba POSVENDA - FIM -->
+                            <!-- Aba AUDIT - INÍCIO -->
+                            <div class="tab-pane fade" id="tabAudit" role="tabpanel" aria-labelledby="tabAudit_tab">
+                                <div class="card-body m-0 p-0" style="max-width: 100%; overflow-x: auto; ">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Trilha de Auditoria</div>
+                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAudit">
+                                            <thead>
+                                                <tr>
+                                                    <th>@Html.Raw("Data/Hora")</th>
+                                                    <th>@Html.Raw("Audit Trail")</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba AUDIT - FIM -->
+
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    @if ((Model.id_movimento_posicao == 0) && (@Model.movimento_nf == false))
+                    {
+                        <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                        <button type="button" name="btnSalvar" title="Salvar" class="btn btn-success float-end d-inline-flex align-items-center gap-2" onclick="jsCheckSavePedido(1)"><i class="fa fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                    }
+                    else
+                    {
+                        <button type="button" name="btnSair" title="Sair" class="btn btn-info float-end d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })')"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Sair</button>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    var oTableGcMovimentosCreatePedido;
+    var otableGcMovimentosAudit;
+    var otableGcMovimentosTarefas;
+    var otableGcMovimentosGed;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsDatepicker('#ig_gc_mov_form_ped_create_venc');
+            jsDatepicker('#ig_gc_mov_form_ped_create_contato');
+            $('#cotacao_dolar_oficial_venda').attr('readonly', 'readonly');
+            jsSetDadosCliente();
+            jsCreateTableGcMovimentos();
+            jsSetCamposReadOnly(1);
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            if ('@Model.movimento_nf'.toLowerCase() == 'true')
+            {
+                LibMessageAlert("<b>Atenção</b>", "Prezado usuário,<br/>Os dados desse movimento <b>NÃO</b> poderão ser alterados,<br/>Existem Notas Fiscais relacionadas!");
+            }
+            else if ((@Model.id_movimento_status > 1) || (@Model.id_movimento_posicao > 0))
+            {
+                LibMessageAlert("<b>Atenção</b>", "Prezado usuário,<br/>Esse Pedido encontra-se <b>BLOQUEADO</b> para alterações!");
+            }
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsSetCamposReadOnly(disable)
+    {
+        try
+        {
+            if (disable == 1)
+            {
+                if (@Model.id_movimento > 0)
+                {
+                    $('#id_moeda').attr('disabled', true);
+                }
+            }
+            else
+            {
+                $('#id_moeda').attr('disabled', false);
+            }
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsSetCampos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSetDadosCliente()
+    {
+        try
+        {
+            $("#id_cliente_destinatario").empty();
+            if ($("#id_cliente").val() > 0)
+            {
+                var dataForm =
+                {
+                    view_g_clientes:
+                    {
+                        'id_cliente': $("#id_cliente").val(),
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxDadosClientesDestinatarios", "Movimentos", new { area = "gc" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result)
+                    {
+                        if (result.success == true)
+                        {
+                            var array = result.dataSetClientesDestinatarios;
+
+                            if (array.length > 0)
+                            {
+                                for (var i = 0; i < array.length; i++)
+                                {
+                                    if ((@Model.id_cliente_destinatario > 0) && (@Model.id_cliente_destinatario == array[i].id_cliente_destinatario)) {
+                                        $("#id_cliente_destinatario").append('<option value="' + array[i].id_cliente_destinatario + '" selected>' + "[ " + array[i].nome + " ]" + '</option>');
+                                    }
+                                    else {
+                                        $("#id_cliente_destinatario").append('<option value="' + array[i].id_cliente_destinatario + '">' + "[ " + array[i].nome + " ]" + '</option>');
+                                    }
+                                }
+                                $("#id_cliente_destinatario ").val(@Model.id_cliente_destinatario).change();
+                            }
+                            else
+                            {
+                                $("#id_cliente_destinatario").empty();
+                            }
+                        }
+                        else
+                        {
+                            $("#id_cliente_destinatario").empty();
+                        }
+
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown || textStatus || '', { hideProcessando: false }); }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", err != null ? String(err) : "");
+        }
+    }
+
+
+    function jsCreateTableGcMovimentos()
+    {
+        try
+        {
+            if (oTableGcMovimentosCreatePedido == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                oTableGcMovimentosCreatePedido = $('#dtGcMovimentosCreatePedido').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { document.getElementById("label_total_pedido").innerHTML = json.yesDisplayField01; }).dataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosItensPedido", "Movimentos", new { area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesCustomIdPK: '@ViewBag.idMovimento',
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 100,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "3%", orderable: false, className: 'text-sm-center align-middle', targets: [0], render: DataTable.render.select() },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "3%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "58%", orderable: false, className: 'text-sm-start', targets: [4] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [5] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [6] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDuplicateRow" title="Duplicar item ' + data[4] + '" class="btn btn-outline-info btn-sm p-1 btnDuplicateRow d-inline-flex align-items-center" onclick="jsDuplicateRow(' + data[1] + ');"><i class="fa-solid fa-copy"></i></button>' } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditRow" title="Editar item ' + data[4] + '" class="btn btn-outline-warning btn-sm p-1 btnEditRow d-inline-flex align-items-center" onclick="jsEditRow(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [9], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDelRow" title="Excluir item ' + data[4] + '" class="btn btn-outline-danger btn-sm p-1 btnDelRow d-inline-flex align-items-center" onclick="jsDeleteRow(' + data[1] + "," + "\'" + data[3] + "\'" + ');"><i class="fa fa-trash"></i></button>' } }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsEditRow(id)
+    {
+        try
+        {
+            if ((@Model.id_movimento_posicao == 0) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalEditarItem", "Movimentos", new { area = "gc" })?IdItem=' + id, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+            else
+            {
+                LibMessageAlert("Atenção", "Alteração não permitida!");
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsDuplicateRow(id)
+    {
+        try {
+            if ((@Model.id_movimento_posicao == 0) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalDuplicateItem", "Movimentos", new { area = "gc" })?idMovimentoItem=' + id, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+            else
+            {
+                LibMessageAlert("Atenção", "Alteração não permitida!");
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsDuplicateRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsDeleteRow(id, produto)
+    {
+        try {
+            if ((@Model.id_movimento_status <= 2) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
+            {
+                GdiSwal2.dialog({
+                    title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                    message: "Confirma a exclusão do item ?" + "<br/><br/>" + "<b>" + produto + "</b>",
+                    closeButton: false,
+                    centerVertical: true,
+                    onEscape: false,
+                    backdrop: true,
+                    buttons: {
+                        cancelar: {
+                            label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                            className: 'btn-outline-warning',
+                            callback: function () {
+                                GdiSwal2.hideAll();
+                            }
+                        },
+                        confirmar: {
+                            label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                            className: 'btn-outline-success',
+                            callback: function ()
+                            {
+                                jsAjaxDeleteItem(id);
+                            }
+                        }
+                    }
+                });
+            }
+            else
+            {
+                LibMessageAlert("Atenção", "Exclusão não permitida!");
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsDeleteRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxDeleteItem(id)
+    {
+        try {
+            LibMessageProcessando("");
+            var dataForm =
+            {
+                record_gc_movimento_item:
+                {
+                    'id_movimento_item': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxRemoverItem", "Movimentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        $("#dtGcMovimentosCreatePedido").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxDeleteItem] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsCheckSavePedido(acao) // Acao | 1 - Salvar | 2 = Visualizar
+    {
+        try
+        {
+            var $tbl = $("#dtGcMovimentosCreatePedido");
+            var qtdItens = ($.fn.DataTable.isDataTable($tbl) ? $tbl.DataTable().page.info().recordsTotal : 0);
+            if ((qtdItens > 0)
+            && (document.getElementById("id_cliente").value != null)
+            && (document.getElementById("id_cliente").value != "")
+            && (document.getElementById("id_cliente").value != "-1")
+            && (document.getElementById("id_cliente").value != undefined))
+            {
+                if (acao == 1) { jsAjaxSavePedido(); }
+                else if (acao == 2) { jsAjaxVisualizarPedido(); };
+            }
+            else
+            {
+                LibMessageAlert("Atenção", "Verifique os seguintes campos:<br/><br/>" + "- Informe os itens!<br/>" + "- Informe o cliente!<br/>");
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckSavePedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxSavePedido()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            jsSetCamposReadOnly(0);
+            var form = $('#FormGcMovimentosCreatePedido');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxSavePedido", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    if (result.success == true)
+                    {
+                        LibMessageProcessandoHide();
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            size: 'extra-large',
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                        jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        jsSetCamposReadOnly(1);
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    jsSetCamposReadOnly(1);
+                    GdiAjaxNotifyInconsistencias(result.msg);
+               }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxSavePedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxPosVendaPedido()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            jsSetCamposReadOnly(0);
+            var form = $('#FormGcMovimentosCreatePedido');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxSavePosVenda", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    if (result.success == true)
+                    {
+                        LibMessageProcessandoHide();
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            size: 'extra-large',
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        GdiSwal2.hideAll();
+                                        jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        jsSetCamposReadOnly(1);
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    jsSetCamposReadOnly(1);
+                    GdiAjaxNotifyInconsistencias(result.msg);
+               }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxSavePedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsModalInserirItem()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var idMovimento = '@ViewBag.idMovimento';
+            var IdMoeda = $('#id_moeda').val();
+            var IdCliente = document.getElementById("id_cliente").value;
+            $("#mainModal").load('@Url.Action("ModalInserirItem", "Movimentos", new { area = "gc" })?idMovimento=' + idMovimento + '&IdMoeda=' + IdMoeda + '&IdCliente=' + IdCliente, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsModalInserirItem] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalSelecionarItensImportacao()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var idMovimento = '@ViewBag.idMovimento';
+            $("#mainModal").load('@Url.Action("ModalInvoicesItensEspelhoDigital", "Movimentos", new { area = "gc" })?idMovimento=' + idMovimento, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalInserirItem] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalImportarExcelSC()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalImportarExcelSC", "Movimentos", new { Area = "gc" })?id=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarExcelSC] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalImportarTxtSC()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalImportarTxtSC", "Movimentos", new { Area = "gc" })?id=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarTxtSC] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+
+    function jsModalCreateEditTarefa(IdTarefa)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditGcTarefa", "Tarefas", new { Area = "gc" })?IdTarefa=' + IdTarefa+'&IdMovimento='+@Model.id_movimento, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarTxtSC] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    $('#tabAudit_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableGcMovimentosAudit == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGcMovimentosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetAuditTrail", "Audit", new { area = "a" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_movimento').val().toString(),
+                                yesCustomField01: "gc_movimentos",
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 20,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "8%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "92%", orderable: false, className: 'text-sm-start', targets: [1] }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabAudit_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $('#tabGED_tab').on('click', function (e)
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            if (otableGcMovimentosGed == null)
+            {
+                otableGcMovimentosGed = $('#dtGcMovimentosGed').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetGedPedido", "Movimentos", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_movimento').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [1], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDesativarAnexo" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar o Anexo ' + data[3] + '" class="btn btn-outline-danger btn-sm p-1 btnDesativarAnexo d-inline-flex align-items-center" onclick="jsDesativarAnexo(' + data[0] + ');"><i class="fa-solid fa-power-off"></i></button>' } },
+                        { "width": "26%", orderable: false, className: 'text-sm-start', targets: [2] },
+                        { "width": "24%", orderable: false, className: 'text-sm-start', targets: [3] },
+                        { "width": "24%", orderable: false, className: 'text-sm-start', targets: [4] },
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [5] },
+                        { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir anexo ' + data[3] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + data[0] + ');"><i class="fa-regular fa-file-lines"></i></button>' } }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabGED_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $('#tabTarefas_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableGcMovimentosTarefas == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGcMovimentosTarefas = $('#dtGcTarefasPedido').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosRequisicoesPedidos", "Tarefas", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_movimento').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 20,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "5%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "55%", orderable: false, className: 'text-sm-start', targets: [2] },
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [3] },
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [4] },
+                        { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [5], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditTarefa" title="Editar Tarefa ' + data[0] + '" class="btn btn-outline-warning btn-sm p-1 btnEditTarefa d-inline-flex align-items-center" onclick="jsModalCreateEditTarefa(' + data[0] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabAudit_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsModalUploadFilePedidos()
+    {
+        try
+        {
+            LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalUploadFilePedidos", "Movimentos", new { area = "gc" })?IdMovimento=' +@Model.id_movimento+"&tag=FormPedidoCreate", function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsDownloadFile(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsDesativarAnexo(id) {
+        try {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                message: "Deseja REALMENTE DESATIVAR esse arquivo anexo ?" + "<br/><br/>" + "<b>Atenção:</b> O Log dessa operação ficará armazenado no banco de dados para futuras auditorias!",
+                closeButton: false,
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons: {
+                    cancelar: {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function () {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar: {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function () {
+                            jsAjaxDesativarAnexo(id);
+                        }
+                    }
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsAjaxDesativarAnexo(id)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var dataForm =
+            {
+                ModalGedArquivo:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDesativarAnexo", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        $("#dtGcMovimentosGed").DataTable().draw(false);
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        GdiSwal2.hideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+
+</script>

@@ -1,0 +1,136 @@
+@model GdiPlataform.Db.g_contratos_aviacao 
+@using GdiPlataform.Security
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/themes/default/style.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/css/adminlte.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/fontawesome-free-7.2.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css" rel="stylesheet" />
+    <title></title>
+    <style type="text/css">
+        table tr.page-break {
+            page-break-after: always
+        }
+    </style>
+</head>
+<body>
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th style="width: 30%; vertical-align:middle">
+                            <p class="float-start">
+                                <h4>
+                                    <img src="@ViewBag.ImgLogoSubdominio" style="height:100px;width:200px;" />
+                                </h4>
+                            </p>
+                        </th>
+                        <th style="width: 70%; vertical-align:middle; text-align:left">
+                            <p style="font-size:20px">GDI IMPORTAÇÃO E COMÉRCIO DE PECAS AERONÁUTICAS LTDA</p>
+                        </th>
+                    <tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <br />
+
+    <div class="col-lg-12" style="font-size: 16px; width: 100%;">
+        <b>TERMO CONTRATUAL DE PRESTAÇÃO DE SERVIÇOS DE REPARO, REVISÃO E MANUTENÇÃO DE AERONAVES, SUAS PARTES E PEÇAS E FORNECIMENTO DE PEÇAS AERONÁUTICAS</b>
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 16px; width: 100%; text-align: center; color: #FF0000;">
+        <b>CONTRATO @ViewBag.ContratoNumero</b>
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>GDI IMPORTAÇÃO E COMÉRCIO DE PECAS AERONÁUTICAS LTDA</b>, inscrita no CNPJ sob n.º 10.623.303/0001-14, estabelecida na Rua Ignacinho Alvarenga, 35 - Venda Nova, Belo Horizonte - MG, CEP 31610-015, registrada na ANAC- Agência Nacional de Aviação Civil do Ministério da Defesa, sob o nr. COM 109-32/ANAC, doravante denominada <b><u>CONTRATADA</u></b> e,
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>@ViewBag.ContratanteNome</b>, devidamente inscrita sob CNPJ/CPF: @ViewBag.ContratanteDocumento, doravante denominada <b><u>CONTRATANTE</u></b>, em cumprimento conforme disposto no decreto 7.044/09 art.174 Parágrafos I e II, sob as cláusulas e condições seguintes:
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>CLÁUSULA PRIMEIRA – OBJETO CONTRATUAL</b>
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        O presente contrato tem por objeto a prestação de serviços de reparo, revisão e manutenção de aeronaves, reposição e fornecimento de peças aeronáuticas, por parte da <b><u>CONTRATADA</u></b> a expensas da <b><u>CONTRATANTE</u></b>, vinculado ao prefixo da aeronave ou registro do equipamento que utilizará o serviço e/ou peça.
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>CLÁUSULA SEGUNDA – MATERIAL DE TROCA E CONSUMO</b>
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        O material de troca e consumo necessários à realização dos serviços orçados será fornecido exclusivamente pela <b><u>CONTRATADA</u></b> e será faturado mediante aprovação de orçamento e/ou ordem de serviços apresentados por escrito à <b><u>CONTRATANTE</u></b>.
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>Parágrafo Primeiro:</b> Aprovado o orçamento e/ou ordem de serviços, da forma como disposto no caput, bem como as condições de pagamento, a <b><u>CONTRATADA</u></b> se reserva ao direito de dar início ao procedimento de reposição de peças e materiais demandados.
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>CLÁUSULA TERCEIRA – RESCISÃO</b>
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        O presente contrato é celebrado por prazo indeterminado. Ambas as partes poderão rescindi-lo a qualquer momento, desde que exista a comunicação prévia de no mínimo 15 (quinze) dias de antecedência.
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        E por estarem assim justos e contratados, assinam o presente instrumento em duas vias de igual valor e forma, para um só efeito, perante as duas testemunhas que assinam a tudo presentes.
+    </div>
+    <br />
+    <div class="col-lg-12" style="font-size: 14px; width: 100%;">
+        <b>Prefixo (s) da (s) aeronave (s):</b>
+        <br />
+        <b>@ViewBag.ContratanteIdentificador</b>
+    </div>
+    <br />
+    <br />
+    <br />
+    <div class="col-lg-12 m-0 p-0">
+        <table class="table table-borderless">
+            <thead>
+                <tr>
+                    <th style="width: 50%; font-size: 12px; vertical-align: middle; text-align: center">
+                        <p class="float-center">
+                            [Assinatura Eletrônica]<br />
+                            --------------------------------------------------<br />
+                            @ViewBag.SignatarioNome<br />
+                            @ViewBag.SignatarioDocumento<br />
+                            [CONTRATANTE]<br />
+                        </p>
+                    </th>
+                    <th style="width: 50%; font-size: 12px; vertical-align: middle; text-align: center">
+                        <p class="float-center">
+                            <h4>
+                                <img src="@ViewBag.imgAssinaturaContratada" style="height:100px;width:200px;" />
+                            </h4>
+                        </p>
+                    </th>
+                <tr>
+            </thead>
+        </table>
+    </div>
+    <div class="row">
+        <br />
+        <div class="col-lg-12" style="font-size: 12px; width: 100%; text-align: center; color: #777; border-top: 1px solid #aaa; padding: 8px 0">
+            Rua Ignacinho Alvarenga, 35 - Venda Nova<br />
+            Cep 31610-015 - Belo Horizonte - MG<br />
+            Fone (31) 34119159<br />
+            https://www.gdiaviacao.com/contato<br />
+            COM 109-32/ANAC
+        </div>
+    </div>
+</body>
+</html>
+
+

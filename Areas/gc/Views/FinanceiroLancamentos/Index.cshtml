@@ -1,0 +1,810 @@
+@model GdiPlataform.Areas.g.Models.cstModalFiltroAvancado
+@using GdiPlataform.Security
+@functions {
+    private static bool GcFinanceiroLancamentosHasRole(string role)
+    {
+        var ui = CachePersister.userIdentity;
+        return ui != null && ui.Roles != null && ui.Roles.Contains(role);
+    }
+}
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="GcIndexFinanceiroLancamentos" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1 d-flex flex-wrap align-items-center gap-1">
+                @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actioncreate"))
+                {
+                    <button type="button" name="btnNovoCredito" title="Novo Crédito" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateLancamento(2)"><i class="fa-solid fa-sack-dollar me-2" aria-hidden="true"></i>Novo Crédito</button>
+                    <button type="button" name="btnNovoDebito" title="Novo Débito" class="btn btn-outline-danger d-inline-flex align-items-center gap-2" onclick="jsModalCreateLancamento(1)"><i class="fa-solid fa-money-bills me-2" aria-hidden="true"></i>Novo Débito</button>
+                }
+                @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionrun") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_ExportarLancamentosExcel"))
+                {
+                    if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actioncreate"))
+                    {<div class="vr mx-1 align-self-stretch"></div> }
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+
+                            @if (CachePersister.userIdentity != null && CachePersister.userIdentity.IdUsuario == 1)
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsAjaxRoboItau()"><i class="fa-brands fa-bots me-2" aria-hidden="true"></i><b>Robô Itaú</b></a>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-divider"></div>
+                            }
+                            @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionrun") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_ExportarLancamentosExcel"))
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsAjaxExportarLancamentosExcel()"><i class="fa-regular fa-file-excel me-2" aria-hidden="true"></i><b>Exportar</b>&nbsp;Lançamentos&nbsp;para&nbsp;Excel</a>
+                                <div class="dropdown-divider"></div>
+                            }
+                            @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionrun"))
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalDuplicarLancamentos(OTableGcFinanceiroLancamentosIndex, 'Id.')"><i class="fa-regular fa-copy me-2" aria-hidden="true"></i><b>Duplicar</b>&nbsp;Lançamento</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalBaixarLancamentos(OTableGcFinanceiroLancamentosIndex, 'Id.')"><i class="fa-solid fa-stamp me-2" aria-hidden="true"></i><b>Baixar</b>&nbsp;Lançamento</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarLancamentos(OTableGcFinanceiroLancamentosIndex, 'Id.')"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i><b>Cancelar</b>&nbsp;Lançamento</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalGerarBoletoLancamentoAvulso(OTableGcFinanceiroLancamentosIndex, 'Id.')"><i class="fa-regular fa-credit-card fa-lg me-2" aria-hidden="true"></i><b>Gerar Boleto</b>&nbsp;Lançamento</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsFinanceiroLancamentoBoleto(OTableGcFinanceiroLancamentosIndex, 'Id.')"><i class="fa-regular fa-file-pdf fa-lg me-2" aria-hidden="true"></i><b>Download Boleto</b>&nbsp;Lançamento</a>
+                            }
+                        </div>
+                    </div>
+                }
+
+
+                @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionrun") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_ExportarLancamentosExcel"))
+                {
+                    <div class="vr mx-1 align-self-stretch"></div>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop2" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Relatórios">
+                            <i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i>Relatórios
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop2">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsAjaxPosicaoAtualContaCaixa()"><i class="fa-solid fa-money-bills me-2" aria-hidden="true"></i><b>Contas Caixas</b>&nbsp;&nbsp;-&nbsp;&nbsp;Posição Atual</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalRelatorioContaCaixaSaldoDiario()"><i class="fa-regular fa-file-excel me-2" aria-hidden="true"></i><b>Relatório</b>&nbsp;&nbsp;--&nbsp;&nbsp;Extrato Diário</a>
+                        </div>
+                    </div>
+                }
+                <h6><span class="badge bg-secondary">@Html.Label("label_saldo", "R$", htmlAttributes: new { @id = "label_saldo" })</span></h6>
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Conta Caixa", htmlAttributes: new { @class = "col-form-label col-sm-1"})
+                        <div class="col-sm-3">
+                            @Html.DropDownListFor(model => model.Field_Text_01, ViewBag.comboContasCaixaGerencial as List<SelectListItem>, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                        </div>
+                        @Html.Label("Pagto", new { @class = "col-sm-1 col-form-label" })
+                        
+                        <div class="col-sm-2">
+                            @* id do .input-group distinto do input (EditorFor) para Tempus Dominus *@
+                            <div class='input-group date' id='ig_gc_fin_lancamentos_idx_d1'>
+                                @Html.EditorFor(model => model.Field_Data_01, new { htmlAttributes = new { @class = "form-control", type = "text", @onkeypress = "keypressed(event);" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-sm-2">
+                            <div class='input-group date' id='ig_gc_fin_lancamentos_idx_d2'>
+                                @Html.EditorFor(model => model.Field_Data_02, new { htmlAttributes = new { @class = "form-control", type = "text", @onkeypress = "keypressed(event);" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+
+                        @Html.Label("Status", "Status", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                    <div class="col-sm-2">
+                        @Html.DropDownListFor(model => model.Field_Text_02, ViewBag.comboFinanceiroFiltroStatus as List<SelectListItem>, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                    </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Descrição", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.Field_Text_03, new { htmlAttributes = new { @class = "form-control", @placeholder = "Descrição", @onkeypress = "keypressed(event);" } })
+                        </div>
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-1">
+                            @Html.EditorFor(model => model.Field_Text_04, new { htmlAttributes = new { @class = "form-control", @placeholder = "Id.", @onkeypress = "keypressed(event);" } })
+                        </div>
+                        @Html.Label("Doc", "Doc.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.Field_Text_05, new { htmlAttributes = new { @class = "form-control", @placeholder = "Nº Documento", @onkeypress = "keypressed(event);" } })
+                        </div>
+                        @Html.Label("R$ Valor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.Field_Text_06, new { htmlAttributes = new { @class = "form-control", @placeholder = "R$ Valor", @onkeypress = "keypressed(event);" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", "Cli./For.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-6">
+                            @Html.DropDownListFor(model => model.Field_Text_07, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                        </div>
+                        @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.DropDownListFor(model => model.Field_Text_08, ViewBag.comboFiltroCst01 as List<SelectListItem>, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                        </div>
+                        <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFinanceiroLancamentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                    <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="DtGcFinanceiroLancamentosIndex">
+                        <thead>
+                            <tr>
+                                <th>[TableRowColor]</th>
+                                <th>[x]</th>
+                                <th>@Html.Encode("Id.")</th>
+                                <th>@Html.Encode("CC")</th>
+                                <th><i class="fa-solid fa-cash-register" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Crédito/Débito"></i></th>
+                                <th><i class="fa-solid fa-folder" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Status (Aberto/Liquidado/Cancelado)"></i></th>
+                                <th><i class="fa-solid fa-layer-group" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Categoria"></i></th>
+                                <th>@Html.Encode("Pagto.")</th>
+                                <th>@Html.Encode("Venc.")</th>
+                                <th>@Html.Encode("Doc.")</th>
+                                <th>@Html.Encode("Cliente/Fornecedor")</th>
+                                <th>@Html.Encode("R$ Total")</th>
+                                <th>@Html.Encode("R$ Pago")</th>
+                                <th></th>
+                                <th><i class="fa-solid fa-paperclip" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos"></i></th>
+                                <th><i class="fa-regular fa-edit" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Lançamento"></i></th>
+                            </tr>
+                        </thead>
+                        <tfoot align="right">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+
+                    @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionrun"))
+                    {
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            <div class="col-sm-1 text-sm-center" style="margin-top:10px">
+                                @Html.CheckBox("hide", new { @id = "hide_gerencial", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })&nbsp;&nbsp;Flag
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var OTableGcFinanceiroLancamentosIndex;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsDatepicker('#ig_gc_fin_lancamentos_idx_d1');
+            jsDatepicker('#ig_gc_fin_lancamentos_idx_d2');
+            jsCreateTableGcFinanceiroLancamentosIndex();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressed(e) {
+        if (e.keyCode == 13) { e.preventDefault(); jsAjaxPesquisarFinanceiroLancamentos(); }
+    }
+
+    function jsCreateTableGcFinanceiroLancamentosIndex()
+    {
+        try
+        {
+            if (OTableGcFinanceiroLancamentosIndex == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                OTableGcFinanceiroLancamentosIndex = $('#DtGcFinanceiroLancamentosIndex').css("font-size", 14)
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('xhr.dt', function (e, settings, json, xhr) { jsUpdateDataView(json.yesDisplayField01, json.yesFilterOnOff); GdiDtNotifyJsonErrorMessage(json); })
+                    .DataTable({
+                    "drawCallback": function (settings) {
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    },
+                    "footerCallback": function (row, data, start, end, display) {
+                        var api = this.api(), data;
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+                        LibMessageProcessandoHide();
+                    },
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosLancamentos","FinanceiroLancamentos",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesCustomField01: emptyIfNull($('#Field_Text_01').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#Field_Text_02').val()).toString(),
+                            yesCustomField03: emptyIfNull($('#Field_Text_03').val()).toString(),
+                            yesCustomField04: emptyIfNull($('#Field_Text_04').val()).toString(),
+                            yesCustomField05: emptyIfNull($('#Field_Text_05').val()).toString(),
+                            yesCustomField06: emptyIfNull($('#Field_Text_06').val()).toString(),
+                            yesCustomField07: emptyIfNull($('#Field_Text_07').val()).toString(),
+                            yesCustomField08: emptyIfNull($('#hide_gerencial:checked').val()).toString(),
+                            yesCustomField09: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_fin_lancamentos_idx_d1')),
+                            yesCustomField10: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_fin_lancamentos_idx_d2')),
+                            yesCustomField11: emptyIfNull($('#Field_Text_08').val()).toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 100,
+                scrollX: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "2%", visible: false, targets: [0] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [1], render: DataTable.render.select() },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "2%", orderable: false, className: 'text-sm-center', targets: [6] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [7] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [8] },
+                    { "width": "6%", orderable: false, className: 'text-sm-center', targets: [9] },
+                    { "width": "39%", orderable: false, className: 'text-sm-start', targets: [10] },
+                    { "width": "7%", orderable: false, className: 'text-sm-end', targets: [11] },
+                    { "width": "7%", orderable: false, className: 'text-sm-end', targets: [12] },
+                    { "width": "1%", orderable: false, className: 'text-sm-end', targets: [13] },
+                    { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [14], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCIndexFinanceiroAnexos" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos do Lançamento Financeiro Nº ' + data[2] + '" class="btn btn-outline-info btn-sm p-1 btnGCIndexFinanceiroAnexos d-inline-flex align-items-center" onclick="jsGCIndexFinanceiroAnexos(' + data[2] + ');"><i class="fa-solid fa-paperclip"></i></button>' } },
+                    { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [15], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGcFinanceiroLancamentosEditRow" title="Editar Lançamento Nº ' + data[2] + '" class="btn btn-outline-warning btn-sm p-1 btnGcFinanceiroLancamentosEditRow d-inline-flex align-items-center" onclick="jsGcFinanceiroLancamentosEditRow(' + data[2] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+                ],
+                "createdRow": function (row, data, dataIndex) {
+                    var c = data[0];
+                    if (c != null && String(c).trim() !== '') {
+                        row.classList.add('gdi-row-tinted');
+                        row.style.setProperty('--gdi-row-bg', String(c).trim());
+                    }
+                },
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+                $('#DtGcFinanceiroLancamentosIndex tbody').on('dblclick', 'tr td', function () {
+                    var data = OTableGcFinanceiroLancamentosIndex.row($(this).closest('tr')).data();
+                    jsGcFinanceiroLancamentosEditRow(data[2]);
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsGcFinanceiroLancamentosEditRow(id)
+    {
+        try {
+
+            var hasAdm = '@GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*")'.toString();
+            var hasUpdate = '@GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionupdate")'.toString();
+            if ((hasAdm == "True") || (hasUpdate == "True"))
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=' + id, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+            else {
+                LibMessageAlert("Atenção", "Edição do Lançamento NÃO permitida!")
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGcFinanceiroLancamentosEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCreateLancamento(TipoPagRec)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=-' + emptyIfNull($('#Field_Text_01').val()).toString() + '&TipoPagRec=' + TipoPagRec, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateLancamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPesquisarFinanceiroLancamentos()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            document.getElementById("yesFilterField").value = "*";
+            $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarFinanceiroLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalBaixarLancamentos(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalBaixarLancamentos", "FinanceiroLancamentos", new { area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!")
+                }
+                }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalBaixarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCancelarLancamentos(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalCancelarLancamentos", "FinanceiroLancamentos", new { area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalDuplicarLancamentos(TableName, columnName)
+    {
+        try {
+        var selectedIds = JsGetSelectedRows(TableName, columnName);
+        var selectedStatus = JsGetSelectedRows(TableName, "Status");
+        if (!selectedIds || selectedIds.length == 0)
+        {
+            LibMessageAlert("Atenção", "Selecione o Lançamento!")
+        }
+        else {
+            if (selectedIds.indexOf(',') == -1)
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=0&IdLancamentoDuplicate=' + selectedIds, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                });
+            }
+            else
+            {
+                LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!")
+            }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalDuplicarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalGerarBoletoLancamentoAvulso(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento!")
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalGerarBoletoLancamentoAvulso", "FinanceiroLancamentos", new { area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalGerarBoletoLancamentoAvulso] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsUpdateDataView(yesDisplayField01, yesFilterOnOff)
+    {
+        try
+        {
+            jsViewSaldoContaCaixa(yesDisplayField01);
+            btnFiltro(yesFilterOnOff);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", (err && err.message) ? err.message.toString() : String(err));
+        }
+    }
+
+    function jsViewSaldoContaCaixa(yesDisplayField01)
+    {
+        try
+        {
+            document.getElementById("label_saldo").innerHTML = yesDisplayField01;
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", (err && err.message) ? err.message.toString() : String(err));
+        }
+    }
+
+    function jsAjaxExportarLancamentosExcel()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxExportarLancamentosExcel", "FinanceiroLancamentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(""),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxExportarLancamentosExcel] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalFiltroAvancado()
+    {
+        try
+        {
+            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0)
+            {
+                LibMessageProcessando("");
+                document.getElementById("yesFilterField").value = "*";
+                document.getElementById("yesFilterOperador").value = "";
+                document.getElementById("yesFilterText").value = "";
+                document.getElementById("yesFilterAdvancedText").value = "";
+                $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+            }
+            else
+            {
+                try
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "FinanceiroLancamentos", new { Area = "gc" })?id=gc_FinanceiroLancamentos_Index', function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                catch (e)
+                {
+                    LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (e && e.message ? e.message.toString() : String(e)));
+                }
+            };
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRunFiltroAvancado(FilterAdvancedText)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
+            $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsFinanceiroLancamentoBoleto(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento!")
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    var dataForm =
+                    {
+                        view_record_gc_financeiro_lancamentos:
+                        {
+                            'id_lancamento': selectedIds,
+                        }
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("AjaxFinanceiroBoletoGCPDF", "FinanceiroLancamentos", new { area = "gc" })',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(dataForm),
+                        dataType: "json",
+                        success: function (result)
+                        {
+                            LibMessageProcessandoHide();
+                            if (result.success == true)
+                            {
+                                window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                            }
+                            else
+                            {
+                                GdiAjaxNotifyInconsistencias(result.msg);
+                            }
+                        },
+                        error: function (result)
+                        {
+                            GdiAjaxNotifyInconsistencias(result.msg)            }
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!")
+                }
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsFinanceiroLancamentoBoleto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalRelatorioContaCaixaSaldoDiario()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalRelatorioContaCaixaSaldoDiario", "FinanceiroLancamentos", new { area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioContaCaixaSaldoDiario] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPosicaoAtualContaCaixa()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxPosicaoAtualContaCaixa", "FinanceiroLancamentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(""),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxExportarLancamentosExcel] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsAjaxRoboItau()
+    {
+        try
+        {
+            LibMessageProcessando("")
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxRoboItau", "FinanceiroLancamentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(""),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxRoboItau] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsGCIndexFinanceiroAnexos(id)
+    {
+        try
+        {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalFinanceiroViewAnexos", "FinanceiroLancamentos", new { Area = "gc" })?id=' + id, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGCIndexFinanceiroAnexos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>
+
+

@@ -1,0 +1,325 @@
+@model GdiPlataform.Areas.qa.Models.ListaConteudoTreinamentoModel
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="IndexGed" name="yesFilterController" />
+                <input type="hidden" id="contentId" value="@Model.id_arquivo_video1" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+
+
+            <i class=""></i>
+
+            <div class="card-body m-2 p-2" style="height: 100%">
+                <div class="form-horizontal m-1 p-1">
+                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                        <div class="section-header"><i class="fa-solid fa-film me-1" aria-hidden="true"></i>Treinamento Oficial - Associação dos Forcedores da Aviação</div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            <div class="col-10 mx-auto m-0 p-0">
+                                <video id="trainingVideo1"
+                                       controls
+                                       preload="metadata"
+                                       style="display:block; margin:0 auto; width:100%; max-width:960px;">
+                                    <source src="@Model.presigned_url_video1" type="video/mp4" />
+                                    Seu navegador não suporta vídeo HTML5.
+                                </video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <i class=""></i>
+
+                <div class="form-horizontal m-1 p-1">
+                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                        <div class="section-header"><i class="fa-solid fa-file-pdf me-1" aria-hidden="true"></i>Materiais de Apoio</div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            <div class="col-10 mx-auto m-0 p-0">
+
+                                @if (!string.IsNullOrWhiteSpace(Model.presigned_url_pdf1) && Model.id_arquivo_pdf1 > 0)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-lg w-100 left-block js-pdf d-inline-flex align-items-center gap-2"
+                                            data-contentid="@Model.id_arquivo_pdf1"
+                                            data-url="@Model.presigned_url_pdf1"
+                                            data-title="@Model.titulo_pdf1">
+                                        <i class="fa-solid fa-file-pdf fa-xl"></i>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.titulo_pdf1
+                                    </button>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(Model.presigned_url_pdf2) && Model.id_arquivo_pdf2 > 0)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-lg w-100 left-block js-pdf d-inline-flex align-items-center gap-2"
+                                            data-contentid="@Model.id_arquivo_pdf2"
+                                            data-url="@Model.presigned_url_pdf2"
+                                            data-title="@Model.titulo_pdf2">
+                                        <i class="fa-solid fa-file-pdf fa-xl"></i>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.titulo_pdf2
+                                    </button>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(Model.presigned_url_pdf3) && Model.id_arquivo_pdf3 > 0)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-lg w-100 left-block js-pdf d-inline-flex align-items-center gap-2"
+                                            data-contentid="@Model.id_arquivo_pdf3"
+                                            data-url="@Model.presigned_url_pdf3"
+                                            data-title="@Model.titulo_pdf3">
+                                        <i class="fa-solid fa-file-pdf fa-xl"></i>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.titulo_pdf3
+                                    </button>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function () {
+
+    var trackUrl = '@Url.Action("Track", "LmsEvidence", new { area = "qa" })';
+
+    function safeGetAntiForgeryToken() {
+        var el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : null;
+    }
+
+    function safeInt(val) {
+        var n = parseInt(val, 10);
+        return isNaN(n) ? null : n;
+    }
+
+    // Retorna SEMPRE uma Promise (mesmo com jQuery ajax)
+    function sendPayload(payload, token) {
+        // Preferencial: fetch
+        if (window.fetch) {
+            return fetch(trackUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-RequestVerificationToken': token
+                },
+                body: JSON.stringify(payload),
+                credentials: 'include'
+            });
+        }
+
+        // Fallback: jQuery.ajax embrulhado em Promise
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: trackUrl,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                headers: { 'X-RequestVerificationToken': token },
+                data: JSON.stringify(payload),
+                success: function (data, textStatus, jqXHR) { resolve({ data: data, jqXHR: jqXHR }); },
+                error: function (jqXHR, textStatus, errorThrown) { reject(errorThrown || textStatus); }
+            });
+        });
+    }
+
+
+    /* ================= PDF ================= */
+
+    function initPdfTracking() {
+        $(document).on('click', '.js-pdf', function (e) {
+            e.preventDefault();
+
+            var $btn = $(this);
+            var pdfId = safeInt($btn.data('contentid'));
+            var url = $btn.data('url');
+
+            if (!pdfId || !url) {
+                console.warn('[LMS] PDF inválido');
+                return;
+            }
+
+            // abre imediatamente (evita popup blocker)
+            window.open(url, '_blank', 'noopener');
+
+            trackPdfOpen(pdfId);
+        });
+    }
+
+    function trackPdfOpen(pdfContentId) {
+        var token = safeGetAntiForgeryToken();
+        if (!token) return;
+
+        sendPayload({
+            ContentId: pdfContentId,
+            ContentType: "PDF",
+            EventType: "OPEN"
+        }, token).catch(function () {
+            console.warn('[LMS] PDF track failed');
+        });
+    }
+
+    /* ================= VIDEO ================= */
+    // (seu initVideoTracking permanece exatamente como já validamos)
+
+    function initVideoTracking() {
+        var video = document.getElementById('trainingVideo1');
+        if (!video) {
+            console.warn('[LMS] video element not found: #trainingVideo1');
+            return;
+        }
+
+        var contentIdEl = document.getElementById('contentId');
+        var contentId = contentIdEl ? safeInt(contentIdEl.value) : null;
+        if (!contentId) {
+            console.warn('[LMS] invalid contentId');
+            return;
+        }
+
+        var token = safeGetAntiForgeryToken();
+        if (!token) {
+            console.warn('[LMS] antiforgery token not found');
+            return;
+        }
+
+        var heartbeatSeconds = 30;
+        var timer = null;
+        var opened = false;
+        var completed = false;
+
+        function buildPayload(eventType) {
+            var duration = (isFinite(video.duration) && video.duration > 0) ? Math.floor(video.duration) : null;
+            var current = isFinite(video.currentTime) ? Math.floor(video.currentTime) : null;
+
+            var percent = null;
+            if (duration && current !== null) {
+                percent = Math.floor((current * 100) / duration);
+                if (percent < 0) percent = 0;
+                if (percent > 100) percent = 100;
+            }
+
+            return {
+                ContentId: contentId,
+                ContentType: "VIDEO",
+                EventType: eventType,
+                CurrentSeconds: current,
+                DurationSeconds: duration,
+                PercentViewed: percent
+            };
+        }
+
+        function postEvent(eventType) {
+            var payload = buildPayload(eventType);
+
+            // Se a URL estiver expirada e o vídeo parar, você verá no console e no Network
+            return sendPayload(payload, token).catch(function (e) {
+                console.warn('[LMS] Track failed:', e);
+            });
+        }
+
+        function tryCompleteByPercent() {
+            if (completed) return;
+            if (!isFinite(video.duration) || video.duration <= 0) return;
+
+            var pct = Math.floor((video.currentTime * 100) / video.duration);
+            if (pct >= 90) {
+                completed = true;
+                postEvent('COMPLETE');
+            }
+        }
+
+        function startHeartbeat() {
+            if (timer) return;
+            timer = setInterval(function () {
+                if (!video.paused && !video.ended) {
+                    postEvent('HEARTBEAT');
+                    tryCompleteByPercent();
+                }
+            }, heartbeatSeconds * 1000);
+        }
+
+        function stopHeartbeat() {
+            if (timer) { clearInterval(timer); timer = null; }
+        }
+
+        // OPEN (quando metadata fica disponível)
+        video.addEventListener('loadedmetadata', function () {
+            if (!opened) {
+                opened = true;
+                postEvent('OPEN');
+            }
+        });
+
+        // Garante OPEN se metadata já carregou antes do handler (edge cases)
+        if (video.readyState >= 1 && !opened) {
+            opened = true;
+            postEvent('OPEN');
+        }
+
+        video.addEventListener('play', function () {
+            startHeartbeat();
+        });
+
+        video.addEventListener('pause', function () {
+            postEvent('HEARTBEAT');
+            tryCompleteByPercent();
+        });
+
+        video.addEventListener('ended', function () {
+            if (!completed) {
+                completed = true;
+                postEvent('COMPLETE');
+            }
+            stopHeartbeat();
+        });
+
+        window.addEventListener('beforeunload', function () {
+            // best-effort: pode não concluir dependendo do browser
+            postEvent('HEARTBEAT');
+        });
+
+        console.log('[LMS] Video tracking initialized. contentId=', contentId, 'trackUrl=', trackUrl);
+    }
+
+    // Expostas globalmente (para onclick, etc.)
+    window.jsShowTreinamentoAviacao001 = function () {
+        try {
+            window.location.href = '@Url.Action("IndexTreinamentoAviacao001", "Treinamentos", new { Area = "qa" })';
+        } catch (err) {
+            LibMessageError("Atenção", "[jsShowTreinamentoAviacao001] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    // Ready único
+    $(function () {
+        try {
+            if (typeof jsInitFormModal === 'function') {
+                jsInitModal();
+            }
+
+            if (typeof getValidationSummary === 'function') {
+                getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            }
+
+            initVideoTracking();
+            initPdfTracking(); 
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[page-init] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+})();
+
+</script>

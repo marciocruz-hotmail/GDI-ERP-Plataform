@@ -1,0 +1,175 @@
+@model GdiPlataform.Db.gc_comex_financeiro
+@using GdiPlataform.Security
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcComexFinanceiroModalCreateEdit" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_financeiro)
+                @Html.HiddenFor(model => model.ativo)
+                @Html.HiddenFor(model => model.data_vencimento)
+                @Html.HiddenFor(model => model.valor_total)
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0">
+                        <div class="section-header"><i class="fa-solid fa-file-invoice-dollar me-1" aria-hidden="true"></i>COMEX - Lançamento Financeiro</div>
+                        <div class="card-body m-0 p-1" style="height: 100%">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("tipo_pag_rec", "Pag/Rec", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-3">
+                                    @Html.DropDownListFor(model => model.tipo_pag_rec, ViewBag.comboPagRec as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                                @Html.Label("data_pagamento", "Data", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @* id do .input-group distinto do input para Tempus Dominus *@
+                                    <div class='input-group date' id='ig_gc_comex_fin_modal_pag'>
+                                        @Html.EditorFor(model => model.data_pagamento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Importação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-7">
+                                    @Html.DropDownListFor(model => model.id_importacao, ViewBag.comboComexImportacoesCrud as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Invoice", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-7">
+                                    @Html.DropDownListFor(model => model.id_invoice, ViewBag.comboComexInvoicesCrud as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("descricao", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-7">
+                                    @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control", maxlength = "100" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("agente_financeiro", "Agente Financeiro", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-7">
+                                    @Html.EditorFor(model => model.agente_financeiro, new { htmlAttributes = new { @class = "form-control", maxlength = "50" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("R$ Pago", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.valor_pago, new { htmlAttributes = new { @class = "form-control", @onkeypress = "jsTeclaPessionada(event);" } })
+                                </div>
+                                @Html.Label("numero_recibo", "Nº Documento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-3">
+                                    @Html.EditorFor(model => model.numero_documento, new { htmlAttributes = new { @class = "form-control", maxlength = "50" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("obs", "Observações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-7">
+                                    @Html.TextAreaFor(model => model.observacao, new { @class = "form-control", @id = "obs", @rows = "3", @title = "Informações adicionais do lançamento", @placeholder = "Informações adicionais do lançamento" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Confirmar Lançamento" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsAjaxModalCreateEditGcComexFinanceiro()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Lançamento</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_gc_comex_fin_modal_pag');
+            jsInitModal();
+            jsSetCampos();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSetCampos()
+    {
+        try
+        {
+            if (@Model.id_financeiro > 0)
+            {
+                $('#tipo_pag_rec').attr('disabled', true);
+                $('#id_importacao').attr('disabled', true);
+                $('#id_invoice').attr('disabled', true);
+            }
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsSetCampos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxModalCreateEditGcComexFinanceiro()
+    {
+        try
+        {
+            LibMessageProcessando("Atualizando Lançamento . . .");
+            $('#tipo_pag_rec').attr('disabled', false);
+            $('#id_importacao').attr('disabled', false);
+            $('#id_invoice').attr('disabled', false);
+            var form = $('#FormGcComexFinanceiroModalCreateEdit');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalCreateEditGcComexFinanceiro", "ComexFinanceiro", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        $("#DtGcComexFinanceiroIndex").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEditLancamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsTeclaPessionada(e)
+    {
+        if (e.keyCode == 13)
+        {
+            jsCheckInputs();
+        }
+    }
+
+</script>
+
+

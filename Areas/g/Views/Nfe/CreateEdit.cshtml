@@ -1,0 +1,434 @@
+@model GdiPlataform.Db.g_nfe
+@using GdiPlataform.Security
+@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gNfe" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_nfe)
+                    @Html.HiddenFor(model => model.id_financeiro)
+                    @Html.HiddenFor(model => model.tipo_r_c)
+                    @Html.HiddenFor(model => model.id_nfe_status)
+                    @Html.HiddenFor(model => model.id_nfe_config)
+                    @Html.HiddenFor(model => model.nfe_key)
+                    @Html.HiddenFor(model => model.iss_display)
+                    @Html.HiddenFor(model => model.cofins_display)
+                    @Html.HiddenFor(model => model.csll_display)
+                    @Html.HiddenFor(model => model.ir_display)
+                    @Html.HiddenFor(model => model.pis_display)
+                    @Html.HiddenFor(model => model.valor_encargos)
+                    @Html.HiddenFor(model => model.data_envio_registro)
+                    @Html.HiddenFor(model => model.data_retorno_registro)
+                    @Html.HiddenFor(model => model.data_envio_cancelamento)
+                    @Html.HiddenFor(model => model.data_retorno_cancelamento)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.HiddenFor(model => model.url_pdf)
+                    @Html.HiddenFor(model => model.url_xml)
+                    @Html.HiddenFor(model => model.id_usuario_cancelamento)
+                    @Html.HiddenFor(model => model.data_envio_cancelamento)
+                    @Html.HiddenFor(model => model.motivo_cancelamento)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.datahora_alteracao)
+                    @Html.HiddenFor(model => model.id_usuario_alteracao)
+                </div>
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabEndereco_tab" data-bs-toggle="pill" href="#tabEndereco" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-location-dot fa-sm" aria-hidden="true"></i>Endereço</a></li>
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabNfe_tab" data-bs-toggle="pill" href="#tabNfe" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-receipt fa-sm" aria-hidden="true"></i>NFE</a></li>
+                        <!-- A Aba de Logs somente é exibida, em modo de edição -->
+                        @if (Model.id_nfe > 0)
+                        {
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabLogs_tab" data-bs-toggle="pill" href="#tabLogs" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Logs</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-1" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <!-- TabDados - Início -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.id_cliente, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.id_cliente, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-6">
+                                            @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.descricao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-6">
+                                            @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-6">
+                                            @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.cpf, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.cpf, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.razao_social, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-6">
+                                            @Html.EditorFor(model => model.razao_social, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.cnpj, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.cnpj, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.inscricao_municipal, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.inscricao_municipal, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- TabDados - Fim -->
+                            <!-- TabEndereco - Início -->
+                            <div class="tab-pane fade" id="tabEndereco" role="tabpanel" aria-labelledby="tabEndereco_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.endereco_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-6">
+                                            @Html.EditorFor(model => model.endereco_com, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.bairro_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-4">
+                                            @Html.EditorFor(model => model.bairro_com, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.id_cidade_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-4 text-sm-start">
+                                            @Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.cep_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.cep_com, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.LabelFor(model => model.id_uf_com, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2 text-sm-start">
+                                            @Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- TabEndereco - Fim -->
+                            <!-- TabNFE - Início -->
+                            <div class="tab-pane fade" id="tabNfe" role="tabpanel" aria-labelledby="tabNfe_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.data_processamento, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @* id do .input-group distinto do input para Tempus Dominus *@
+                                            <div class='input-group date' id='ig_g_nfe_ce_d_proc'>
+                                                @Html.EditorFor(model => model.data_processamento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </div>
+                                        @Html.LabelFor(model => model.data_vencimento, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            <div class='input-group date' id='ig_g_nfe_ce_d_venc'>
+                                                @Html.EditorFor(model => model.data_vencimento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.iss_valor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.iss_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.LabelFor(model => model.iss_retido, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                            <div class="form-check form-switch">
+                                                @Html.CheckBoxFor(model => model.iss_retido, new { @class = "form-check-input", role = "switch" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.cofins_valor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.cofins_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.LabelFor(model => model.csll_valor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.csll_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.inss_valor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.inss_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.LabelFor(model => model.ir_valor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.ir_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.pis_valor, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.pis_valor, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.LabelFor(model => model.valor_total_bruto, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.valor_total_bruto, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.valor_descontos, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.valor_descontos, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                        @Html.LabelFor(model => model.valor_total_liquido, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2">
+                                            @Html.EditorFor(model => model.valor_total_liquido, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- TabNFE - Fim -->
+                            <!-- Aba Log (Início) -->
+                            @if (Model.id_nfe > 0)
+                            {
+                                <div class="tab-pane fade" id="tabLogs" role="tabpanel" aria-labelledby="tabLogs_tab">
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Nfe Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-4 text-sm-start" style="margin-top:7px">
+                                                @Html.Label("NfeStatus", (string)ViewBag.NfeStatus)
+                                            </div>
+                                            @Html.Label("Chave", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-4 text-sm-start" style="margin-top:7px">
+                                                @Html.Label("NfeKey", (string)ViewBag.NfeKey)
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Arquivos", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-4 text-sm-start" style="margin-top:7px">
+                                                @if (ViewBag.UrlPDF != "")
+                                                {<button type="button" name="btnDownloadPDF" title="Download PDF" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="window.open('@ViewBag.UrlPDF')"><i class="fa-regular fa-file-pdf me-2" aria-hidden="true"></i>Download PDF</button>}
+                                                @if (ViewBag.UrlXML != "")
+                                                {<button type="button" name="btnDownloadXML" title="Download XML" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="window.open('@ViewBag.UrlXML')"><i class="fa-regular fa-file me-2" aria-hidden="true"></i>Download XML</button>}
+                                            </div>
+                                        </div>
+
+                                        <div class="card-header">Logs Nfe</div>
+                                        <div class="card-body m-0 p-1" style="height: 100%">
+                                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTables-NfeLogs">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Data</th>
+                                                        <th>Log</th>
+                                                        <th>Usuário Inst.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <!-- Aba Log (Fim) -->
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Nfe",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+
+                    @* LIBERAÇÃO DO BOTÃO SALVAR *@
+                    @* NOVO REGISTRO *@
+                    @if (Model.id_nfe <= 0)
+                    {<button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button> }
+
+                    @* Somente poderá alterar os dados se status (Aguardando Transmissão ou Negada ou Cancelamento Negado) *@
+                    @if ((Model.id_nfe > 0) && ((Model.id_nfe_status == 1) || (Model.id_nfe_status == 9) || (Model.id_nfe_status == 11) || (Model.id_nfe_status == 14)))
+                    {<button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>}
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var otableNfeLogs;    
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_g_nfe_ce_d_proc');
+            jsDatepicker('#ig_g_nfe_ce_d_venc');
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $('#tabLogs_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableNfeLogs == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableNfeLogs = $('#dataTables-NfeLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosNfeLogs", "Nfe", new { area = "g" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_nfe').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 10,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "70%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [2] }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[tabLogs_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+
+            if (isEmpty($('#endereco_com').val().toString().trim()) || ($('#endereco_com').val().toString().trim().length == 0)) {
+                hasError = true;
+                msgError += "Campo <b>Endereço</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#bairro_com').val().toString().trim()) || ($('#bairro_com').val().toString().trim().length == 0)) {
+                hasError = true;
+                msgError += "Campo <b>Bairro</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#id_cidade_com').val().toString().trim()) || ($('#id_cidade_com').val().toString().trim().length == 0)) {
+                hasError = true;
+                msgError += "Campo <b>Cidade</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#cep_com').val().toString().trim()) || ($('#cep_com').val().toString().trim().length == 0)) {
+                hasError = true;
+                msgError += "Campo <b>CEP</b> é de preenchimento obrigatório!<br/>";
+            }
+            if (isEmpty($('#id_uf_com').val().toString().trim()) || ($('#id_uf_com').val().toString().trim().length == 0)) {
+                hasError = true;
+                msgError += "Campo <b>UF</b> é de preenchimento obrigatório!<br/>";
+            }
+            if ((isEmpty($('#cpf').val().toString().trim())) && (isEmpty($('#cnpj').val().toString().trim()))) {
+                hasError = true;
+                msgError += "Campo <b>Documento (CPF ou CNPJ)</b> é de preenchimento obrigatório!<br/>";
+            }
+            if ((!isEmpty($('#cpf').val().toString().trim())) && (isEmpty($('#nome').val().toString().trim()))) {
+                hasError = true;
+                msgError += "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>";
+            }
+            if ((!isEmpty($('#cnpj').val().toString().trim())) && (isEmpty($('#razao_social').val().toString().trim()))) {
+                hasError = true;
+                msgError += "Campo <b>Razão Social</b> é de preenchimento obrigatório!<br/>";
+            }
+
+            if (hasError) { LibMessageAlert("Atenção", msgError); }
+            else
+            {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#formCreateEdit_gNfe").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+

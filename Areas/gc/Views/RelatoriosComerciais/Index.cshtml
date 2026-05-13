@@ -1,0 +1,227 @@
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@Html.AntiForgeryToken()
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="col-8 mx-auto">
+                        <div class="card shadow border">
+                            <div class="card-body d-flex flex-column align-items-left">
+                                <p class="card-text">
+                                    <h4>Selecione o relatório desejado</h4>
+                                    <br />
+                                </p>
+
+                                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                    <div class="form-group row text-sm-end m-0 p-1">
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes")))
+                                            {
+                                                <button type="button" name="btnRelatorio7" title="Relatório - Vendedores - Comissões" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioVendedoresComissoes()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Vendedores - Comissões</button>
+                                            }
+                                        </div>
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresCarteira")))
+                                            {
+                                                <button type="button" name="btnRelatorio7" title="Relatório - Vendedores - Carteira Clientes" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioVendedoresCarteira()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Vendedores - Carteira de Clientes</button>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 p-1">
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresPedidos")))
+                                            {
+                                                <button type="button" name="btnRelatorio3" title="Relatório - Vendedores - Pedidos" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioVendedoresPedidos()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Vendedores - Pedidos</button>
+                                            }
+                                        </div>
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresAtrasados")))
+                                            {
+                                                <button type="button" name="btnRelatorio8" title="Relatório - Vendedores - Títulos Atrasados" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioVendedoresAtrasados()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Vendedores - Títulos Atrasados</button>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="col-sm-12">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_ItensComercializados")))
+                                            {
+                                                <button type="button" name="btnRelatorio2" title="Relatório - Itens Comercializados" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioItensComercializados()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Produtos Comercializados</button>
+                                            }
+                                        </div>
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_FretesTransportadoras")))
+                                            {
+                                                <button type="button" name="btnRelatorio6" title="Relatório - Transportadoras/Fretes" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioTransportadorasFretes()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Transportadoras/Fretes</button>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="col-sm-12">
+                                            &nbsp;
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_NotasFiscaisEmitidas")))
+                                            {
+                                                <button type="button" name="btnRelatorio1" title="Relatório - Notas Fiscais Geradas" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioNotasFiscaisEmitidas()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Notas Fiscais - Geradas</button>
+                                            }
+                                        </div>
+                                        <div class="col-sm-6">
+                                            @if ((CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_*")) || (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_NotasFiscaisContabilidade")))
+                                            {
+                                                <button type="button" name="btnRelatorio4" title="Relatório - Notas Fiscais - Contabilidade" class="btn btn-outline-secondary btn-lg w-100 left-block d-inline-flex align-items-center gap-2" onclick="jsModalRelatorioNotasFiscaisContabilidade()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Notas Fiscais - Contabilidade</button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsModalRelatorioNotasFiscaisEmitidas()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioNotasFiscaisEmitidas", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioNotasFiscaisEmitidas] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalRelatorioItensComercializados()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioItensComercializados", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioItensComercializados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalRelatorioNotasFiscaisContabilidade()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioNotasFiscaisContabilidade", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioNotasFiscaisContabilidade] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalRelatorioNotasFiscaisMensais()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioNotasFiscaisMensais", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioNotasFiscaisMensais] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalRelatorioVendedoresPedidos()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioVendedoresPedidos", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioVendedoresPedidos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalRelatorioVendedoresComissoes()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioVendedoresComissoes", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioVendedoresComissoes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalRelatorioVendedoresCarteira()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioVendedoresCarteira", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioVendedoresComissoes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalRelatorioVendedoresAtrasados()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioVendedoresAtrasados", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioVendedoresAtrasados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalRelatorioTransportadorasFretes()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalRelatorioTransportadorasFretes", "RelatoriosComerciais", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalRelatorioTransportadorasFretes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>

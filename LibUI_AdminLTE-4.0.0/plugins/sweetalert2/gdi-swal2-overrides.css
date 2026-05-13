@@ -1,0 +1,31 @@
+/**
+ * Overrides globais SweetAlert2 (GDI ERP).
+ * Carregar após sweetalert2.min.css e bootstrap-5.min.css (tema).
+ */
+.swal2-html-container {
+  text-align: left !important;
+}
+
+/**
+ * Popup sempre claro: `bootstrap-5.min.css` aplica fundo escuro em
+ * `@media (prefers-color-scheme: dark)` para `[data-swal2-theme='bootstrap-5']`.
+ * Repõe apenas as variáveis que esse media query altera (mesmos valores do bloco claro do tema).
+ */
+@media (prefers-color-scheme: dark) {
+  [data-swal2-theme='bootstrap-5'] {
+    --swal2-background: #fff;
+    --swal2-color: #212529;
+    --swal2-border: 1px solid rgba(0, 0, 0, 0.175);
+    --swal2-input-background: #fff;
+    --swal2-input-border: 1px solid #dee2e6;
+    --swal2-input-focus-border: 1px solid #86b7fe;
+    --swal2-input-focus-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075), 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    --swal2-validation-message-background: #f8d7da;
+    --swal2-validation-message-color: #842029;
+    --swal2-footer-border-color: #dee2e6;
+    --swal2-footer-background: #f8f9fa;
+    --swal2-footer-color: #6c757d;
+    --swal2-close-button-color: #000;
+    --swal2-toast-border: 1px solid rgba(0, 0, 0, 0.175);
+  }
+}

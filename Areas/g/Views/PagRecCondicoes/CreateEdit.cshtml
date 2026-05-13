@@ -1,0 +1,110 @@
+@model GdiPlataform.Db.g_pagrec_condicoes
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gPagRecCondicoes" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_pagrec_condicao)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-1" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Ativo", "Ativo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(model => model.ativo, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Descrição", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Pagamento", "Pagamento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(model => model.pagamento, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                    @Html.Label("Recebimento", "Recebimento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(model => model.recebimento, new { @class = "form-check-input", role = "switch" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("Qtd Dias", "Qtd Dias", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-1">
+                                        @Html.EditorFor(model => model.qtd_dias, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("Qtd Parcelas", "Qtd Parcelas", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-1">
+                                        @Html.EditorFor(model => model.qtd_parcelas, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","PagRecCondicoes",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsSalvarDados()
+    {
+        try {
+            if (isEmpty($('#descricao').val().toString().trim())) {
+                LibMessageAlert("Atenção", "Campo <b>Descrição</b> é de preenchimento obrigatório!<br/>");
+            }
+            else
+            {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#formCreateEdit_gPagRecCondicoes").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

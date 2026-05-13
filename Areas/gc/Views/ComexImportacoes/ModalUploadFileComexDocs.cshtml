@@ -1,0 +1,177 @@
+@model GdiPlataform.Areas.g.Models.cstUploadGed
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalUploadFileComexDocs", enctype = "multipart/form-data" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_arquivo)
+                @Html.HiddenFor(model => model.id_arquivo_tipo)
+                @Html.HiddenFor(model => model.id_comex_importacao)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Dados do Arquivo</a></li>
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-2" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <!-- Dados - Início -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("Arquivo", new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-8 text-sm-start">
+                                            <input type="file" class="form-control" id="customFile" onchange="jsFileInputChange(this)">
+                                            <div class="form-text" id="customFile_info"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-10">
+                                            @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("obs", "Obs", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-10">
+                                            @Html.TextAreaFor(model => model.observacao, new { @class = "form-control", @rows = "3" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Dados - Fim -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Confirmar Upload" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-cloud-arrow-up me-2" aria-hidden="true"></i>Confirmar Upload</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $("#customFile").on("change", function ()
+    {
+        try
+        {
+            var fileName = $(this).val().split("\\").pop();
+            var description = fileName.split(".");
+            $('#descricao').val(description[0]);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[customFile] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+
+    function jsCheckInputs()
+    {
+        try {
+            if (isEmpty($('#customFile').val().toString().trim())) {
+                GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
+            }
+            else {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try
+        {
+            LibMessageProcessando("Processando Arquivo . . .")
+            var formData = new FormData(document.getElementById("FormModalUploadFileComexDocs"));
+            formData.append("filesource", document.getElementById("customFile").files[0]);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxUploadFileGed", "Ged", new { Area = "g" })',
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function () {
+                                $("#dtGedComexArquivos").DataTable().draw(false);
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    LibMessageProcessandoHide();
+                    var details =
+                        "Status: " + jqXHR.status + "\n" +
+                        "textStatus: " + textStatus + "\n" +
+                        "errorThrown: " + errorThrown + "\n\n" +
+                        "responseText:\n" + (jqXHR.responseText || "");
+                    GdiAjaxNotifyInconsistencias(details, { title: "Error: Verifique as inconsistências" });
+                }
+            });
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsSendForm] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    };
+
+    function jsTeclaPessionada(e)
+    {
+        try {
+            if (e.keyCode == 13)
+            {
+                jsCheckInputs();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsTeclaPessionada] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>
+
+
+

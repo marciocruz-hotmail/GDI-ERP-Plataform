@@ -1,0 +1,397 @@
+@model GdiPlataform.Areas.g.Models.cstFinanceiroLancamentosIndex
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="FinanceiroLancamentos" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("g_FinanceiroLancamentos_*")) || (CachePersister.userIdentity.Roles.Contains("g_FinanceiroLancamentos_Actioncreate")))
+                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalIncluirLancamentos()"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
+                else
+                { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
+                @if ((CachePersister.userIdentity.Roles.Contains("g_FinanceiroLancamentos_*")) || (CachePersister.userIdentity.Roles.Contains("g_FinanceiroLancamentos_Actionupdate")))
+                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="ajaxEditarLancamentos(otableFinanceiroLancamentos, 'Id.')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
+                else
+                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
+                @if ((CachePersister.userIdentity.Roles.Contains("g_FinanceiroLancamentos_*")) || (CachePersister.userIdentity.Roles.Contains("g_FinanceiroLancamentos_Actionrun")))
+                {
+                    <div class="btn-group" role="group">
+                        @{int qtdMenusTitulos = 0; }
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_VisualizarBoleto")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalGerarFaturamento()"><i class="fa-solid fa-money-check-alt me-2" aria-hidden="true"></i>Gerar Faturamento - Todos os Títulos</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_VisualizarBoleto")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalFecharLancamentosAbertos()"><i class="fa-solid fa-money-check me-2" aria-hidden="true"></i>Gerar Título para o Cliente (Fechar Lançamentos - Criando Novo Título)</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_EditarTitulo")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalFinalizarEdicaoTitulo()"><i class="fa-solid fa-tasks me-2" aria-hidden="true"></i>Concluir edição do título do Cliente (Fechar Lançamentos - Reabrir Título Em Edição)</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_ProrrogarVencimentoTitulo")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarLancamentos(otableFinanceiroLancamentos, 'Id.')"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Cancelar Lançamento (Somente Status "Aberto")</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-header m-0 p-1">
+                <div class="form-horizontal m-0 p-1" id="formIndexFinanceiroLancamentos">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-6">
+                            @Html.DropDownListFor(model => model.LancamentosIndex_id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Período", new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @* id do .input-group distinto do input (EditorFor) para Tempus Dominus *@
+                            <div class='input-group date' id='ig_g_fin_lancamentos_idx_d1'>
+                                @Html.EditorFor(model => model.LancamentosIndex_data1, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        @Html.Label("à", new { @class = "col-sm-1 col-form-label text-sm-center" })
+                        <div class="col-sm-2">
+                            <div class='input-group date' id='ig_g_fin_lancamentos_idx_d2'>
+                                @Html.EditorFor(model => model.LancamentosIndex_data2, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="ajaxPesquisarLancamentos()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Pesquisar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGFinanceiroLancamentos">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Label("", "Id.")</th>
+                                    <th>@Html.DisplayName("Status")</th>
+                                    <th>@Html.Label("", "Id. Cliente")</th>
+                                    <th>@Html.DisplayName("Produto")</th>
+                                    <th>@Html.DisplayName("Qtd")</th>
+                                    <th>@Html.DisplayName("R$ Unit")</th>
+                                    <th>@Html.DisplayName("R$ Total")</th>
+                                    <th>@Html.Label("", "R$ Faturado")</th>
+                                    <th>@Html.DisplayName("Data")</th>
+                                    <th>@Html.DisplayName("Origem")</th>
+                                </tr>
+                            </thead>
+                            <tfoot align="right">
+                                <tr>
+                                    <th align="right" colspan="7">Totais</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableFinanceiroLancamentosFinanceiroLancamentos;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_g_fin_lancamentos_idx_d1');
+            jsDatepicker('#ig_g_fin_lancamentos_idx_d2');
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function currencyFormat(num)
+    {
+        return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+    }
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableFinanceiroLancamentosFinanceiroLancamentos = $('#dtGFinanceiroLancamentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                "footerCallback": function (row, data, start, end, display) {
+                    var api = this.api(), data;
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace('.', '').replace(',', '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    var valorTotal = api.column(7).data().reduce(function (a, b) { return intVal(a) + intVal(b); }, 0);
+                    var valorFaturado = api.column(8).data().reduce(function (a, b) { return intVal(a) + intVal(b); }, 0);
+                    $(api.column(7).footer()).html((valorTotal / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
+                    $(api.column(8).footer()).html((valorFaturado / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }));
+                    LibMessageProcessandoHide();
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDados", "FinanceiroLancamentos", new { Area = "g" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#LancamentosIndex_id_cliente').val()).toString(),
+                        yesCustomField02: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_g_fin_lancamentos_idx_d1')),
+                        yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_g_fin_lancamentos_idx_d2')),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 50,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "7%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "29%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [7] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [8] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [9] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [10] },
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            ajaxPesquisarLancamentos();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+     };
+
+
+    function ajaxPesquisarLancamentos()
+    {
+        try {
+            LibMessageProcessando("Pesquisando Lançamentos . . .");
+            document.getElementById("yesFilterField").value = "*";
+            $("#dtGFinanceiroLancamentos").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[ajaxPesquisarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalIncluirLancamentos()
+    {
+        try {
+            var idCliente = emptyIfNull($('#LancamentosIndex_id_cliente').val()).toString();
+            if (idCliente.length == 0 || idCliente == "0")
+            {
+                LibMessageAlert("Atenção", "Selecione o Cliente!");
+            }
+            else
+            {
+                $("#mainModal").load('@Url.Action("ModalIncluirLancamentos", "FinanceiroLancamentos", new { area = "g" })?idCliente=' + idCliente, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalIncluirLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function ajaxEditarLancamentos(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf("Aberto") > -1) { selectedStatus = selectedStatus.replace("Aberto", "").trim(); }
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento a ser editado!");
+            }
+            else if (selectedStatus != "") {
+                LibMessageAlert("Atenção", "Opção disponível apenas para Lançamentos com status <b>Em Aberto</b>");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("modalEditarLancamentos", "FinanceiroLancamentos", new { area = "g" })?idLancamento=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[ajaxEditarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCancelarLancamentos(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf("Aberto") > -1) { selectedStatus = selectedStatus.replace("Aberto", "").trim(); }
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Lançamento a ser cancelado!");
+            }
+            else if (selectedStatus != "")
+            {
+                LibMessageAlert("Atenção", "Opção disponível apenas para Lançamentos com status <b>Em Aberto</b>!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    $("#mainModal").load('@Url.Action("ModalCancelarLancamentos", "FinanceiroLancamentos", new { area = "g" })?idLancamento=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else {
+                    LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(um) Lançamento!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFecharLancamentosAbertos()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalFecharLancamentosAbertos", "FinanceiroLancamentos", new { area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFecharLancamentosAbertos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalGerarFaturamento()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalGerarFaturamento", "FinanceiroLancamentos", new { area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalGerarFaturamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFinalizarEdicaoTitulo()
+    {
+        try
+        {
+            $("#mainModal").load('@Url.Action("ModalFinalizarEdicaoTitulo", "FinanceiroLancamentos", new { area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFinalizarEdicaoTitulo] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>
+

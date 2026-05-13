@@ -1,0 +1,1950 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props" Condition="Exists('packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props')" />
+  <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props')" />
+  <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props')" />
+  <Import Project="packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.props" Condition="Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.props')" />
+  <Import Project="packages\EntityFramework.6.5.2\build\EntityFramework.props" Condition="Exists('packages\EntityFramework.6.5.2\build\EntityFramework.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9A8272A0-3779-4045-B383-659571079B76}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GdiPlataform</RootNamespace>
+    <AssemblyName>GDI-ERP-Plataform</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <Use64BitIISExpress />
+    <IISExpressSSLPort>44388</IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <NoWarn>$(NoWarn);MSB3247;MSB3277</NoWarn>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3247;MSB3277</MSBuildWarningsAsMessages>
+    <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AWSSDK.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
+      <HintPath>packages\AWSSDK.Core.4.0.6.1\lib\net472\AWSSDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.S3, Version=4.0.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
+      <HintPath>packages\AWSSDK.S3.4.0.23\lib\net472\AWSSDK.S3.dll</HintPath>
+    </Reference>
+    <Reference Include="Azure.Core, Version=1.55.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>packages\Azure.Core.1.55.0\lib\net472\Azure.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
+      <HintPath>packages\BouncyCastle.Cryptography.2.6.2\lib\net461\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML, Version=0.105.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b, processorArchitecture=MSIL">
+      <HintPath>packages\ClosedXML.0.105.0\lib\netstandard2.0\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML.Parser, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1d5f7376574c51ec, processorArchitecture=MSIL">
+      <HintPath>packages\ClosedXML.Parser.2.0.0\lib\netstandard2.0\ClosedXML.Parser.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=3.5.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>packages\DocumentFormat.OpenXml.3.5.1\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml.Framework, Version=3.5.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>packages\DocumentFormat.OpenXml.Framework.3.5.1\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>packages\EntityFramework.6.5.2\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>packages\EntityFramework.6.5.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Enums.NET, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7ea1c1650d506225, processorArchitecture=MSIL">
+      <HintPath>packages\Enums.NET.5.0.0\lib\net461\Enums.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelNumberFormat, Version=1.1.0.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
+      <HintPath>packages\ExcelNumberFormat.1.1.0\lib\net20\ExcelNumberFormat.dll</HintPath>
+    </Reference>
+    <Reference Include="ExtendedNumerics.BigDecimal, Version=3003.0.0.346, Culture=neutral, PublicKeyToken=65f1315a45ad8949, processorArchitecture=MSIL">
+      <HintPath>packages\ExtendedNumerics.BigDecimal.3003.0.0.346\lib\net472\ExtendedNumerics.BigDecimal.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=1.4.2.13, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <HintPath>packages\SharpZipLib.1.4.2\lib\netstandard2.0\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cd8b63ad3d691a37, processorArchitecture=MSIL">
+      <HintPath>packages\MathNet.Numerics.Signed.5.0.0\lib\net461\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.10.0.7\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.Cryptography, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.Cryptography.10.0.7\lib\net462\Microsoft.Bcl.Cryptography.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.HashCode, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.HashCode.6.0.0\lib\net462\Microsoft.Bcl.HashCode.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.TimeProvider, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.TimeProvider.10.0.7\lib\net462\Microsoft.Bcl.TimeProvider.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=4.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\lib\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Extensions.Configuration.Abstractions, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.Configuration.Abstractions.10.0.7\lib\net462\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.DependencyInjection.Abstractions.10.0.7\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Diagnostics.Abstractions, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.Diagnostics.Abstractions.10.0.7\lib\net462\Microsoft.Extensions.Diagnostics.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.FileProviders.Abstractions, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.FileProviders.Abstractions.10.0.7\lib\net462\Microsoft.Extensions.FileProviders.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Hosting.Abstractions, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.Hosting.Abstractions.10.0.7\lib\net462\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.Logging.Abstractions.10.0.7\lib\net462\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Options, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.Options.10.0.7\lib\net462\Microsoft.Extensions.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.Primitives.10.0.7\lib\net462\Microsoft.Extensions.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Graph, Version=5.105.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Graph.5.105.0\lib\netstandard2.0\Microsoft.Graph.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Graph.Core, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Graph.Core.4.0.1\lib\net462\Microsoft.Graph.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Identity.Client, Version=4.84.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Identity.Client.4.84.0\lib\net472\Microsoft.Identity.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Identity.Client.Extensions.Msal, Version=4.84.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Identity.Client.Extensions.Msal.4.84.0\lib\netstandard2.0\Microsoft.Identity.Client.Extensions.Msal.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Abstractions, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Abstractions.8.18.0\lib\net472\Microsoft.IdentityModel.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.JsonWebTokens.8.18.0\lib\net472\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Logging.8.18.0\lib\net472\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocols, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Protocols.8.18.0\lib\net472\Microsoft.IdentityModel.Protocols.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Protocols.OpenIdConnect.8.18.0\lib\net472\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Tokens.8.18.0\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Validators, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Validators.8.18.0\lib\net472\Microsoft.IdentityModel.Validators.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IO.RecyclableMemoryStream.3.0.1\lib\netstandard2.0\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Authentication.Azure, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Authentication.Azure.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Authentication.Azure.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Http.HttpClientLibrary, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Http.HttpClientLibrary.2.0.0\lib\net462\Microsoft.Kiota.Http.HttpClientLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Serialization.Form, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Serialization.Form.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Form.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Serialization.Json, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Serialization.Json.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Serialization.Multipart, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Serialization.Multipart.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Multipart.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kiota.Serialization.Text, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Kiota.Serialization.Text.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Bson, Version=1.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.Bson.1.0.3\lib\net45\Newtonsoft.Json.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.Core, Version=2.8.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>packages\NPOI.2.8.0\lib\net472\NPOI.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML, Version=2.8.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>packages\NPOI.2.8.0\lib\net472\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.8.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>packages\NPOI.2.8.0\lib\net472\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats, Version=2.8.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <HintPath>packages\NPOI.2.8.0\lib\net472\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="NSax, Version=1.0.2.0, Culture=neutral, PublicKeyToken=0b3d9671cbd3c8d0, processorArchitecture=MSIL">
+      <HintPath>packages\NSax.1.0.2\lib\net472\NSax.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="RBush, Version=4.0.0.0, Culture=neutral, PublicKeyToken=c77e27b81f4d0187, processorArchitecture=MSIL">
+      <HintPath>packages\RBush.Signed.4.0.0\lib\net47\RBush.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=114.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>packages\RestSharp.114.0.0\lib\net471\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Rotativa, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Rotativa.1.7.3\lib\net461\Rotativa.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Fonts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d998eea7b14cab13, processorArchitecture=MSIL">
+      <HintPath>packages\SixLabors.Fonts.1.0.1\lib\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+    </Reference>
+    <Reference Include="SkiaSharp, Version=3.119.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>packages\SkiaSharp.3.119.2\lib\net462\SkiaSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Std.UriTemplate, Version=2.0.8.0, Culture=neutral, PublicKeyToken=c118b0afb4598f9a, processorArchitecture=MSIL">
+      <HintPath>packages\Std.UriTemplate.2.0.8\lib\netstandard2.0\Std.UriTemplate.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ClientModel, Version=1.11.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>packages\System.ClientModel.1.11.0\lib\netstandard2.0\System.ClientModel.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration.ConfigurationManager, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Configuration.ConfigurationManager.10.0.7\lib\net462\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Diagnostics.DiagnosticSource.10.0.7\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Formats.Asn1, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Formats.Asn1.10.0.7\lib\net462\System.Formats.Asn1.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\System.IdentityModel.Tokens.Jwt.8.18.0\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.FileSystem.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.FileSystem.AccessControl.5.0.0\lib\net461\System.IO.FileSystem.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Hashing, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.Hashing.10.0.7\lib\net462\System.IO.Hashing.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Pipelines, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.Pipelines.10.0.7\lib\net462\System.IO.Pipelines.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory.Data, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.Data.10.0.7\lib\net462\System.Memory.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Client.6.0.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WinHttpHandler, Version=10.0.0.7, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Net.Http.WinHttpHandler.10.0.7\lib\net462\System.Net.Http.WinHttpHandler.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=6.0.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.AccessControl.6.0.1\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.ProtectedData, Version=10.0.0.7, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.ProtectedData.10.0.7\lib\net462\System.Security.Cryptography.ProtectedData.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.X509Certificates.4.3.2\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Xml, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.Xml.10.0.7\lib\net462\System.Security.Cryptography.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encoding.CodePages, Version=10.0.0.7, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Encoding.CodePages.10.0.7\lib\net462\System.Text.Encoding.CodePages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Encodings.Web.10.0.7\lib\net462\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Json.10.0.7\lib\net462\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebPages.3.3.0\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Core.5.3.0\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.WebHost.5.3.0\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.Mvc.5.3.0\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.Razor.3.3.0\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebPages.3.3.0\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebPages.3.3.0\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebPages.3.3.0\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>packages\Microsoft.Web.Infrastructure.2.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="System.Web.Optimization">
+      <HintPath>packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="WebGrease">
+      <Private>True</Private>
+      <HintPath>packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
+    </Reference>
+    <Reference Include="Antlr3.Runtime">
+      <Private>True</Private>
+      <HintPath>packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="Zen.Barcode.Core, Version=3.1.0.0, Culture=neutral, PublicKeyToken=b5ae55aa76d2d9de, processorArchitecture=MSIL">
+      <HintPath>packages\Zen.Barcode.Rendering.Framework.3.1.10729.1\lib\Zen.Barcode.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="ZString, Version=2.6.0.0, Culture=neutral, PublicKeyToken=df4c250b14d82627, processorArchitecture=MSIL">
+      <HintPath>packages\ZString.2.6.0\lib\netstandard2.0\ZString.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Areas\a\aAreaRegistration.cs" />
+    <Compile Include="Areas\a\Controllers\AuditController.cs" />
+    <Compile Include="Areas\a\Controllers\FiltrosController.cs" />
+    <Compile Include="Areas\a\Controllers\ParametrosController.cs" />
+    <Compile Include="Areas\a\Models\CstFiltroModel.cs" />
+    <Compile Include="Areas\gc\Controllers\CfopController.cs" />
+    <Compile Include="Areas\gc\Controllers\CfopOperacoesController.cs" />
+    <Compile Include="Areas\gc\Controllers\CfopParametrosController.cs" />
+    <Compile Include="Areas\gc\Controllers\ComexFinanceiroController.cs" />
+    <Compile Include="Areas\gc\Controllers\ComexImportacoesController.cs" />
+    <Compile Include="Areas\gc\Controllers\ComexInvoicesController.cs" />
+    <Compile Include="Areas\gc\Controllers\ComexProdutosController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueControleController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueInventarioController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueLotesController.cs" />
+    <Compile Include="Areas\gc\Controllers\FinanceiroDespesasController.cs" />
+    <Compile Include="Areas\gc\Controllers\FinanceiroLancamentosController.cs" />
+    <Compile Include="Areas\gc\Controllers\FinanceiroParametroDifalController.cs" />
+    <Compile Include="Areas\gc\Controllers\FretesController.cs" />
+    <Compile Include="Areas\gc\Controllers\GerencialController.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosComprasController.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosController.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosEntradasController.cs" />
+    <Compile Include="Areas\gc\Controllers\ParametrosController.cs" />
+    <Compile Include="Areas\gc\Controllers\RelatoriosCadastraisController.cs" />
+    <Compile Include="Areas\gc\Controllers\RelatoriosComerciaisController.cs" />
+    <Compile Include="Areas\gc\Controllers\RelatoriosFinanceirosController.cs" />
+    <Compile Include="Areas\gc\Controllers\RelatoriosRegulamentacaoController.cs" />
+    <Compile Include="Areas\gc\gcAreaRegistration.cs" />
+    <Compile Include="Areas\gc\Models\cstComexCadastrarAtualizarItens.cs" />
+    <Compile Include="Areas\gc\Models\cstComexEntradaMateriais.cs" />
+    <Compile Include="Areas\gc\Models\cstComexEntradaMateriaisItens.cs" />
+    <Compile Include="Areas\gc\Models\cstDadosFaturamentoNF.cs" />
+    <Compile Include="Areas\gc\Models\cstDatasetClientesContatos.cs" />
+    <Compile Include="Areas\gc\Models\cstDatasetProdutosServicos.cs" />
+    <Compile Include="Areas\gc\Models\cstEstoqueComexItemImportacao.cs" />
+    <Compile Include="Areas\gc\Models\cstEstoqueEntradaMateriais.cs" />
+    <Compile Include="Areas\gc\Models\cstEstoqueEntradaMateriaisItem.cs" />
+    <Compile Include="Areas\gc\Models\CstEstoqueLotesMovimentar.cs" />
+    <Compile Include="Areas\gc\Models\cstFinanceiroLancamentoBoletoFebraban.cs" />
+    <Compile Include="Areas\gc\Models\cstGerarNFCompraExterior.cs" />
+    <Compile Include="Areas\gc\Models\cstImportacaoNFEntrada.cs" />
+    <Compile Include="Areas\gc\Models\cstInvoice.cs" />
+    <Compile Include="Areas\gc\Models\cstInvoiceItem.cs" />
+    <Compile Include="Areas\gc\Models\CstInvoiceItemValidacao.cs" />
+    <Compile Include="Areas\gc\Models\cstModalRelatorio.cs" />
+    <Compile Include="Areas\gc\Models\cstModelComexItemImportacao.cs" />
+    <Compile Include="Areas\gc\Models\cstModelComexItemInvoice.cs" />
+    <Compile Include="Areas\gc\Models\cstModelRelatorioComissaoVendedores.cs" />
+    <Compile Include="Areas\gc\Models\cstModelSalesOrderSC.cs" />
+    <Compile Include="Areas\gc\Models\cstMovimentoEntradaNF.cs" />
+    <Compile Include="Areas\gc\Models\cstMovimentoEntradaNFItem.cs" />
+    <Compile Include="Areas\gc\Models\cstNfeAutorizacao.cs" />
+    <Compile Include="Areas\gc\Models\cstNfeCartaCorrecao.cs" />
+    <Compile Include="Areas\gc\Models\cstNfeEmitente.cs" />
+    <Compile Include="Areas\gc\Models\cstNfeICMSTotal.cs" />
+    <Compile Include="Areas\gc\Models\cstPainelComercialGerencial.cs" />
+    <Compile Include="Areas\gc\Models\cstPedido.cs" />
+    <Compile Include="Areas\gc\Models\CstPedidoConferenciaEntradaLote.cs" />
+    <Compile Include="Areas\gc\Models\CstPedidoSeparacao.cs" />
+    <Compile Include="Areas\gc\Models\CstPedidoSeparacaoLote.cs" />
+    <Compile Include="Areas\gc\Models\cstPosicaoFinanceiraCliente.cs" />
+    <Compile Include="Areas\gc\Models\cstReportHTML.cs" />
+    <Compile Include="Areas\gc\Models\cstRowExtratoContaCaixa.cs" />
+    <Compile Include="Areas\gc\Models\cstUploadFiles.cs" />
+    <Compile Include="Areas\gc\Models\cstUploadList.cs" />
+    <Compile Include="Areas\gc\Reports\ReportEmailPedido.cs" />
+    <Compile Include="Areas\gc\Services\EstoqueInventarioService.cs" />
+    <Compile Include="Areas\gc\Services\PedidosVendaServices.cs" />
+    <Compile Include="Areas\g\Controllers\AssistentesController.cs" />
+    <Compile Include="Areas\g\Controllers\AtendimentosController.cs" />
+    <Compile Include="Areas\g\Controllers\CentrosCustosController.cs" />
+    <Compile Include="Areas\g\Controllers\CidadesController.cs" />
+    <Compile Include="Areas\g\Controllers\ClassificacaoFinanceiraController.cs" />
+    <Compile Include="Areas\g\Controllers\ClientesController.cs" />
+    <Compile Include="Areas\g\Controllers\ContasCaixasController.cs" />
+    <Compile Include="Areas\g\Controllers\ContratosAviacaoController.cs" />
+    <Compile Include="Areas\g\Controllers\FiliaisController.cs" />
+    <Compile Include="Areas\g\Controllers\FinanceiroController.cs" />
+    <Compile Include="Areas\g\Controllers\FinanceiroFaturamentosController.cs" />
+    <Compile Include="Areas\g\Controllers\FinanceiroLancamentosController.cs" />
+    <Compile Include="Areas\g\Controllers\GedController.cs" />
+    <Compile Include="Areas\g\Controllers\GlobalController.cs" />
+    <Compile Include="Areas\g\Controllers\ImportacoesBancariasController.cs" />
+    <Compile Include="Areas\g\Controllers\NfeController.cs" />
+    <Compile Include="Areas\g\Controllers\PagRecCondicoesController.cs" />
+    <Compile Include="Areas\g\Controllers\PortalVendedorController.cs" />
+    <Compile Include="Areas\g\Controllers\PagRecTiposController.cs" />
+    <Compile Include="Areas\g\Controllers\PerfisController.cs" />
+    <Compile Include="Areas\g\Controllers\ProdutosController.cs" />
+    <Compile Include="Areas\g\Controllers\ProdutosNcmController.cs" />
+    <Compile Include="Areas\g\Controllers\ProdutosTiposController.cs" />
+    <Compile Include="Areas\g\Controllers\RequisicoesController.cs" />
+    <Compile Include="Areas\g\Controllers\UFController.cs" />
+    <Compile Include="Areas\g\Controllers\UsuariosController.cs" />
+    <Compile Include="Areas\g\Controllers\VendedoresController.cs" />
+    <Compile Include="Areas\g\gAreaRegistration.cs" />
+    <Compile Include="Areas\g\Models\Lib\LibFinanceiro.cs" />
+    <Compile Include="Areas\g\Models\Lib\LibFinanceiroBoletos.cs" />
+    <Compile Include="Areas\g\Models\cstAlterarPrecosTabelasRevendaVendedor.cs" />
+    <Compile Include="Areas\g\Models\cstClienteLimiteCredito.cs" />
+    <Compile Include="Areas\g\Models\cstCopiarPrecosTabelas.cs" />
+    <Compile Include="Areas\g\Models\cstDadosProdutoServicosFixo.cs" />
+    <Compile Include="Areas\g\Models\cstDadosTituloFinanceiroEdicao.cs" />
+    <Compile Include="Areas\g\Models\cstExportacaoDadosNFEModel.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroBoletos.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroBoletosLancamentos.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroFaturamentosEnviarNFe.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroImpostos.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroIndex.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroLancamentos.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroLancamentosIndex.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroProrrogarVencimentoTitulos.cs" />
+    <Compile Include="Areas\g\Models\cstFinanceiroTransferirContaCaixa.cs" />
+    <Compile Include="Areas\g\Models\cstImportacoesBancarias.cs" />
+    <Compile Include="Areas\g\Models\cstImportacoesWithDate.cs" />
+    <Compile Include="Areas\g\Models\cstModalFiltroAvancado.cs" />
+    <Compile Include="Areas\g\Models\cstPerfisAcessos.cs" />
+    <Compile Include="Areas\g\Models\cstPortalClienteFinanceiro.cs" />
+    <Compile Include="Areas\g\Models\cstRevendasTabelasDetalhesModel.cs" />
+    <Compile Include="Areas\g\Models\cstStringReplace.cs" />
+    <Compile Include="Areas\g\Models\cstUpload.cs" />
+    <Compile Include="Areas\g\Models\cstUploadGed.cs" />
+    <Compile Include="Areas\g\Models\cstVendedoresTabelasDetalhesModel.cs" />
+    <Compile Include="Areas\g\Models\cstViewPerfisAcessosModel.cs" />
+    <Compile Include="Areas\g\Models\cstViewPortalClienteFinanceiro.cs" />
+    <Compile Include="Areas\g\Models\cstViewRevendasTabelasModel.cs" />
+    <Compile Include="Areas\g\Models\cstViewVendedoresTabelasModel.cs" />
+    <Compile Include="Areas\qa\Controllers\GedSGQController.cs" />
+    <Compile Include="Areas\qa\Controllers\LmsEvidenceController.cs" />
+    <Compile Include="Areas\qa\Controllers\TreinamentosController.cs" />
+    <Compile Include="Areas\qa\Models\EvidenceEventDto.cs" />
+    <Compile Include="Areas\qa\Models\ListaConteudoTreinamentoModel.cs" />
+    <Compile Include="Areas\qa\qaAreaRegistration.cs" />
+    <Compile Include="Controllers\AcessoNegadoController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\JobRunRequest.cs" />
+    <Compile Include="Controllers\JobServerController.cs" />
+    <Compile Include="Controllers\IAuthenticationManager.cs" />
+    <Compile Include="Controllers\jQueryDataTableParamModel.cs" />
+    <Compile Include="Controllers\JQueryDataTablesModel.cs" />
+    <Compile Include="Controllers\JQueryDataTablesModelBinder.cs" />
+    <Compile Include="Controllers\NavbarController.cs" />
+    <Compile Include="Controllers\UserIdentityController.cs" />
+    <Compile Include="ControlVersion.cs" />
+    <Compile Include="Db\a_parametros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_sistemas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_sistemas_controllers.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_sistemas_grupos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_sistemas_modulos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_tablesrows_colors.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_yesprodutos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\a_yesprodutos_extrato.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\crm_portalcliente_acessos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_cfop.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_cfop_finalidade.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_cfop_operacoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_cfop_parametros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_financeiro.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes_files_xls.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes_itens.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes_itens_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes_itens_lotes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_importacoes_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_invoices.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_invoices_itens.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_invoices_itens_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_invoices_itens_serials.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_invoices_pdf.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_produtos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_produtos_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_comex_produtos_tabelao.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_entregas_prazos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_cd.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_competencia.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_competencia_saldo.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_endereco_area.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_endereco_corredor.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_endereco_prateleira.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_endereco_secao.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_inventario.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_inventario_item.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_lotes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_lotes_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_movimento.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_movimento_tipo.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_seriais.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_estoque_transferencia.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_financeiro_lancamentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_financeiro_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_frete_responsavel.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_icms_cst.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_indicador_ie.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_inteligencia_comercial.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_inteligencia_comercial_monitoramento.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_locais_estoque.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_atividades.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_cancelamentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_cancelamentos_motivos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_financeiros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_itens.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_nf.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_posicao.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_posvenda.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_movimentos_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_parametros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_parametros_difal.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_parametros_difal_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_tarefas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_tarefas_grupos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_tarefas_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_tarefas_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_tarefas_usuarios.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_transportadoras.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\gc_tributos_cst.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\ged_arquivos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\ged_arquivos_logs.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\ged_arquivos_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_alerts.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_api_gateway.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_assistentes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_atendimentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_atendimentos_atividades.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_atendimentos_categorias.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_atendimentos_categorias_atividades.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_atendimentos_logs.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_atendimentos_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_centros_custos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_cidades.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_classificacao_financeira.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_clientes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_clientes_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_clientes_contatos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_clientes_contatos_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_clientes_destinatarios.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_clientes_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_coligadas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_contas_caixas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_contas_caixas_acessos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_contratos_aviacao.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_contratos_aviacao_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_cotacoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_departamentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_escolaridade.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_estado_civil.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_filiais.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_filtros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_faturamentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_gateway.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_historicos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_lancamentos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_logs.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_origem.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_remessas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_financeiro_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_jobserver.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_logomarcas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_messages.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_moedas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_carta_correcao.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_config.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_envio_email_log.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_finalidade.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_gateway.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_logs.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_nfe_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_pagrec_condicoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_pagrec_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_pais.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_parametros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_perfis.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_perfis_acessos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_processamento.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_processamento_modulo.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_processamento_tipo.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_audit.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_condicoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_controle.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_familia.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_grupos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_logs.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_medicoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_ncm.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_ncm_ibptax.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_produtos_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_regioes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_requisicoes.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_requisicoes_tipos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_revendas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_tasks.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_tasks_tipo.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_templates.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_uf.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_unidade_medida.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_usuarios.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_usuarios_grupos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_usuarios_login_logs.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_usuarios_senhas_historico.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\g_vendedores.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\Metadata\gc_comex_financeiroMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_comex_importacoesMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_comex_importacoes_itens_lotesMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_comex_invoices_itensMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_financeiro_lancamentosMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_movimentosMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_movimentos_financeirosMetadata.cs" />
+    <Compile Include="Db\Metadata\gc_movimentos_itensMetadata.cs" />
+    <Compile Include="Db\Metadata\ged_arquivosMetadata.cs" />
+    <Compile Include="Db\Metadata\g_assistentesMetadata.cs" />
+    <Compile Include="Db\Metadata\g_cidadesMetadata.cs" />
+    <Compile Include="Db\Metadata\g_clientesMetadata.cs" />
+    <Compile Include="Db\Metadata\g_clientes_produtos_fixosMetadata.cs" />
+    <Compile Include="Db\Metadata\g_contas_caixasMetadata.cs" />
+    <Compile Include="Db\Metadata\g_contratos_aviacaoMetadata.cs" />
+    <Compile Include="Db\Metadata\g_filiaisMetadata.cs" />
+    <Compile Include="Db\Metadata\g_financeiroMetadata.cs" />
+    <Compile Include="Db\Metadata\g_financeiro_faturamentosMetadata.cs" />
+    <Compile Include="Db\Metadata\g_nfeMetadata.cs" />
+    <Compile Include="Db\Metadata\g_perfisMetadata.cs" />
+    <Compile Include="Db\Metadata\g_produtosMetadata.cs" />
+    <Compile Include="Db\Metadata\g_produtos_medicoesMetadata.cs" />
+    <Compile Include="Db\Metadata\g_produtos_tiposMetadata.cs" />
+    <Compile Include="Db\Metadata\g_regioesMetadata.cs" />
+    <Compile Include="Db\Metadata\g_requisicoesMetadata.cs" />
+    <Compile Include="Db\Metadata\g_revendasMetadata.cs" />
+    <Compile Include="Db\Metadata\g_usuariosMetadata.cs" />
+    <Compile Include="Db\Metadata\g_vendedoresMetadata.cs" />
+    <Compile Include="Db\ModelDbGdiPlataform.Context1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelDbGdiPlataform.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\ModelDbGdiPlataform.cs" />
+    <Compile Include="Db\ModelDbGdiPlataform.Designer.cs">
+      <DependentUpon>ModelDbGdiPlataform.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Db\ModelDbGdiPlataform1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\ModelDbGdiPlataform1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelDbGdiPlataform.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos_areas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos_arquivos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos_registros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_evidence_event.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_evidence_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Lib\LibAudit.cs" />
+    <Compile Include="Lib\LibBoletos.cs" />
+    <Compile Include="Lib\LibCache.cs" />
+    <Compile Include="Lib\LibCnabBancario.cs" />
+    <Compile Include="Lib\LibDataSets.cs" />
+    <Compile Include="Lib\LibDateTime.cs" />
+    <Compile Include="Lib\LibDB.cs" />
+    <Compile Include="Lib\LibDBGestaoComercial.cs" />
+    <Compile Include="Lib\LibEmail.cs" />
+    <Compile Include="Lib\LibExcelReader.cs" />
+    <Compile Include="Lib\LibExceptions.cs" />
+    <Compile Include="Lib\LibFilesDisk.cs" />
+    <Compile Include="Lib\LibGDI.cs" />
+    <Compile Include="Lib\LibIcons.cs" />
+    <Compile Include="Lib\LibNumbers.cs" />
+    <Compile Include="Lib\LibObjects.cs" />
+    <Compile Include="Lib\PasswordPolicy.cs" />
+    <Compile Include="Lib\LibRetornoProcessamento.cs" />
+    <Compile Include="Lib\LibSheetHelper.cs" />
+    <Compile Include="Lib\LibStringFormat.cs" />
+    <Compile Include="Lib\LibStringValidate.cs" />
+    <Compile Include="Lib\LibXML.cs" />
+    <Compile Include="Models\AlertMsgItem.cs" />
+    <Compile Include="Models\ContextoModel.cs" />
+    <Compile Include="Models\cstTenant.cs" />
+    <Compile Include="Models\jsTree3Node.cs" />
+    <Compile Include="Models\ModelApiResponse.cs" />
+    <Compile Include="Models\ModelControlTableUpdate.cs" />
+    <Compile Include="Models\NavbarItemAlert.cs" />
+    <Compile Include="Models\NavbarItemAtividade.cs" />
+    <Compile Include="Models\NavbarItemMenu.cs" />
+    <Compile Include="Models\NavbarItemMessage.cs" />
+    <Compile Include="Models\NavbarItemTask.cs" />
+    <Compile Include="Models\UserIdentity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Robos\Aws\BotAwsEmail.cs" />
+    <Compile Include="Robos\Aws\BotAwsS3.cs" />
+    <Compile Include="Robos\Aws\GdiAwsS3Credentials.cs" />
+    <Compile Include="Robos\CotacaoDolar\RoboCotacaoDolar.cs" />
+    <Compile Include="Robos\CpfCnpj\RoboCpfCnpj.cs" />
+    <Compile Include="Robos\ENotas\Nfe\CartaCorrecao\CartaCorrecao.cs" />
+    <Compile Include="Robos\ENotas\Nfe\CartaCorrecao\CartaCorrecaoRetorno.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Cliente.cs" />
+    <Compile Include="Robos\ENotas\Nfe\DataNFPe.cs" />
+    <Compile Include="Robos\ENotas\Nfe\DataNFSe.cs" />
+    <Compile Include="Robos\ENotas\Nfe\DataNFSeId.cs" />
+    <Compile Include="Robos\ENotas\Nfe\DeclaracaoImportacao.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Endereco.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibAuthenticationException.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibAuthorizationException.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibErro.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibException.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibGeneralException.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibMessages.Designer.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Exceptions\GWLibValidationException.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Impostos.cs" />
+    <Compile Include="Robos\ENotas\Nfe\ImpostosVenda.cs" />
+    <Compile Include="Robos\ENotas\Nfe\ItemNFP.cs" />
+    <Compile Include="Robos\ENotas\Nfe\ItemNFPVenda.cs" />
+    <Compile Include="Robos\ENotas\Nfe\NFPe.cs" />
+    <Compile Include="Robos\ENotas\Nfe\NFPRemessa.cs" />
+    <Compile Include="Robos\ENotas\Nfe\NFPResponse.cs" />
+    <Compile Include="Robos\ENotas\Nfe\NFPVenda.cs" />
+    <Compile Include="Robos\ENotas\Nfe\NFSe.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Servico.cs" />
+    <Compile Include="Robos\ENotas\Nfe\Transporte.cs" />
+    <Compile Include="Robos\ENotas\RoboEnotasNFE.cs" />
+    <Compile Include="Robos\Itau\ModelItauBolecode.cs" />
+    <Compile Include="Robos\Itau\RoboItauBolecode.cs" />
+    <Compile Include="Robos\SintegraWS\Models\cstRetornoReceitaCPF.cs" />
+    <Compile Include="Robos\SintegraWS\Models\cstRetornoSintegraWS.cs" />
+    <Compile Include="Robos\SintegraWS\RoboSintegraWS.cs" />
+    <Compile Include="Robos\WhatsApp\RoboWhatsApp.cs" />
+    <Compile Include="Security\CachePersister.cs" />
+    <Compile Include="Security\Contexto.cs" />
+    <Compile Include="Security\CustomAuthorizeAttribute.cs" />
+    <Compile Include="Security\CustomPrincipal.cs" />
+    <Compile Include="Views\ViewModels\IdentityViewModel.cs" />
+    <Compile Include="Views\ViewModels\TrocaObrigatoriaSenhaViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\bootstrap-grid.css" />
+    <Content Include="Content\bootstrap-grid.min.css" />
+    <Content Include="Content\bootstrap-grid.rtl.css" />
+    <Content Include="Content\bootstrap-grid.rtl.min.css" />
+    <Content Include="Content\bootstrap-reboot.css" />
+    <Content Include="Content\bootstrap-reboot.min.css" />
+    <Content Include="Content\bootstrap-reboot.rtl.css" />
+    <Content Include="Content\bootstrap-reboot.rtl.min.css" />
+    <Content Include="Content\bootstrap-utilities.css" />
+    <Content Include="Content\bootstrap-utilities.min.css" />
+    <Content Include="Content\bootstrap-utilities.rtl.css" />
+    <Content Include="Content\bootstrap-utilities.rtl.min.css" />
+    <Content Include="Content\bootstrap.css" />
+    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\site.css" />
+    <Content Include="Content\gdi-datatables-bs5.css" />
+    <Content Include="Content\gdi-section-cards.css" />
+    <Content Include="Content\kaushan-script-local.css" />
+    <Content Include="Content\fonts\kaushanscript-latin.woff2" />
+    <Content Include="Content\fonts\kaushanscript-latin-ext.woff2" />
+    <Content Include="Content\bootstrap.rtl.css" />
+    <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\fonts-googleapis.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\Login.css" />
+    <Content Include="Db\InserirMetadata.exe" />
+    <Content Include="Db\ModelDbGdiPlataform.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ModelDbGdiPlataform.Context1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Db\ModelDbGdiPlataform.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ModelDbGdiPlataform1.cs</LastGenOutput>
+    </Content>
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\Site.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\AdminLTEFullLogo.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\AdminLTELogo.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\avatar.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\avatar2.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\avatar3.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\avatar4.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\avatar5.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\boxed-bg.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\boxed-bg.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\credit\american-express.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\credit\cirrus.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\credit\mastercard.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\credit\paypal.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\credit\paypal2.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\credit\visa.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\default-150x150.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\icons.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\photo1.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\photo2.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\photo3.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\photo4.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\prod-1.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\prod-2.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\prod-3.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\prod-4.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\prod-5.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user1-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user2-160x160.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user3-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user4-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user5-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user6-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user7-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\assets\img\user8-128x128.jpg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.rtl.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.rtl.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\example.html" />
+    <Content Include="LibUI_AdminLTE-4.0.0\js\adminlte.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\js\adminlte.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-switch\css\bootstrap2\bootstrap-switch.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-switch\css\bootstrap2\bootstrap-switch.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-switch\css\bootstrap3\bootstrap-switch.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-switch\css\bootstrap3\bootstrap-switch.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-switch\js\bootstrap-switch.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-switch\js\bootstrap-switch.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap4-toggle\bootstrap4-toggle.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap4-toggle\bootstrap4-toggle.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\select2\**\*" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\tempus-dominus-6.9.4\**\*" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\datatablesnet-bs5-2.3.2\datatables.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\datatablesnet-bs5-2.3.2\datatables.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\datatablesnet-bs5-2.3.2\datatables.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\datatablesnet-bs5-2.3.2\datatables.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\all.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\all.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\brands.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\brands.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\fontawesome.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\fontawesome.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\regular.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\regular.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\solid.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\solid.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\svg-with-js.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\svg-with-js.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\svg.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\svg.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\v4-font-face.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\v4-font-face.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\v4-shims.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\v4-shims.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\v5-font-face.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\css\v5-font-face.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\all.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\all.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\brands.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\brands.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\conflict-detection.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\conflict-detection.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\fontawesome.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\fontawesome.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\regular.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\regular.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\solid.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\solid.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\v4-shims.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\js\v4-shims.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.slim.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.slim.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery.spin.fgnass-2.3.2\spin.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery.spin.fgnass-2.3.2\spin.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\jstree.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\jstree.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap-theme.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap-theme.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\js\bootstrap.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\js\bootstrap.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\jquery.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\30px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\32px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\40px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\style.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\style.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\throbber.gif" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\30px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\32px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\style.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\style.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\throbber.gif" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\asttter.ico" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\favicon.ico" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\favicon2.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\favicon3.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icon-bank-32.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-genealogy-24.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-genealogy-32.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-pie-chart-report-script-24.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-tags-24.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap-theme.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap-theme.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\js\bootstrap.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\js\bootstrap.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\jquery.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\30px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\32px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\40px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\style.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\throbber.gif" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\30px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\32px.png" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.svg" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\throbber.gif" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\start.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\js\gdi-select2.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\js\gdi-swal2-dialog-shim.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\js\start.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\sweetalert2\bootstrap-5.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\sweetalert2\sweetalert2.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\sweetalert2\gdi-swal2-overrides.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\sweetalert2\sweetalert2.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\overlayscrollbars-2.11.0\overlayscrollbars.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\overlayscrollbars-2.11.0\overlayscrollbars.browser.es5.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-icons-1.13.1\bootstrap-icons.min.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-icons-1.13.1\fonts\bootstrap-icons.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\bootstrap-icons-1.13.1\fonts\bootstrap-icons.woff2" />
+    <Content Include="Lib\DDL\000 - Restore Database.txt" />
+    <Content Include="Lib\DDL\ddl-version.txt" />
+    <Content Include="Rotativa\help-wkhtmltoimage.txt" />
+    <Content Include="Rotativa\help-wkhtmltopdf.txt" />
+    <Content Include="Rotativa\wkhtmltoimage.exe" />
+    <Content Include="Rotativa\wkhtmltopdf.exe" />
+    <Content Include="Areas\a\Views\Filtros\ModalFiltroGenericoView.cshtml" />
+    <Content Include="Areas\a\Views\Parametros\Index.cshtml" />
+    <Content Include="Areas\a\Views\web.config" />
+    <Content Include="Areas\gc\Views\CfopOperacoes\Index.cshtml" />
+    <Content Include="Areas\gc\Views\CfopOperacoes\ModalCreateEditOperacao.cshtml" />
+    <Content Include="Areas\gc\Views\CfopParametros\Index.cshtml" />
+    <Content Include="Areas\gc\Views\CfopParametros\ModalCreateEditParametro.cshtml" />
+    <Content Include="Areas\gc\Views\Cfop\CreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\Cfop\Index.cshtml" />
+    <Content Include="Areas\gc\Views\ComexFinanceiro\Index.cshtml" />
+    <Content Include="Areas\gc\Views\ComexFinanceiro\ModalCancelarComexFinanceiro.cshtml" />
+    <Content Include="Areas\gc\Views\ComexFinanceiro\ModalCreateEditGcComexFinanceiro.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\CreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\Index.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalCadastrarAtualizarItensImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalCancelarImportacaoComex.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalCarregarItensImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalExcluirItensImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalFechamentoCustosImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalImportacoesLogs.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalUploadFileComexDocs.cshtml" />
+    <Content Include="Areas\gc\Views\ComexImportacoes\ModalUploadFileComexInvoicesPDF.cshtml" />
+    <Content Include="Areas\gc\Views\ComexInvoices\Index.cshtml" />
+    <Content Include="Areas\gc\Views\ComexInvoices\ModalCambioInvoice.cshtml" />
+    <Content Include="Areas\gc\Views\ComexInvoices\ModalCancelarInvoice.cshtml" />
+    <Content Include="Areas\gc\Views\ComexInvoices\ModalImportarInvoiceXLS.cshtml" />
+    <Content Include="Areas\gc\Views\ComexInvoices\ModalInvoice.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\FormProcessarProdutosPreAtualizar.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\FormProcessarProdutosPreNovos.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\Index.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\ModalCancelarCadastroProdutos.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\ModalCreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\ModalDesativarProdutoComex.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\gc\Views\ComexProdutos\ProdutosPre.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueControle\CreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueControle\Index.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueControle\ModalCreateMedicao.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueInventario\FormInventarioItens.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueInventario\Index.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueInventario\ModalCreateEditInventarioItem.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueInventario\ModalCreateInventario.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueInventario\ModalFinalizarInventario.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\FormRecebimentoItensEstoque.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\FormRecebimentoItensImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\Index.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\IndexRecebimentoEstoque.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\IndexRecebimentoImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\ModalConferenciaEstoqueItem.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\ModalConferenciaImportacaoItem.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\ModalRecebimentoComexLote.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\ModalRecebimentoComexObs.cshtml" />
+    <Content Include="Areas\gc\Views\Estoque\ModalTransferenciaGerencial.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\BoletoPdfFebraban.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\Index.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalBaixarLancamentos.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalCancelarLancamentos.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalCancelarMovimentoFinanceiro.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalCreateEditLancamento.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalFinanceiroViewAnexos.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalGerarBoletoLancamentoAvulso.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalGerarFinanceiroMovimentos.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalRelatorioContaCaixaSaldoDiario.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalUploadAnexoFinanceiro.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalViewFinanceiroMovimentos.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroParametroDifal\CreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroParametroDifal\Index.cshtml" />
+    <Content Include="Areas\gc\Views\Fretes\Index.cshtml" />
+    <Content Include="Areas\gc\Views\Gerencial\IndexPainelComercialGerencial.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosCompras\CreateCotacaoPedidoCompra.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosCompras\IndexCompras.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosCompras\ModalImportarExcelSC.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosCompras\ModalInsertEditItemCompra.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\FormProcessarNFCompraNacional.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\FormProcessarNFDevolucao.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\FormProcessarNFImportacao.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\Index.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\ModalNFEntradaCancelar.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\ModalNFEntradaGerarNF.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\ModalNFEntradaImportar.cshtml" />
+    <Content Include="Areas\gc\Views\MovimentosEntradas\ModalPedidoTransferirFilial.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\BoletoPdfFebraban.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\FormPedidoCreate.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\IndexEstoque.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\IndexPedido.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalCancelarPedido.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalConsultaPedidos.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalHistoricoMovimento.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalImportarExcelSC.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalImportarTxtSC.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalInvoicesItensEspelhoDigital.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalNotificacaoCliente.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoAjustarComissao.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoAprovacao.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoAtualizarValorTotal.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoCartaCorrecao.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoConverterMoeda.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoDuplicar.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoEntrega.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoExpedicao.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoInsertEditItem.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoNotaFiscal.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoSeparacao.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoSeparacaoLotes.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalPedidoViewAnexos.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalReabrirMovimento.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalUploadFilePedidos.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalViewCartaCorrecao.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ModalViewNotasFiscais.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\PainelPedidos.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ReportInvoicePDF.cshtml" />
+    <Content Include="Areas\gc\Views\Movimentos\ReportTermoConvenioICMSPDF.cshtml" />
+    <Content Include="Areas\gc\Views\Parametros\Index.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosCadastrais\Index.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosCadastrais\ModalRelatorioClientesFornecedores.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\Index.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioItensComercializados.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioNotasFiscaisContabilidade.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioNotasFiscaisEmitidas.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioNotasFiscaisMensais.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioTransportadorasFretes.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioVendedoresAtrasados.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioVendedoresCarteira.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioVendedoresComissoes.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosComerciais\ModalRelatorioVendedoresPedidos.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosFinanceiros\Index.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosFinanceiros\ModalRelatorioLancamentosFinanceiros.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\Index.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioANP.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioIBAMA.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioJogueLimpo.cshtml" />
+    <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioPF.cshtml" />
+    <Content Include="Areas\gc\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\gc\Views\web.config" />
+    <Content Include="Areas\gc\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\g\Views\Assistentes\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Assistentes\Index.cshtml" />
+    <Content Include="Areas\g\Views\Atendimentos\Edit.cshtml" />
+    <Content Include="Areas\g\Views\Atendimentos\Index.cshtml" />
+    <Content Include="Areas\g\Views\Atendimentos\ModalCreateEditAtividade.cshtml" />
+    <Content Include="Areas\g\Views\Atendimentos\ModalCreateNewAtendimento.cshtml" />
+    <Content Include="Areas\g\Views\Atendimentos\ModalUploadFileAtendimentos.cshtml" />
+    <Content Include="Areas\g\Views\CentrosCustos\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\CentrosCustos\Index.cshtml" />
+    <Content Include="Areas\g\Views\Cidades\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Cidades\Index.cshtml" />
+    <Content Include="Areas\g\Views\Cidades\ModalCadastrarNovaCidade.cshtml" />
+    <Content Include="Areas\g\Views\Cidades\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\g\Views\ClassificacaoFinanceira\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ClassificacaoFinanceira\Index.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\Index.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalAtualizarLimiteCredito.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalAtualizarVendedorConsultor.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalCreateEditContato.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalCreateEditDestinatario.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalDesativarContato.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\g\Views\Clientes\ModalNovoCadastroRoboSintegra.cshtml" />
+    <Content Include="Areas\g\Views\ContasCaixas\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ContasCaixas\Index.cshtml" />
+    <Content Include="Areas\g\Views\ContratosAviacao\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ContratosAviacao\Index.cshtml" />
+    <Content Include="Areas\g\Views\ContratosAviacao\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\g\Views\ContratosAviacao\ModalUploadContratoAssinado.cshtml" />
+    <Content Include="Areas\g\Views\ContratosAviacao\ReportPDFContrato001.cshtml" />
+    <Content Include="Areas\g\Views\Filiais\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Filiais\Index.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroFaturamentos\Index.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroFaturamentos\modalAtualizarFaturamentoGestorFranquia.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroFaturamentos\ModalEnviarEmailsClientes.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroFaturamentos\ModalEnviarNFEmailCliente.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroFaturamentos\ModalImportarArquivoFaturamentoGestorFranquia.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroLancamentos\Index.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroLancamentos\ModalCancelarLancamentos.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroLancamentos\ModalFecharLancamentosAbertos.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroLancamentos\ModalFinalizarEdicaoTitulo.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroLancamentos\ModalGerarFaturamento.cshtml" />
+    <Content Include="Areas\g\Views\FinanceiroLancamentos\ModalIncluirLancamentos.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\Backup_ReportBoletoDDA.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\BoletoPDF.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\BoletoPdfFebraban.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\DadosConsolidados.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\GerarFinanceiroBoletoEmail.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\GerarFinanceiroBoletoHTML.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\Index.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalBaixarTitulos.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalBoleto.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalCancelarTitulos.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalEditarTitulo.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalGerarRemessaBoletosBancarios.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalNotaDebito.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalProrrogarVencimentoTitulo.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ReportBoletoDDA.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ReportBoletoGC.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ReportBoletoHTML.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ReportNotaDebitoHTML.cshtml" />
+    <Content Include="Areas\g\Views\Ged\Index.cshtml" />
+    <Content Include="Areas\g\Views\Ged\ModalDesativarGed.cshtml" />
+    <Content Include="Areas\g\Views\Ged\ModalEditFileGed.cshtml" />
+    <Content Include="Areas\g\Views\Ged\ModalUploadFileGed.cshtml" />
+    <Content Include="Areas\g\Views\ImportacoesBancarias\Index.cshtml" />
+    <Content Include="Areas\g\Views\ImportacoesBancarias\ModalImportarCnabBoletos.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\Index.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalAtualizarStatusNfe.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\modalCancelarNfe.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalEnviarCancelamentoNfe.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\modalExportarDadosNfePDF.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalGerarNfe.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalImportarNfeLote.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalNfeEnviarPorEmailUnitario.cshtml" />
+    <Content Include="Areas\g\Views\Nfe\ModalSincronizarLotesNfe.cshtml" />
+    <Content Include="Areas\g\Views\PagRecCondicoes\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\PagRecCondicoes\Index.cshtml" />
+    <Content Include="Areas\g\Views\PagRecTipos\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\PagRecTipos\Index.cshtml" />
+    <Content Include="Areas\g\Views\Perfis\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Perfis\Index.cshtml" />
+    <Content Include="Areas\g\Views\PortalCliente\PortalFinanceiro.cshtml" />
+    <Content Include="Areas\g\Views\PortalVendedor\PortalFinanceiro.cshtml" />
+    <Content Include="Areas\g\Views\ProdutosNcm\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ProdutosNcm\Index.cshtml" />
+    <Content Include="Areas\g\Views\ProdutosNcm\ModalAtualizarTabelaIBPT.cshtml" />
+    <Content Include="Areas\g\Views\ProdutosTipos\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ProdutosTipos\Index.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\Index.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\ModalAtualizarCadastroProdutos.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\ModalDesativarCadastroProduto.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\ModalFiltroAvancadoView.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\ModalViewFichaEstoqueProduto.cshtml" />
+    <Content Include="Areas\g\Views\Requisicoes\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Requisicoes\Index.cshtml" />
+    <Content Include="Areas\g\Views\Requisicoes\ModalSolicitarBloqueioLogon.cshtml" />
+    <Content Include="Areas\g\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\g\Views\UF\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\UF\Index.cshtml" />
+    <Content Include="Areas\g\Views\Usuarios\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Usuarios\Index.cshtml" />
+    <Content Include="Areas\g\Views\Usuarios\modalUsuarioTrocarSenha.cshtml" />
+    <Content Include="Areas\g\Views\Vendedores\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Vendedores\Index.cshtml" />
+    <Content Include="Areas\g\Views\web.config" />
+    <Content Include="Areas\g\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\qa\Views\GedSGQ\IndexAtasReunioes.cshtml" />
+    <Content Include="Areas\qa\Views\GedSGQ\IndexComunicados.cshtml" />
+    <Content Include="Areas\qa\Views\GedSGQ\IndexDocsSGQ.cshtml" />
+    <Content Include="Areas\qa\Views\GedSGQ\IndexPops.cshtml" />
+    <Content Include="Areas\qa\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\qa\Views\Treinamentos\Index.cshtml" />
+    <Content Include="Areas\qa\Views\Treinamentos\IndexTreinamentoAviacao001.cshtml" />
+    <Content Include="Areas\qa\Views\web.config" />
+    <Content Include="Areas\qa\Views\_ViewStart.cshtml" />
+    <Content Include="Db\InserirMetadata.exe.config" />
+    <EntityDeploy Include="Db\ModelDbGdiPlataform.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>ModelDbGdiPlataform1.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Db\ModelDbGdiPlataform.edmx.diagram">
+      <DependentUpon>ModelDbGdiPlataform.edmx</DependentUpon>
+    </Content>
+    <Content Include="Lib\Certificados\certificado-itau-gdisp-2026-04-15.pfx" />
+    <Content Include="Lib\Templates\template_fechamento_custos_importacao.xls" />
+    <Content Include="Lib\Templates\template_gc_estoque_inventario.xlsx" />
+    <Content Include="Lib\Templates\template_gc_exportar_lancamentos_gdi.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_clientesfornecedores.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_comercial_itens_comercializados.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_estoque_posicao.xlsx" />
+    <Content Include="Lib\Templates\template_gc_relatorio_financeiro_extrato_cc.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_financeiro_lancamentos.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_nf_contabilidade.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_nf_mensais.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_notas_emitidas_gdi.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_regulamentacao.xlsx" />
+    <Content Include="Lib\Templates\template_gc_relatorio_transportadoras_fretes.xls" />
+    <Content Include="Lib\Templates\template_gc_relatorio_vendedores_carteira.xlsx" />
+    <Content Include="Lib\Templates\template_gc_relatorio_vendedores_comissoes.xlsx" />
+    <Content Include="Lib\Templates\template_gc_relatorio_vendedores_pedidos.xlsx" />
+    <Content Include="App_Browsers\qt.browser" />
+    <Content Include="Lib\Certificados\certificado-itau-gdibh-2027-02-24.pfx" />
+    <Content Include="Areas\gc\Views\EstoqueLotes\Index.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueLotes\ModalCreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueLotes\ModalUploadAnexoEstoqueLotes.cshtml" />
+    <Content Include="Lib\Certificados\itau-certificado-gdisp-2027-04-07.pfx" />
+    <Content Include="Content\bootstrap.rtl.min.css.map" />
+    <Content Include="Content\bootstrap.rtl.css.map" />
+    <Content Include="Content\bootstrap.min.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap-utilities.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-utilities.rtl.css.map" />
+    <Content Include="Content\bootstrap-utilities.min.css.map" />
+    <Content Include="Content\bootstrap-utilities.css.map" />
+    <Content Include="Content\bootstrap-reboot.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.rtl.css.map" />
+    <Content Include="Content\bootstrap-reboot.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.css.map" />
+    <Content Include="Content\bootstrap-grid.rtl.min.css.map" />
+    <Content Include="Content\bootstrap-grid.rtl.css.map" />
+    <Content Include="Content\bootstrap-grid.min.css.map" />
+    <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.css.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.min.css.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.rtl.css.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\css\adminlte.rtl.min.css.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\js\adminlte.js.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\js\adminlte.min.js.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\webfonts\fa-brands-400.woff2" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\webfonts\fa-regular-400.woff2" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\webfonts\fa-solid-900.woff2" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\webfonts\fa-v4compatibility.woff2" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.min.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.slim.min.map" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\base.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\style.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\main.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\mixins.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\base.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.eot" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.ttf" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.woff" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\main.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\mixins.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\responsive.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.less" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\responsive.less" />
+    <Content Include="CLAUDE.md" />
+    <Content Include=".cursor\CHANGELOG-DEV.md" />
+    <Content Include=".cursor\context\migracao-472-481.md" />
+    <Content Include=".cursor\rules" />
+    <Content Include=".md\investigacao-timeout-sessao.md" />
+    <Content Include=".md\relatorio-migracao-netframework-472-481.md" />
+    <Content Include=".md\roadmap.md" />
+    <None Include="Properties\PublishProfiles\aeroflightx.com.pubxml" />
+    <Content Include="Scripts\bootstrap.bundle.js" />
+    <Content Include="Scripts\bootstrap.bundle.min.js" />
+    <Content Include="Scripts\bootstrap.esm.js" />
+    <Content Include="Scripts\bootstrap.esm.min.js" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\bootstrap.min.js.map" />
+    <Content Include="Scripts\bootstrap.js.map" />
+    <Content Include="Scripts\bootstrap.esm.min.js.map" />
+    <Content Include="Scripts\bootstrap.esm.js.map" />
+    <Content Include="Scripts\bootstrap.bundle.min.js.map" />
+    <Content Include="Scripts\bootstrap.bundle.js.map" />
+    <None Include="Scripts\jquery-3.7.0.intellisense.js" />
+    <None Include="Scripts\jquery-3.7.1.intellisense.js" />
+    <Content Include="Scripts\jquery-3.7.1.js" />
+    <Content Include="Scripts\jquery-3.7.1.min.js" />
+    <Content Include="Scripts\jquery-3.7.1.slim.js" />
+    <Content Include="Scripts\jquery-3.7.1.slim.min.js" />
+    <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\sessionInactivity.js" />
+    <Content Include="Scripts\gdi-session-handler.js" />
+    <Content Include="Scripts\jsFileInputChange.js" />
+    <None Include="Scripts\gdi_verify_csproj_gdi_helpers.py" />
+    <None Include="Scripts\gdi_inventory_datatables_g_area.py" />
+    <None Include="Scripts\gdi_replace_alert_libmessage.py" />
+    <None Include="Scripts\gdi_dedupe_libmessage_if_else.py" />
+    <Content Include="Web.config" />
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Home\Contact.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\AcessoNegado\Index.cshtml" />
+    <Content Include="Views\Error\Index.cshtml" />
+    <Content Include="Views\Error\ModalError.cshtml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
+    <Content Include="Views\Shared\_IndexFooter.cshtml" />
+    <Content Include="Views\Shared\_Blank.cshtml" />
+    <Content Include="Views\Shared\_Modal.cshtml" />
+    <Content Include="Views\Shared\_Navbar.cshtml" />
+    <Content Include="Views\Shared\_AlertMsg.cshtml" />
+    <Content Include="Views\UserIdentity\Index.cshtml" />
+    <Content Include="Views\UserIdentity\TrocaObrigatoriaSenha.cshtml" />
+    <Content Include="Scripts\jquery-3.7.1.slim.min.map" />
+    <Content Include="Scripts\jquery-3.7.1.min.map" />
+    <Content Include="App_Data\Secrets\aws-s3.local.json.example" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Robos\ENotas\Nfe\Exceptions\GWLibMessages.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="packages\AWSSDK.S3.4.0.23\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
+    <Analyzer Include="packages\AWSSDK.S3.4.0.23\analyzers\dotnet\cs\SharedAnalysisCode.dll" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- Coloca o System.Net.Http do pacote NuGet primeiro nos caminhos de busca para evitar conflito 4.0.0.0 vs 4.2.0.0 e o aviso MSB3247 -->
+  <Target Name="PreferSystemNetHttpPackage" BeforeTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <AssemblySearchPaths>$(ProjectDir)packages\System.Net.Http.4.3.4\lib\net46\;$(AssemblySearchPaths)</AssemblySearchPaths>
+    </PropertyGroup>
+  </Target>
+  <!-- Garante que apenas o System.Net.Http do pacote NuGet seja usado (remove o do framework e mantém o do pacote para compilação e cópia) -->
+  <Target Name="UnifySystemNetHttpReference" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'System.Net.Http'" />
+      <ReferencePath Include="$(ProjectDir)packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll">
+        <OriginalItemSpec>System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</OriginalItemSpec>
+        <CopyLocal>True</CopyLocal>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>58207</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>https://localhost:44388/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\EntityFramework.6.5.2\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.2\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('packages\EntityFramework.6.5.2\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.2\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets'))" />
+    <Error Condition="!Exists('packages\SkiaSharp.NativeAssets.Linux.NoDependencies.3.119.2\build\net462\SkiaSharp.NativeAssets.Linux.NoDependencies.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SkiaSharp.NativeAssets.Linux.NoDependencies.3.119.2\build\net462\SkiaSharp.NativeAssets.Linux.NoDependencies.targets'))" />
+    <Error Condition="!Exists('packages\SkiaSharp.NativeAssets.macOS.3.119.2\build\net462\SkiaSharp.NativeAssets.macOS.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SkiaSharp.NativeAssets.macOS.3.119.2\build\net462\SkiaSharp.NativeAssets.macOS.targets'))" />
+    <Error Condition="!Exists('packages\SkiaSharp.NativeAssets.Win32.3.119.2\build\net462\SkiaSharp.NativeAssets.Win32.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SkiaSharp.NativeAssets.Win32.3.119.2\build\net462\SkiaSharp.NativeAssets.Win32.targets'))" />
+    <Error Condition="!Exists('packages\NPOI.2.8.0\build\NPOI.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\NPOI.2.8.0\build\NPOI.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets'))" />
+    <Error Condition="!Exists('packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props'))" />
+  </Target>
+  <Import Project="packages\EntityFramework.6.5.2\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.5.2\build\EntityFramework.targets')" />
+  <Import Project="packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
+  <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" />
+  <!-- Garante AssemblyFile se os .props não forem avaliados (ex.: NuGet/VS em estado transitório). Espelha Microsoft.Build.Tasks.Git.props / Microsoft.SourceLink.Common.props. -->
+  <PropertyGroup>
+    <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.8.0.0\tools\net472\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
+    <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.8.0.0\tools\core\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
+    <_MicrosoftSourceLinkCommonAssemblyFile Condition="'$(_MicrosoftSourceLinkCommonAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.SourceLink.Common.8.0.0\tools\net472\Microsoft.SourceLink.Common.dll</_MicrosoftSourceLinkCommonAssemblyFile>
+    <_MicrosoftSourceLinkCommonAssemblyFile Condition="'$(_MicrosoftSourceLinkCommonAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.SourceLink.Common.8.0.0\tools\core\Microsoft.SourceLink.Common.dll</_MicrosoftSourceLinkCommonAssemblyFile>
+  </PropertyGroup>
+  <Import Project="packages\SkiaSharp.NativeAssets.Linux.NoDependencies.3.119.2\build\net462\SkiaSharp.NativeAssets.Linux.NoDependencies.targets" Condition="Exists('packages\SkiaSharp.NativeAssets.Linux.NoDependencies.3.119.2\build\net462\SkiaSharp.NativeAssets.Linux.NoDependencies.targets')" />
+  <Import Project="packages\SkiaSharp.NativeAssets.macOS.3.119.2\build\net462\SkiaSharp.NativeAssets.macOS.targets" Condition="Exists('packages\SkiaSharp.NativeAssets.macOS.3.119.2\build\net462\SkiaSharp.NativeAssets.macOS.targets')" />
+  <Import Project="packages\SkiaSharp.NativeAssets.Win32.3.119.2\build\net462\SkiaSharp.NativeAssets.Win32.targets" Condition="Exists('packages\SkiaSharp.NativeAssets.Win32.3.119.2\build\net462\SkiaSharp.NativeAssets.Win32.targets')" />
+  <Import Project="packages\NPOI.2.8.0\build\NPOI.targets" Condition="Exists('packages\NPOI.2.8.0\build\NPOI.targets')" />
+  <Import Project="packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets" Condition="Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets')" />
+  <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets')" />
+  <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets')" />
+</Project>

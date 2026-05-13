@@ -1,0 +1,759 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterController" value="IndexPedido" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Processos")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidosLogs(otableGCIndexPedido, 'Id.')"><i class="fa-solid fa-list-check me-2" aria-hidden="true"></i>Cotação/Pedido/OS - <b>Histórico</b></a>
+                        </div>
+                    </div>
+                }
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_PainelPedidos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Apontamentos_Button")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop2" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Evolução dos Pedidos">
+                            <i class="fa-solid fa-clipboard-check me-2" aria-hidden="true"></i>Apontamentos
+                        </button>
+                        <div class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop2">
+                            @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_PainelPedidos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Apontamentos_Aprovacao")))
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidoAprovacao(otableGCIndexPedido, 'Id.')"><i class="fa-solid fa-clipboard-check fa-lg me-2" aria-hidden="true"></i><b>1</b> - Aprovação</a>
+                                <div class="dropdown-divider"></div>
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_PainelPedidos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Apontamentos_Separacao")))
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidoSeparacao(otableGCIndexPedido, 'Id.')"><i class="fa-solid fa-dolly fa-lg me-2" aria-hidden="true"></i><b>2</b> - Separação</a>
+                                <div class="dropdown-divider"></div>
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_PainelPedidos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Apontamentos_Expedicao")))
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidoExpedicao(otableGCIndexPedido, 'Id.')"><i class="fa-solid fa-truck fa-lg me-2" aria-hidden="true"></i><b>5</b> - Expedição</a>
+                                <div class="dropdown-divider"></div>
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_PainelPedidos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Apontamentos_Entrega")))
+                            {
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalPedidoEntrega(otableGCIndexPedido, 'Id.')"><i class="fa-solid fa-people-carry fa-lg me-2" aria-hidden="true"></i><b>6</b> - Entrega</a>
+                                <div class="dropdown-divider"></div>
+                            }
+                        </div>
+                    </div>
+                }
+                else if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_FinanceiroNF_View")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop2" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Financeiro / NF">
+                            <i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i>Financeiro/ NF
+                        </button>
+                        <div class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop2">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalViewCartaCorrecaoNF(otableGCIndexPedido, 'Id.')"><i class="fa-regular fa-folder fa-lg me-2" aria-hidden="true"></i><b>4.4</b> - Carta de Correção - Visualizar</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1 min-w-0" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("N", "Id/NF", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.documento_numero, new { htmlAttributes = new { @class = "form-control", @onkeypress = "keypressed(event);" } })
+                        </div>
+                        @Html.Label("Posição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                    <div class="col-sm-2">
+                        @Html.DropDownListFor(model => model.id_movimento_posicao, ViewBag.comboMovimentosPosicao as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();" })
+                    </div>
+                        @Html.Label("Estoque", "Estoque", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.DropDownListFor(model => model.id_local_estoque, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-8 min-w-0">
+                            @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                    <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dataTableGCIndexPedido">
+                        <thead>
+                            <tr>
+                                <th>[TableRowColor]</th>
+                                <th>[x]</th>
+                                <th>@Html.Encode("Id.")</th>
+                                <th><i class="fa-solid fa-bolt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Operação"></i></th>
+                                <th>@Html.Encode("NF")</th>
+                                <th>Status</th>
+                                <th>Próx. Ativ.</th>
+                                <th>Cliente / Operação</th>
+                                <th>Consultor</th>
+                                <th>Data</th>
+                                <th><i class="fa-solid fa-cart-plus" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens"></i></th>
+                                <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque"></i></th>
+                                <th>Valor</th>
+                                <th></th>
+                                <th><i class="fa-solid fa-search fa-lg" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Pedido"></i></th>
+                                <th><i class="fa-regular fa-credit-card fa-lg" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Financeiro"></i></th>
+                                <th><i class="fa-regular fa-file-alt fa-lg" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Notas Fiscais"></i></th>
+                                <th><i class="fa-solid fa-paperclip" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos"></i></th>
+                            </tr>
+                        </thead>
+                        <tfoot align="right">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var otableGCIndexPedido;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateOtableGCIndexPedido();
+            gdiAplicarFoco('#documento_numero', true);
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarMovimentos()
+        }
+    }
+
+    function jsCreateOtableGCIndexPedido()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGCIndexPedido = $('#dataTableGCIndexPedido')
+                .css("font-size", 14)
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('xhr.dt', function (e, settings, json, xhr) {
+                    if (GdiDtNotifyJsonErrorMessage(json)) { }
+                    else if (json && json.yesFilterOnOff !== undefined) {
+                        btnFiltro(json.yesFilterOnOff);
+                    }
+                })
+                .DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                },
+                "footerCallback": function (row, data, start, end, display)
+                {
+                    LibMessageProcessandoHide();
+                    gdiAplicarFoco('#documento_numero', true);
+                },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosPainelPedidos","Movimentos",new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesCustomField01: emptyIfNull($('#documento_numero').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#id_movimento_posicao').val()).toString(),
+                        yesCustomField03: emptyIfNull($('#edit_cliente').val()).toString(),
+                        yesCustomField04: emptyIfNull($('#id_local_estoque').val()).toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "0%", visible: false, targets: [0] },
+                { "width": "2%", orderable: false, className: 'text-sm-center', targets: [1], render: DataTable.render.select() },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "30%", orderable: false, className: 'text-sm-start', targets: [7] },
+                { "width": "6%", orderable: false, className: 'text-sm-start', targets: [8] },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [9] },
+                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [10] },
+                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [11] },
+                { "width": "7%", orderable: false, className: 'text-sm-end', targets: [12] },
+                { "width": "1%", orderable: false, className: 'text-sm-center', targets: [13] },
+                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [14], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewPedido" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Pedido Nº ' + data[2] + '" class="btn btn-info btn-sm p-1 btnGCPainelPedidosViewFinanceiro d-inline-flex align-items-center" onclick="jsAjaxReportInvoicePDF(' + data[2] + ');"><i class="fa-solid fa-search"></i></button>' } },
+                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [15], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewFinanceiro" data-bs-toggle="tooltip" data-bs-placement="top" title="Financeiro - Visualizar Lançamentos Nº ' + data[2] + '" class="btn btn-secondary btn-sm p-1 btnGCPainelPedidosViewFinanceiro d-inline-flex align-items-center" onclick="jsModalViewFinanceiroMovimentos(' + data[2] + ');"><i class="fa-regular fa-credit-card"></i></button>' } },
+                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [16], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewNotaFiscal" data-bs-toggle="tooltip" data-bs-placement="top" title="Notas Fiscais - Visualizar Nº ' + data[2] + '" class="btn btn-secondary btn-sm p-1 btnGCPainelPedidosViewNotaFiscal d-inline-flex align-items-center" onclick="jsModalViewNotasFiscais(' + data[2] + ');"><i class="fa-regular fa-file-alt"></i></button>' } } ,
+                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [17], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosAnexos" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos do Pedido Nº ' + data[2] + '" class="btn btn-info btn-sm p-1 btnGCPainelPedidosAnexos d-inline-flex align-items-center" onclick="jsGCPainelPedidosAnexos(' + data[2] + ');"><i class="fa-solid fa-paperclip"></i></button>' } }
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                var c = data[0];
+                if (c != null && String(c).trim() !== '') {
+                    row.classList.add('gdi-row-tinted');
+                    row.style.setProperty('--gdi-row-bg', String(c).trim());
+                }
+            },
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsCreateOtableGCIndexPedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function ajaxFiltroAvancado()
+    {
+        try {
+            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
+                document.getElementById("yesFilterField").value = "*";
+                document.getElementById("yesFilterOperador").value = "";
+                document.getElementById("yesFilterText").value = "";
+                document.getElementById("yesFilterAdvancedText").value = "";
+                $("#dataTableGCIndexPedido").DataTable().draw(false);
+            }
+            else
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("modalFiltroAvancadoView", "Cidades", new { Area = "g" })?id=g_cidades_index', function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[ajaxFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsGCIndexPedidoEditRow(id)
+    {
+        try {
+                LibMessageProcessando("Processando . . .");
+                window.location = '@Url.Action("EditPedido", "Movimentos", new { area = "gc" })?id=' + id;
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGCIndexPedidoEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPesquisarMovimentos()
+    {
+        try
+        {
+            LibMessageProcessando('Pesquisando Cotações / Pedidos / OS. . .');
+            document.getElementById("yesFilterField").value = "*";
+            $("#dataTableGCIndexPedido").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarMovimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxReportInvoicePDF(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                'id': id,
+                'saida': 'pdf'
+            }
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxReportInvoicePDF", "Movimentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    if (result.success == true)
+                    {
+                        window.location = '@Url.Action("AjaxGetFileResultDownload", "Global", new { Area = "g" })' + "?url=" + result.url;
+                        LibMessageProcessandoHide();
+                    }
+                    else
+                    {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxReportInvoicePDF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalPedidoAprovacao(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoAprovacao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoAprovacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalPedidoSeparacao(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoSeparacao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoSeparacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalViewNotasFiscais(selectedIds)
+    {
+        try {
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalViewNotasFiscais", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalViewNotasFiscais] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalPedidoNotaFiscal(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoNotaFiscal", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoNotaFiscal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalPedidoExpedicao(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoExpedicao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoExpedicao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalPedidoEntrega(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoEntrega", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoEntrega] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalPedidoCartaCorrecao(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidoCartaCorrecao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidoCartaCorrecao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalViewCartaCorrecaoNF(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalViewCartaCorrecao", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalViewCartaCorrecaoNF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalViewFinanceiroMovimentos(selectedIds)
+    {
+        try
+        {
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else
+            {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalViewFinanceiroMovimentos", "FinanceiroLancamentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalViewFinanceiroMovimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalGerarFinanceiroMovimentos(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalGerarFinanceiroMovimentos", "FinanceiroLancamentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalGerarFinanceiroMovimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCancelarMovimentoFinanceiro(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalCancelarMovimentoFinanceiro", "FinanceiroLancamentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarMovimentoFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalReabrirMovimento(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalReabrirMovimento", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalReabrirMovimento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalPedidosLogs(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalPedidosLogs", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidosLogs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsGCPainelPedidosAnexos(id)
+    {
+        try
+        {
+                LibMessageProcessando("");
+                $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + id, function ()
+                {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGCIndexPedidoAnexos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+
+</script>
+

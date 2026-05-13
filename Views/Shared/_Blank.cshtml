@@ -1,0 +1,125 @@
+@using GdiPlataform.Security
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="@CachePersister.userIdentity.GoogleTagURL"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', '@CachePersister.userIdentity.GoogleTag');
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>aeroflightx.com - @CachePersister.userIdentity.VersionERP</title>
+    <!-- AdminLTE 4 / Bootstrap 5 (referência: LibUI_AdminLTE-4.0.0/example.html) -->
+    <link rel="stylesheet" href="~/LibUI_AdminLTE-4.0.0/plugins/overlayscrollbars-2.11.0/overlayscrollbars.min.css" />
+    <link rel="stylesheet" href="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap-icons-1.13.1/bootstrap-icons.min.css" />
+    <link href="~/LibUI_AdminLTE-4.0.0/css/adminlte.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/fontawesome-free-7.2.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/bootstrap-5.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/gdi-swal2-overrides.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/css/tempus-dominus.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.css" rel="stylesheet" />
+    <link href="~/Content/gdi-section-cards.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css" rel="stylesheet" />
+
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/jquery-3.6.0/jquery.min.js"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/overlayscrollbars-2.11.0/overlayscrollbars.browser.es5.min.js"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.js"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/popper.min.js"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/tempus-dominus.min.js"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/jQuery-provider.min.js?v=@CachePersister.userIdentity.VersionERP"></script>
+    @Scripts.Render("~/bundles/libui-swal-compat")
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/jquery.spin.fgnass-2.3.2/spin.min.js"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/js/adminlte.min.js"></script>
+
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js?v=@(CachePersister.userIdentity.VersionERP)&amp;gdiBusy=6"></script>
+    <script src="~/Scripts/jsFileInputChange.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
+
+    <style type="text/css">
+        #loading {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 1000;
+        }
+
+        #loadingcontent {
+            display: table;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #loadingspinner {
+            display: table-cell;
+            vertical-align: middle;
+            width: 100%;
+            text-align: center;
+            font-size: larger;
+            padding-top: 80px;
+        }
+
+
+        #loadingModal {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 1000;
+        }
+
+        #loadingModalcontent {
+            display: table;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #loadingModalspinner {
+            display: table-cell;
+            vertical-align: middle;
+            width: 100%;
+            text-align: center;
+            font-size: larger;
+            padding-top: 80px;
+        }
+    </style>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <div id="mainModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        </div>
+        <div id="loading" display="none">
+            <div id="loadingcontent">
+                <p id="loadingspinner">Processando...</p>
+            </div>
+        </div>
+        <main class="app-main">
+            <div class="app-content pt-0">
+                <div class="container-fluid m-0 p-0">
+                    @RenderBody()
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,243 @@
+@model GdiPlataform.ViewModels.IdentityViewModel
+@using GdiPlataform.Security
+@{
+    Layout = null;
+    var wallPaper = (ViewBag.WallPaper ?? "").ToString();
+    var wallPaperUrl = wallPaper.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+        ? wallPaper
+        : Url.Content("~/" + wallPaper.TrimStart('~', '/'));
+}
+
+<style>
+    .app-content .container-fluid,
+    .app-content {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+</style>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "UserIdentity" }))
+{
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+        <link rel="icon" href="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/favicon-v2.ico">
+        <link rel="shortcut icon" href="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/favicon-v2.ico">
+        <title>Aero FlightX - @ViewBag.Version</title>
+
+        <link rel="stylesheet" href="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap-icons-1.13.1/bootstrap-icons.min.css" />
+        <link href="~/Content/kaushan-script-local.css" rel="stylesheet" />
+
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/Login.css" rel="stylesheet">
+        <link href="~/LibUI_AdminLTE-4.0.0/css/adminlte.min.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/fontawesome-free-7.2.0/css/all.min.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/bootstrap-5.min.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/gdi-swal2-overrides.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/css/tempus-dominus.min.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap4-toggle/bootstrap4-toggle.min.css" rel="stylesheet" />
+        <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css?v=@ViewBag.Version" rel="stylesheet" />
+
+        <script src="~/LibUI_AdminLTE-4.0.0/plugins/jquery-3.6.0/jquery.min.js"></script>
+        <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+        @* LibMessage* / LibMessageError: exige ~/bundles/libui-swal-compat antes de start.js *@
+        @Scripts.Render("~/bundles/libui-swal-compat")
+        <script src="~/LibUI_AdminLTE-4.0.0/js/adminlte.min.js"></script>
+        <script src="~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js?v=@(ViewBag.Version)&amp;gdiBusy=6"></script>
+        @Scripts.Render("~/bundles/jqueryval")
+
+        <!-- ===================== CSS ===================== -->
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: rgba(0, 0, 0, 0.76);
+                background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('@wallPaperUrl');
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: center center;
+                background-attachment: fixed;
+                min-height: 100vh;
+            }
+
+            .login-page-wrap {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px 16px;
+            }
+
+            a {
+                text-decoration: none !important;
+            }
+
+            h1, h2, h3 {
+                font-family: 'Kaushan Script', cursive;
+            }
+
+            .myform {
+                position: relative;
+                display: -ms-flexbox;
+                display: flex;
+                padding: 1rem;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                width: min(500px, 92vw);
+                pointer-events: auto;
+                background-color: #fff;
+                background-clip: padding-box;
+                border: 1px solid rgba(0, 0, 0, .2);
+                border-radius: 1.1rem;
+                outline: 0;
+                max-width: none;
+            }
+
+            .tx-tfm {
+                text-transform: uppercase;
+            }
+
+            .mybtn {
+                border-radius: 50px;
+            }
+
+            .login-or {
+                position: relative;
+                color: #aaa;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .span-or {
+                display: block;
+                position: absolute;
+                left: 50%;
+                top: -2px;
+                margin-left: -25px;
+                background-color: #fff;
+                width: 50px;
+                text-align: center;
+            }
+
+            .hr-or {
+                height: 1px;
+                margin-top: 0px !important;
+                margin-bottom: 0px !important;
+            }
+
+            .google {
+                color: #666;
+                width: 100%;
+                height: 40px;
+                text-align: center;
+                outline: none;
+                border: 1px solid lightgrey;
+            }
+
+            form .error {
+                color: #ff0000;
+            }
+
+            #second {
+                display: none;
+            }
+        </style>
+
+    </head>
+
+
+    <body style="margin: 0; padding: 0;">
+        <div class="login-page-wrap">
+                    @Html.AntiForgeryToken()
+                    <!-- ===== LOGIN ===== -->
+                    <div id="first">
+                        <div class="myform form">
+                            <div class="logo mb-3">
+                                <div class="col-md-12 text-center">
+                                    <img src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoGdi.png" class="img-fluid">
+                                </div>
+                                <br />
+                            </div>
+
+                            <div class="logo mb-3">
+                                <div class="col-md-12 text-center">
+                                    <h1>Aero FlightX</h1>
+                                </div>
+                                <br/>
+                            </div>
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger">
+                                    <strong>@ViewBag.Error</strong>
+                                </div>
+                            }
+                            @if (TempData["Error"] != null)
+                            {
+                                <div class="alert alert-danger">
+                                    <strong>@TempData["Error"]</strong>
+                                </div>
+                            }
+                            @if (TempData["Info"] != null)
+                            {
+                                <div class="alert alert-info">
+                                    <strong>@TempData["Info"]</strong>
+                                </div>
+                            }
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                @Html.EditorFor(model => model.userIdentity.Acesso, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true", placeholder = "Enter Username", title = "Enter Username", required = true, type = "text" } })
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                @Html.EditorFor(model => model.userIdentity.Password, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter Password", title = "Enter Password", required = true, type = "password" } })
+                            </div>
+                            @Html.HiddenFor(model => model.userIdentity.DisplayScreenWidth)
+                            @Html.HiddenFor(model => model.userIdentity.DisplayScreenHeight)
+                            <div class="col-md-12 text-center">
+                                <button type="button" class="btn w-100 mybtn btn-primary tx-tfm" onclick="jsValidarAcesso()">Login</button>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+
+    </body>
+</html>
+}
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $("input[type=text]").keypress(function (e) {
+            if (e.keyCode == 13) {
+                jsValidarAcesso();
+            }
+        });
+        $("input[type=password]").keypress(function (e) {
+            if (e.keyCode == 13) {
+                jsValidarAcesso();
+            }
+        });
+    });
+
+    function jsValidarAcesso() {
+        try {
+            $('#userIdentity_DisplayScreenWidth').val($(window).width());
+            $('#userIdentity_DisplayScreenHeight').val($(window).height());
+            if ((isEmpty($('#userIdentity_Acesso').val().toString().trim())) || (isEmpty($('#userIdentity_Password').val().toString().trim()))) {
+                LibMessageAlert("Atenção", "Preencha corretamente os campos <b>Acesso</b> e <b>Senha</b>!");
+            }
+            else {
+                LibMessageProcessando("Validating access " + $('#userIdentity_Acesso').val().toUpperCase() + " . . .")
+                $("#UserIdentity").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", (err && err.message) ? err.message.toString() : String(err));
+        }
+    };
+</script>

@@ -1,0 +1,447 @@
+@model GdiPlataform.Db.gc_movimentos_itens
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+
+
+<style>
+    /* Modal específico: Pedido Insert/Edit Item */
+    #modalPedidoInsertEditItem .modal-content {
+        max-height: calc(100vh - 2rem); /* evita estourar a viewport */
+    }
+
+    #modalPedidoInsertEditItem .modal-body {
+        overflow-y: auto; /* scroll manual */
+        max-height: calc(100vh - 170px); /* ajuste fino: header+footer */
+        overflow-x: visible; /* ajuda com componentes horizontais */
+    }
+</style>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoInsertEditItem" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-centered" id="modalPedidoInsertEditItem">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+
+                @if (ViewBag.ActionDuplicate == "1")
+                {
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-copy fa-sm" aria-hidden="true"></i>
+    @Html.Raw("<b>Duplicar Item</b>")</h5>
+                }
+                else
+                {
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                }
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.id_movimento_item)
+                @Html.HiddenFor(model => model.tag1_int)
+                @Html.HiddenFor(model => model.tag1_string)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <br/>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("qtd", "Qty:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.EditorFor(model => model.quantidade, new { htmlAttributes = new { @class = "form-control", data_autofocus = "select" } })
+                        </div>
+                        @Html.Label("fornecedor_cotacao_solicitar", "Solicitar Cotação ao Fornecedor?", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                        <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                            <div class="form-check form-switch">
+                                @Html.CheckBoxFor(model => model.fornecedor_cotacao_solicitar, new { @class = "form-check-input", role = "switch" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("produto", "PN:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-9 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @id = "id_produto", @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsResetDadosProduto(); jsHandleSelectOpen();", @onchange = "jsSetDadosProduto();", @onblur = "jsSetDadosProduto(); jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                        </div>
+                        <div class="col-sm-2 text-sm-start">
+                            <button type="button" name="btnDetailsProducts" tabIndex="-1" title="Informações do Item" onclick="jsShowDetailsProducts();" class="btn btn-primary d-inline-flex align-items-center gap-2"><i class="fa fa-info"></i></button>
+                            <button type="button" name="btnHistoricoComercial" tabIndex="-1" title="Histórico Comercial do Item (Geral)" onclick="jsShowDadosHistoricoComercialItemGeral();" class="btn btn-primary d-inline-flex align-items-center gap-2"><i class="fa-solid fa-file-lines"></i></button>
+                            <button type="button" name="btnHistoricoComercial" tabIndex="-1" title="Histórico Comercial do Item (Cliente)" onclick="jsShowDadosHistoricoComercialItemCliente();" class="btn btn-primary d-inline-flex align-items-center gap-2"><i class="fa-solid fa-file-signature"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("id_produto_condicao", "CD:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_produto_condicao, ViewBag.comboProdutosCondicoes as List<SelectListItem>, new { @class = "form-control select-modal-fix", @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @style = "width:50px", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                        </div>
+                        @Html.Label("id_entrega_prazo", "Delivery:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3 text-sm-start">
+                            @Html.DropDownListFor(model => model.id_entrega_prazo, ViewBag.comboEntregasPrazos as List<SelectListItem>, new { @class = "form-control select-modal-fix", @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsHandleSelectOpen();", @onblur = "jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("valor_unit", "Unit:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.valor_unit, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                        @Html.Label("valor_unit_corecharge", "Core:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.valor_unit_corecharge, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("serial", "Serial", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.serial, new { htmlAttributes = new { @class = "form-control", @id = "serial", maxlength = "20" } })
+                        </div>
+                        @Html.Label("lote", "Lote", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.lote01_identificador, new { htmlAttributes = new { @class = "form-control", @id = "serial", maxlength = "50" } })
+                        </div>
+                        @Html.Label("seq", "Seq.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-1">
+                            @Html.EditorFor(model => model.sequencia, new { htmlAttributes = new { @class = "form-control", @id = "seq", maxlength = "3" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("obs", "Obs.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-7">
+                            @Html.EditorFor(model => model.obs, new { htmlAttributes = new { @class = "form-control", @id = "obs", maxlength = "50" } })
+                        </div>
+                        @Html.Label("nf", "Obs NF", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                            <div class="form-check form-switch">
+                                @Html.CheckBoxFor(model => model.obs_nf, new { @class = "form-check-input", role = "switch" })
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <div class="form-group row text-sm-end m-1 p-0">
+                        @Html.Label("fob1_dollar", "Fob", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.Editor("Fob", new { htmlAttributes = new { @id = "fob1_dollar", @class = "form-control", type = "text", disabled = "disabled" } })
+                        </div>
+                        @Html.Label("saldo_01_disponivel", "Est. BH", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.Editor("saldo_01_disponivel", new { htmlAttributes = new { @id = "saldo_01_disponivel", @class = "form-control", type = "text", disabled = "disabled" } })
+                        </div>
+                        @Html.Label("saldo_03_disponivel", "Est SP", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-2">
+                            @Html.Editor("saldo_03_disponivel", new { htmlAttributes = new { @id = "saldo_03_disponivel", @class = "form-control", type = "text", disabled = "disabled" } })
+                        </div>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" id="btnSalvar" name="btnSalvar" title="Confirmar Item" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Item</button>
+            </div>
+        </div>
+    </div>
+    }
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            jsSetDadosProduto();
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsResetDadosProduto()
+    {
+        document.getElementById("valor_unit").value = "";
+    }
+
+    function jsSetDadosProduto()
+    {
+        try
+        {
+            var dataForm =
+            {
+                view_gc_movimentos_itens:
+                {
+                    'id_produto': $("#id_produto").val(),
+                    'id_movimento': $("#id_movimento").val(),
+                    'id_movimento_item': $("#id_movimento_item").val(),
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxGetPrecoVendaProduto", "Movimentos", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    if (result.success == true)
+                    {
+                        if (('@ViewBag.ActionDuplicate' != "1") && ('@Model.id_movimento_item' == -1) && ($("#id_produto").val() != null) && ($("#id_produto").val() > 0))
+                        {
+                            document.getElementById("valor_unit").value = result.preco_venda;
+                        }
+                        $('fob1_dollar').attr('disabled', false);
+                        $('saldo_01_disponivel').attr('disabled', false);
+                        $('saldo_03_disponivel').attr('disabled', false);
+                        document.getElementById("fob1_dollar").value = result.fob1_dollar;
+                        document.getElementById("saldo_01_disponivel").value = result.saldo_01_disponivel;
+                        document.getElementById("saldo_03_disponivel").value = result.saldo_03_disponivel;
+                        $('fob1_dollar').attr('disabled', true);
+                        $('saldo_01_disponivel').attr('disabled', true);
+                        $('saldo_03_disponivel').attr('disabled', true);
+                    }
+                    else
+                    {
+                        if (('@ViewBag.ActionDuplicate' != "1") && ('@Model.id_movimento_item' == -1) && ($("#id_produto").val() != null) && ($("#id_produto").val() > 0))
+                        {
+                            document.getElementById("valor_unit").value = "0";
+                        }
+                        $('fob1_dollar').attr('disabled', false);
+                        $('saldo_01_disponivel').attr('disabled', false);
+                        $('saldo_03_disponivel').attr('disabled', false);
+                        document.getElementById("fob1_dollar").value = "0";
+                        document.getElementById("saldo_01_disponivel").value = "0";
+                        document.getElementById("saldo_03_disponivel").value = "0";
+                        $('fob1_dollar').attr('disabled', true);
+                        $('saldo_01_disponivel').attr('disabled', true);
+                        $('saldo_03_disponivel').attr('disabled', true);
+                    }
+                },
+                error: function (result)
+                {
+                    if (('@ViewBag.ActionDuplicate' != "1") && ('@Model.id_movimento_item' == -1) && ($("#id_produto").val() != null) && ($("#id_produto").val() > 0))
+                    {
+                        document.getElementById("valor_unit").value = "0";
+                    }
+                    $('fob1_dollar').attr('disabled', false);
+                    $('saldo_01_disponivel').attr('disabled', false);
+                    $('saldo_03_disponivel').attr('disabled', false);
+                    document.getElementById("fob1_dollar").value = "0";
+                    document.getElementById("saldo_01_disponivel").value = "0";
+                    document.getElementById("saldo_03_disponivel").value = "0";
+                    $('fob1_dollar').attr('disabled', true);
+                    $('saldo_01_disponivel').attr('disabled', true);
+                    $('saldo_03_disponivel').attr('disabled', true);
+                }
+            });
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsSetDadosProduto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsShowDetailsProducts()
+    {
+        try
+        {
+            if (($("#id_produto").val() != null) && ($("#id_produto").val() > 0)) {
+                var dataForm =
+                {
+                    view_g_produtos:
+                    {
+                        'id_produto': $("#id_produto").val(),
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxGetDetailsProduct", "Movimentos", new { area = "gc" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.success == true)
+                        {
+                            yesMessageInfo("Dados do Produto", result.msg);
+                        }
+                        else
+                        {
+                            document.getElementById("valor_unit").value = "0";
+                        }
+                    },
+                    error: function (result)
+                    {
+                        document.getElementById("valor_unit").value = "0";
+                    }
+                });
+            }
+            else {
+                LibMessageAlert("Advertência", "Selecione o item!");
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsShowDetailsProducts] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCheckInputs()
+    {
+        try
+        {
+            var msgError = "";
+            if ((isEmpty($('#quantidade').val().toString().trim())) || ($('#quantidade').val().toString().trim() == "0") || ($('#quantidade').val().toString().trim() == "0,00"))
+            {
+                msgError += "O campo <b>Qtd</b> é de preenchimento obrigatório!" + "<br/>";
+            }
+            if ((isEmpty($('#id_produto').val().toString().trim())) || ($('#id_produto').val().toString().trim() == "0") || ($('#id_produto').val().toString().trim() == "-1"))
+            {
+                msgError += "O campo <b>Produto</b> é de preenchimento obrigatório!"+"<br/>";
+            }
+            if (isEmpty($('#valor_unit').val().toString().trim()))
+            {
+                msgError += "O campo <b>R$ Unit.</b> é de preenchimento obrigatório!" + "<br/>";
+            }
+            if (($('#valor_unit').val().toString().trim() == "0") || ($('#valor_unit').val().toString().trim() == "0,00"))
+            {
+                if (isEmpty($('#obs').val().toString().trim()))
+                {
+                    msgError += "O campo <b>Obs</b> é de preenchimento obrigatório para R$ Unit. igual a zero!" + "<br/>";
+                }
+            }
+
+            if (msgError.trim().length > 0) { LibMessageAlert("Atenção", msgError); }
+            else
+            {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try
+        {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando("Atualizando Itens . . .");
+            var form = $('#FormModalPedidoInsertEditItem');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxInsertEditItem", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        $("#dtGcMovimentosCreatePedido").DataTable().draw(false);
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+    function jsShowDadosHistoricoComercialItemGeral()
+    {
+        try
+        {
+            if (($("#id_produto").val() != null) && ($("#id_produto").val() > 0)) {
+                var dataForm =
+                {
+                    view_g_produtos:
+                    {
+                        'id_produto': $("#id_produto").val(),
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxDadosHistoricoComercialItemGeral", "Movimentos", new { area = "gc" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.success == true) {
+                            yesMessageInfo("Histórico Comercial do Item", result.msg);
+                        }
+                        else {
+                            yesMessageInfo("Verifique as inconsistências", result.msg);
+                        }
+                    },
+                    error: function (result) {
+                        yesMessageInfo("Verifique as inconsistências", result.msg);
+                    }
+                });
+            }
+            else {
+                LibMessageAlert("Advertência", "Selecione o item!");
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsShowDadosHistoricoComercialItemGeral] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsShowDadosHistoricoComercialItemCliente()
+    {
+        try
+        {
+            if (($("#id_produto").val() != null) && ($("#id_produto").val() > 0) && ($("#id_coligada").val() != null) && ($("#id_coligada").val() > 0)  ) {
+                var dataForm =
+                {
+                    view_g_produtos:
+                    {
+                        'id_produto': $("#id_produto").val(),
+                        'id_coligada': $("#id_cliente").val(),
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxDadosHistoricoComercialItemCliente", "Movimentos", new { area = "gc" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.success == true) {
+                            yesMessageInfo("Histórico Comercial do Item", result.msg);
+                        }
+                        else {
+                            yesMessageInfo("Verifique as inconsistências", result.msg);
+                        }
+                    },
+                    error: function (result) {
+                        yesMessageInfo("Verifique as inconsistências", result.msg);
+                    }
+                });
+            }
+            else {
+                LibMessageAlert("Advertência", "Informe o item e o cliente!");
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsShowDadosHistoricoComercialItemCliente] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+
+</script>

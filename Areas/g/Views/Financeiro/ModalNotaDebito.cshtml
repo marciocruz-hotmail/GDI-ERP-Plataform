@@ -1,0 +1,63 @@
+@using GdiPlataform.Security
+@using GdiPlataform.Lib;
+@{Layout = null;}
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalNotaDebitoGFinanceiro" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-alt fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            @Html.AntiForgeryToken()
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="col-sm-12">
+                        <P align=center>
+                            @ViewBag.EncodedHtml
+                        </P>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnFechar" title="Fechar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-regular fa-window-close me-2" aria-hidden="true"></i>Fechar</button>
+                <button type="button" name="btnOpenPDF" title="Gerar Nota Débito (PDF)" class="btn btn-info d-inline-flex align-items-center gap-2" onclick="OpenPDFNotaDebito()"><i class="fa-regular fa-file-pdf me-2" aria-hidden="true"></i>Gerar Nota Débito (PDF)</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function OpenPDFNotaDebito()
+    {
+        try
+        {
+            window.open('@Url.Action("GerarNotaDebitoPDF", "Financeiro", new { area = "g" })/@ViewBag.idFinanceiro')
+        }
+        catch (e)
+        {
+            GdiAjaxNotifyInconsistencias(e.message.toString());
+        }
+    };
+
+
+</script>
+
+

@@ -1,0 +1,114 @@
+@model GdiPlataform.Db.gc_estoque_transferencia
+@using GdiPlataform.Security
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ModalTransferenciaGerencial" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+
+                        <div class="card-body m-1 p-1" style="height: 100%">
+                            <div class="form-group row text-sm-end m-2 p-1">
+                                @Html.Label("produto", "Item:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10 text-sm-start">
+                                    @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-2 p-1">
+                                @Html.Label("qtd", "Quantidade:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.qtd_transferida, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                                @Html.Label("Origem", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.DropDownListFor(model => model.id_local_estoque_origem, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                                @Html.Label("Destino", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.DropDownListFor(model => model.id_local_estoque_destino, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Confirmar Lançamento" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsAjaxModalTransferenciaGerencial()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Transferência</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsAjaxModalTransferenciaGerencial()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#ModalTransferenciaGerencial');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalTransferenciaGerencial", "Estoque", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        $("#dtEstoque").DataTable().draw(false);
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxModalTransferenciaGerencial] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsTeclaPessionada(e)
+    {
+        if (e.keyCode == 13)
+        {
+            jsCheckInputs();
+        }
+    }
+
+</script>
+
+
+

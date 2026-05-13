@@ -1,0 +1,2233 @@
+﻿DROP TABLE [dbo].[gc_comex_importacoes_BACKUP_20260429];
+
+-- ============================================================
+-- SCRIPT DE MIGRAÇÃO ESTRUTURAL - gc_movimentos
+-- Gerado em: 2026-05-01
+-- Objetivo: Adicionar campos de pós-venda à tabela gc_movimentos
+-- preservando todos os dados, constraints e índices originais.
+-- ============================================================
+-- ATENÇÃO ANTES DE EXECUTAR:
+--   1. Faça backup completo do banco antes de prosseguir.
+--   2. Verifique se há views, procedures ou FKs externas
+--      apontando para gc_movimentos — o script avisa, mas
+--      não remove dependências externas automaticamente.
+--   3. Execute em janela de manutenção (operação bloqueante).
+--   4. Testado para SQL Server 2016+.
+-- ============================================================
+
+USE [erp_gdi_homologacao];
+GO
+
+SET NOCOUNT ON;
+SET XACT_ABORT ON; -- rollback automático em erro dentro de transação
+GO
+
+-- ============================================================
+-- BLOCO 0: VERIFICAÇÃO DE DEPENDÊNCIAS EXTERNAS
+-- Emite warnings se existirem objetos dependentes.
+-- O script NÃO aborta aqui — o DBA deve avaliar manualmente.
+-- ============================================================
+PRINT '>>> BLOCO 0: Verificando dependências externas...';
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.sql_expression_dependencies d
+    JOIN sys.objects o ON d.referencing_id = o.object_id
+    WHERE d.referenced_entity_name = 'gc_movimentos'
+      AND o.type IN ('V','P','TR','IF','TF','FN')
+)
+BEGIN
+    PRINT '  [AVISO] Existem objetos dependentes de gc_movimentos:';
+    SELECT
+        o.type_desc AS tipo,
+        o.name AS nome_objeto
+    FROM sys.sql_expression_dependencies d
+    JOIN sys.objects o ON d.referencing_id = o.object_id
+    WHERE d.referenced_entity_name = 'gc_movimentos'
+      AND o.type IN ('V','P','TR','IF','TF','FN');
+    PRINT '  Avalie se esses objetos precisam ser adaptados antes de prosseguir.';
+END
+ELSE
+BEGIN
+    PRINT '  Nenhuma dependência direta encontrada. OK.';
+END
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.foreign_keys fk
+    JOIN sys.tables t ON fk.referenced_object_id = t.object_id
+    WHERE t.name = 'gc_movimentos'
+)
+BEGIN
+    PRINT '  [AVISO] Existem FOREIGN KEYS referenciando gc_movimentos:';
+    SELECT
+        fk.name AS fk_nome,
+        OBJECT_NAME(fk.parent_object_id) AS tabela_origem
+    FROM sys.foreign_keys fk
+    JOIN sys.tables t ON fk.referenced_object_id = t.object_id
+    WHERE t.name = 'gc_movimentos';
+    PRINT '  Essas FKs podem impedir o DROP/RENAME. Remova-as manualmente se necessário.';
+END
+ELSE
+BEGIN
+    PRINT '  Nenhuma FK externa referenciando gc_movimentos. OK.';
+END
+GO
+
+-- ============================================================
+-- BLOCO 1: LIMPEZA INICIAL
+-- Remove tabela auxiliar de execuções anteriores, se existir.
+-- ============================================================
+PRINT '>>> BLOCO 1: Limpeza inicial de objetos residuais...';
+
+BEGIN TRY
+    -- Remove a tabela auxiliar se sobrou de execução anterior
+    IF OBJECT_ID('dbo.gc_movimentos_NEW', 'U') IS NOT NULL
+    BEGIN
+        -- Remove constraints da tabela auxiliar antes do DROP
+        DECLARE @sql_clean NVARCHAR(MAX) = N'';
+
+        SELECT @sql_clean = @sql_clean +
+            N'ALTER TABLE [dbo].[gc_movimentos_NEW] DROP CONSTRAINT [' + dc.name + N'];' + CHAR(13)
+        FROM sys.default_constraints dc
+        JOIN sys.tables t ON dc.parent_object_id = t.object_id
+        WHERE t.name = 'gc_movimentos_NEW';
+
+        IF LEN(@sql_clean) > 0
+        BEGIN
+            EXEC sp_executesql @sql_clean;
+            PRINT '  Constraints da tabela auxiliar anterior removidas.';
+        END
+
+        DROP TABLE [dbo].[gc_movimentos_NEW];
+        PRINT '  Tabela gc_movimentos_NEW anterior removida.';
+    END
+    ELSE
+    BEGIN
+        PRINT '  Nenhum resíduo de execução anterior encontrado. OK.';
+    END
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha na limpeza inicial: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 2: CRIAÇÃO DA TABELA AUXILIAR
+-- Estrutura completa da tabela original + novos campos.
+-- Constraints recebem nomes com sufixo _NEW para evitar conflito.
+-- ============================================================
+PRINT '>>> BLOCO 2: Criando tabela auxiliar gc_movimentos_NEW...';
+
+BEGIN TRY
+    CREATE TABLE [dbo].[gc_movimentos_NEW] (
+        [id_movimento]                                      [int] IDENTITY(29226,1)     NOT NULL,
+        [id_movimento_ref]                                  [int]                        NOT NULL,
+        [id_movimento_tipo]                                 [int]                        NOT NULL,
+        [id_movimento_status]                               [int]                        NOT NULL,
+        [id_movimento_posicao]                              [int]                        NOT NULL,
+        [id_importacao]                                     [int]                        NOT NULL,
+        [id_nfe_status]                                     [int]                        NOT NULL,
+        [id_local_estoque]                                  [int]                        NOT NULL,
+        [id_estoque_cd]                                     [int]                        NOT NULL,
+        [id_moeda]                                          [int]                        NOT NULL,
+        [id_cfop_finalidade]                                [int]                        NOT NULL,
+        [id_cfop_operacao]                                  [int]                        NOT NULL,
+        [reaberto]                                          [bit]                        NOT NULL,
+        [id_cliente]                                        [int]                        NOT NULL,
+        [id_contato]                                        [int]                        NOT NULL,
+        [contato_nome]                                      [varchar](50)                NULL,
+        [contato_telefone]                                  [varchar](50)                NULL,
+        [contato_email]                                     [varchar](200)               NULL,
+        [id_cliente_destinatario]                           [int]                        NOT NULL,
+        [id_vendedor]                                       [int]                        NOT NULL,
+        [id_vendedor_assistente]                            [int]                        NOT NULL,
+        [part_vendedor_assistente]                          [decimal](5, 2)              NOT NULL,
+        [id_frete_responsavel]                              [int]                        NOT NULL,
+        [notifica_contatos_emails]                          [varchar](max)               NULL,
+        [notifica_contatos_ids]                             [varchar](50)                NULL,
+        [obs]                                               [nvarchar](max)              NULL,
+        [data_vencimento]                                   [date]                       NULL,
+        [id_pagrec_tipo]                                    [int]                        NOT NULL,
+        [id_pagrec_condicao]                                [int]                        NOT NULL,
+        [documento_numero]                                  [varchar](30)                NULL,
+        [oc_numero]                                         [varchar](20)                NULL,
+        [nf_serie]                                          [varchar](3)                 NOT NULL,
+        [nf_numero]                                         [varchar](10)                NOT NULL,
+        [nf_data_geracao]                                   [datetime2](0)               NULL,
+        [nf_id_usuario_geracao]                             [int]                        NOT NULL,
+        [nf_chave]                                          [varchar](100)               NULL,
+        [nf_chave_referenciada]                             [varchar](100)               NULL,
+        [nf_data_recebimento]                               [datetime2](0)               NULL,
+        [nf_protocolo]                                      [varchar](50)                NULL,
+        [nf_digval]                                         [varchar](50)                NULL,
+        [nf_cstat]                                          [varchar](10)                NULL,
+        [nf_cmotivo]                                        [varchar](100)               NULL,
+        [nf_key]                                            [varchar](50)                NULL,
+        [nf_url_pdf]                                        [varchar](200)               NULL,
+        [nf_url_xml]                                        [varchar](200)               NULL,
+        [nf_s3_pdf]                                         [int]                        NOT NULL,
+        [nf_s3_xml]                                         [int]                        NOT NULL,
+        [icms_vbc]                                          [decimal](15, 2)             NOT NULL,
+        [icms_vicms]                                        [decimal](15, 2)             NOT NULL,
+        [icms_difal_calculado]                              [decimal](15, 2)             NOT NULL,
+        [icms_difal_pagar]                                  [decimal](15, 2)             NOT NULL,
+        [frete_valor]                                       [decimal](15, 2)             NOT NULL,
+        [frete_gerencial]                                   [decimal](15, 2)             NOT NULL,
+        [frete_observacoes]                                 [varchar](max)               NULL,
+        [frete1_custo]                                      [decimal](15, 2)             NOT NULL,
+        [frete1_transportadora]                             [int]                        NOT NULL,
+        [frete1_documento]                                  [varchar](50)                NULL,
+        [frete1_rastreio]                                   [varchar](50)                NULL,
+        [frete2_custo]                                      [decimal](15, 2)             NOT NULL,
+        [frete2_transportadora]                             [int]                        NOT NULL,
+        [frete2_documento]                                  [varchar](50)                NULL,
+        [frete2_rastreio]                                   [varchar](50)                NULL,
+        [frete3_custo]                                      [decimal](15, 2)             NOT NULL,
+        [frete3_transportadora]                             [int]                        NOT NULL,
+        [frete3_documento]                                  [varchar](50)                NULL,
+        [frete3_rastreio]                                   [varchar](50)                NULL,
+        [frete_qvol]                                        [decimal](15, 2)             NOT NULL,
+        [frete_esp]                                         [varchar](50)                NULL,
+        [frete_marca]                                       [varchar](50)                NULL,
+        [frete_nvol]                                        [varchar](50)                NULL,
+        [frete_pesol]                                       [decimal](15, 3)             NOT NULL,
+        [frete_pesob]                                       [decimal](15, 3)             NOT NULL,
+        [frete_dimensao_altura]                             [decimal](15, 2)             NOT NULL,
+        [frete_dimensao_largura]                            [decimal](15, 2)             NOT NULL,
+        [frete_dimensao_profundidade]                       [decimal](15, 2)             NOT NULL,
+        [seguro_valor]                                      [decimal](15, 2)             NOT NULL,
+        [despesas_acessorias_valor]                         [decimal](15, 2)             NOT NULL,
+        [desconto_valor]                                    [decimal](15, 2)             NOT NULL,
+        [qtd_itens]                                         [int]                        NOT NULL,
+        [qtd_produtos]                                      [int]                        NOT NULL,
+        [valor_total_produtos]                              [decimal](15, 2)             NOT NULL,
+        [valor_total_bruto]                                 [decimal](15, 2)             NOT NULL,
+        [valor_total_liquido]                               [decimal](15, 2)             NOT NULL,
+        [markup]                                            [decimal](12, 2)             NOT NULL,
+        [valor_total_corecharge]                            [decimal](15, 2)             NOT NULL,
+        [valor_total_adiantamento]                          [decimal](15, 2)             NOT NULL,
+        [transportadora_cotacao]                            [varchar](50)                NULL,
+        [movimento_aprovado]                                [bit]                        NOT NULL,
+        [id_usuario_aprovacao]                              [int]                        NOT NULL,
+        [datahora_aprovacao]                                [datetime2](0)               NULL,
+        [obs_aprovacao]                                     [varchar](max)               NULL,
+        [aprovacao_notificacao_interna]                     [bit]                        NOT NULL,
+        [movimento_separado]                                [bit]                        NOT NULL,
+        [id_usuario_separacao]                              [int]                        NOT NULL,
+        [datahora_separacao]                                [datetime2](0)               NULL,
+        [obs_separacao]                                     [varchar](max)               NULL,
+        [movimento_faturado]                                [bit]                        NOT NULL,
+        [id_usuario_faturamento]                            [int]                        NOT NULL,
+        [datahora_faturamento]                              [datetime2](0)               NULL,
+        [obs_faturamento]                                   [varchar](max)               NULL,
+        [movimento_nf]                                      [bit]                        NOT NULL,
+        [movimento_nf_autorizada]                           [bit]                        NOT NULL,
+        [id_usuario_nf]                                     [int]                        NOT NULL,
+        [datahora_nf]                                       [datetime2](0)               NULL,
+        [movimento_notificado]                              [bit]                        NOT NULL,
+        [id_usuario_notificacao]                            [int]                        NOT NULL,
+        [datahora_notificacao]                              [datetime2](0)               NULL,
+        [movimento_expedido]                                [bit]                        NOT NULL,
+        [id_usuario_expedicao]                              [int]                        NOT NULL,
+        [datahora_expedicao]                                [datetime2](0)               NULL,
+        [datahora_entrega_previsao]                         [datetime2](0)               NULL,
+        [obs_expedicao]                                     [varchar](max)               NULL,
+        [movimento_entregue]                                [bit]                        NOT NULL,
+        [id_usuario_entrega]                                [int]                        NOT NULL,
+        [datahora_entrega]                                  [datetime2](0)               NULL,
+        [nome_recebedor_entrega]                            [varchar](50)                NULL,
+        [documento_recebedor_entrega]                       [varchar](50)                NULL,
+        [obs_entrega]                                       [varchar](max)               NULL,
+        [movimento_cancelado]                               [bit]                        NOT NULL,
+        [id_usuario_cancelamento]                           [int]                        NOT NULL,
+        [datahora_cancelamento]                             [datetime2](0)               NULL,
+        [obs_cancelamento]                                  [varchar](max)               NULL,
+        [movimento_estoque_entrada]                         [bit]                        NOT NULL,
+        [movimento_estoque_saida]                           [bit]                        NOT NULL,
+        [movimento_estoque_devolucao]                       [bit]                        NOT NULL,
+        [entrada_nfe_processada]                            [bit]                        NOT NULL,
+        [receb_estoque_processado]                          [bit]                        NOT NULL,
+        [receb_estoque_id_usuario]                          [int]                        NOT NULL,
+        [receb_estoque_datahora]                            [datetime2](0)               NULL,
+        [receb_estoque_qtd_itens_total]                     [decimal](15, 2)             NOT NULL,
+        [receb_estoque_qtd_itens_conformes]                 [decimal](15, 2)             NOT NULL,
+        [receb_estoque_qtd_itens_nc]                        [decimal](15, 2)             NOT NULL,
+        [receb_estoque_qtd_itens_falta]                     [decimal](15, 2)             NOT NULL,
+        [receb_estoque_qtd_itens_quarentena]                [decimal](15, 2)             NOT NULL,
+        [movimento_transferido_filial]                      [bit]                        NOT NULL,
+        [id_movimento_transferencia]                        [int]                        NOT NULL,
+        [qtd_nfs_ativas]                                    [int]                        NOT NULL,
+        [qtd_nfs_geradas]                                   [int]                        NOT NULL,
+        [qtd_nfs_autorizadas]                               [int]                        NOT NULL,
+        [qtd_nfs_canceladas]                                [int]                        NOT NULL,
+        [qtd_cc_ativas]                                     [int]                        NOT NULL,
+        [qtd_cc_geradas]                                    [int]                        NOT NULL,
+        [qtd_cc_autorizadas]                                [int]                        NOT NULL,
+        [qtd_cc_canceladas]                                 [int]                        NOT NULL,
+        [valor_compra_reais]                                [decimal](15, 2)             NOT NULL,
+        [valor_compra_dolar]                                [decimal](15, 2)             NOT NULL,
+        [valor_venda_reais]                                 [decimal](15, 2)             NOT NULL,
+        [valor_venda_dolar]                                 [decimal](15, 2)             NOT NULL,
+        [cotacao_dolar_compra]                              [decimal](15, 4)             NOT NULL,
+        [cotacao_dolar_venda]                               [decimal](15, 4)             NOT NULL,
+        [cotacao_dolar_oficial_venda]                       [decimal](15, 4)             NOT NULL,
+        [valor_margem_venda]                                [decimal](15, 2)             NOT NULL,
+        [percentual_margem_venda]                           [decimal](15, 2)             NOT NULL,
+        [comissao1_vendedor]                                [int]                        NOT NULL,
+        [comissao1_percentual]                              [decimal](15, 2)             NOT NULL,
+        [comissao1_valor]                                   [decimal](15, 2)             NOT NULL,
+        [comissao1_abate_nf]                                [bit]                        NOT NULL,
+        [comissao2_vendedor]                                [int]                        NOT NULL,
+        [comissao2_percentual]                              [decimal](15, 2)             NOT NULL,
+        [comissao2_valor]                                   [decimal](15, 2)             NOT NULL,
+        [comissao2_abate_nf]                                [bit]                        NOT NULL,
+        [aeronave_prefixo]                                  [varchar](50)                NULL,
+        [aeronave_modelo]                                   [varchar](50)                NULL,
+        [aeronave_serie]                                    [varchar](50)                NULL,
+        [aeronave_registro]                                 [varchar](50)                NULL,
+        [has_beneficio_aviacao]                             [bit]                        NOT NULL,
+        [invoice1_cliente]                                  [varchar](200)               NULL,
+        [invoice1_numero]                                   [varchar](50)                NULL,
+        [salesorder1_numero]                                [varchar](50)                NULL,
+        [invoice2_numero]                                   [varchar](50)                NULL,
+        [salesorder2_numero]                                [varchar](50)                NULL,
+        [invoice3_numero]                                   [varchar](50)                NULL,
+        [salesorder3_numero]                                [varchar](50)                NULL,
+        [valor_fob_scross]                                  [decimal](15, 4)             NOT NULL,
+        [valor_fob_brasil]                                  [decimal](15, 4)             NOT NULL,
+        [param_reducao_bc]                                  [bit]                        NOT NULL,
+        [param_zerar_difal]                                 [bit]                        NOT NULL,
+        [informacoes_adicionais]                            [varchar](200)               NULL,
+        [informacoes_complementares_nf]                     [varchar](max)               NULL,
+
+        -- -------------------------------------------------------
+        -- NOVOS CAMPOS: pós-venda (inseridos após informacoes_complementares_nf)
+        -- -------------------------------------------------------
+        [posvenda_datahora_contato]                         [datetime2](0)               NULL,
+        [posvenda_pedido_recebido]                          [bit]                        NOT NULL,
+        [posvenda_recebimento_conforme_combinado]           [bit]                        NOT NULL,
+        [posvenda_observacao_recebimento_pedido]            [varchar](max)               NULL,
+        [posvenda_mercadoria_estado_fisico_ok]              [bit]                        NOT NULL,
+        [posvenda_itens_correspondem_pedido_nf]             [bit]                        NOT NULL,
+        [posvenda_informacoes_tecnicas_ok]                  [bit]                        NOT NULL,
+        [posvenda_documentacao_correta]                     [bit]                        NOT NULL,
+        [posvenda_houve_dificuldade_documentacao]           [bit]                        NOT NULL,
+        [posvenda_nota_avaliacao_geral]                     [tinyint]                    NULL,
+        [posvenda_nota_avaliacao_prazo_entrega]             [tinyint]                    NULL,
+        [posvenda_nota_avaliacao_clareza_informacoes_comerciais] [tinyint]               NULL,
+        [posvenda_nota_avaliacao_atendimento_equipe]        [tinyint]                    NULL,
+        [posvenda_pedido_nao_conforme]                      [bit]                        NOT NULL,
+        [posvenda_descricao_nao_conformidade]               [varchar](max)               NULL,
+        [posvenda_cliente_sugeriu_melhoria]                 [bit]                        NOT NULL,
+        [posvenda_descricao_sugestao_melhoria]              [varchar](max)               NULL,
+        [posvenda_observacoes_internas]                     [varchar](max)               NULL,
+        -- -------------------------------------------------------
+
+        [tag]                                               [bit]                        NOT NULL,
+        [tag_string]                                        [varchar](200)               NULL,
+        [id_coligada]                                       [int]                        NOT NULL,
+        [id_filial]                                         [int]                        NOT NULL,
+        [id_usuario_cadastro]                               [int]                        NOT NULL,
+        [datahora_cadastro]                                 [datetime2](0)               NOT NULL,
+        [id_usuario_alteracao]                              [int]                        NOT NULL,
+        [datahora_alteracao]                                [datetime2](0)               NULL,
+        [checklist_separacao]                               [bit]                        NOT NULL,
+        [checklist_expedicao]                               [bit]                        NOT NULL,
+        [obs_negociacao]                                    [varchar](max)               NULL,
+
+        CONSTRAINT [PK_gc_movimentos_NEW_id_movimento] PRIMARY KEY CLUSTERED
+        (
+            [id_movimento] ASC
+        ) WITH (
+            PAD_INDEX = OFF,
+            STATISTICS_NORECOMPUTE = OFF,
+            IGNORE_DUP_KEY = OFF,
+            ALLOW_ROW_LOCKS = ON,
+            ALLOW_PAGE_LOCKS = ON,
+            OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF
+        ) ON [PRIMARY]
+    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY];
+
+    PRINT '  Tabela gc_movimentos_NEW criada com sucesso.';
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha ao criar gc_movimentos_NEW: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 3: APLICAÇÃO DE DEFAULTS NA TABELA AUXILIAR
+-- Nomes com sufixo _NEW para não conflitar com os originais.
+-- Inclui defaults para todos os campos originais e para
+-- os novos campos de pós-venda.
+-- ============================================================
+PRINT '>>> BLOCO 3: Aplicando constraints DEFAULT na tabela auxiliar...';
+
+BEGIN TRY
+
+    -- Limpeza global por nome antes de criar cada constraint:
+    -- remove qualquer resíduo de execução anterior via sys.default_constraints.
+    DECLARE @c NVARCHAR(200);
+    DECLARE @sql_drop_df NVARCHAR(500);
+    DECLARE cur_drop CURSOR LOCAL FAST_FORWARD FOR
+        SELECT dc.name
+        FROM sys.default_constraints dc
+        JOIN sys.tables t ON dc.parent_object_id = t.object_id
+        WHERE t.name = 'gc_movimentos_NEW'
+          AND dc.name IN (
+            'DF_gc_movimentos_NEW_id_movimento_ref',
+            'DF_gc_movimentos_NEW_id_movimento_posicao',
+            'DF_gc_movimentos_NEW_id_importacao',
+            'DF_gc_movimentos_NEW_id_nfe_status',
+            'DF_gc_movimentos_NEW_id_local_estoque',
+            'DF_gc_movimentos_NEW_id_estoque_cd',
+            'DF_gc_movimentos_NEW_id_moeda',
+            'DF_gc_movimentos_NEW_id_cfop_finalidade',
+            'DF_gc_movimentos_NEW_id_cfop_operacao',
+            'DF_gc_movimentos_NEW_reaberto',
+            'DF_gc_movimentos_NEW_id_cliente',
+            'DF_gc_movimentos_NEW_id_contato',
+            'DF_gc_movimentos_NEW_contato_nome',
+            'DF_gc_movimentos_NEW_contato_telefone',
+            'DF_gc_movimentos_NEW_contato_email',
+            'DF_gc_movimentos_NEW_id_cliente_destinatario',
+            'DF_gc_movimentos_NEW_id_vendedor',
+            'DF_gc_movimentos_NEW_id_vendedor_assistente',
+            'DF_gc_movimentos_NEW_id_frete_responsavel',
+            'DF_gc_movimentos_NEW_notifica_contatos_ids',
+            'DF_gc_movimentos_NEW_data_vencimento',
+            'DF_gc_movimentos_NEW_id_pagrec_tipo',
+            'DF_gc_movimentos_NEW_id_pagrec_condicao',
+            'DF_gc_movimentos_NEW_documento_numero',
+            'DF_gc_movimentos_NEW_oc_numero',
+            'DF_gc_movimentos_NEW_nf_data_geracao',
+            'DF_gc_movimentos_NEW_nf_chave',
+            'DF_gc_movimentos_NEW_nf_chave_referenciada',
+            'DF_gc_movimentos_NEW_nf_data_recebimento',
+            'DF_gc_movimentos_NEW_nf_protocolo',
+            'DF_gc_movimentos_NEW_nf_digval',
+            'DF_gc_movimentos_NEW_nf_cstat',
+            'DF_gc_movimentos_NEW_nf_cmotivo',
+            'DF_gc_movimentos_NEW_nf_key',
+            'DF_gc_movimentos_NEW_nf_url_pdf',
+            'DF_gc_movimentos_NEW_nf_url_xml',
+            'DF_gc_movimentos_NEW_nf_s3_pdf',
+            'DF_gc_movimentos_NEW_nf_s3_xml',
+            'DF_gc_movimentos_NEW_icms_vbc',
+            'DF_gc_movimentos_NEW_icms_vicms',
+            'DF_gc_movimentos_NEW_icms_difal_calculado',
+            'DF_gc_movimentos_NEW_icms_difal_pagar',
+            'DF_gc_movimentos_NEW_frete_valor',
+            'DF_gc_movimentos_NEW_frete_gerencial',
+            'DF_gc_movimentos_NEW_frete1_custo',
+            'DF_gc_movimentos_NEW_frete1_transportadora',
+            'DF_gc_movimentos_NEW_frete1_documento',
+            'DF_gc_movimentos_NEW_frete1_rastreio',
+            'DF_gc_movimentos_NEW_frete2_custo',
+            'DF_gc_movimentos_NEW_frete2_transportadora',
+            'DF_gc_movimentos_NEW_frete2_documento',
+            'DF_gc_movimentos_NEW_frete2_rastreio',
+            'DF_gc_movimentos_NEW_frete3_custo',
+            'DF_gc_movimentos_NEW_frete3_transportadora',
+            'DF_gc_movimentos_NEW_frete3_documento',
+            'DF_gc_movimentos_NEW_frete3_rastreio',
+            'DF_gc_movimentos_NEW_frete_qvol',
+            'DF_gc_movimentos_NEW_frete_esp',
+            'DF_gc_movimentos_NEW_frete_marca',
+            'DF_gc_movimentos_NEW_frete_nvol',
+            'DF_gc_movimentos_NEW_frete_pesol',
+            'DF_gc_movimentos_NEW_frete_pesob',
+            'DF_gc_movimentos_NEW_frete_dimensao_altura',
+            'DF_gc_movimentos_NEW_frete_dimensao_largura',
+            'DF_gc_movimentos_NEW_frete_dimensao_profundidade',
+            'DF_gc_movimentos_NEW_seguro_valor',
+            'DF_gc_movimentos_NEW_despesas_acessorias_valor',
+            'DF_gc_movimentos_NEW_desconto_valor',
+            'DF_gc_movimentos_NEW_qtd_itens',
+            'DF_gc_movimentos_NEW_qtd_produtos',
+            'DF_gc_movimentos_NEW_valor_total_produtos',
+            'DF_gc_movimentos_NEW_valor_total_bruto',
+            'DF_gc_movimentos_NEW_valor_total_liquido',
+            'DF_gc_movimentos_NEW_markup',
+            'DF_gc_movimentos_NEW_valor_total_corecharge',
+            'DF_gc_movimentos_NEW_valor_total_adiantamento',
+            'DF_gc_movimentos_NEW_transportadora_cotacao',
+            'DF_gc_movimentos_NEW_movimento_aprovado',
+            'DF_gc_movimentos_NEW_datahora_aprovacao',
+            'DF_gc_movimentos_NEW_aprovacao_notificacao_interna',
+            'DF_gc_movimentos_NEW_movimento_separado',
+            'DF_gc_movimentos_NEW_id_usuario_separacao',
+            'DF_gc_movimentos_NEW_datahora_separacao',
+            'DF_gc_movimentos_NEW_movimento_faturado',
+            'DF_gc_movimentos_NEW_datahora_faturamento',
+            'DF_gc_movimentos_NEW_movimento_nf',
+            'DF_gc_movimentos_NEW_movimento_nf_autorizada',
+            'DF_gc_movimentos_NEW_id_usuario_nf',
+            'DF_gc_movimentos_NEW_datahora_nf',
+            'DF_gc_movimentos_NEW_movimento_notificado',
+            'DF_gc_movimentos_NEW_id_usuario_notificacao',
+            'DF_gc_movimentos_NEW_datahora_notificacao',
+            'DF_gc_movimentos_NEW_movimento_expedido',
+            'DF_gc_movimentos_NEW_id_usuario_expedicao',
+            'DF_gc_movimentos_NEW_datahora_expedicao',
+            'DF_gc_movimentos_NEW_datahora_entrega_previsao',
+            'DF_gc_movimentos_NEW_movimento_entregue',
+            'DF_gc_movimentos_NEW_id_usuario_entrega',
+            'DF_gc_movimentos_NEW_datahora_entrega',
+            'DF_gc_movimentos_NEW_nome_recebedor_entrega',
+            'DF_gc_movimentos_NEW_documento_recebedor_entrega',
+            'DF_gc_movimentos_NEW_movimento_cancelado',
+            'DF_gc_movimentos_NEW_id_usuario_cancelamento',
+            'DF_gc_movimentos_NEW_datahora_cancelamento',
+            'DF_gc_movimentos_NEW_movimento_estoque_entrada',
+            'DF_gc_movimentos_NEW_movimento_estoque_saida',
+            'DF_gc_movimentos_NEW_movimento_estoque_devolucao',
+            'DF_gc_movimentos_NEW_entrada_nfe_processada',
+            'DF_gc_movimentos_NEW_receb_estoque_processado',
+            'DF_gc_movimentos_NEW_receb_estoque_id_usuario',
+            'DF_gc_movimentos_NEW_receb_estoque_datahora',
+            'DF_gc_movimentos_NEW_receb_estoque_qtd_itens_total',
+            'DF_gc_movimentos_NEW_receb_estoque_qtd_itens_conformes',
+            'DF_gc_movimentos_NEW_receb_estoque_qtd_itens_nc',
+            'DF_gc_movimentos_NEW_receb_estoque_qtd_itens_falta',
+            'DF_gc_movimentos_NEW_receb_estoque_qtd_itens_quarentena',
+            'DF_gc_movimentos_NEW_movimento_transferido_filial',
+            'DF_gc_movimentos_NEW_id_movimento_transferencia',
+            'DF_gc_movimentos_NEW_qtd_nfs_ativas',
+            'DF_gc_movimentos_NEW_qtd_nfs_geradas',
+            'DF_gc_movimentos_NEW_qtd_nfs_autorizadas',
+            'DF_gc_movimentos_NEW_qtd_nfs_canceladas',
+            'DF_gc_movimentos_NEW_qtd_cc_ativas',
+            'DF_gc_movimentos_NEW_qtd_cc_geradas',
+            'DF_gc_movimentos_NEW_qtd_cc_autorizadas',
+            'DF_gc_movimentos_NEW_qtd_cc_canceladas',
+            'DF_gc_movimentos_NEW_valor_compra_reais',
+            'DF_gc_movimentos_NEW_valor_compra_dolar',
+            'DF_gc_movimentos_NEW_valor_venda_reais',
+            'DF_gc_movimentos_NEW_valor_venda_dolar',
+            'DF_gc_movimentos_NEW_cotacao_dolar_compra',
+            'DF_gc_movimentos_NEW_cotacao_dolar_venda',
+            'DF_gc_movimentos_NEW_cotacao_dolar_oficial_venda',
+            'DF_gc_movimentos_NEW_valor_margem_venda',
+            'DF_gc_movimentos_NEW_percentual_margem_venda',
+            'DF_gc_movimentos_NEW_comissao1_vendedor',
+            'DF_gc_movimentos_NEW_comissao1_percentual',
+            'DF_gc_movimentos_NEW_comissao1_valor',
+            'DF_gc_movimentos_NEW_comissao1_abate_nf',
+            'DF_gc_movimentos_NEW_comissao2_vendedor',
+            'DF_gc_movimentos_NEW_comissao2_percentual',
+            'DF_gc_movimentos_NEW_comissao2_valor',
+            'DF_gc_movimentos_NEW_comissao2_abate_nf',
+            'DF_gc_movimentos_NEW_aeronave_prefixo',
+            'DF_gc_movimentos_NEW_aeronave_modelo',
+            'DF_gc_movimentos_NEW_aeronave_serie',
+            'DF_gc_movimentos_NEW_aeronave_registro',
+            'DF_gc_movimentos_NEW_has_beneficio_aviacao',
+            'DF_gc_movimentos_NEW_invoice1_cliente',
+            'DF_gc_movimentos_NEW_invoice1_numero',
+            'DF_gc_movimentos_NEW_salesorder1_numero',
+            'DF_gc_movimentos_NEW_invoice2_numero',
+            'DF_gc_movimentos_NEW_salesorder2_numero',
+            'DF_gc_movimentos_NEW_invoice3_numero',
+            'DF_gc_movimentos_NEW_salesorder3_numero',
+            'DF_gc_movimentos_NEW_valor_fob_scross',
+            'DF_gc_movimentos_NEW_valor_fob_brasil',
+            'DF_gc_movimentos_NEW_param_reducao_bc',
+            'DF_gc_movimentos_NEW_param_zerar_difal',
+            'DF_gc_movimentos_NEW_informacoes_adicionais',
+            'DF_gc_movimentos_NEW_tag',
+            'DF_gc_movimentos_NEW_tag_string',
+            'DF_gc_movimentos_NEW_id_coligada',
+            'DF_gc_movimentos_NEW_id_filial',
+            'DF_gc_movimentos_NEW_id_usuario_alteracao',
+            'DF_gc_movimentos_NEW_datahora_alteracao',
+            'DF_gc_movimentos_NEW_checklist_separacao',
+            'DF_gc_movimentos_NEW_checklist_expedicao',
+            -- Novos campos de pós-venda
+            'DF_gc_movimentos_NEW_posvenda_datahora_contato',
+            'DF_gc_movimentos_NEW_posvenda_pedido_recebido',
+            'DF_gc_movimentos_NEW_posvenda_recebimento_conforme_combinado',
+            'DF_gc_movimentos_NEW_posvenda_observacao_recebimento_pedido',
+            'DF_gc_movimentos_NEW_posvenda_mercadoria_estado_fisico_ok',
+            'DF_gc_movimentos_NEW_posvenda_itens_correspondem_pedido_nf',
+            'DF_gc_movimentos_NEW_posvenda_informacoes_tecnicas_ok',
+            'DF_gc_movimentos_NEW_posvenda_documentacao_correta',
+            'DF_gc_movimentos_NEW_posvenda_houve_dificuldade_documentacao',
+            'DF_gc_movimentos_NEW_posvenda_nota_avaliacao_geral',
+            'DF_gc_movimentos_NEW_posvenda_nota_avaliacao_prazo_entrega',
+            'DF_gc_movimentos_NEW_posvenda_nota_avaliacao_clareza_informacoes_comerciais',
+            'DF_gc_movimentos_NEW_posvenda_nota_avaliacao_atendimento_equipe',
+            'DF_gc_movimentos_NEW_posvenda_pedido_nao_conforme',
+            'DF_gc_movimentos_NEW_posvenda_descricao_nao_conformidade',
+            'DF_gc_movimentos_NEW_posvenda_cliente_sugeriu_melhoria',
+            'DF_gc_movimentos_NEW_posvenda_descricao_sugestao_melhoria',
+            'DF_gc_movimentos_NEW_posvenda_observacoes_internas'
+          );
+
+    OPEN cur_drop;
+    FETCH NEXT FROM cur_drop INTO @c;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @sql_drop_df = N'ALTER TABLE [dbo].[gc_movimentos_NEW] DROP CONSTRAINT ' + QUOTENAME(@c);
+        EXEC sp_executesql @sql_drop_df;
+        FETCH NEXT FROM cur_drop INTO @c;
+    END
+    CLOSE cur_drop;
+    DEALLOCATE cur_drop;
+
+    -- ---- Campos originais ----
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_movimento_ref]                   DEFAULT ((0))       FOR [id_movimento_ref];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_movimento_posicao]               DEFAULT ((0))       FOR [id_movimento_posicao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_importacao]                      DEFAULT ((0))       FOR [id_importacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_nfe_status]                      DEFAULT ((0))       FOR [id_nfe_status];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_local_estoque]                   DEFAULT ((0))       FOR [id_local_estoque];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_estoque_cd]                      DEFAULT ((0))       FOR [id_estoque_cd];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_moeda]                           DEFAULT ((1))       FOR [id_moeda];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_cfop_finalidade]                 DEFAULT ((0))       FOR [id_cfop_finalidade];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_cfop_operacao]                   DEFAULT ((0))       FOR [id_cfop_operacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_reaberto]                           DEFAULT ((0))       FOR [reaberto];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_cliente]                         DEFAULT ((0))       FOR [id_cliente];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_contato]                         DEFAULT ((0))       FOR [id_contato];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_contato_nome]                       DEFAULT (NULL)      FOR [contato_nome];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_contato_telefone]                   DEFAULT (NULL)      FOR [contato_telefone];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_contato_email]                      DEFAULT (NULL)      FOR [contato_email];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_cliente_destinatario]            DEFAULT ((0))       FOR [id_cliente_destinatario];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_vendedor]                        DEFAULT ((0))       FOR [id_vendedor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_vendedor_assistente]             DEFAULT ((0))       FOR [id_vendedor_assistente];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_frete_responsavel]               DEFAULT ((0))       FOR [id_frete_responsavel];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_notifica_contatos_ids]              DEFAULT (NULL)      FOR [notifica_contatos_ids];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_data_vencimento]                    DEFAULT (NULL)      FOR [data_vencimento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_pagrec_tipo]                     DEFAULT ((0))       FOR [id_pagrec_tipo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_pagrec_condicao]                 DEFAULT ((0))       FOR [id_pagrec_condicao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_documento_numero]                   DEFAULT (NULL)      FOR [documento_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_oc_numero]                          DEFAULT (NULL)      FOR [oc_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_data_geracao]                    DEFAULT (NULL)      FOR [nf_data_geracao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_chave]                           DEFAULT (NULL)      FOR [nf_chave];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_chave_referenciada]              DEFAULT (NULL)      FOR [nf_chave_referenciada];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_data_recebimento]                DEFAULT (NULL)      FOR [nf_data_recebimento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_protocolo]                       DEFAULT (NULL)      FOR [nf_protocolo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_digval]                          DEFAULT (NULL)      FOR [nf_digval];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_cstat]                           DEFAULT (NULL)      FOR [nf_cstat];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_cmotivo]                         DEFAULT (NULL)      FOR [nf_cmotivo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_key]                             DEFAULT (NULL)      FOR [nf_key];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_url_pdf]                         DEFAULT (NULL)      FOR [nf_url_pdf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_url_xml]                         DEFAULT (NULL)      FOR [nf_url_xml];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_s3_pdf]                          DEFAULT ((0))       FOR [nf_s3_pdf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nf_s3_xml]                          DEFAULT ((0))       FOR [nf_s3_xml];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_icms_vbc]                           DEFAULT ((0.00))    FOR [icms_vbc];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_icms_vicms]                         DEFAULT ((0.00))    FOR [icms_vicms];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_icms_difal_calculado]               DEFAULT ((0.00))    FOR [icms_difal_calculado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_icms_difal_pagar]                   DEFAULT ((0.00))    FOR [icms_difal_pagar];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_valor]                        DEFAULT ((0.00))    FOR [frete_valor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_gerencial]                    DEFAULT ((0.00))    FOR [frete_gerencial];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete1_custo]                       DEFAULT ((0.00))    FOR [frete1_custo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete1_transportadora]              DEFAULT ((0))       FOR [frete1_transportadora];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete1_documento]                   DEFAULT (NULL)      FOR [frete1_documento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete1_rastreio]                    DEFAULT (NULL)      FOR [frete1_rastreio];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete2_custo]                       DEFAULT ((0.00))    FOR [frete2_custo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete2_transportadora]              DEFAULT ((0))       FOR [frete2_transportadora];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete2_documento]                   DEFAULT (NULL)      FOR [frete2_documento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete2_rastreio]                    DEFAULT (NULL)      FOR [frete2_rastreio];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete3_custo]                       DEFAULT ((0.00))    FOR [frete3_custo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete3_transportadora]              DEFAULT ((0))       FOR [frete3_transportadora];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete3_documento]                   DEFAULT (NULL)      FOR [frete3_documento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete3_rastreio]                    DEFAULT (NULL)      FOR [frete3_rastreio];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_qvol]                         DEFAULT ((0.00))    FOR [frete_qvol];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_esp]                          DEFAULT (NULL)      FOR [frete_esp];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_marca]                        DEFAULT (NULL)      FOR [frete_marca];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_nvol]                         DEFAULT (NULL)      FOR [frete_nvol];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_pesol]                        DEFAULT ((0.000))   FOR [frete_pesol];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_pesob]                        DEFAULT ((0.000))   FOR [frete_pesob];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_dimensao_altura]              DEFAULT ((0.00))    FOR [frete_dimensao_altura];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_dimensao_largura]             DEFAULT ((0.00))    FOR [frete_dimensao_largura];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_frete_dimensao_profundidade]        DEFAULT ((0.00))    FOR [frete_dimensao_profundidade];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_seguro_valor]                       DEFAULT ((0.00))    FOR [seguro_valor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_despesas_acessorias_valor]          DEFAULT ((0.00))    FOR [despesas_acessorias_valor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_desconto_valor]                     DEFAULT ((0.00))    FOR [desconto_valor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_itens]                          DEFAULT ((0))       FOR [qtd_itens];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_produtos]                       DEFAULT ((0))       FOR [qtd_produtos];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_total_produtos]               DEFAULT ((0.00))    FOR [valor_total_produtos];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_total_bruto]                  DEFAULT ((0.00))    FOR [valor_total_bruto];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_total_liquido]                DEFAULT ((0.00))    FOR [valor_total_liquido];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_markup]                             DEFAULT ((0.00))    FOR [markup];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_total_corecharge]             DEFAULT ((0.00))    FOR [valor_total_corecharge];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_total_adiantamento]           DEFAULT ((0.00))    FOR [valor_total_adiantamento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_transportadora_cotacao]             DEFAULT (NULL)      FOR [transportadora_cotacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_aprovado]                 DEFAULT ((0))       FOR [movimento_aprovado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_aprovacao]                 DEFAULT (NULL)      FOR [datahora_aprovacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_aprovacao_notificacao_interna]      DEFAULT ((0))       FOR [aprovacao_notificacao_interna];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_separado]                 DEFAULT ((0))       FOR [movimento_separado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_separacao]               DEFAULT ((0))       FOR [id_usuario_separacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_separacao]                 DEFAULT (NULL)      FOR [datahora_separacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_faturado]                 DEFAULT ((0))       FOR [movimento_faturado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_faturamento]               DEFAULT (NULL)      FOR [datahora_faturamento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_nf]                       DEFAULT ((0))       FOR [movimento_nf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_nf_autorizada]            DEFAULT ((0))       FOR [movimento_nf_autorizada];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_nf]                      DEFAULT ((0))       FOR [id_usuario_nf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_nf]                        DEFAULT (NULL)      FOR [datahora_nf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_notificado]               DEFAULT ((0))       FOR [movimento_notificado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_notificacao]             DEFAULT ((0))       FOR [id_usuario_notificacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_notificacao]               DEFAULT (NULL)      FOR [datahora_notificacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_expedido]                 DEFAULT ((0))       FOR [movimento_expedido];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_expedicao]               DEFAULT ((0))       FOR [id_usuario_expedicao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_expedicao]                 DEFAULT (NULL)      FOR [datahora_expedicao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_entrega_previsao]          DEFAULT (NULL)      FOR [datahora_entrega_previsao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_entregue]                 DEFAULT ((0))       FOR [movimento_entregue];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_entrega]                 DEFAULT ((0))       FOR [id_usuario_entrega];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_entrega]                   DEFAULT (NULL)      FOR [datahora_entrega];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_nome_recebedor_entrega]             DEFAULT (NULL)      FOR [nome_recebedor_entrega];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_documento_recebedor_entrega]        DEFAULT (NULL)      FOR [documento_recebedor_entrega];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_cancelado]                DEFAULT ((0))       FOR [movimento_cancelado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_cancelamento]            DEFAULT ((0))       FOR [id_usuario_cancelamento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_cancelamento]              DEFAULT (NULL)      FOR [datahora_cancelamento];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_estoque_entrada]          DEFAULT ((0))       FOR [movimento_estoque_entrada];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_estoque_saida]            DEFAULT ((0))       FOR [movimento_estoque_saida];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_estoque_devolucao]        DEFAULT ((0))       FOR [movimento_estoque_devolucao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_entrada_nfe_processada]             DEFAULT ((0))       FOR [entrada_nfe_processada];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_processado]           DEFAULT ((0))       FOR [receb_estoque_processado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_id_usuario]           DEFAULT ((0))       FOR [receb_estoque_id_usuario];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_datahora]             DEFAULT (NULL)      FOR [receb_estoque_datahora];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_qtd_itens_total]      DEFAULT ((0.00))    FOR [receb_estoque_qtd_itens_total];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_qtd_itens_conformes]  DEFAULT ((0.00))    FOR [receb_estoque_qtd_itens_conformes];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_qtd_itens_nc]         DEFAULT ((0.00))    FOR [receb_estoque_qtd_itens_nc];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_qtd_itens_falta]      DEFAULT ((0.00))    FOR [receb_estoque_qtd_itens_falta];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_receb_estoque_qtd_itens_quarentena] DEFAULT ((0.00))    FOR [receb_estoque_qtd_itens_quarentena];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_movimento_transferido_filial]       DEFAULT ((0))       FOR [movimento_transferido_filial];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_movimento_transferencia]         DEFAULT ((0))       FOR [id_movimento_transferencia];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_nfs_ativas]                     DEFAULT ((0))       FOR [qtd_nfs_ativas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_nfs_geradas]                    DEFAULT ((0))       FOR [qtd_nfs_geradas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_nfs_autorizadas]                DEFAULT ((0))       FOR [qtd_nfs_autorizadas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_nfs_canceladas]                 DEFAULT ((0))       FOR [qtd_nfs_canceladas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_cc_ativas]                      DEFAULT ((0))       FOR [qtd_cc_ativas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_cc_geradas]                     DEFAULT ((0))       FOR [qtd_cc_geradas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_cc_autorizadas]                 DEFAULT ((0))       FOR [qtd_cc_autorizadas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_qtd_cc_canceladas]                  DEFAULT ((0))       FOR [qtd_cc_canceladas];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_compra_reais]                 DEFAULT ((0.00))    FOR [valor_compra_reais];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_compra_dolar]                 DEFAULT ((0.00))    FOR [valor_compra_dolar];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_venda_reais]                  DEFAULT ((0.00))    FOR [valor_venda_reais];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_venda_dolar]                  DEFAULT ((0.00))    FOR [valor_venda_dolar];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_cotacao_dolar_compra]               DEFAULT ((0.0000))  FOR [cotacao_dolar_compra];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_cotacao_dolar_venda]                DEFAULT ((0.0000))  FOR [cotacao_dolar_venda];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_cotacao_dolar_oficial_venda]        DEFAULT ((0.0000))  FOR [cotacao_dolar_oficial_venda];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_margem_venda]                 DEFAULT ((0.00))    FOR [valor_margem_venda];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_percentual_margem_venda]            DEFAULT ((0.00))    FOR [percentual_margem_venda];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao1_vendedor]                 DEFAULT ((0))       FOR [comissao1_vendedor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao1_percentual]               DEFAULT ((0.00))    FOR [comissao1_percentual];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao1_valor]                    DEFAULT ((0.00))    FOR [comissao1_valor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao1_abate_nf]                 DEFAULT ((0))       FOR [comissao1_abate_nf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao2_vendedor]                 DEFAULT ((0))       FOR [comissao2_vendedor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao2_percentual]               DEFAULT ((0.00))    FOR [comissao2_percentual];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao2_valor]                    DEFAULT ((0.00))    FOR [comissao2_valor];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_comissao2_abate_nf]                 DEFAULT ((0))       FOR [comissao2_abate_nf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_aeronave_prefixo]                   DEFAULT (NULL)      FOR [aeronave_prefixo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_aeronave_modelo]                    DEFAULT (NULL)      FOR [aeronave_modelo];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_aeronave_serie]                     DEFAULT (NULL)      FOR [aeronave_serie];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_aeronave_registro]                  DEFAULT (NULL)      FOR [aeronave_registro];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_has_beneficio_aviacao]              DEFAULT ((0))       FOR [has_beneficio_aviacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_invoice1_cliente]                   DEFAULT (NULL)      FOR [invoice1_cliente];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_invoice1_numero]                    DEFAULT (NULL)      FOR [invoice1_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_salesorder1_numero]                 DEFAULT (NULL)      FOR [salesorder1_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_invoice2_numero]                    DEFAULT (NULL)      FOR [invoice2_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_salesorder2_numero]                 DEFAULT (NULL)      FOR [salesorder2_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_invoice3_numero]                    DEFAULT (NULL)      FOR [invoice3_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_salesorder3_numero]                 DEFAULT (NULL)      FOR [salesorder3_numero];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_fob_scross]                   DEFAULT ((0.0000))  FOR [valor_fob_scross];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_valor_fob_brasil]                   DEFAULT ((0.0000))  FOR [valor_fob_brasil];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_param_reducao_bc]                   DEFAULT ((0))       FOR [param_reducao_bc];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_param_zerar_difal]                  DEFAULT ((0))       FOR [param_zerar_difal];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_informacoes_adicionais]             DEFAULT (NULL)      FOR [informacoes_adicionais];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_tag]                                DEFAULT ((0))       FOR [tag];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_tag_string]                         DEFAULT (NULL)      FOR [tag_string];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_coligada]                        DEFAULT ((0))       FOR [id_coligada];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_filial]                          DEFAULT ((0))       FOR [id_filial];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_id_usuario_alteracao]               DEFAULT ((0))       FOR [id_usuario_alteracao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_datahora_alteracao]                 DEFAULT (NULL)      FOR [datahora_alteracao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_checklist_separacao]                DEFAULT ((0))       FOR [checklist_separacao];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_checklist_expedicao]                DEFAULT ((0))       FOR [checklist_expedicao];
+
+    -- ---- Defaults dos novos campos de pós-venda ----
+    -- Campos bit NOT NULL: default 0
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_datahora_contato]                          DEFAULT (NULL)   FOR [posvenda_datahora_contato];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_pedido_recebido]                          DEFAULT ((0))    FOR [posvenda_pedido_recebido];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_recebimento_conforme_combinado]           DEFAULT ((0))    FOR [posvenda_recebimento_conforme_combinado];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_observacao_recebimento_pedido]            DEFAULT (NULL)   FOR [posvenda_observacao_recebimento_pedido];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_mercadoria_estado_fisico_ok]              DEFAULT ((0))    FOR [posvenda_mercadoria_estado_fisico_ok];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_itens_correspondem_pedido_nf]             DEFAULT ((0))    FOR [posvenda_itens_correspondem_pedido_nf];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_informacoes_tecnicas_ok]                  DEFAULT ((0))    FOR [posvenda_informacoes_tecnicas_ok];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_documentacao_correta]                     DEFAULT ((0))    FOR [posvenda_documentacao_correta];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_houve_dificuldade_documentacao]           DEFAULT ((0))    FOR [posvenda_houve_dificuldade_documentacao];
+    -- Campos tinyint NULL: default NULL (já é o comportamento natural para colunas nullable)
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_nota_avaliacao_geral]                     DEFAULT (NULL)   FOR [posvenda_nota_avaliacao_geral];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_nota_avaliacao_prazo_entrega]             DEFAULT (NULL)   FOR [posvenda_nota_avaliacao_prazo_entrega];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_nota_avaliacao_clareza_info_comerciais]   DEFAULT (NULL)   FOR [posvenda_nota_avaliacao_clareza_informacoes_comerciais];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_nota_avaliacao_atendimento_equipe]        DEFAULT (NULL)   FOR [posvenda_nota_avaliacao_atendimento_equipe];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_pedido_nao_conforme]                      DEFAULT ((0))    FOR [posvenda_pedido_nao_conforme];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_descricao_nao_conformidade]               DEFAULT (NULL)   FOR [posvenda_descricao_nao_conformidade];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_cliente_sugeriu_melhoria]                 DEFAULT ((0))    FOR [posvenda_cliente_sugeriu_melhoria];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_descricao_sugestao_melhoria]              DEFAULT (NULL)   FOR [posvenda_descricao_sugestao_melhoria];
+    ALTER TABLE [dbo].[gc_movimentos_NEW] ADD CONSTRAINT [DF_gc_movimentos_NEW_posvenda_observacoes_internas]                     DEFAULT (NULL)   FOR [posvenda_observacoes_internas];
+
+    PRINT '  Constraints DEFAULT aplicadas com sucesso.';
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha ao aplicar DEFAULTs: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 4: CÓPIA DOS DADOS
+-- SET IDENTITY_INSERT ON para preservar os IDs originais.
+-- Novos campos bit NOT NULL recebem valor 0 (false) nos
+-- registros existentes — semântica neutra e segura.
+-- Novos campos NULL recebem NULL.
+-- ============================================================
+PRINT '>>> BLOCO 4: Copiando dados de gc_movimentos para gc_movimentos_NEW...';
+
+BEGIN TRY
+    SET IDENTITY_INSERT [dbo].[gc_movimentos_NEW] ON;
+
+    INSERT INTO [dbo].[gc_movimentos_NEW] (
+        [id_movimento], [id_movimento_ref], [id_movimento_tipo], [id_movimento_status],
+        [id_movimento_posicao], [id_importacao], [id_nfe_status], [id_local_estoque],
+        [id_estoque_cd], [id_moeda], [id_cfop_finalidade], [id_cfop_operacao],
+        [reaberto], [id_cliente], [id_contato], [contato_nome], [contato_telefone],
+        [contato_email], [id_cliente_destinatario], [id_vendedor], [id_vendedor_assistente],
+        [part_vendedor_assistente], [id_frete_responsavel], [notifica_contatos_emails],
+        [notifica_contatos_ids], [obs], [data_vencimento], [id_pagrec_tipo],
+        [id_pagrec_condicao], [documento_numero], [oc_numero], [nf_serie], [nf_numero],
+        [nf_data_geracao], [nf_id_usuario_geracao], [nf_chave], [nf_chave_referenciada],
+        [nf_data_recebimento], [nf_protocolo], [nf_digval], [nf_cstat], [nf_cmotivo],
+        [nf_key], [nf_url_pdf], [nf_url_xml], [nf_s3_pdf], [nf_s3_xml],
+        [icms_vbc], [icms_vicms], [icms_difal_calculado], [icms_difal_pagar],
+        [frete_valor], [frete_gerencial], [frete_observacoes], [frete1_custo],
+        [frete1_transportadora], [frete1_documento], [frete1_rastreio], [frete2_custo],
+        [frete2_transportadora], [frete2_documento], [frete2_rastreio], [frete3_custo],
+        [frete3_transportadora], [frete3_documento], [frete3_rastreio], [frete_qvol],
+        [frete_esp], [frete_marca], [frete_nvol], [frete_pesol], [frete_pesob],
+        [frete_dimensao_altura], [frete_dimensao_largura], [frete_dimensao_profundidade],
+        [seguro_valor], [despesas_acessorias_valor], [desconto_valor], [qtd_itens],
+        [qtd_produtos], [valor_total_produtos], [valor_total_bruto], [valor_total_liquido],
+        [markup], [valor_total_corecharge], [valor_total_adiantamento], [transportadora_cotacao],
+        [movimento_aprovado], [id_usuario_aprovacao], [datahora_aprovacao], [obs_aprovacao],
+        [aprovacao_notificacao_interna], [movimento_separado], [id_usuario_separacao],
+        [datahora_separacao], [obs_separacao], [movimento_faturado], [id_usuario_faturamento],
+        [datahora_faturamento], [obs_faturamento], [movimento_nf], [movimento_nf_autorizada],
+        [id_usuario_nf], [datahora_nf], [movimento_notificado], [id_usuario_notificacao],
+        [datahora_notificacao], [movimento_expedido], [id_usuario_expedicao],
+        [datahora_expedicao], [datahora_entrega_previsao], [obs_expedicao],
+        [movimento_entregue], [id_usuario_entrega], [datahora_entrega],
+        [nome_recebedor_entrega], [documento_recebedor_entrega], [obs_entrega],
+        [movimento_cancelado], [id_usuario_cancelamento], [datahora_cancelamento],
+        [obs_cancelamento], [movimento_estoque_entrada], [movimento_estoque_saida],
+        [movimento_estoque_devolucao], [entrada_nfe_processada], [receb_estoque_processado],
+        [receb_estoque_id_usuario], [receb_estoque_datahora], [receb_estoque_qtd_itens_total],
+        [receb_estoque_qtd_itens_conformes], [receb_estoque_qtd_itens_nc],
+        [receb_estoque_qtd_itens_falta], [receb_estoque_qtd_itens_quarentena],
+        [movimento_transferido_filial], [id_movimento_transferencia], [qtd_nfs_ativas],
+        [qtd_nfs_geradas], [qtd_nfs_autorizadas], [qtd_nfs_canceladas], [qtd_cc_ativas],
+        [qtd_cc_geradas], [qtd_cc_autorizadas], [qtd_cc_canceladas], [valor_compra_reais],
+        [valor_compra_dolar], [valor_venda_reais], [valor_venda_dolar], [cotacao_dolar_compra],
+        [cotacao_dolar_venda], [cotacao_dolar_oficial_venda], [valor_margem_venda],
+        [percentual_margem_venda], [comissao1_vendedor], [comissao1_percentual],
+        [comissao1_valor], [comissao1_abate_nf], [comissao2_vendedor], [comissao2_percentual],
+        [comissao2_valor], [comissao2_abate_nf], [aeronave_prefixo], [aeronave_modelo],
+        [aeronave_serie], [aeronave_registro], [has_beneficio_aviacao], [invoice1_cliente],
+        [invoice1_numero], [salesorder1_numero], [invoice2_numero], [salesorder2_numero],
+        [invoice3_numero], [salesorder3_numero], [valor_fob_scross], [valor_fob_brasil],
+        [param_reducao_bc], [param_zerar_difal], [informacoes_adicionais],
+        [informacoes_complementares_nf],
+        -- Novos campos pós-venda: valores neutros/nulos para registros existentes
+        [posvenda_datahora_contato],
+        [posvenda_pedido_recebido],
+        [posvenda_recebimento_conforme_combinado],
+        [posvenda_observacao_recebimento_pedido],
+        [posvenda_mercadoria_estado_fisico_ok],
+        [posvenda_itens_correspondem_pedido_nf],
+        [posvenda_informacoes_tecnicas_ok],
+        [posvenda_documentacao_correta],
+        [posvenda_houve_dificuldade_documentacao],
+        [posvenda_nota_avaliacao_geral],
+        [posvenda_nota_avaliacao_prazo_entrega],
+        [posvenda_nota_avaliacao_clareza_informacoes_comerciais],
+        [posvenda_nota_avaliacao_atendimento_equipe],
+        [posvenda_pedido_nao_conforme],
+        [posvenda_descricao_nao_conformidade],
+        [posvenda_cliente_sugeriu_melhoria],
+        [posvenda_descricao_sugestao_melhoria],
+        [posvenda_observacoes_internas],
+        -- Campos finais originais
+        [tag], [tag_string], [id_coligada], [id_filial], [id_usuario_cadastro],
+        [datahora_cadastro], [id_usuario_alteracao], [datahora_alteracao],
+        [checklist_separacao], [checklist_expedicao], [obs_negociacao]
+    )
+    SELECT
+        [id_movimento], [id_movimento_ref], [id_movimento_tipo], [id_movimento_status],
+        [id_movimento_posicao], [id_importacao], [id_nfe_status], [id_local_estoque],
+        [id_estoque_cd], [id_moeda], [id_cfop_finalidade], [id_cfop_operacao],
+        [reaberto], [id_cliente], [id_contato], [contato_nome], [contato_telefone],
+        [contato_email], [id_cliente_destinatario], [id_vendedor], [id_vendedor_assistente],
+        [part_vendedor_assistente], [id_frete_responsavel], [notifica_contatos_emails],
+        [notifica_contatos_ids], [obs], [data_vencimento], [id_pagrec_tipo],
+        [id_pagrec_condicao], [documento_numero], [oc_numero], [nf_serie], [nf_numero],
+        [nf_data_geracao], [nf_id_usuario_geracao], [nf_chave], [nf_chave_referenciada],
+        [nf_data_recebimento], [nf_protocolo], [nf_digval], [nf_cstat], [nf_cmotivo],
+        [nf_key], [nf_url_pdf], [nf_url_xml], [nf_s3_pdf], [nf_s3_xml],
+        [icms_vbc], [icms_vicms], [icms_difal_calculado], [icms_difal_pagar],
+        [frete_valor], [frete_gerencial], [frete_observacoes], [frete1_custo],
+        [frete1_transportadora], [frete1_documento], [frete1_rastreio], [frete2_custo],
+        [frete2_transportadora], [frete2_documento], [frete2_rastreio], [frete3_custo],
+        [frete3_transportadora], [frete3_documento], [frete3_rastreio], [frete_qvol],
+        [frete_esp], [frete_marca], [frete_nvol], [frete_pesol], [frete_pesob],
+        [frete_dimensao_altura], [frete_dimensao_largura], [frete_dimensao_profundidade],
+        [seguro_valor], [despesas_acessorias_valor], [desconto_valor], [qtd_itens],
+        [qtd_produtos], [valor_total_produtos], [valor_total_bruto], [valor_total_liquido],
+        [markup], [valor_total_corecharge], [valor_total_adiantamento], [transportadora_cotacao],
+        [movimento_aprovado], [id_usuario_aprovacao], [datahora_aprovacao], [obs_aprovacao],
+        [aprovacao_notificacao_interna], [movimento_separado], [id_usuario_separacao],
+        [datahora_separacao], [obs_separacao], [movimento_faturado], [id_usuario_faturamento],
+        [datahora_faturamento], [obs_faturamento], [movimento_nf], [movimento_nf_autorizada],
+        [id_usuario_nf], [datahora_nf], [movimento_notificado], [id_usuario_notificacao],
+        [datahora_notificacao], [movimento_expedido], [id_usuario_expedicao],
+        [datahora_expedicao], [datahora_entrega_previsao], [obs_expedicao],
+        [movimento_entregue], [id_usuario_entrega], [datahora_entrega],
+        [nome_recebedor_entrega], [documento_recebedor_entrega], [obs_entrega],
+        [movimento_cancelado], [id_usuario_cancelamento], [datahora_cancelamento],
+        [obs_cancelamento], [movimento_estoque_entrada], [movimento_estoque_saida],
+        [movimento_estoque_devolucao], [entrada_nfe_processada], [receb_estoque_processado],
+        [receb_estoque_id_usuario], [receb_estoque_datahora], [receb_estoque_qtd_itens_total],
+        [receb_estoque_qtd_itens_conformes], [receb_estoque_qtd_itens_nc],
+        [receb_estoque_qtd_itens_falta], [receb_estoque_qtd_itens_quarentena],
+        [movimento_transferido_filial], [id_movimento_transferencia], [qtd_nfs_ativas],
+        [qtd_nfs_geradas], [qtd_nfs_autorizadas], [qtd_nfs_canceladas], [qtd_cc_ativas],
+        [qtd_cc_geradas], [qtd_cc_autorizadas], [qtd_cc_canceladas], [valor_compra_reais],
+        [valor_compra_dolar], [valor_venda_reais], [valor_venda_dolar], [cotacao_dolar_compra],
+        [cotacao_dolar_venda], [cotacao_dolar_oficial_venda], [valor_margem_venda],
+        [percentual_margem_venda], [comissao1_vendedor], [comissao1_percentual],
+        [comissao1_valor], [comissao1_abate_nf], [comissao2_vendedor], [comissao2_percentual],
+        [comissao2_valor], [comissao2_abate_nf], [aeronave_prefixo], [aeronave_modelo],
+        [aeronave_serie], [aeronave_registro], [has_beneficio_aviacao], [invoice1_cliente],
+        [invoice1_numero], [salesorder1_numero], [invoice2_numero], [salesorder2_numero],
+        [invoice3_numero], [salesorder3_numero], [valor_fob_scross], [valor_fob_brasil],
+        [param_reducao_bc], [param_zerar_difal], [informacoes_adicionais],
+        [informacoes_complementares_nf],
+        -- Valores neutros para os novos campos em registros existentes
+        NULL,             -- posvenda_datahora_contato
+        CAST(0 AS bit),   -- posvenda_pedido_recebido
+        CAST(0 AS bit),   -- posvenda_recebimento_conforme_combinado
+        NULL,             -- posvenda_observacao_recebimento_pedido
+        CAST(0 AS bit),   -- posvenda_mercadoria_estado_fisico_ok
+        CAST(0 AS bit),   -- posvenda_itens_correspondem_pedido_nf
+        CAST(0 AS bit),   -- posvenda_informacoes_tecnicas_ok
+        CAST(0 AS bit),   -- posvenda_documentacao_correta
+        CAST(0 AS bit),   -- posvenda_houve_dificuldade_documentacao
+        NULL,             -- posvenda_nota_avaliacao_geral
+        NULL,             -- posvenda_nota_avaliacao_prazo_entrega
+        NULL,             -- posvenda_nota_avaliacao_clareza_informacoes_comerciais
+        NULL,             -- posvenda_nota_avaliacao_atendimento_equipe
+        CAST(0 AS bit),   -- posvenda_pedido_nao_conforme
+        NULL,             -- posvenda_descricao_nao_conformidade
+        CAST(0 AS bit),   -- posvenda_cliente_sugeriu_melhoria
+        NULL,             -- posvenda_descricao_sugestao_melhoria
+        NULL,             -- posvenda_observacoes_internas
+        -- Campos finais originais
+        [tag], [tag_string], [id_coligada], [id_filial], [id_usuario_cadastro],
+        [datahora_cadastro], [id_usuario_alteracao], [datahora_alteracao],
+        [checklist_separacao], [checklist_expedicao], [obs_negociacao]
+    FROM [dbo].[gc_movimentos];
+
+    SET IDENTITY_INSERT [dbo].[gc_movimentos_NEW] OFF;
+
+    PRINT '  Dados copiados. Linhas inseridas: ' + CAST(@@ROWCOUNT AS VARCHAR(20));
+END TRY
+BEGIN CATCH
+    -- Garante que IDENTITY_INSERT seja desligado mesmo em erro
+    IF (SESSIONPROPERTY('IDENTITY_INSERT') = 1)
+        SET IDENTITY_INSERT [dbo].[gc_movimentos_NEW] OFF;
+    PRINT '  [ERRO] Falha na cópia dos dados: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 5: VALIDAÇÃO DE CONTAGEM
+-- Aborta se houver divergência de registros entre as tabelas.
+-- ============================================================
+PRINT '>>> BLOCO 5: Validando contagem de registros...';
+
+BEGIN TRY
+    DECLARE @cnt_orig INT, @cnt_new INT;
+
+    SELECT @cnt_orig = COUNT(1) FROM [dbo].[gc_movimentos];
+    SELECT @cnt_new  = COUNT(1) FROM [dbo].[gc_movimentos_NEW];
+
+    IF @cnt_orig <> @cnt_new
+    BEGIN
+        RAISERROR('ABORTAR: contagem divergente! Original=%d | Nova=%d. Migracao interrompida.', 16, 1, @cnt_orig, @cnt_new);
+    END
+    ELSE
+    BEGIN
+        PRINT '  Contagem OK: ' + CAST(@cnt_orig AS VARCHAR) + ' registros em ambas as tabelas.';
+    END
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Validação de contagem falhou: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 6: REMOÇÃO DAS CONSTRAINTS DA TABELA ORIGINAL
+-- Remove todas as DEFAULT constraints da tabela original
+-- (necessário para permitir o DROP da tabela).
+-- ============================================================
+PRINT '>>> BLOCO 6: Removendo constraints da tabela original...';
+
+BEGIN TRY
+    DECLARE @sql_drop_orig NVARCHAR(MAX) = N'';
+
+    SELECT @sql_drop_orig = @sql_drop_orig +
+        N'ALTER TABLE [dbo].[gc_movimentos] DROP CONSTRAINT [' + dc.name + N'];' + CHAR(13)
+    FROM sys.default_constraints dc
+    JOIN sys.tables t ON dc.parent_object_id = t.object_id
+    WHERE t.name = 'gc_movimentos';
+
+    IF LEN(@sql_drop_orig) > 0
+    BEGIN
+        EXEC sp_executesql @sql_drop_orig;
+        PRINT '  Constraints DEFAULT da tabela original removidas.';
+    END
+    ELSE
+    BEGIN
+        PRINT '  Nenhuma constraint DEFAULT encontrada na tabela original.';
+    END
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha ao remover constraints originais: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 7: REMOÇÃO DA TABELA ORIGINAL
+-- DROP somente após validação de contagem e remoção de
+-- constraints. A PK é removida como constraint antes do DROP.
+-- ============================================================
+PRINT '>>> BLOCO 7: Removendo tabela original gc_movimentos...';
+
+BEGIN TRY
+    -- Remove a PK explicitamente (por nome conhecido) se ainda existir
+    IF EXISTS (
+        SELECT 1 FROM sys.key_constraints
+        WHERE name = 'PK_gc_movimentos_id_movimento'
+          AND parent_object_id = OBJECT_ID('dbo.gc_movimentos')
+    )
+    BEGIN
+        ALTER TABLE [dbo].[gc_movimentos] DROP CONSTRAINT [PK_gc_movimentos_id_movimento];
+        PRINT '  PK original removida.';
+    END
+
+    DROP TABLE [dbo].[gc_movimentos];
+    PRINT '  Tabela gc_movimentos removida.';
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha ao remover tabela original: ' + ERROR_MESSAGE();
+    PRINT '  Verifique se existem FKs externas ou outros vínculos pendentes.';
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 8: RENOMEAÇÃO DA TABELA AUXILIAR
+-- Renomeia gc_movimentos_NEW para gc_movimentos.
+-- Verifica conflito de nome antes de executar.
+-- ============================================================
+PRINT '>>> BLOCO 8: Renomeando gc_movimentos_NEW para gc_movimentos...';
+
+BEGIN TRY
+    -- Confirma que a tabela original foi removida
+    IF OBJECT_ID('dbo.gc_movimentos', 'U') IS NOT NULL
+    BEGIN
+        RAISERROR('ABORTAR: gc_movimentos ainda existe. O rename seria ambíguo.', 16, 1);
+    END
+
+    -- Confirma que a tabela auxiliar existe
+    IF OBJECT_ID('dbo.gc_movimentos_NEW', 'U') IS NULL
+    BEGIN
+        RAISERROR('ABORTAR: gc_movimentos_NEW não encontrada. Nada a renomear.', 16, 1);
+    END
+
+    EXEC sp_rename 'dbo.gc_movimentos_NEW', 'gc_movimentos';
+    PRINT '  Tabela renomeada para gc_movimentos com sucesso.';
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha ao renomear tabela: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 9: RENOMEAÇÃO DA PRIMARY KEY
+-- Após o rename da tabela, a PK ainda tem nome _NEW.
+-- Ajusta para o nome canônico do schema original.
+-- ============================================================
+PRINT '>>> BLOCO 9: Renomeando a Primary Key para o nome canônico...';
+
+BEGIN TRY
+    -- Remove PK com nome canônico se existir (residual improvável, mas defensivo)
+    IF EXISTS (
+        SELECT 1 FROM sys.key_constraints
+        WHERE name = 'PK_gc_movimentos_id_movimento'
+          AND parent_object_id = OBJECT_ID('dbo.gc_movimentos')
+    )
+    BEGIN
+        ALTER TABLE [dbo].[gc_movimentos] DROP CONSTRAINT [PK_gc_movimentos_id_movimento];
+        PRINT '  PK canônica preexistente removida (residual).';
+    END
+
+    -- Renomeia a PK _NEW para o nome canônico
+    IF EXISTS (
+        SELECT 1 FROM sys.key_constraints
+        WHERE name = 'PK_gc_movimentos_NEW_id_movimento'
+          AND parent_object_id = OBJECT_ID('dbo.gc_movimentos')
+    )
+    BEGIN
+        EXEC sp_rename
+            'dbo.gc_movimentos.PK_gc_movimentos_NEW_id_movimento',
+            'PK_gc_movimentos_id_movimento',
+            'INDEX';
+        PRINT '  PK renomeada para PK_gc_movimentos_id_movimento.';
+    END
+    ELSE
+    BEGIN
+        PRINT '  [AVISO] PK_gc_movimentos_NEW_id_movimento não encontrada. Verifique manualmente.';
+    END
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha ao renomear PK: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 10: RENOMEAÇÃO DAS CONSTRAINTS DEFAULT
+-- Renomeia todas as constraints _NEW para os nomes canônicos
+-- do schema original. Operação estética/documentacional — não
+-- afeta o funcionamento, mas mantém o schema consistente.
+-- ============================================================
+PRINT '>>> BLOCO 10: Renomeando constraints DEFAULT para nomes canônicos...';
+
+BEGIN TRY
+    -- Mapa de renomeação: nome_novo -> nome_canônico
+    -- Executado dinamicamente para evitar falhas individuais pararem o bloco inteiro
+    DECLARE @old_name NVARCHAR(200), @new_name NVARCHAR(200);
+    DECLARE @rename_sql NVARCHAR(500);
+
+    DECLARE cur_rename CURSOR LOCAL FAST_FORWARD FOR
+    SELECT dc.name AS old_name,
+           REPLACE(dc.name, '_NEW_', '_') AS new_name
+    FROM sys.default_constraints dc
+    JOIN sys.tables t ON dc.parent_object_id = t.object_id
+    WHERE t.name = 'gc_movimentos'
+      AND dc.name LIKE 'DF_gc_movimentos_NEW_%';
+
+    OPEN cur_rename;
+    FETCH NEXT FROM cur_rename INTO @old_name, @new_name;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        BEGIN TRY
+            -- Só renomeia se o nome canônico ainda não existir
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.default_constraints dc2
+                JOIN sys.tables t2 ON dc2.parent_object_id = t2.object_id
+                WHERE t2.name = 'gc_movimentos' AND dc2.name = @new_name
+            )
+            BEGIN
+                SET @rename_sql = N'EXEC sp_rename ''' + @old_name + N''', ''' + @new_name + N''', ''OBJECT'';';
+                EXEC sp_executesql @rename_sql;
+            END
+        END TRY
+        BEGIN CATCH
+            PRINT '  [AVISO] Não foi possível renomear constraint ' + @old_name + ': ' + ERROR_MESSAGE();
+        END CATCH
+
+        FETCH NEXT FROM cur_rename INTO @old_name, @new_name;
+    END
+
+    CLOSE cur_rename;
+    DEALLOCATE cur_rename;
+
+    PRINT '  Renomeação de constraints concluída.';
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha no bloco de renomeação de constraints: ' + ERROR_MESSAGE();
+    -- Não propaga: renomeação de constraints é cosmética, não bloqueia o schema.
+END CATCH
+GO
+
+-- ============================================================
+-- BLOCO 11: LIMPEZA FINAL E VERIFICAÇÃO
+-- Confirma que não restaram objetos residuais e que a tabela
+-- final possui a estrutura e contagem esperadas.
+-- ============================================================
+PRINT '>>> BLOCO 11: Verificação final e limpeza...';
+
+BEGIN TRY
+    -- Verifica que gc_movimentos_NEW não existe mais
+    IF OBJECT_ID('dbo.gc_movimentos_NEW', 'U') IS NOT NULL
+    BEGIN
+        PRINT '  [AVISO] gc_movimentos_NEW ainda existe — removendo resíduo...';
+        DROP TABLE [dbo].[gc_movimentos_NEW];
+        PRINT '  Resíduo removido.';
+    END
+    ELSE
+    BEGIN
+        PRINT '  Nenhum objeto residual encontrado. OK.';
+    END
+
+    -- Conta colunas da tabela final
+    DECLARE @col_count INT;
+    SELECT @col_count = COUNT(1)
+    FROM sys.columns
+    WHERE object_id = OBJECT_ID('dbo.gc_movimentos');
+
+    PRINT '  Colunas na tabela final gc_movimentos: ' + CAST(@col_count AS VARCHAR);
+
+    -- Confirma presença de ao menos um novo campo de pós-venda
+    IF EXISTS (
+        SELECT 1 FROM sys.columns
+        WHERE object_id = OBJECT_ID('dbo.gc_movimentos')
+          AND name = 'posvenda_pedido_recebido'
+    )
+        PRINT '  Campo posvenda_pedido_recebido confirmado na tabela final. OK.';
+    ELSE
+        PRINT '  [AVISO] Campo posvenda_pedido_recebido NÃO encontrado — verifique a migração.';
+
+    -- Conta registros finais
+    DECLARE @cnt_final INT;
+    SELECT @cnt_final = COUNT(1) FROM [dbo].[gc_movimentos];
+    PRINT '  Registros na tabela final: ' + CAST(@cnt_final AS VARCHAR);
+
+    PRINT '>>> MIGRAÇÃO CONCLUÍDA COM SUCESSO.';
+END TRY
+BEGIN CATCH
+    PRINT '  [ERRO] Falha na verificação final: ' + ERROR_MESSAGE();
+    THROW;
+END CATCH
+GO
+
+-- ============================================================
+-- FIM DO SCRIPT
+-- ============================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+USE [erp_gdi_homologacao];
+GO
+
+SET XACT_ABORT ON;
+GO
+
+BEGIN TRY
+    BEGIN TRAN;
+
+    -----------------------------------------------------------------------
+    -- 1. Remove qualquer FK existente que aponte para dbo.gc_estoque_lotes
+    -----------------------------------------------------------------------
+    DECLARE @sql_drop_fks NVARCHAR(MAX) = N'';
+
+    SELECT @sql_drop_fks = @sql_drop_fks +
+        N'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + N'.' + QUOTENAME(OBJECT_NAME(parent_object_id)) +
+        N' DROP CONSTRAINT ' + QUOTENAME(name) + N';' + CHAR(13) + CHAR(10)
+    FROM sys.foreign_keys
+    WHERE referenced_object_id = OBJECT_ID(N'dbo.gc_estoque_lotes');
+
+    IF @sql_drop_fks <> N''
+        EXEC sp_executesql @sql_drop_fks;
+
+    -----------------------------------------------------------------------
+    -- 2. Remove a tabela principal atual
+    --    Mantem intacta a tabela dbo.gc_estoque_lotes_audit
+    -----------------------------------------------------------------------
+    IF OBJECT_ID(N'dbo.gc_estoque_lotes', N'U') IS NOT NULL
+    BEGIN
+        DROP TABLE dbo.gc_estoque_lotes;
+    END
+
+    -----------------------------------------------------------------------
+    -- 3. Cria a nova tabela de lotes do zero, sem FKs formais
+    -----------------------------------------------------------------------
+    CREATE TABLE dbo.gc_estoque_lotes
+    (
+        id_estoque_lote             INT IDENTITY(1,1) NOT NULL,
+        id_produto                  INT NOT NULL,
+        codigo_lote                 NVARCHAR(60) 	NOT NULL,
+        data_validade               DATE NULL,
+        serial_lote                 NVARCHAR(100) 	NULL,
+        saldo_01_disponivel         DECIMAL(12,3) 	NOT NULL CONSTRAINT DF_gc_estoque_lotes_saldo_01_disponivel DEFAULT (0),
+        saldo_03_disponivel         DECIMAL(12,3) 	NOT NULL CONSTRAINT DF_gc_estoque_lotes_saldo_03_disponivel DEFAULT (0),
+        id_movimento_origem         INT NULL,
+        id_importacao               INT NULL,
+		id_arquivo_ged              INT NULL,
+        ativo                       BIT NOT NULL 	CONSTRAINT DF_gc_estoque_lotes_ativo DEFAULT (1),
+        datahora_cadastro           DATETIME2(0) 	NOT NULL 	CONSTRAINT DF_gc_estoque_lotes_datahora_cadastro DEFAULT (GETDATE()),
+        id_usuario_cadastro         INT NOT NULL,
+        datahora_alteracao          DATETIME2(0) NULL,
+        id_usuario_alteracao        INT NULL,
+        CONSTRAINT PK_gc_estoque_lotes PRIMARY KEY CLUSTERED (id_estoque_lote)
+    );
+
+    -----------------------------------------------------------------------
+    -- 4. Índices para pesquisa e prevenção lógica de duplicidade
+    -----------------------------------------------------------------------
+    CREATE NONCLUSTERED INDEX IX_gc_estoque_lotes_id_produto
+        ON dbo.gc_estoque_lotes (id_produto);
+
+    CREATE NONCLUSTERED INDEX IX_gc_estoque_lotes_codigo_lote
+        ON dbo.gc_estoque_lotes (codigo_lote);
+
+    CREATE NONCLUSTERED INDEX IX_gc_estoque_lotes_id_importacao
+        ON dbo.gc_estoque_lotes (id_importacao);
+
+    CREATE UNIQUE NONCLUSTERED INDEX UX_gc_estoque_lotes_id_produto_codigo_lote
+        ON dbo.gc_estoque_lotes (id_produto, codigo_lote);
+
+    COMMIT TRAN;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRAN;
+
+    THROW;
+END CATCH;
+GO
+
+
+ALTER TABLE ged_arquivos
+ADD id_estoque_lote INT NOT NULL
+CONSTRAINT DF_ged_arquivos_id_estoque_lote DEFAULT (0);
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+alter table erp_gdi_homologacao.dbo.gc_movimentos add checklist_separacao bit NOT NULL CONSTRAINT DF_gc_movimentos_checklist_separacao DEFAULT (0);
+alter table erp_gdi_homologacao.dbo.gc_movimentos add checklist_expedicao bit NOT NULL CONSTRAINT DF_gc_movimentos_checklist_expedicao DEFAULT (0);
+
+
+
+
+
+
+
+
+
+CREATE TABLE dbo.gc_estoque_competencia
+(
+    id_estoque_competencia INT IDENTITY(1,1) NOT NULL,
+    ano                    INT           NOT NULL,
+    mes                    INT           NOT NULL,
+    data_inicio            DATE          NOT NULL,
+    data_fim               DATE          NOT NULL,
+    status                 CHAR(1)       NOT NULL, -- A = Aberta, E = Encerrada, F = Fechada/Consolidada
+    datahora_atualizacao   DATETIME      NULL,
+    id_usuario_atualizacao INT           NULL,
+    datahora_fechamento    DATETIME      NULL,
+    id_usuario_fechamento  INT           NULL,
+    CONSTRAINT PK_gc_estoque_competencia PRIMARY KEY CLUSTERED (id_estoque_competencia)
+);
+
+-- Índice opcional para buscas por período/status
+CREATE NONCLUSTERED INDEX IX_gc_estoque_competencia_AnoMesStatus
+    ON dbo.gc_estoque_competencia (ano, mes, status);
+
+
+
+CREATE TABLE dbo.gc_estoque_competencia_saldo
+(
+    id_estoque_competencia_saldo INT IDENTITY(1,1) NOT NULL,
+    id_estoque_competencia       INT              NOT NULL,
+    id_produto                   INT              NOT NULL,
+
+    saldo_01_disponivel          DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_01_consignado          DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_01_reservado           DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_01_separado            DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_01_quarentena          DECIMAL(18,4)    NOT NULL DEFAULT(0),
+
+    saldo_03_disponivel          DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_03_consignado          DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_03_reservado           DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_03_separado            DECIMAL(18,4)    NOT NULL DEFAULT(0),
+    saldo_03_quarentena          DECIMAL(18,4)    NOT NULL DEFAULT(0),
+
+    fob1_dollar                  DECIMAL(18,4)    NULL,
+
+    CONSTRAINT PK_gc_estoque_competencia_saldo
+        PRIMARY KEY CLUSTERED (id_estoque_competencia_saldo)
+);
+
+-- Índice opcional para buscas por competência/produto
+CREATE NONCLUSTERED INDEX IX_gc_estoque_competencia_saldo_CompetenciaProduto
+    ON dbo.gc_estoque_competencia_saldo (id_estoque_competencia, id_produto);
+
+
+
+
+CREATE TABLE dbo.g_jobserver
+(
+    id_jobserver     INT IDENTITY(1,1) NOT NULL,
+    job_id           NVARCHAR(10)      NOT NULL,
+    job_name         NVARCHAR(100)     NOT NULL,
+    job_parameters   NVARCHAR(100)     NULL,
+    concluido        BIT               NOT NULL DEFAULT 0,
+    qtd_rows_sucesso INT               NOT NULL DEFAULT 0,
+    qtd_rows_erro    INT               NOT NULL DEFAULT 0,
+    datahora_inicio  DATETIME          NULL,
+    datahora_fim     DATETIME          NULL,
+
+    CONSTRAINT PK_g_jobserver PRIMARY KEY CLUSTERED (id_jobserver)
+);
+
+
+
+
+
+
+/*  ########################################################################################
+    27/01/2025  - MÓDULO ATENDIMENTO (anexos em atendimentos))
+    ######################################################################################## */
+
+
+use [erp_gdi_homologacao]
+IF OBJECT_ID('dbo.ged_arquivos2', 'U') IS NOT NULL DROP TABLE dbo.ged_arquivos2;
+IF OBJECT_ID('dbo.ged_arquivos_backup', 'U') IS NOT NULL DROP TABLE dbo.ged_arquivos_backup;
+EXEC sp_rename 'dbo.ged_arquivos', 'ged_arquivos_backup';
+EXEC sp_rename 'dbo.PK_ged_arquivos_id_arquivo', 'PK_ged_arquivos_backup_id_arquivo', 'OBJECT';
+EXEC sp_rename 'dbo.DF_ged_arquivos_ativo', 'DF_ged_arquivos_backup_ativo', 'OBJECT';
+EXEC sp_rename 'dbo.DF_ged_arquivos_controla_data_referencia', 'DF_ged_arquivos_backup_controla_data_referencia', 'OBJECT';
+EXEC sp_rename 'dbo.DF_ged_arquivos_controla_data_vencimento', 'DF_ged_arquivos_backup_controla_data_vencimento', 'OBJECT';
+
+
+SET ANSI_NULLS ON
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [erp_gdi_homologacao].[dbo].[ged_arquivos](
+	[id_arquivo] [int] IDENTITY(1,1) NOT NULL,
+	[ativo] [bit] NOT NULL,
+	[id_arquivo_tipo] [int] NOT NULL,
+	[id_cliente_relacionado] [int] NOT NULL,
+	[id_contrato_relacionado] [int] NOT NULL,
+	[id_usuario_relacionado] [int] NOT NULL,
+	[id_gc_financeiro] [int] NOT NULL,
+	[id_gc_movimento] [int] NOT NULL,
+	[id_comex_importacao] [int] NOT NULL,
+	[id_comex_invoice] [int] NOT NULL,
+	[id_comex_financeiro] [int] NOT NULL,
+	[id_atendimento] [int] NOT NULL,
+	[controla_data_referencia] [bit] NOT NULL,
+	[controla_data_vencimento] [bit] NOT NULL,
+	[data_referencia] [date] NULL,
+	[data_vencimento] [date] NULL,
+	[versao] [int] NOT NULL,
+	[descricao] [nvarchar](200) NOT NULL,
+	[observacao] [nvarchar](255) NULL,
+	[filename] [nvarchar](200) NULL,
+	[filetype] [nvarchar](5) NULL,
+	[filebucket] [nvarchar](200) NULL,
+	[size_bytes] [decimal](15, 2) NOT NULL,
+	[size_kbytes] [decimal](15, 2) NOT NULL,
+	[size_mbytes] [decimal](15, 2) NOT NULL,
+	[size_gbytes] [decimal](15, 2) NOT NULL,
+	[downloads] [int] NOT NULL,
+	[datahora_cadastro] [datetime2](0) NULL,
+	[id_usuario_cadastro] [int] NULL,
+	[datahora_alteracao] [datetime2](0) NULL,
+	[id_usuario_alteracao] [int] NULL,
+	[datahora_desativacao] [datetime2](0) NULL,
+	[id_usuario_desativacao] [int] NOT NULL,
+	[motivo_desativacao] [nvarchar](200) NULL,
+	[tag_string] [nvarchar](45) NULL,
+ CONSTRAINT [PK_ged_arquivos_id_arquivo] PRIMARY KEY CLUSTERED 
+(
+	[id_arquivo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  CONSTRAINT [DF_ged_arquivos_ativo]  DEFAULT ((0)) FOR [ativo]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_arquivo_tipo]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_cliente_relacionado]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_contrato_relacionado]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_usuario_relacionado]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_gc_financeiro]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_gc_movimento]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_comex_importacao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_comex_invoice]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_comex_financeiro]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_atendimento]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  CONSTRAINT [DF_ged_arquivos_controla_data_referencia]  DEFAULT ((0)) FOR [controla_data_referencia]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  CONSTRAINT [DF_ged_arquivos_controla_data_vencimento]  DEFAULT ((0)) FOR [controla_data_vencimento]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [data_referencia]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [data_vencimento]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((1)) FOR [versao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [filename]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [filetype]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [filebucket]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0.00)) FOR [size_bytes]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0.00)) FOR [size_kbytes]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0.00)) FOR [size_mbytes]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0.00)) FOR [size_gbytes]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [downloads]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [datahora_cadastro]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [id_usuario_cadastro]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [datahora_alteracao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [id_usuario_alteracao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [datahora_desativacao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT ((0)) FOR [id_usuario_desativacao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [motivo_desativacao]
+GO
+
+ALTER TABLE [dbo].[ged_arquivos] ADD  DEFAULT (NULL) FOR [tag_string]
+GO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO dbo.ged_arquivos
+(
+    [ativo],
+    [id_arquivo_tipo],
+    [id_cliente_relacionado],
+    [id_contrato_relacionado],
+    [id_usuario_relacionado],
+    [id_gc_financeiro],
+    [id_gc_movimento],
+    [id_comex_importacao],
+    [id_comex_invoice],
+    [id_comex_financeiro],
+    [id_atendimento],
+    [controla_data_referencia],
+    [controla_data_vencimento],
+    [data_referencia],
+    [data_vencimento],
+    [versao],
+    [descricao],
+    [observacao],
+    [filename],
+    [filetype],
+    [filebucket],
+    [size_bytes],
+    [size_kbytes],
+    [size_mbytes],
+    [size_gbytes],
+    [downloads],
+    [datahora_cadastro],
+    [id_usuario_cadastro],
+    [datahora_alteracao],
+    [id_usuario_alteracao],
+    [datahora_desativacao],
+    [id_usuario_desativacao],
+    [motivo_desativacao],
+    [tag_string]
+)
+SELECT
+    ativo,
+    id_arquivo_tipo,
+    id_cliente_relacionado,
+    id_contrato_relacionado,
+    id_usuario_relacionado,
+    id_gc_financeiro,
+    id_gc_movimento,
+    id_comex_importacao,
+    id_comex_invoice,
+    id_comex_financeiro,
+    0,
+    controla_data_referencia,
+    controla_data_vencimento,
+    data_referencia,
+    data_vencimento,
+    versao,
+    descricao,
+    observacao,
+    filename,
+    filetype,
+    filebucket,
+    size_bytes,
+    size_kbytes,
+    size_mbytes,
+    size_gbytes,
+    downloads,
+    datahora_cadastro,
+    id_usuario_cadastro,
+    datahora_alteracao,
+    id_usuario_alteracao,
+    datahora_desativacao,
+    id_usuario_desativacao,
+    motivo_desativacao,
+    tag_string
+FROM erp_gdi_homologacao.dbo.ged_arquivos_backup;
+GO
+
+
+
+use [erp_gdi_homologacao]
+select * from dbo.ged_arquivos;
+select * from dbo.ged_arquivos_backup;
+
+IF OBJECT_ID('dbo.ged_arquivos_backup', 'U') IS NOT NULL DROP TABLE dbo.ged_arquivos_backup;
+select * from dbo.ged_arquivos_backup
+
+
+
+
+
+
+
+
+/*  ########################################################################################
+    26/01/2025  - MÓDULO ATENDIMENTO  
+    ######################################################################################## */
+
+USE [erp_gdi_homologacao]
+GO
+
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+GO
+
+/* =========================================================
+   DROP TABLES (ordem correta: filhas -> pais)
+   ========================================================= */
+IF OBJECT_ID('dbo.g_atendimentos_logs', 'U') IS NOT NULL DROP TABLE dbo.g_atendimentos_logs;
+IF OBJECT_ID('dbo.g_atendimentos_atividades', 'U') IS NOT NULL DROP TABLE dbo.g_atendimentos_atividades;
+IF OBJECT_ID('dbo.g_atendimentos', 'U') IS NOT NULL DROP TABLE dbo.g_atendimentos;
+
+IF OBJECT_ID('dbo.g_atendimentos_categorias_atividades', 'U') IS NOT NULL DROP TABLE dbo.g_atendimentos_categorias_atividades;
+IF OBJECT_ID('dbo.g_atendimentos_categorias', 'U') IS NOT NULL DROP TABLE dbo.g_atendimentos_categorias;
+
+IF OBJECT_ID('dbo.g_atendimentos_status', 'U') IS NOT NULL DROP TABLE dbo.g_atendimentos_status;
+IF OBJECT_ID('dbo.g_departamentos', 'U') IS NOT NULL DROP TABLE dbo.g_departamentos;
+GO
+
+
+/* =========================================================
+   dbo.g_departamentos
+   ========================================================= */
+CREATE TABLE dbo.g_departamentos
+(
+    id_departamento        int            IDENTITY(1,1) NOT NULL,
+    ativo                  bit            NOT NULL,
+    nome                   nvarchar(100)  NOT NULL,
+    ordem                  int            NOT NULL,
+
+    id_usuario_cadastro    int            NOT NULL,
+    datahora_cadastro      datetime2(0)   NOT NULL,
+    id_usuario_alteracao   int            NULL,
+    datahora_alteracao     datetime2(0)   NULL,
+
+    CONSTRAINT PK_g_departamentos PRIMARY KEY CLUSTERED (id_departamento)
+);
+GO
+
+ALTER TABLE [dbo].[g_departamentos] ADD  CONSTRAINT [DF_g_departamentos_ativo]  DEFAULT ((1)) FOR [ativo]
+ALTER TABLE [dbo].[g_departamentos] ADD  CONSTRAINT [DF_g_departamentos_ordem]  DEFAULT ((0)) FOR [ordem]
+ALTER TABLE [dbo].[g_departamentos] ADD  CONSTRAINT [DF_g_departamentos_id_usuario_cadastro]  DEFAULT ((0)) FOR [id_usuario_cadastro]
+ALTER TABLE [dbo].[g_departamentos] ADD  CONSTRAINT [DF_g_departamentos_datahora_cadastro]  DEFAULT (sysdatetime()) FOR [datahora_cadastro]
+GO
+
+INSERT [dbo].[g_departamentos] VALUES (1, N'Adm/Financeiro', 1, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_departamentos] VALUES (1, N'Expedição/Estoque - BH', 2, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_departamentos] VALUES (1, N'Expedição/Estoque - SP', 3, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_departamentos] VALUES (1, N'Comercial - BH', 4, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_departamentos] VALUES (1, N'Comercial - SP', 5, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_departamentos] VALUES (1, N'Qualidade', 6, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_departamentos] VALUES (1, N'Compras', 7, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+GO
+
+/* =========================================================
+   dbo.g_atendimentos_status
+   ========================================================= */
+CREATE TABLE dbo.g_atendimentos_status
+(
+    id_status            int            IDENTITY(1,1) NOT NULL,
+    ativo                bit            NOT NULL CONSTRAINT DF_g_atendimentos_status_ativo DEFAULT (1),
+    nome                 nvarchar(100)  NOT NULL,
+    icone                nvarchar(50)   NULL,
+    ordem                int            NOT NULL CONSTRAINT DF_g_atendimentos_status_ordem DEFAULT (0),
+
+    id_usuario_cadastro  int            NOT NULL,
+    datahora_cadastro    datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_status_datahora_cadastro DEFAULT (SYSDATETIME()),
+    id_usuario_alteracao int            NULL,
+    datahora_alteracao   datetime2(0)   NULL,
+
+    CONSTRAINT PK_g_atendimentos_status PRIMARY KEY CLUSTERED (id_status)
+);
+GO
+
+INSERT [dbo].[g_atendimentos_status] ([ativo], [nome], [icone], [ordem], [id_usuario_cadastro], [datahora_cadastro], [id_usuario_alteracao], [datahora_alteracao]) VALUES (1, N'Aberto', NULL, 1, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_atendimentos_status] ([ativo], [nome], [icone], [ordem], [id_usuario_cadastro], [datahora_cadastro], [id_usuario_alteracao], [datahora_alteracao]) VALUES (1, N'Atendimento', NULL, 2, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_atendimentos_status] ([ativo], [nome], [icone], [ordem], [id_usuario_cadastro], [datahora_cadastro], [id_usuario_alteracao], [datahora_alteracao]) VALUES (1, N'Concluído', NULL, 3, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+INSERT [dbo].[g_atendimentos_status] ([ativo], [nome], [icone], [ordem], [id_usuario_cadastro], [datahora_cadastro], [id_usuario_alteracao], [datahora_alteracao]) VALUES (1, N'Cancelado', NULL, 4, 1, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), NULL, NULL)
+GO
+
+
+/* =========================================================
+   dbo.g_atendimentos_categorias
+   ========================================================= */
+CREATE TABLE dbo.g_atendimentos_categorias
+(
+    id_atendimento_categoria  int            IDENTITY(1,1) NOT NULL,
+    ativo                     bit            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_ativo DEFAULT (1),
+    id_departamento           int            NOT NULL,
+    nome                      nvarchar(100)  NOT NULL,
+
+    param_id_cliente                    int     NOT NULL CONSTRAINT DF_g_atendimentos_categorias_param_id_cliente DEFAULT (0),
+    param_numero_pedido                 int     NOT NULL CONSTRAINT DF_g_atendimentos_categorias_param_numero_pedido DEFAULT (0),
+    param_numero_nf                     int     NOT NULL CONSTRAINT DF_g_atendimentos_categorias_param_numero_nf DEFAULT (0),
+    param_id_produto                    int     NOT NULL CONSTRAINT DF_g_atendimentos_categorias_param_id_produto DEFAULT (0),
+    param_limite_credito                int     NOT NULL CONSTRAINT DF_g_atendimentos_categorias_param_limite_credito DEFAULT (0),
+    param_id_vendedor                   int     NOT NULL CONSTRAINT DF_g_atendimentos_categorias_param_id_vendedor DEFAULT (0),
+
+    id_coligada               int            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_id_coligada DEFAULT (0),
+    id_filial                 int            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_id_filial DEFAULT (0),
+
+    datahora_cadastro         datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_categorias_datahora_cadastro DEFAULT (SYSDATETIME()),
+    id_usuario_cadastro       int            NOT NULL,
+    datahora_alteracao        datetime2(0)   NULL,
+    id_usuario_alteracao      int            NULL,
+
+    CONSTRAINT PK_g_atendimentos_categorias PRIMARY KEY CLUSTERED (id_atendimento_categoria)
+);
+GO
+
+
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Pedidos - Alterar/cancelar faturamento/boleto', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Pedidos - Alterar/cancelar nota fiscal', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Pedidos - Cancelar o pedido', 0, 0, 0,0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Pedidos - Alterar dados gerais', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Pedidos - Solicitação/Recebimento seguro de pedidos extraviados', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Pedidos - Acompanhar devolução/troca', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Clientes - Liberar/Aumentar limite crédito', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Clientes - Trocar vendedor', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Clientes - Renegociação débitos', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 1, N'Estoque - Ajustar saldo/itens de estoque', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 2, N'Estoque BH - Solicitações Gerais', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 2, N'Pedidos - Acompanhar entrega de pedido', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 3, N'Estoque SP - Solicitações Gerais', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 4, N'Comercial BH - Pedidos - Ajustar dados do pedido', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 4, N'Comercial BH - Clientes - Ajustar/corrigir dados cadastro cliente', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 4, N'Comercial BH - Solicitações gerais', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 5, N'Comercial SP - Pedidos - Ajustar dados do pedido', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 5, N'Comercial SP - Clientes - Ajustar/corrigir dados cadastro cliente', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 5, N'Comercial SP - Solicitações gerais', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 6, N'Qualidade - Registro de Não Conformidade', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias] VALUES (1, 7, N'Compras - Solicitação cotação/compra de materiais', 0, 0, 0, 0, 0, 0, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+GO
+
+
+
+/* =========================================================
+   dbo.g_atendimentos_categorias_atividades
+   ========================================================= */
+CREATE TABLE dbo.g_atendimentos_categorias_atividades
+(
+    id_atendimento_categoria_atividade  int            IDENTITY(1,1) NOT NULL,
+    ativo                               bit            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_atividades_ativo DEFAULT (1),
+    id_atendimento_categoria            int            NOT NULL,
+    ordem                               int            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_atividades_ordem DEFAULT (0),
+    atividade                           nvarchar(100)  NOT NULL,
+    sla_dias                            int            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_atividades_sla_dias DEFAULT (0),
+
+    id_coligada                         int            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_atividades_id_coligada DEFAULT (0),
+    id_filial                           int            NOT NULL CONSTRAINT DF_g_atendimentos_categorias_atividades_id_filial DEFAULT (0),
+
+    datahora_cadastro                   datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_categorias_atividades_datahora_cadastro DEFAULT (SYSDATETIME()),
+    id_usuario_cadastro                 int            NOT NULL,
+    datahora_alteracao                  datetime2(0)   NULL,
+    id_usuario_alteracao                int            NULL,
+
+    CONSTRAINT PK_g_atendimentos_categorias_atividades PRIMARY KEY CLUSTERED (id_atendimento_categoria_atividade)
+);
+GO
+
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 1, 0, N'Pedidos - Alterar/cancelar faturamento/boleto', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 2, 0, N'Pedidos - Alterar/cancelar nota fiscal', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 3, 0, N'Pedidos - Cancelar pedido', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 4, 0, N'Pedidos - Alterar Dados Gerais', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 5, 0, N'Pedidos - Solicitar recebimento de seguro de pedidos extraviados', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 5, 0, N'Pedidos - Acompanhar recebimento de seguro de pedidos extraviados', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 5, 0, N'Pedidos - Processar recebimento financeiro de seguro de pedidos extraviados', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 6, 0, N'Pedidos - Solicitar/Receber/Processar NF devolução', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 6, 0, N'Pedidos - Processamento da entrada do material', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 6, 0, N'Pedidos - Processamento do reembolso ou substituição', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 7, 0, N'Clientes - Realizar consulta cadastral do cliente', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 7, 0, N'Clientes - Avaliar, realizar alteração do limite de crédito do cliente', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 8, 0, N'Clientes - Verificar histórico de pedidos/cotações do cliente x vendedores', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 8, 0, N'Clientes - Avaliar, realizar alteração do vendedor responsável pelo cliente', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 9, 0, N'Clientes - Verificar histórico de débitos do cliente e solicitar aprovação da diretoria', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 9, 0, N'Clientes - Avaliar, realizar renegociação de débitos', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 10, 0, N'Estoque - Verificar ficha de estoque do item', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 10, 0, N'Estoque - Avaliar, realizar ajuste no saldo/itens de estoque', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 10, 0, N'Estoque - Avaliar, elaborar documento não conformidade', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 11, 0, N'Estoque - Avaliar, atender solicitação geral', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 12, 0, N'Pedido - Verificar situação do pedido/entrega junto ao transportador', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 12, 0, N'Pedido - Confirmar entrega junto ao cliente', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 13, 0, N'Estoque - Avaliar, atender solicitação geral', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 14, 0, N'Comercial BH - Pedidos - Ajustar dados do pedido', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 15, 0, N'Comercial BH - Clientes - Ajustar/corrigir dados cadastro cliente', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 16, 0, N'Comercial BH - Avaliar, atender solicitação geral', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 17, 0, N'Comercial SP - Pedidos - Ajustar dados do pedido', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 18, 0, N'Comercial SP - Clientes - Ajustar/corrigir dados cadastro cliente', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 19, 0, N'Comercial SP - Avaliar, atender solicitação geral', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 20, 0, N'Qualidade - Avaliar, elaborar documento da qualidade/não conformidade', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 20, 0, N'Qualidade - Anexar documento de não conformidade no atendimento e no módulo da qualidade do ERP', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+INSERT [dbo].[g_atendimentos_categorias_atividades] VALUES (1, 21, 0, N'Compras - Avaliar, registrar, executar cotação/compra de materiais', 1, 0, 0, CAST(N'2026-01-20T00:00:00.0000000' AS DateTime2), 1, NULL, NULL)
+GO
+
+
+/* =========================================================
+   dbo.g_atendimentos
+   ========================================================= */
+CREATE TABLE dbo.g_atendimentos
+(
+    id_atendimento               int            IDENTITY(1,1) NOT NULL,
+    concluido                    bit            NOT NULL CONSTRAINT DF_g_atendimentos_concluido DEFAULT (0),
+    solicitacao                  nvarchar(100)  NULL,
+    descricao                    nvarchar(max)  NULL,
+    anotacoes                    nvarchar(max)  NULL,
+    privado                      bit            NOT NULL CONSTRAINT DF_g_atendimentos_privado DEFAULT (0),
+    enviar_atualizacoes          bit            NOT NULL CONSTRAINT DF_g_atendimentos_enviar_atualizacoes DEFAULT (1),
+    email_atualizacoes           nvarchar(max)  NULL,
+
+    /* Opcional: permitir NULL (evita “0 inválido” e facilita FK) */
+    param_id_cliente                    int     NOT NULL CONSTRAINT DF_g_atendimentos_param_id_cliente DEFAULT (0),
+    param_numero_pedido                 int     NOT NULL CONSTRAINT DF_g_atendimentos_param_numero_pedido DEFAULT (0),
+    param_numero_nf                     int     NOT NULL CONSTRAINT DF_g_atendimentos_param_numero_nf DEFAULT (0),
+    param_id_produto                    int     NOT NULL CONSTRAINT DF_g_atendimentos_param_id_produto DEFAULT (0),
+    param_limite_credito                int     NOT NULL CONSTRAINT DF_g_atendimentos_param_limite_credito DEFAULT (0),
+    param_id_vendedor                   int     NOT NULL CONSTRAINT DF_g_atendimentos_param_id_vendedor DEFAULT (0),
+
+    /* Obrigatório (ticket deve ter status e categoria) */
+    id_status                    int            NOT NULL,
+    id_atendimento_categoria     int            NOT NULL,
+
+    solicitacao_id_usuario       int            NOT NULL,
+    solicitacao_datahora         datetime2(0)   NOT NULL,
+
+    responsavel_id_usuario       int            NULL,
+    responsavel_id_departamento  int            NULL,
+
+    conclusao_id_usuario         int            NULL,
+    conclusao_datahora           datetime2(0)   NULL,
+
+    cancelamento_id_usuario      int            NULL,
+    cancelamento_datahora        datetime2(0)   NULL,
+
+    id_coligada                  int            NOT NULL CONSTRAINT DF_g_atendimentos_id_coligada DEFAULT (0),
+    id_filial                    int            NOT NULL CONSTRAINT DF_g_atendimentos_id_filial DEFAULT (0),
+
+    datahora_cadastro            datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_datahora_cadastro DEFAULT (SYSDATETIME()),
+    id_usuario_cadastro          int            NOT NULL,
+    datahora_alteracao           datetime2(0)   NULL,
+    id_usuario_alteracao         int            NULL,
+
+    CONSTRAINT PK_g_atendimentos PRIMARY KEY CLUSTERED (id_atendimento)
+);
+GO
+
+
+
+
+/* =========================================================
+   dbo.g_atendimentos_atividades
+   NOTA TÉCNICA: removi id_atendimento_categoria (redundante).
+               a categoria é derivável pelo atendimento ou pelo catálogo.
+   ========================================================= */
+CREATE TABLE dbo.g_atendimentos_atividades
+(
+    id_atendimento_atividade              int            IDENTITY(1,1) NOT NULL,
+    id_atendimento                        int            NOT NULL,
+    id_atendimento_categoria_atividade    int            NULL,  -- pode ser NULL para atividade “livre”/ad-hoc
+
+    concluido                             bit            NOT NULL CONSTRAINT DF_g_atendimentos_atividades_concluido DEFAULT (0),
+    privado                               bit            NOT NULL CONSTRAINT DF_g_atendimentos_atividades_privado DEFAULT (0),
+
+    solicitacao                           nvarchar(100)  NULL,
+    descricao                             nvarchar(max)  NULL,
+    anotacoes                             nvarchar(max)  NULL,
+
+    ordem                                 int            NOT NULL CONSTRAINT DF_g_atendimentos_atividades_ordem DEFAULT (0),
+    observacoes                           nvarchar(max)  NULL,
+
+    solicitacao_id_usuario                int            NOT NULL,
+    solicitacao_datahora                  datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_atividades_solicitacao_datahora DEFAULT (SYSDATETIME()),
+
+    responsavel_id_usuario                int            NULL,
+    responsavel_id_departamento           int            NULL,
+
+    conclusao_id_usuario                  int            NULL,
+    conclusao_datahora                    datetime2(0)   NULL,
+
+    cancelamento_id_usuario               int            NULL,
+    cancelamento_datahora                 datetime2(0)   NULL,
+
+    sla_datahora                          datetime2(0)   NULL,
+
+    id_coligada                           int            NOT NULL CONSTRAINT DF_g_atendimentos_atividades_id_coligada DEFAULT (0),
+    id_filial                             int            NOT NULL CONSTRAINT DF_g_atendimentos_atividades_id_filial DEFAULT (0),
+
+    datahora_cadastro                     datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_atividades_datahora_cadastro DEFAULT (SYSDATETIME()),
+    id_usuario_cadastro                   int            NOT NULL,
+    datahora_alteracao                    datetime2(0)   NULL,
+    id_usuario_alteracao                  int            NULL,
+
+    CONSTRAINT PK_g_atendimentos_atividades PRIMARY KEY CLUSTERED (id_atendimento_atividade)
+);
+GO
+
+
+/* =========================================================
+   dbo.g_atendimentos_logs
+   ========================================================= */
+CREATE TABLE dbo.g_atendimentos_logs
+(
+    id_atendimento_log           int            IDENTITY(1,1) NOT NULL,
+    id_atendimento               int            NOT NULL,
+    log_automatico               bit            NOT NULL CONSTRAINT DF_g_atendimentos_logs_log_automatico DEFAULT (0),
+    privado                      bit            NOT NULL CONSTRAINT DF_g_atendimentos_logs_privado DEFAULT (0),
+    log                          nvarchar(max)  NOT NULL,
+
+    responsavel_id_usuario       int            NULL,
+    responsavel_id_departamento  int            NULL,
+
+    datahora_cadastro            datetime2(0)   NOT NULL CONSTRAINT DF_g_atendimentos_logs_datahora_cadastro DEFAULT (SYSDATETIME()),
+    id_usuario_cadastro          int            NOT NULL,
+
+    CONSTRAINT PK_g_atendimentos_logs PRIMARY KEY CLUSTERED (id_atendimento_log)
+);
+GO
+
+
+
+
+
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 1;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 2;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 3;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 4;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 1, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 5;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 1, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 6;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 1, param_id_vendedor = 0 where id_atendimento_categoria = 7;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 1 where id_atendimento_categoria = 8;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 9;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 1, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 10;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 11;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 12;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 13;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 14;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 15;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 16;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 1, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 17;
+update g_atendimentos_categorias set param_id_cliente = 1, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 18;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 19;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 20;
+update g_atendimentos_categorias set param_id_cliente = 0, param_numero_pedido = 0, param_numero_nf = 0, param_id_produto = 0, param_limite_credito = 0, param_id_vendedor = 0 where id_atendimento_categoria = 21
+GO
+
+update dbo.a_sistemas_grupos set nome = 'Atendimentos', image_class = 'fa-solid fa-ticket' where id_sistema_grupo = 18;
+update dbo.a_sistemas_controllers set ativo = 0, descricao = '[Desativado] Tarefas > Tarefas' where id_sistema_controller = 85;
+GO
+
+EXEC sp_rename 'dbo.g_usuarios.gc_param_local_estoque_pedidos', 'id_departamento', 'COLUMN';
+GO
+
+EXEC sp_rename 'dbo.g_usuarios.gc_param_local_estoque_pedidos', 'id_departamento', 'COLUMN';
+update dbo.g_usuarios set id_departamento = 6 where id_usuario = 1;
+update dbo.g_usuarios set id_departamento = 4 where id_usuario = 4;
+update dbo.g_usuarios set id_departamento = 5 where id_usuario = 5;
+update dbo.g_usuarios set id_departamento = 4 where id_usuario = 7;
+update dbo.g_usuarios set id_departamento = 3 where id_usuario = 8;
+update dbo.g_usuarios set id_departamento = 1 where id_usuario = 11;
+update dbo.g_usuarios set id_departamento = 2 where id_usuario = 15;
+update dbo.g_usuarios set id_departamento = 2 where id_usuario = 17;
+update dbo.g_usuarios set id_departamento = 1 where id_usuario = 18
+update dbo.g_usuarios set id_departamento = 5 where id_usuario = 20;
+update dbo.g_usuarios set id_departamento = 2 where id_usuario = 23;
+GO
+
+IF OBJECT_ID('dbo.migration_boolean_manifest', 'U') IS NOT NULL DROP TABLE dbo.migration_boolean_manifest;
+IF OBJECT_ID('dbo.migration_rowcount_audit', 'U') IS NOT NULL DROP TABLE dbo.migration_rowcount_audit;
+IF OBJECT_ID('dbo.mysql_alter_log', 'U') IS NOT NULL DROP TABLE dbo.mysql_alter_log;
+IF OBJECT_ID('dbo.mysql_auditoria_tinyint1_boolean', 'U') IS NOT NULL DROP TABLE dbo.mysql_auditoria_tinyint1_boolean;
+IF OBJECT_ID('dbo.mysql_tinyint1_enforce_log', 'U') IS NOT NULL DROP TABLE dbo.mysql_tinyint1_enforce_log;
+GO
+
+DROP TABLE dbo.;
+DROP TABLE dbo.;
+DROP TABLE dbo.;
+DROP TABLE dbo.;
+DROP TABLE dbo.;
+GO
+
+select * from dbo.g_departamentos;
+select * from dbo.g_atendimentos_logs;
+select * from dbo.g_atendimentos_atividades;
+select * from dbo.g_atendimentos;
+select * from dbo.g_atendimentos_categorias_atividades;
+select * from dbo.g_atendimentos_categorias;
+select * from dbo.g_atendimentos_status;
+select * from dbo.g_departamentos;
+select * from dbo.a_sistemas_controllers where id_sistema_controller = 85;

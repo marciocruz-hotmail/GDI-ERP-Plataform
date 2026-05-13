@@ -1,0 +1,142 @@
+@model GdiPlataform.Db.g_atendimentos_atividades
+@using GdiPlataform.Security
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditAtividade" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_atendimento_atividade)
+                @Html.HiddenFor(model => model.id_atendimento)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-1">
+                        <div class="card-body m-1 p-1">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("fechado", "Concluído", htmlAttributes: new { @class = "control-labexl col-sm-2", @style = "margin-top:5px;" })
+                                <div class="col-sm-1 text-sm-start">
+                                    <div class="form-check form-switch" style="margin-top:10px;">
+                                        @Html.CheckBoxFor(model => model.concluido, new { @class = "form-check-input", role = "switch" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                            </div>
+
+
+                            @if (Model.id_atendimento_atividade == 0)
+                            {
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("solicitacao", "Solicitação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-7">
+                                        @Html.EditorFor(model => model.solicitacao, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("descricao", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-10">
+                                        @Html.TextAreaFor(model => model.descricao, 4, 60, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("solicitacao", "Solicitação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-8 col-form-label text-start" style="margin-top:5px;">
+                                        @Html.Raw(Model.solicitacao)
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("descrição", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-8 col-form-label text-start" style="margin-top:5px;">
+                                        @Html.Raw(Model.descricao)
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("anotacoes", "Anotações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-8">
+                                        @Html.TextAreaFor(model => model.anotacoes, 4, 60, new { @class = "form-control", data_autofocus = "true" })
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if ((Model.id_atendimento_atividade == 0) || (Model.id_atendimento_atividade > 0 && Model.concluido == false))
+                {
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxCreateEditAtividade()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsYesInit] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditAtividade()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#FormModalCreateEditAtividade');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditAtividade", "Atendimentos", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                $("#dtGAtendimentoAtividades").DataTable().draw(false);
+                                $("#dtGAtendimentosLogs").DataTable().draw(false);
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEditAtividade] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+

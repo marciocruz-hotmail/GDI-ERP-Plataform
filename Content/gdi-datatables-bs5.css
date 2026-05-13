@@ -1,0 +1,14 @@
+/**
+ * DataTables + Bootstrap 5 / AdminLTE 4:
+ * Use class "gdi-dt-zebra" na <table> em vez de "table-striped" quando houver cor por linha (createdRow).
+ * - Zebra: linhas ímpares sem classe contextual BS5 nem .gdi-row-tinted.
+ * - Cor dinâmica: <tr class="gdi-row-tinted" style="--gdi-row-bg: #hex;"> (definir --gdi-row-bg no createdRow).
+ * - Cores fixas: preferir classes BS5 no <tr> (.table-success, .table-warning, .table-danger, …).
+ */
+.table.gdi-dt-zebra > tbody > tr:nth-child(odd):not(.table-primary):not(.table-secondary):not(.table-success):not(.table-danger):not(.table-warning):not(.table-info):not(.table-light):not(.table-dark):not(.gdi-row-tinted) > td {
+    background-color: rgba(var(--bs-emphasis-color-rgb), 0.06);
+}
+
+.table.gdi-dt-zebra > tbody > tr.gdi-row-tinted > td {
+    background-color: var(--gdi-row-bg);
+}

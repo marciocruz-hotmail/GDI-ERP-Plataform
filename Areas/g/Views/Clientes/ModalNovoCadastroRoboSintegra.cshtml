@@ -1,0 +1,245 @@
+@model GdiPlataform.Db.g_clientes
+@using GdiPlataform.Security
+@using GdiPlataform.Lib
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalNovoCadastroRoboSintegra" }))
+{
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_cliente)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-2">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("cnpj", "CPF/CNPJ", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                        <div class="col-sm-9">
+                            @Html.EditorFor(model => model.cnpj, new { htmlAttributes = new { @class = "form-control", @onkeypress = "keypressed(event);", maxlength = "30" } })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputsNovoCliente()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Sintegra / Receita Federal</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    function keypressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsCheckInputsNovoCliente();
+        }
+    }
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCheckInputsSintegra()
+    {
+        try
+        {
+            if (isEmpty($('#cnpj').val().toString().trim()))
+            {
+                yesMessageAlertSmall("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!");
+            }
+            else
+            {
+                jsSendFormSintegra();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputsSintegra]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendFormSintegra()
+    {
+        try
+        {
+            LibMessageProcessando("")
+            var form = $('#formModalNovoCadastroRoboSintegra');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalNovoCadastroRoboSintegra", "Clientes", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendFormSintegra] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsCheckInputsReceitaFederal() {
+        try {
+            if (isEmpty($('#cnpj').val().toString().trim())) {
+                yesMessageAlertSmall("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!");
+            }
+            else {
+                jsSendFormReceitaFederal();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputsReceitaFederal]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendFormReceitaFederal()
+    {
+        try
+        {
+            LibMessageProcessando("")
+            var form = $('#formModalNovoCadastroRoboSintegra');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalNovoCadastroRoboCpfCnpj", "Clientes", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendFormReceitaFederal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsCheckInputsNovoCliente() {
+        try {
+            if (isEmpty($('#cnpj').val().toString().trim())) {
+                yesMessageAlertSmall("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!");
+            }
+            else {
+                jsSendFormNovoCliente();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputsNovoCliente]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsSendFormNovoCliente()
+    {
+        try
+        {
+            LibMessageProcessando("")
+            var form = $('#formModalNovoCadastroRoboSintegra');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalCadastroNovoCliente", "Clientes", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendFormReceitaFederal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+
+
+</script>
+

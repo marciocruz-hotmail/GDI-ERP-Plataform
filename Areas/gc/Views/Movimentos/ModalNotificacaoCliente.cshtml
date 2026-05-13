@@ -1,0 +1,190 @@
+@model GdiPlataform.Db.gc_movimentos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalNotificacaoCliente" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-envelope fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5><br />
+                @Html.HiddenFor(model => model.param_zerar_difal)
+                @Html.HiddenFor(model => model.id_movimento)
+                @Html.HiddenFor(model => model.param_reducao_bc)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card-body m-0 p-0" style="height: 100%">
+                        @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                        {
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                        }
+                        else
+                        {
+                            <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0" style="height:100%;">
+                                <div class="section-header mt-3"><i class="fa-solid fa-people-group me-1" aria-hidden="true"></i>Contatos a serem notificados (Email Nota Fiscal/Boleto + WhatsApp)</div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("id_contato", "Contato", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.DropDownListFor(model => model.id_contato, ViewBag.ComboClientesContatos as List<SelectListItem>, new { @class = "form-control", @onchange = "jsSetDadosContato();", @onblur = "jsSetDadosContato();" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("contato_nome", "Pessoa de Contato", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.EditorFor(model => model.contato_nome, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("contato_telefone", "Telefone/Celular", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.EditorFor(model => model.contato_telefone, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("contato_email", "Email Contato", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                    <div class="col-sm-6">
+                                        @Html.EditorFor(model => model.contato_email, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("notifica_contatos_emails", "Emails Notificações", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                    <div class="col-sm-9">
+                                        @Html.TextAreaFor(model => model.notifica_contatos_emails, new { @class = "form-control", @id = "notifica_contatos_emails", @rows = "3", @title = "Emails a serem notificados", @placeholder = "Todos os e-mails que receberão os emails de notificações sobre o pedido\nNão é necessário repetir o email do contato" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Notificar Cliente</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try
+        {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando("Notificando o Cliente . . .")
+            var form = $('#FormModalNotificacaoCliente');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxModalNotificacaoCliente", "Movimentos", new { area = "gc" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                $("#dataTableGCIndexPedido").DataTable().draw(false);
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    document.getElementById('btnSalvar').disabled = false;
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsSetDadosContato()
+    {
+        try
+        {
+            if (($("#id_contato").val() != null) && ($("#id_contato").val() > 0))
+            {
+                var dataForm =
+                {
+                    view_g_clientes_contatos:
+                    {
+                        'id_contato': $("#id_contato").val(),
+                    }
+                };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AjaxGetDadosContato", "Clientes", new { area = "g" })',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(dataForm),
+                    dataType: "json",
+                    success: function (result)
+                    {
+                        if (result.success == true)
+                        {
+                            document.getElementById("contato_nome").value = result.contato_nome;
+                            document.getElementById("contato_telefone").value = result.contato_telefone;
+                            document.getElementById("contato_email").value = result.contato_email;
+                        }
+                        else
+                        {
+                            document.getElementById("contato_nome").value = "";
+                            document.getElementById("contato_telefone").value = "";
+                            document.getElementById("contato_email").value = "";
+                        }
+                    },
+                    error: function (result)
+                    {
+                        document.getElementById("contato_nome").value = "";
+                        document.getElementById("contato_telefone").value = "";
+                        document.getElementById("contato_email").value = "";
+                    }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsSetPrecoVendaProduto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+</script>
+
+

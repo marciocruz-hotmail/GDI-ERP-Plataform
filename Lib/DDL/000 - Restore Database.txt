@@ -1,0 +1,24 @@
+﻿
+/* ========== RESTORE DATABASE HOMOLOGACAO ========== */
+USE master;
+GO
+
+ALTER DATABASE [erp_gdi_homologacao]
+SET SINGLE_USER
+WITH ROLLBACK IMMEDIATE;
+GO
+
+RESTORE DATABASE [erp_gdi_homologacao]
+FROM DISK = 'C:\BackupSQL\erp_gdi_producao_20260315_180002_FULL.bak'
+WITH 
+    MOVE 'erp_gdi_producao' TO 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\erp_gdi_homologacao.mdf',
+    MOVE 'erp_gdi_producao_log' TO 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\erp_gdi_homologacao_log.ldf',
+    REPLACE,
+    RECOVERY,
+    STATS = 10;
+GO
+
+ALTER DATABASE [erp_gdi_homologacao]
+SET MULTI_USER;
+GO
+/* ========== RESTORE DATABASE HOMOLOGACAO ========== */

@@ -1,0 +1,1252 @@
+@model GdiPlataform.Db.gc_comex_importacoes
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcComexImportacoesCreateEdit" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_importacao)
+                    @Html.HiddenFor(model => model.ativo)
+                    @Html.HiddenFor(model => model.qtd_invoices)
+                    @Html.HiddenFor(model => model.qtd_invoices_recebidas)
+                    @Html.HiddenFor(model => model.qtd_itens)
+                    @Html.HiddenFor(model => model.qtd_itens_recebidos)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.HiddenFor(model => model.datahora_cadastro)
+                    @Html.HiddenFor(model => model.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.cambio_liquidado)
+                    @Html.HiddenFor(model => model.nf_despachante_numero)
+                    @Html.HiddenFor(model => model.exclusao_datahora)
+                    @Html.HiddenFor(model => model.exclusao_id_usuario)
+                    @Html.HiddenFor(model => model.exclusao_motivo)
+                    @Html.HiddenFor(model => model.percentual_valor_gdi)
+                    @Html.HiddenFor(model => model.percentual_valor_sc)
+                    @Html.HiddenFor(model => model.percentual_peso_liquido_gdi)
+                    @Html.HiddenFor(model => model.percentual_peso_liquido_sc)
+                    @Html.HiddenFor(model => model.percentual_peso_bruto_gdi)
+                    @Html.HiddenFor(model => model.percentual_peso_bruto_sc)
+                    @Html.HiddenFor(model => model.calculo_custos_executado)
+                    @Html.HiddenFor(model => model.calculo_custos_id_usuario)
+                    @Html.HiddenFor(model => model.calculo_custos_data_hora)
+                    @Html.HiddenFor(model => model.fechamento_executado)
+                    @Html.HiddenFor(model => model.fechamento_id_usuario)
+                    @Html.HiddenFor(model => model.fechamento_data_hora)
+                    @Html.HiddenFor(model => model.invoices_finalizadas)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                        <!-- Abas exibidas somente em modo de edição -->
+                        @if (Model.id_importacao > 0)
+                        {
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabInvoicesExpandidas_tab" data-bs-toggle="pill" href="#tabInvoicesExpandidas" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-file-invoice-dollar fa-sm" aria-hidden="true"></i>Invoices Expandidas</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabItens_tab" data-bs-toggle="pill" href="#tabItens" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-barcode fa-sm" aria-hidden="true"></i>Itens</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabInvoicesPDF_tab" data-bs-toggle="pill" href="#tabInvoicesPDF" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-file-invoice-dollar fa-sm" aria-hidden="true"></i>Invoices PDF (Clientes)</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabGED_tab" data-bs-toggle="pill" href="#tabGED" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-paperclip fa-sm" aria-hidden="true"></i>Anexos</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabCustos_tab" data-bs-toggle="pill" href="#tabCustos" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-coins fa-sm" aria-hidden="true"></i>Custos</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabAudit_tab" data-bs-toggle="pill" href="#tabAudit" role="tab" aria-controls="crud-tabs" aria-selected="false"><i class="fa-solid fa-magnifying-glass-arrow-right fa-sm" aria-hidden="true"></i>Audit</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-1" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <!-- Dados - Início -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Importação</div>
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("numero", "Número", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.numero, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("Data Registro", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @* id do .input-group distinto do input para Tempus Dominus *@
+                                                <div class='input-group date' id='ig_comex_imp_data_registro'>
+                                                    @Html.EditorFor(model => model.data_registro, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("di_numero", "DI - Número", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.di_numero, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("DI - Data Registro", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                <div class='input-group date' id='ig_comex_imp_di_data_registro'>
+                                                    @Html.EditorFor(model => model.di_data_registro, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("DI - Protocolo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.di_protocolo, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("DI - Data Desembaraço", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-2">
+                                                <div class='input-group date' id='ig_comex_imp_di_data_desembaraco'>
+                                                    @Html.EditorFor(model => model.di_data_desembaraco, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("DI - Total (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.di_valor_total, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                            </div>
+                                            @Html.Label("DI - Câmbio", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.di_cambio, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("AWB", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.awb_numero, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("DI - Volumes", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.di_volumes, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("li_numero", "LI - Número", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-3">
+                                                @Html.EditorFor(model => model.li_numero, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            @Html.Label("LI - Data Registro", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                <div class='input-group date' id='ig_comex_imp_li_data_registro'>
+                                                    @Html.EditorFor(model => model.li_data_registro, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.DropDownListFor(model => model.id_importacao_status, ViewBag.comboStatusImportacao as List<SelectListItem>, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("Câmbio (Débito)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.cambio_debito, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                            </div>
+                                            @Html.Label("Câmbio (Crédito)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-2">
+                                                @Html.EditorFor(model => model.cambio_credito, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("obs", "Informações", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                            <div class="col-sm-6">
+                                                @Html.TextAreaFor(model => model.obs, new { @class = "form-control", @id = "obs", @rows = "5", @title = "Informações adicionais da importação", @placeholder = "Informações adicionais da importação" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Dados - Fim -->
+
+                            <!-- Abas exibidas em modo de edição  -->
+                            @if (Model.id_importacao > 0)
+                            {<!--1 -->
+                                <!-- Aba Invoices - INÍCIO -->
+                                <div class="tab-pane fade" id="tabInvoicesExpandidas" role="tabpanel" aria-labelledby="tabInvoicesExpandidas_tab">
+                                    <div class="card-header m-0 p-1">
+                                        @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_Actiondelete")))
+                                        {
+                                            <div class="btn-group" role="group">
+                                                <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                                                    <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                                    <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarInvoice(otableGcComexInvoices, 'Id.')"><i class="fa-regular fa-trash-can me-2" aria-hidden="true"></i><b style='color: #cc0000'>Cancelar Invoice</b></a>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Invoices Expandidas</div>
+                                        <div class="card-body m-0 p-1" style="height: 100%">
+                                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexInvoices">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>[x]</th>
+                                                                <th>Id.</th>
+                                                                <th>Invoice</th>
+                                                                <th>GDI<br/>Itens</th>
+                                                                <th>GDI<br/>US$</th>
+                                                                <th>Clientes<br/>Itens</th>
+                                                                <th>Clientes<br/>US$</th>
+                                                                <th>Total<br />Itens</th>
+                                                                <th>Total<br/>US$</th>
+                                                                <th>Câmbio<br/>Débito</th>
+                                                                <th>Câmbio<br/>Crédito</th>
+                                                                <th><i class="fa-solid fa-dollar-sign" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Câmbio"></i></th>
+                                                                <th><i class="fa-regular fa-clipboard" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Itens"></i></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tfoot align="right">
+                                                            <tr>
+                                                                <th align="right" colspan="8"></th>
+                                                                <th align="right">@Html.Label("label_total_itens", "US$", htmlAttributes: new { @id = "label_total_itens" })</th>
+                                                                <th align="right">@Html.Label("label_total_cambio_debito", "US$", htmlAttributes: new { @id = "label_total_cambio_debito" })</th>
+                                                                <th align="right" colspan="3"></th>
+                                                            </tr>
+                                                        </tfoot>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                    <div class="card-body text-sm-center m-0 p-1">
+                                                        <button type="button" name="btnImportarInvoices" onclick="jsModalImportarInvoiceXLS()" title="Importar Invoice (xls)" class="btn btn-secondary d-inline-flex align-items-center gap-2"><i class="fa-regular fa-file-excel fa-lg me-2" aria-hidden="true"></i>Importar Invoice (xls)</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba Invoices - FIM -->
+
+                                <!-- Aba Itens - INÍCIO -->
+                                <div class="tab-pane fade" id="tabItens" role="tabpanel" aria-labelledby="tabItens_tab">
+                                    
+                                    <div class="card-header m-0 p-1">
+                                        @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_Actiondelete")))
+                                        {
+                                            <div class="btn-group" role="group">
+                                                <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                                                    <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                                    <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalExcluirItensImportacao()"><i class="fa-regular fa-trash-can me-2" aria-hidden="true"></i><b style='color: #cc0000'>Excluir Itens Importação</b></a>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Itens da Importação</div>
+                                        <div class="card-body m-0 p-1" style="height: 100%">
+                                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                                    <h5 class="card-header m-0 p-1">@Html.Label("label_titulo_aba_itens", "Itens da Importação", htmlAttributes: new { @id = "label_titulo_aba_itens" })</h5>
+                                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexItens">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="font-size:12px;">Qtd</th>
+                                                                <th style="font-size:12px;">Item</th>
+                                                                <th style="font-size:12px;">R$ Unit</th>
+                                                                <th style="font-size:12px;">R$ Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tfoot align="right">
+                                                            <tr>
+                                                                <th align="center">@Html.Label("label_qtd_itens", "0", htmlAttributes: new { @id = "label_qtd_itens" })</th>
+                                                                <th align="center">@Html.Label("label_qtd_produtos", "0", htmlAttributes: new { @id = "label_qtd_produtos" })</th>
+                                                                <th align="right"></th>
+                                                                <th align="right">@Html.Label("label_valor_total_itens", "R$", htmlAttributes: new { @id = "label_valor_total_itens" })</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                        <tbody></tbody>
+                                                    </table>
+
+                                                    <div class="card-body text-sm-center m-0 p-1">
+                                                        <button type="button" name="btnImportarItens" onclick="jsModalCarregarItensImportacao()" title="Carregar Itens Importação (xlsx)" class="btn btn-secondary d-inline-flex align-items-center gap-2"><i class="fa-regular fa-file-excel fa-lg me-2" aria-hidden="true"></i>Carregar Itens Importação (xlsx)</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba Itens - FIM -->
+
+
+                                <!-- Aba Invoices PDF - INÍCIO -->
+                                <div class="tab-pane fade" id="tabInvoicesPDF" role="tabpanel" aria-labelledby="tabInvoicesPDF_tab">
+                                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Invoices PDF (Clientes)</div>
+                                            <div class="card-body m-0 p-1" style="height: 100%">
+                                                <h5 class="card-header m-0 p-0"></h5>
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGedComexInvoicesPDF">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>@Html.Raw("Id.")</th>
+                                                            <th>@Html.Raw("Nº Invoice")</th>
+                                                            <th>@Html.Raw("Nº Sales Order")</th>
+                                                            <th>@Html.Raw("Arquivo")</th>
+                                                            <th>@Html.Raw("Versão")</th>
+                                                            <th><i class="fa-solid fa-cloud-download-alt" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Arquivo"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                                <div class="card-body text-sm-center m-0 p-1">
+                                                    <div class="row justify-content-center">
+                                                        <div class="col-6" style="text-align:center">
+                                                            <button type="button" name="btnUploadInvoicePDF" title="Anexar Invoices" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFileComexInvoicesPDF()"><i class="fa-solid fa-file-pdf fa-lg me-2" aria-hidden="true"></i>Anexar Invoices</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba Invoices PDF - FIM -->
+
+
+                                <!-- Aba GED - INÍCIO -->
+                                <div class="tab-pane fade" id="tabGED" role="tabpanel" aria-labelledby="tabGED_tab">
+                                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-file-lines me-1" aria-hidden="true"></i>Documentos</div>
+                                            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGedComexArquivos">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>@Html.Raw("Id.")</th>
+                                                            <th>@Html.Raw("Descrição")</th>
+                                                            <th>@Html.Raw("Arquivo")</th>
+                                                            <th>@Html.Raw("Tipo")</th>
+                                                            <th>@Html.Raw("Versão")</th>
+                                                            <th>@Html.Raw("Data")</th>
+                                                            <th>@Html.Raw("Usuário")</th>
+                                                            <th><i class="fa-regular fa-edit" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Arquivo"></i></th>
+                                                            <th><i class="fa-solid fa-cloud-download-alt" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Arquivo"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                                <div class="card-body text-sm-center m-0 p-1">
+                                                    <div class="row justify-content-center">
+                                                        <div class="col-6" style="text-align:center">
+                                                            <button type="button" name="btnUploadFileComexDocs" title="Anexar Documentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFileComexDocs()"><i class="fa-solid fa-cloud-arrow-up fa-lg me-2" aria-hidden="true"></i>Anexar Documentos</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba GED - FIM -->
+
+
+                                <!-- Aba CUSTOS - INÍCIO -->
+                                <div class="tab-pane fade" id="tabCustos" role="tabpanel" aria-labelledby="tabCustos_tab">
+                                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Custos da Importação</div>
+                                            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_fob", "FOB DI (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_fob, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_fob", "FOB SC (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2 text-sm-end">
+                                                        @Html.EditorFor(model => model.despesas_fob_ajustado, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("total_custo", "Custo Total (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.total_custo, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("percentual_custo_fob", "% Custo X Fob", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.percentual_custo_fob, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    &nbsp;
+                                                </div>
+
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_icms", "ICMS (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_icms, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_pis", "PIS (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_pis, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_cofins", "Cofins (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_cofins, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_csll", "CSLL (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_csll, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_ibs", "IBS (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_ibs, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_cbs", "CBS (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_cbs, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_ipi", "IPI (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_ipi, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_ii", "I.I. (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_ii, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_siscomex", "Siscomex (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_siscomex, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_sda", "SDA (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_sda, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_armazenagem_primaria", "Armazen. Primária (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_armazenagem_primaria, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_armazenagem_secundaria", "Armazen. Secundária (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_armazenagem_secundaria, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_armazenagem_infraero", "Armazen. Infraero (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_armazenagem_infraero, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_transp_rodo_remocao", "Transp. Remoção (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_transp_rodo_remocao, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_marinha_mercante", "Marinha Mercante (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_marinha_mercante, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_frete_internacional", "Frete Internacional (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_frete_internacional, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_frete_brasil", "Frete Nacional (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_frete_brasil, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_taxa_expediente_santos", "Taxa Exp. Santos (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_taxa_expediente_santos, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_taxa_capatazia", "Taxa Capatazia (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_taxa_capatazia, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_despachante", "Despachante (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_despachante, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_outras", "Outras Despesas (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_outras, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    &nbsp;
+                                                </div>
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("despesas_core_sc", "Core SC (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_core_sc, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("despesas_core_gdi", "Core GDI (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.despesas_core_gdi, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    &nbsp;
+                                                </div>
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("peso_liquido", "Peso Liquido", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.peso_liquido, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                    @Html.Label("peso_bruto", "Peso Bruto", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.peso_bruto, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba CUSTOS - FIM -->
+
+                                <!-- Aba AUDIT - INÍCIO -->
+                                <div class="tab-pane fade" id="tabAudit" role="tabpanel" aria-labelledby="tabAudit_tab">
+                                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Trilha de Auditoria</div>
+                                            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAudit">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>@Html.Raw("Dt/Hora")</th>
+                                                            <th>@Html.Raw("Audit Trail")</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Aba AUDIT - FIM -->
+                            } <!--1 -->
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","ComexImportacoes",new { Area = "gc" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    @if (Model.id_importacao > 0)
+                    {<button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Atualizar Dados Importação</button> }
+                    else
+                    { <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Cadastrar Importação</button>}
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var otableGcComexInvoices;
+    var otableGcComexItens;
+    var otableGcComexGed;
+    var otableGcComexInvoicesPDF;
+    var otableGcComexAudit;
+
+    $(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_comex_imp_data_registro');
+            jsDatepicker('#ig_comex_imp_li_data_registro');
+            jsDatepicker('#ig_comex_imp_di_data_registro');
+            jsDatepicker('#ig_comex_imp_di_data_desembaraco');
+            jsInitForm();
+            $('#cambio_debito').attr('readonly', 'readonly');
+            $('#cambio_credito').attr('readonly', 'readonly');
+            $('#despesas_fob').attr('readonly', 'readonly');
+            $('#total_custo').attr('readonly', 'readonly');
+            $('#percentual_custo_fob').attr('readonly', 'readonly');
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSalvarDados()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
+
+            if (isEmpty($('#numero').val().toString().trim())) {
+                hasError = true;
+                msgError += "Campo <b>Número da Importação</b> é de preenchimento obrigatório!<br/>";
+            }
+
+            if (hasError) { LibMessageAlert("Atenção", msgError); }
+            else
+            {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#FormGcComexImportacoesCreateEdit").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    $('#tabInvoicesExpandidas_tab').on('click', function (e)
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            if (otableGcComexInvoices == null)
+            {
+                otableGcComexInvoices = $('#dtGcComexInvoices').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); if (!json || !json.errorMessage || String(json.errorMessage).trim().length === 0) { var el1 = document.getElementById("label_total_cambio_debito"); var el2 = document.getElementById("label_total_itens"); if (el1 && json.yesDisplayField01 != null) el1.innerHTML = json.yesDisplayField01; if (el2 && json.yesDisplayField02 != null) el2.innerHTML = json.yesDisplayField02; } }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosViewImportacao", "ComexInvoices", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_importacao').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 10,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "22%", orderable: false, className: 'text-sm-start', targets: [2] },
+                        { "width": "6%", orderable: false, className: 'text-sm-end', targets: [3] },
+                        { "width": "8%", orderable: false, className: 'text-sm-end', targets: [4] },
+                        { "width": "6%", orderable: false, className: 'text-sm-end', targets: [5] },
+                        { "width": "8%", orderable: false, className: 'text-sm-end', targets: [6] },
+                        { "width": "6%", orderable: false, className: 'text-sm-end', targets: [7] },
+                        { "width": "8%", orderable: false, className: 'text-sm-end', targets: [8] },
+                        { "width": "10%", orderable: false, className: 'text-sm-end', targets: [9] },
+                        { "width": "10%", orderable: false, className: 'text-sm-end', targets: [10] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [11], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" title="Câmbio ' + data[2] + '" class="btn btn-outline-warning btn-sm p-1 d-inline-flex align-items-center" onclick="jsModalCambioInvoice(' + data[1] + ');"><i class="fa-solid fa-dollar-sign"></i></button>' } },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" title="Itens ' + data[2] + '" class="btn btn-outline-info btn-sm p-1 d-inline-flex align-items-center" onclick="jsModalInvoice(' + data[1] + ');"><i class="fa-regular fa-clipboard"></i></button>' } }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[tabInvoicesExpandidas_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $('#tabItens_tab').on('click', function (e)
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            if (otableGcComexItens == null)
+            {
+                otableGcComexItens = $('#dtGcComexItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); jsDisplayFooterItensImportacao(json); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosItensImportacao", "ComexImportacoes", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_importacao').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "74%", orderable: false, className: 'text-sm-start', targets: [1] },
+                        { "width": "10%", orderable: false, className: 'text-sm-end', targets: [2] },
+                        { "width": "10%", orderable: false, className: 'text-sm-end', targets: [3] }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabItens_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $('#tabGED_tab').on('click', function (e)
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            if (otableGcComexGed == null)
+            {
+                otableGcComexGed = $('#dtGedComexArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetGedComex", "ComexImportacoes", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_importacao').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "32%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "32%", orderable: false, className: 'text-sm-center', targets: [2] },
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [3] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [4] },
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [5] },
+                        { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Arquivo Idº ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnEditFile d-inline-flex align-items-center" onclick="jsEditFile(' + data[0] + ');"><i class="fa-regular fa-edit"></i></button>' } },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Arquivo Id: ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + data[0] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' } }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabGED_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    $('#tabInvoicesPDF_tab').on('click', function (e)
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            if (otableGcComexInvoicesPDF == null)
+            {
+                otableGcComexInvoicesPDF = $('#dtGedComexInvoicesPDF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetGedInvoicesComex", "ComexImportacoes", new { area = "gc" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_importacao').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 100,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "16%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "16%", orderable: false, className: 'text-sm-center', targets: [2] },
+                        { "width": "54%", orderable: false, className: 'text-sm-center', targets: [3] },
+                        { "width": "6%", orderable: false, className: 'text-sm-center', targets: [5] },
+                        { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [5], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Invoice ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + data[0] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' } }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabInvoicesPDF_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+
+    $('#tabAudit_tab').on('click', function (e)
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            if (otableGcComexAudit == null)
+            {
+                otableGcComexAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetAuditTrail", "Audit", new { area = "a" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_importacao').val().toString(),
+                                yesCustomField01: "gc_comex_importacoes",
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 20,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "85%", orderable: false, className: 'text-sm-start', targets: [1] }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabAudit_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsDisplayFooterItensImportacao(json)
+    {
+        try
+        {
+            if (!json || (json.errorMessage && String(json.errorMessage).trim().length > 0)) { return; }
+            document.getElementById("label_qtd_itens").innerHTML = json.yesDisplayField01;
+            document.getElementById("label_qtd_produtos").innerHTML = json.yesDisplayField02;
+            document.getElementById("label_valor_total_itens").innerHTML = json.yesDisplayField03;
+            document.getElementById("label_titulo_aba_itens").innerHTML = json.yesDisplayField02 + "  |  " + json.yesDisplayField01 + " Itens  |  " + json.yesDisplayField03;
+
+        } catch (err)
+        {
+            LibMessageError("Atenção", "[jsDisplayFooterItensImportacao] " + (err && err.message ? err.message.toString() : String(err)));
+        };
+    }
+
+    function jsModalImportarInvoiceXLS(id)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalImportarInvoiceXLS", "ComexInvoices", new { area = "gc" })?id=' + id, function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsModalImportarInvoiceXLS] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalCarregarItensImportacao(id)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCarregarItensImportacao", "ComexImportacoes", new { area = "gc" })?id=' + id, function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsModalImportarInvoiceXLS] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalInvoice(idInvoice)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalInvoice", "ComexInvoices", new { area = "gc" })?viewIdInvoice=' + idInvoice, function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsModalInvoice] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsModalCambioInvoice(idInvoice)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCambioInvoice", "ComexInvoices", new { area = "gc" })?viewIdInvoice=' + idInvoice, function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsModalCambioInvoice] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+
+    function jsModalCancelarInvoice(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Invoice!");
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalCancelarInvoice", "ComexInvoices", new { Area = "gc" })?idInvoice=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Invoice!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarInvoice] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsModalExcluirItensImportacao()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalExcluirItensImportacao", "ComexImportacoes", new { Area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalApagarItensImportacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalUploadFileComexInvoicesPDF()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalUploadFileComexInvoicesPDF", "ComexImportacoes", new { area = "gc" })?IdGed=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalUploadFileComexDocs()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalUploadFileComexDocs", "ComexImportacoes", new { area = "gc" })?IdGed=0', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsDownloadFile(id)
+    {
+        try
+        {
+            LibMessageProcessando();
+            var dataForm =
+            {
+                view_ged_arquivos:
+                {
+                    'id_arquivo': id,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxDownloadFileS3", "Ged", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        window.open(result.url, 'Ged', '_parent');
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                    }
+                    else {
+                        LibMessageProcessandoHide();
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            })
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+</script>

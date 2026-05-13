@@ -1,0 +1,533 @@
+@model IEnumerable<GdiPlataform.Db.g_nfe>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>
+                @if ((CachePersister.userIdentity.Roles.Contains("g_Nfe_*")) || (CachePersister.userIdentity.Roles.Contains("g_Nfe_Actionupdate")))
+                { <button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGNfe, 'Id.', '@Url.Action("Edit", "Nfe", new { area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
+                else
+                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
+                <button type="button" id="btnFiltroDefault" name="btnFiltroDefault" title="Filtro" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroDefault()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Filtro</button>
+                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Filtro Avançado</button>
+
+                @if ((CachePersister.userIdentity.Roles.Contains("g_Nfe_*")) || (CachePersister.userIdentity.Roles.Contains("g_Nfe_Actionupdate")))
+                {
+                    <div class="btn-group" role="group">
+                        @{int qtdMenus = 0; }
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_FinanceiroFaturamentos_*")) || (CachePersister.userIdentity.Roles.Contains("g_FinanceiroFaturamentos_Actionread")))
+                            {
+                                if ((CachePersister.userIdentity.Roles.Contains("g_Nfe_*")) || (CachePersister.userIdentity.Roles.Contains("g_Nfe_NfeEnviarPorEmail")))
+                                {
+                                    <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalNfeEnviarPorEmailUnitario(otableGNfe, 'Id.')"><i class="fa-regular fa-envelope me-2" aria-hidden="true"></i>Enviar Nf-e Por E-mail</a>
+                                    qtdMenus = qtdMenus + 1;
+                                }
+
+                                if (qtdMenus > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalClonarNfe(otableGNfe, 'Id.', '')"><i class="fa fa-copy me-2" aria-hidden="true"></i>Clonar Dados Nf-e</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalExportarDadosNfePDF()"><i class="fa-regular fa-file-pdf me-2" aria-hidden="true"></i>Exportar Dados Nf-e (Geração PDF)</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalGerarNfe(otableGNfe, 'Id.')"><i class="fa-solid fa-stream me-2" aria-hidden="true"></i>Gerar Nf-e</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalAtualizarStatusNfe(otableGNfe, 'Id.')"><i class="fa-solid fa-sign-in-alt me-2" aria-hidden="true"></i>Atualizar Status Nf-e</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarNfe(otableGNfe, 'Id.', '')"><i class="fa-solid fa-ban me-2" aria-hidden="true"></i>Cancelar Nf-e Autorizada</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalEnviarCancelamentoNfe(otableGNfe, 'Id.')"><i class="fa-solid fa-stream me-2" aria-hidden="true"></i>Enviar Cancelamento Nf-e</a>
+                            }
+
+                            @if (CachePersister.userIdentity.Administrador == true)
+                            {
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalSincronizarLotesNfe()"><i class="fa-solid fa-exchange-alt me-2" aria-hidden="true"></i>Transmitir/Receber NFE (Registro/Cancelamento)</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportarNfeLote()"><i class="fa fa-upload fa-fw me-2" aria-hidden="true"></i>Importar Nota Fiscal Eletrônica (Lote)</a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGNfe">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.DisplayNameFor(model => model.id_nfe)</th>
+                                    <th>@Html.DisplayName("Tipo")</th>
+                                    <th>@Html.DisplayNameFor(model => model.id_nfe_status)</th>
+                                    <th>@Html.DisplayName("Nome Cliente")</th>
+                                    <th>@Html.DisplayName("Documento")</th>
+                                    <th>@Html.DisplayNameFor(model => model.data_processamento)</th>
+                                    <th>@Html.DisplayNameFor(model => model.data_vencimento)</th>
+                                    <th>@Html.DisplayNameFor(model => model.valor_total_liquido)</th>
+                                    <th>@Html.DisplayName("PDF")</th>
+                                    <th>XML</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableGNfe;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGNfe = $('#dtGNfe').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDados","Nfe",new { Area = "g" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesFilterOperador: $('#yesFilterOperador').val().toString(),
+                            yesFilterText: $('#yesFilterText').val().toString(),
+                            yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "20%", orderable: false, className: 'text-sm-center', targets: [3] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "12%", orderable: false, className: 'text-sm-start', targets: [5] },
+                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [6] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [7] },
+                    { "width": "12%", orderable: false, className: 'text-sm-end', targets: [8] },
+                    { "width": "7%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [9], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" name="btnDownloadPDF" title="Download PDF do cliente (' + data[4] + ')" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="downloadPDFXML(\'' + data[9] + '\');"><i class="fa-regular fa-file-pdf"></i></button>' } },
+                    { "width": "7%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [10], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" name="btnDownloadXML" title="Download XML do cliente (' + data[4] + ')" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="downloadPDFXML(\'' + data[10] + '\');"><i class="fa-regular fa-file"></i></button>' } }
+                ],
+                    select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalFiltroDefault()
+    {
+        try {
+            if (document.getElementById("btnFiltroDefault").innerHTML.indexOf("Remover") > 0) {
+                document.getElementById("yesFilterField").value = "*";
+                document.getElementById("yesFilterOperador").value = "";
+                document.getElementById("yesFilterText").value = "";
+                document.getElementById("yesFilterAdvancedText").value = "";
+                $("#dtGNfe").DataTable().draw(false);
+            }
+            else {
+                $("#mainModal").load('@Url.Action("ModalFiltroGenericoView", "Filtros", new { Area = "a" })?id=g_Nfe_Index', function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                })
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFiltroDefault] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRunFiltroDefault(filterField, filterOperador, filterText)
+    {
+        try {
+            document.getElementById("yesFilterField").value = filterField;
+            document.getElementById("yesFilterOperador").value = filterOperador;
+            document.getElementById("yesFilterText").value = filterText;
+            document.getElementById("yesFilterAdvancedText").value = "";
+            $("#dtGNfe").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRunFiltroDefault] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFiltroAvancado()
+    {
+        try {
+            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0)
+            {
+                document.getElementById("yesFilterField").value = "*";
+                document.getElementById("yesFilterOperador").value = "";
+                document.getElementById("yesFilterText").value = "";
+                document.getElementById("yesFilterAdvancedText").value = "";
+                $("#dtGNfe").DataTable().draw(false);
+            }
+            else
+            {
+                $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "Nfe", new { Area = "g" })?id=g_Nfe_Index', function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRunFiltroAvancado(FilterAdvancedText)
+    {
+        try {
+            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
+            $("#dtGNfe").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalNfeEnviarPorEmailUnitario(TableName, columnName)
+    {        
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);            
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");            
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o registro!")
+            }
+            else if (selectedIds.indexOf(',') >= 0)
+            {
+                LibMessageAlert("Atenção", "Para essa opção, selecione apenas 1(uma) registro!");
+            }
+            else if ((selectedStatus != "Autorizada") && (selectedStatus != "Cancelada"))
+            {
+                LibMessageAlert("Atenção", "So e possivel enviar e-mail para NFe Autorizada ou Cancelada!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalNfeEnviarPorEmailUnitario", "Nfe", new { Area = "g" })?id=' + selectedIds, function () { var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();} })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para execução do processo, selecione apenas 1(um) registro!")
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalNfeEnviarPorEmailUnitario] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalClonarNfe(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1) {
+                    sendAjaxClonarNfe(selectedIds);
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalClonarNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+
+    }
+
+    function sendAjaxClonarNfe(selectedIds)
+    {
+        try {
+            LibMessageProcessando("Clonando NFE . . .");
+            var dataForm =
+            {
+                record_g_nfe:
+                {
+                    'id_nfe': selectedIds,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxClonarNfe", "Nfe", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function () {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        location.reload();
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString())
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[sendAjaxClonarNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsModalExportarDadosNfePDF()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalExportarDadosNfePDF", "Nfe", new { area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalExportarDadosNfePDF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalGerarNfe(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0) {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            } else if (selectedIds.indexOf(',') > -1) {
+                LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
+            } else {
+                $("#mainModal").load('@Url.Action("ModalGerarNfe", "Nfe", new { area = "g" })?id=' + selectedIds, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalGerarNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalAtualizarStatusNfe(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0) {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            } else if (selectedIds.indexOf(',') > -1) {
+                LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
+            } else {
+                $("#mainModal").load('@Url.Action("ModalAtualizarStatusNfe", "Nfe", new { area = "g" })?id=' + selectedIds, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalAtualizarStatusNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalEnviarCancelamentoNfe(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0) {
+                LibMessageAlert("Atenção", "Selecione o registro!");
+            } else if (selectedIds.indexOf(',') > -1) {
+                LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
+            } else {
+                $("#mainModal").load('@Url.Action("ModalEnviarCancelamentoNfe", "Nfe", new { area = "g" })?id=' + selectedIds, function () {
+                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalEnviarCancelamentoNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCancelarNfe(TableName, columnName, urlEdit)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            var selectedStatus = JsGetSelectedRows(TableName, "Status");
+            while (selectedStatus.indexOf(",") > -1) { selectedStatus = selectedStatus.replace(",", "").trim(); }
+            while (selectedStatus.indexOf(" ") > -1) { selectedStatus = selectedStatus.replace(" ", "").trim(); }
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione os Registros!");
+            }
+            else if (selectedStatus != "Autorizada")
+            {
+                LibMessageAlert("Atenção", "Opção disponível apenas para NFE <b>Autorizada</b>!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalCancelarNfe", "Nfe", new { area = "g" })?id=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Para esse processo, selecione apenas 1(um) registro!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalSincronizarLotesNfe()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalSincronizarLotesNfe", "Nfe", new { area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalSincronizarLotesNfe] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function downloadPDFXML(url)
+    {
+        try {
+            if (url != "") {
+                window.open(url);
+            }
+            else {
+                LibMessageAlert("Atenção", "Não foram localizados arquivos para download!");
+        }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[downloadPDFXML] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalImportarNfeLote()
+    {
+        try {
+            $("#mainModal").load('@Url.Action("ModalImportarNfeLote", "Nfe", new { Area = "g" })?id=1', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalImportarNfeLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+

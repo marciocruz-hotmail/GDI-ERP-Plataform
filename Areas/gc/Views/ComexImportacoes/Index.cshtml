@@ -1,0 +1,348 @@
+@model IEnumerable<GdiPlataform.Db.gc_comex_importacoes>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-1">
+                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="card-header m-0 p-1">
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_Actioncreate")))
+                {<button type="button" name="btnRegistroNovo" title="Nova Importação" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","ComexImportacoes",new { Area = "gc" })')"><i class="fa-solid fa-passport fa-lg me-2" aria-hidden="true"></i>Nova Importação</button> }
+                else
+                { <button type="button" name="btnRegistroNovo" title="Nova Importação - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-solid fa-passport fa-lg me-2" aria-hidden="true"></i>Nova Importação</button>}
+
+                @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_Actionrun")))
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                            <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalFechamentoCustosImportacao(otableGcComexImportacoes, 'Id.')"><i class="fa-solid fa-cash-register me-2" aria-hidden="true"></i>Comex - Fechamento de Custos</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalCancelarImportacaoComex(otableGcComexImportacoes, 'Id.')"><i class="fa-regular fa-trash-can" style='color: #cc0000'></i><b style='color: #cc0000'>&nbsp;&nbsp;&nbsp;Comex - Cancelar Importação</b></a>
+                            <div class="dropdown-divider"></div>
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalImportacoesLogs(otableGcComexImportacoes, 'Id.')"><i class="fa-solid fa-list-check"></i><b>&nbsp;&nbsp;&nbsp;Log da Importação</b></a>
+                        </div>
+                    </div>
+                }
+                @if ((CachePersister.userIdentity.Administrador == true) || (CachePersister.userIdentity.IdPerfil == 1)) // (somente os administradores tem esse acesso)
+                {
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop2" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Administrador">
+                            <i class="fa-regular fa-gem me-2" aria-hidden="true"></i>Administrador
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop2">
+                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsAtualizarCustoProdutos(otableGcComexImportacoes, 'Id.')"><i class="fa-solid fa-file-invoice-dollar me-2" aria-hidden="true"></i>Produtos - Atualizar Custo Fob Produtos</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexImportacoes">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Encode("Id.")</th>
+                                    <th>Data</th>
+                                    <th>Import. Nº</th>
+                                    <th>DI Nº</th>
+                                    <th>Status</th>
+                                    <th>DI Data</th>
+                                    <th>Cotação<br/>(US$)</th>
+                                    <th>Câmbio<br/>(US$)</th>
+                                    <th>Fob<br/>(US$)</th>
+                                    <th><i class="fa-regular fa-folder-open" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Abrir Importação"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var otableGcComexImportacoes;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTableGcComexImportacoes();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTableGcComexImportacoes()
+    {
+        try
+        {
+            if (otableGcComexImportacoes == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGcComexImportacoes = $('#dtGcComexImportacoes')
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); })
+                    .DataTable({
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDados","ComexImportacoes",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                },
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { "width": "28%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
+                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [5] },
+                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [7] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [8] },
+                    { "width": "8%", orderable: false, className: 'text-sm-end', targets: [9] },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [10], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditRow" title="Abrir Importação Id ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnEditRow d-inline-flex align-items-center" onclick="jsOpenImportacaoComex(' + data[1] + ');"><i class="fa-solid fa-passport"></i></button>' } }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[4, 'desc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+                $('#dtGcComexImportacoes tbody').on('dblclick', 'tr td', function () {
+                    var data = otableGcComexImportacoes.row($(this).closest('tr')).data();
+                    jsOpenImportacaoComex(data[1]);
+                });
+
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsOpenImportacaoComex(id)
+    {
+        try
+        {
+                LibMessageProcessando("Processando . . .");
+                window.location = '@Url.Action("Edit", "ComexImportacoes", new { area = "gc" })?id=' + id;
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsOpenImportacaoComex] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalCancelarImportacaoComex(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Importação!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalCancelarImportacaoComex", "ComexImportacoes", new { Area = "gc" })?idImportacao='+selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Importação!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCancelarInvoice] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalImportacoesLogs(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Importação!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalImportacoesLogs", "ComexImportacoes", new { Area = "gc" })?idImportacao=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Importação!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalPedidosLogs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAtualizarCustoProdutos(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Importação!");
+            }
+            else
+            {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+
+                    $.ajax({
+                        cache: false,
+                        async: true,
+                        type: "GET",
+                        url: '@Url.Action("AjaxAtualizarCustoProdutos", "ComexImportacoes", new { area = "gc" })?id=' + selectedIds,
+                        success: function (result)
+                        {
+                            LibMessageProcessandoHide();
+                            if (result.success == true)
+                            {
+                                GdiSwal2.alert({
+                                    title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                                    centerVertical: true,
+                                    message: result.msg,
+                                    callback: function ()
+                                    {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                })
+                            }
+                            else
+                            {
+                                $('#limite_credito_atual').attr('disabled', true);
+                                GdiAjaxNotifyInconsistencias(result.msg);
+                            }
+                        },
+                        error: function (result)
+                        {
+                            LibMessageProcessandoHide();
+                            $('#limite_credito_atual').attr('disabled', true);
+                            GdiAjaxNotifyInconsistencias(result.toString());
+                        }
+                    });
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Importação!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAtualizarCustoProdutos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFechamentoCustosImportacao(TableName, columnName)
+    {
+        try
+        {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione a Importação!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    $("#mainModal").load('@Url.Action("ModalFechamentoCustosImportacao", "ComexImportacoes", new { Area = "gc" })?idImportacao='+selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Importação!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFechamentoCustosImportacao] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+
+
+
+

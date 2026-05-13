@@ -1,0 +1,191 @@
+@model GdiPlataform.Areas.g.Models.cstUploadGed
+@using GdiPlataform.Security
+@using System.Web
+@{
+    Layout = "~/Views/Shared/_Modal.cshtml";
+    // Garante "Descrição" independente do encoding do arquivo (evita DescriÃ§Ã£o)
+    var labelDescricao = "\u0044\u0065\u0073\u0063\u0072\u0069\u00e7\u00e3o";
+}
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalUploadAnexoEstoqueLotes", enctype = "multipart/form-data" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_arquivo)
+                @Html.HiddenFor(model => model.id_estoque_lote)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                
+                
+                <div class="card-body m-0 p-2" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="card-body m-0 p-1" style="height: 100%">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Tipo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-6">
+                                    @Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Arquivo", new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-8 text-sm-start">
+                                    <input type="file" class="form-control" id="customFile" onchange="jsFileInputChange(this)">
+                                    <div class="form-text" id="customFile_info"></div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("descricao", labelDescricao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-10">
+                                    @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" onclick="jsCloseModalUploadAnexoEstoqueLote()">
+                    <i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar
+                </button>
+                <button type="button" id="btnSalvar" name="btnSalvar" title="Confirmar Upload" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputsEstoqueLote()">
+                    <i class="fa-solid fa-cloud-arrow-up me-2" aria-hidden="true"></i>Confirmar Upload
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary() == null) ? "" : @Html.ValidationSummary().ToHtmlString()))));
+            // Abre o diálogo de seleção de arquivo assim que o modal estiver visível
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).ready(function ()
+    {
+        try
+        {
+            var $input = $('#customFile');
+            $input[0].click();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[customFile] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $("#customFile").on("change", function ()
+    {
+        try {
+            var fileName = $(this).val().split("\\").pop();
+            var description = fileName.split(".");
+            $('#descricao').val(description[0]);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[customFile] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsCheckInputsEstoqueLote() {
+        try {
+            if (isEmpty($('#customFile').val().toString().trim())) {
+                GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
+            }
+            else {
+                jsSendFormEstoqueLote();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputsEstoqueLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCloseModalUploadAnexoEstoqueLote() {
+        try
+        {
+            LibMessageProcessando("");
+            yesDestroyModal('#ModalUploadAnexoEstoqueLotes');
+            $("#mainModal").load('@Url.Action("Edit", "EstoqueLotes", new { area = "gc" })?id=' + $('#id_estoque_lote').val().toString(), function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCloseModalUploadAnexoEstoqueLote] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendFormEstoqueLote() {
+        try {
+            document.getElementById('btnSalvar').disabled = true;
+            LibMessageProcessando("Processando Arquivo . . .");
+            var formData = new FormData(document.getElementById("FormModalUploadAnexoEstoqueLotes"));
+            formData.append("filesource", document.getElementById("customFile").files[0]);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxUploadFileGed", "Ged", new { Area = "g" })',
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function () {
+                                LibMessageProcessando("");
+                                yesDestroyModal('#ModalUploadAnexoEstoqueLotes');
+                                $("#mainModal").load('@Url.Action("Edit", "EstoqueLotes", new { area = "gc" })?id=' + $('#id_estoque_lote').val().toString(), function () {
+                                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                                });
+                            }
+                        });
+                    }
+                    else {
+                        document.getElementById('btnSalvar').disabled = false;
+                        GdiAjaxNotifyInconsistencias(result.msg, { title: "Erro no Upload - Verifique as inconsistências" });
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    document.getElementById('btnSalvar').disabled = false;
+                    LibMessageProcessandoHide();
+                    var details =
+                        "Status: " + jqXHR.status + "\n" +
+                        "textStatus: " + textStatus + "\n" +
+                        "errorThrown: " + errorThrown + "\n\n" +
+                        "responseText:\n" + (jqXHR.responseText || "");
+                    GdiAjaxNotifyInconsistencias(details, { title: "Error: Verifique as inconsistências" });
+                }
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsSendFormEstoqueLote] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    };
+
+    function jsTeclaPessionada(e) {
+        try {
+            if (e.keyCode == 13) {
+                jsCheckInputsEstoqueLote();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsTeclaPessionada] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>
+

@@ -1,0 +1,189 @@
+@model GdiPlataform.Areas.g.Models.cstFinanceiroProrrogarVencimentoTitulos
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalProrrogarVencimentoTitulos" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_financeiro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Data", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-4">
+                            @* id do .input-group distinto do input para Tempus Dominus *@
+                            <div class='input-group date' id='ig_g_fin_modal_prorrogar_venc'>
+                                @Html.EditorFor(model => model.data_vencimento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Descontos", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.descontos_valor, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Juros/Multas", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-3">
+                            @Html.EditorFor(model => model.juros_multas_valor, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label(" ", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-9 text-sm-start">
+                            <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                @Html.CheckBoxFor(model => model.juros_multas_automatico, new { @class = "form-check-input", role = "switch" })
+                                <span class="form-check-label ms-1 mb-0">Calcular - Juros/Multa Automático (parâmetro Conta Caixa)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSimular" class="btn btn-info me-auto d-inline-flex align-items-center gap-2" onclick="jsAjaxSimularProrrogarVencimentoTitulos()"><i class="fa-solid fa-sync me-2" aria-hidden="true"></i>Simular</button>
+                <button type="button" name="btnConfirmar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsDatepicker('#ig_g_fin_modal_prorrogar_venc');
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsAjaxSimularProrrogarVencimentoTitulos()
+    {
+        LibMessageProcessando("Simulando Prorrogação Título . . .")
+        var form = $('#formModalProrrogarVencimentoTitulos');
+        $.ajax({
+            cache: false,
+            async: true,
+            type: "POST",
+            url: '@Url.Action("AjaxSimularProrrogarVencimentoTitulos", "Financeiro", new { area = "g" })',
+            data: form.serialize(),
+            success: function (result)
+            {
+                LibMessageProcessandoHide();
+                if (result.success == true) {
+                    GdiSwal2.dialog({
+                        title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Simulação de Prorrogação de Vencimento de Título Financeiro</b>",
+                        closeButton: false,
+                        message: result.msg,
+                        centerVertical: true,
+                        onEscape: false,
+                        backdrop: true,
+                        buttons: {
+                            confirmar: {
+                                label: '&nbsp;OK',
+                                className: 'btn btn-info',
+                                callback: function ()
+                                {
+                                    GdiSwal2.hideAll();
+                                }
+                            }
+                        }
+                    })
+                }
+                else {
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            },
+            error: function (result)
+            {
+                GdiAjaxNotifyInconsistencias(result.toString())
+            }
+        });
+    };
+
+    function jsSendForm()
+    {
+        try
+        {
+            LibMessageProcessando("Prorrogando Vencimento Título . . .")
+            var form = $('#formModalProrrogarVencimentoTitulos');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxProrrogarVencimentoTitulo", "Financeiro", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dtGFinanceiro").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString())
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsRunFiltroAvancadoModal()
+    {
+        try
+        {
+            var msgButton = document.getElementById("btnFiltroAvancado").innerHTML.replace("Filtro Avançado", "Remover Filtro").replace("fa-solid fa-filter", "fa-solid fa-magnifying-glass-minus");
+            document.getElementById("btnFiltroAvancado").innerHTML = msgButton;
+            document.getElementById("btnFiltroAvancado").title = "Remover Filtro";
+            executarFiltroAvancado($('#editIdClienteFornecedor').val().toString() + ";" + emptyIfNull($('#editData1').data('date')).toString() + ";" + emptyIfNull($('#editData2').data('date')).toString());
+            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRunFiltroAvancadoModal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+</script>
+
+

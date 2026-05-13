@@ -1,0 +1,199 @@
+@model GdiPlataform.Areas.gc.Models.cstInvoice
+@using GdiPlataform.Security
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/LibUI_AdminLTE-4.0.0/css/adminlte.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/fontawesome-free-7.2.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css" rel="stylesheet" />
+    <title></title>
+    <style type="text/css">
+        table tr.page-break {
+            page-break-after: always
+        }
+    </style>
+</head>
+<body>
+    <div class="row  header-no-lines">
+        <div class="col-lg-12 m-0 p-0 header-no-lines">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th style="width:30%; vertical-align:middle">
+                            <h4 class="mb-0">
+                                <img src="@ViewBag.ImgLogoSubdominio"
+                                     style="height:100px;width:200px;" />
+                            </h4>
+                        </th>
+                        <th style="width:40%; vertical-align:middle; text-align:center">
+                            <p style="font-size:20px">@Model.invoice_tipo #@Model.invoice_numero</p>
+                            <p style="font-size:16px;margin:5px;">Order Date: @Model.invoice_data</p>
+                            <p style="font-size:14px;margin:5px;">Order Validity: @Model.invoice_data_vencimento</p>
+                            <p style="font-size:14px;margin:5px;">Payment Terms: @Model.invoice_condicao_pagto</p>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.invoice_aeronave_prefixo))
+                            {
+                                <p style="font-size:14px;margin:5px;">
+                                    Prefixo: @Model.invoice_aeronave_prefixo
+                                </p>
+                            }
+                        </th>
+
+                        <th style="width:30%; vertical-align:middle; text-align:right">
+                            <p style="font-size:14px">
+                                <i class="fa-solid fa-globe"></i> GDI Aviação, Inc.<br>
+                                gdi@gdiaviacao.com<br>
+                                Consultant: @Model.vendedor_nome<br>
+                                @Model.vendedor_telefone<br>
+                                @Model.vendedor_email
+                            </p>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th style="width: 100%; vertical-align:top; text-align:left">
+                            <p style="font-size:14px">
+                                @{
+                                    var cabecalho = "";
+                                    cabecalho += "To: " + Model.cliente_nome + "<br>";
+                                    cabecalho += Model.cliente_endereco1 + "<br>";
+                                    if (!Model.contato_nome.IsEmpty())
+                                    {
+                                        cabecalho += "Contact: " + Model.contato_nome + "<br>";
+                                    }
+                                    if (!Model.contato_telefone.IsEmpty())
+                                    {
+                                        cabecalho += "Phone: " + Model.contato_telefone + "<br>";
+                                    }
+                                    if (!Model.contato_email.IsEmpty())
+                                    {
+                                        cabecalho += "Email: " + Model.contato_email + "<br>";
+                                    }
+                                }
+                                @Html.Raw(@cabecalho)
+                            </p>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-12 table-responsive page-break">
+            <table class="table table-striped page-break">
+                <tbody>
+                    @{
+                        <tr m-0 mt-1 p-0>
+                            <th style="font-size: 14px; width: 3%; color: #000000; vertical-align: middle; text-align: center">Item</th>
+                            <th style="font-size: 14px; width: 52%; color: #000000; vertical-align: middle; text-align: center ">Part Number | Description</th>
+                            <th style="font-size: 14px; width: 4%; color: #000000; vertical-align: middle; text-align: center">CD</th>
+                            <th style="font-size: 14px; width: 5%; color: #000000; vertical-align: middle; text-align: center">Qty</th>
+                            <th style="font-size: 14px; width: 12%; color: #000000; vertical-align: middle; text-align: center">Delivery Day</th>
+                            <th style="font-size: 14px; width: 12%; color: #000000; vertical-align: middle; text-align: right">Unit Price</th>
+                            <th style="font-size: 14px; width: 12%; color: #000000; vertical-align: middle; text-align: right">Total Amt</th>
+                        </tr>
+
+                        for (int x = 0; x < Model.AllItens.Count(); x++)
+                        {
+                            <tr m-0 mt-1 p-0>
+                                <td style="font-size: 14px; width: 3%; color: #000000; vertical-align: middle; text-align: center">@Model.AllItens[x].indexItem</td>
+                                <td style="font-size: 14px; width: 52%; color: #000000; vertical-align: middle; text-align: left">@Html.Raw(@Model.AllItens[x].produto_nome)</td>
+                                <td style="font-size: 14px; width: 4%; color: #000000; vertical-align: middle; text-align: left">@Model.AllItens[x].cd</td>
+                                <td style="font-size: 14px; width: 5%; color: #000000; vertical-align: middle; text-align: center">@Model.AllItens[x].qtd</td>
+                                <td style="font-size: 14px; width: 12%; color: #000000; vertical-align: middle; text-align: center">@Model.AllItens[x].delivery</td>
+                                <td style="font-size: 14px; width: 12%; color: #000000; vertical-align: middle; text-align: right">@Model.AllItens[x].valor_unit</td>
+                                <td style="font-size: 14px; width: 12%; color: #000000; vertical-align: middle; text-align: right">@Model.AllItens[x].valor_total</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12" style="font-size: 14px; width: 100%; text-align: center; color: #777; border-top: 1px solid #aaa; padding: 2px 0"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 table-responsive" style="padding-left: 6px; border-left: 6px solid #3989c6">
+            <table align="right">
+                <tr>
+                    <th style="font-size: 14px; width: 50%; vertical-align:middle; text-align: right"></th>
+                    <th style="font-size: 14px; width: 50%; vertical-align:middle; text-align: right"></th>
+                </tr>
+                <tr>
+                    <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">SubTotal:</td>
+                    <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">@Model.invoice_subtotal_value</td>
+                </tr>
+                @if (Model.invoice_total_corecharges.Trim().Length > 0)
+                {
+                    <tr>
+                        <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">Core Charges:</td>
+                        <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">@Model.invoice_total_corecharges</td>
+                    </tr>
+                }
+                @if (Model.invoice_total_freight.Trim().Length > 0)
+                {
+                    <tr>
+                        <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">Freight:</td>
+                        <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">@Model.invoice_total_freight</td>
+                    </tr>
+                }
+                <tr>
+                    <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">Total (@Model.invoice_moeda_nome <img src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/@Model.invoice_moeda_flag" style="height:24px;width:24px;margin-top:-5px;" />):</td>
+                    <td style="font-size: 14px; height: 10px; vertical-align: middle; text-align: right">@Model.invoice_grantotal_value</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @if (Model.invoice_obs.Trim().Length > 0)
+    {
+        <div class="row">
+            <div class="col-lg-12" style="font-size: 14px; padding-left: 6px; border-left: 6px solid #3989c6 ">
+                <div class="notice">@Html.Raw(@Model.invoice_obs.Trim())</div>
+            </div>
+        </div>
+    }
+    @if (!Model.invoice_obs_general.IsEmpty())
+    {
+        <div class="row">
+            <div class="col-lg-12" style="font-size: 14px; padding-left: 6px; border-left: 6px solid #3989c6 ">
+                <div class="notice">@Html.Raw(@Model.invoice_obs_general.Trim())</div>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <br />
+        <div class="col-lg-12" style="font-size: 14px; width: 100%; text-align: center; color: #777; border-top: 1px solid #aaa; padding: 8px 0">
+            Cotação Digital - GDI Aviação, Inc.<br />
+            <p style="font-size:14px">
+                portalflightx.com<br>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<style>
+    .header-no-lines {
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+</style>
+
+

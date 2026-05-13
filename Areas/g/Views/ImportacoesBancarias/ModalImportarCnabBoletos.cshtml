@@ -1,0 +1,156 @@
+@model GdiPlataform.Areas.g.Models.cstImportacoesBancarias
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalImportarCnabBoletos_gImportacoesBancarias" }))
+{
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div style="text-align:center" class="form-group">
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.LabelFor(model => model.id_conta_caixa, new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-8 text-sm-start">
+                                @Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContaCaixa as List<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("Arquivo", new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-8 text-sm-start">
+                                <input type="file" class="form-control" id="customFile" onchange="jsFileInputChange(this)">
+                                <div class="form-text" id="customFile_info"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Processar Arquivo" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Processar Arquivo</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+	$(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCheckInputs()
+    {
+        try {
+            if (isEmpty($('#customFile').val().toString().trim()))
+            {
+                GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
+            }
+            else
+            {
+                jsSendForm();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando("Processando Importação . . .");
+            var formData = new FormData();
+            var totalFiles = document.getElementById("customFile").files.length;
+            var dataForm =
+            {
+                record_cstImportacoesBancarias: {}
+            };
+            for (var i = 0; i < totalFiles; i++) {
+                var file = document.getElementById("customFile").files[i];
+                formData.append("filesource", file);
+            }
+            formData.append("id_conta_caixa", $('#id_conta_caixa').val().toString());
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxImportarCnabBoletos", "ImportacoesBancarias", new { Area = "g" })',
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function () {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        if (result.idProcessamento != "0") // Se houver processamento, realizar o download do relatório
+                                        {
+                                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                                        }
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-regular fa-window-close' style='color:#ff0000'>&nbsp&nbsp</i><b>Erro no Processamento</b>",
+                            message: result.msg,
+                            closeButton: false,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function () {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString())
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+</script>

@@ -1,0 +1,81 @@
+@model GdiPlataform.Db.ged_arquivos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalDesativarGed" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h4 class="modal-title d-flex align-items-center gap-2"><i class="fa-solid fa-file-lines" aria-hidden="true"></i>@Html.Raw((String)ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_arquivo)
+                @Html.HiddenFor(model => model.tag_string)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Motivo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-8">
+                            @Html.EditorFor(model => model.motivo_desativacao, new { htmlAttributes = new { @class = "form-control", maxlength = "200" } })
+                        </div>
+                    </div>
+                    </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Desistir</button>
+                <button type="button" name="btnSalvar" class="btn btn-danger d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-trash me-2" aria-hidden="true"></i>Desativar o Arquivo</button>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendForm()
+    {
+        try {
+            LibMessageProcessando();
+            var form = $('#FormModalDesativarGed');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxModalDesativarGed", "Ged", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                        $(result.tag).DataTable().draw(false);
+                        GdiSwal2.hideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>
+
+
+

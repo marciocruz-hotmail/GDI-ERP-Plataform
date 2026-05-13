@@ -1,0 +1,227 @@
+@model GdiPlataform.Db.g_atendimentos
+@using GdiPlataform.Security
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "ModalCreateGAtendimentos" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h4 class="modal-title d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
+    @Html.Raw(@ViewBag.Title)</h4>
+                @Html.HiddenFor(model => model.id_atendimento)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card m-0 p-0">
+
+                        <div class="card-body m-0 p-0">
+
+                            <div class="card shadow-sm gdi-section-accent-success m-1 p-0" style="height:100%;">
+                                <div class="card-header m-0 p-0" style="height:100%; background-color: #ABEBC6"><i class="fa-solid fa-circle-info me-2" aria-hidden="true"></i>Informe os dados do Atendimento</div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("responsavel_id_departamento", "Departamento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-3">
+                                        @Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("id_atendimento_categoria", "Categoria", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(model => model.id_atendimento_categoria, ViewBag.ComboGAtendimentosCategorias as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("solicitacao", "Solicitação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-10">
+                                        @Html.EditorFor(model => model.solicitacao, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("descricao", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-10">
+                                        @Html.TextAreaFor(model => model.descricao, 4, 60, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card shadow-sm gdi-section-accent-warning m-1 p-0" style="height:100%;">
+                                <div class="card-header m-0 p-0" style="height:100%; background-color: #FCF3CF"><i class="fa-solid fa-pen-to-square me-2" aria-hidden="true"></i>Dados Adicionais</div>
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("param_numero_pedido", "Nº Pedido", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.param_numero_pedido, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("param_numero_nf", "Nº Nota Fiscal", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.param_numero_nf, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("param_limite_credito", "R$ Limite Crédito", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
+                                        @Html.EditorFor(model => model.param_limite_credito, new { htmlAttributes = new { @class = "form-control" } })
+                                    </div>
+                                    @Html.Label("param_id_vendedor", "Vendedor", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-4">
+                                        @Html.DropDownListFor(model => model.param_id_vendedor, ViewBag.ComboVendedores as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group row text-sm-end m-0 pt-1">
+                                    @Html.Label("param_id_cliente", "Cliente", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-10">
+                                        @Html.DropDownListFor(model => model.param_id_cliente, ViewBag.ComboClientes as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsCheckInputs()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsYesInit] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    $(document).ready(function () {
+        GetLookupCategorias();
+    });
+
+    $('#responsavel_id_departamento').change(function () {
+        try
+        {
+            GetLookupCategorias();
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[responsavel_id_departamento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function GetLookupCategorias() {
+        try {
+            var idDepartamento = $("#responsavel_id_departamento").val();
+            var $ddl = $("#id_atendimento_categoria");
+
+            $ddl.html("<option value='0' selected>Carregando...</option>");
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxGetLookupCategorias", "Atendimentos", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ record_g_departamentos: { id_departamento: idDepartamento } }),
+                dataType: "json",
+                success: function (lista) {
+
+                    // coloque selected no 0 no HTML
+                    var options = "<option value='0' selected>[ Selecione a Categoria ]</option>";
+
+                    $.each(lista, function (index, item) {
+                        options += "<option value='" + item.id_atendimento_categoria + "'>" +
+                                   item.nome +
+                                   "</option>";
+                    });
+
+                    $ddl.html(options);
+                    $ddl.val('0');
+                },
+                error: function (xhr) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(xhr.responseText || xhr.statusText);
+                }
+            });
+        } catch (err) {
+            LibMessageError("Atenção", "[GetLookupCategorias] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCheckInputs()
+    {
+        try
+        {
+            if (isEmpty($('#solicitacao').val().toString().trim()) || isEmpty($('#descricao').val().toString().trim())) {
+                GdiAjaxNotifyInconsistencias("Preencha corretamente os campos [Solicitação e Descrição]!");
+            }
+            else {
+                //2025-04-09 tratar os caracteres < >
+                var _descricao = document.forms["ModalCreateGAtendimentos"]["descricao"].value;
+                _descricao = _descricao.replace(/[<]/g, "< ");
+                _descricao = _descricao.replace(/[>]/g, " >");
+                document.forms["ModalCreateGAtendimentos"]["descricao"].value = _descricao;
+                jsAjaxCreateEditAtendimento();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[checkInputs] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxCreateEditAtendimento()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#ModalCreateGAtendimentos');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxCreateEditAtendimento", "Atendimentos", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.alert({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                            centerVertical: true,
+                            message: result.msg,
+                            callback: function ()
+                            {
+                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                $("#dtGAtendimentos").DataTable().draw(false);
+                                GdiSwal2.hideAll();
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxCreateEditAtendimento] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
+
+

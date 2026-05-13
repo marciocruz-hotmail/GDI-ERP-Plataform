@@ -1,0 +1,46 @@
+@model IEnumerable<GdiPlataform.AlertMsgItem>
+@using System.Linq
+@using System.Collections.Generic
+@{
+    var raw = Model;
+    if (raw == null)
+    {
+        raw = Enumerable.Empty<AlertMsgItem>();
+    }
+
+    var items = raw.Where(x => x != null && !string.IsNullOrWhiteSpace(x.Html)).ToList();
+
+    string NormalizeType(string t)
+    {
+        if (string.IsNullOrWhiteSpace(t)) return "danger";
+        var x = t.Trim().ToLowerInvariant();
+        if (x == "error") x = "danger";
+        var ok = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        { "primary", "secondary", "success", "danger", "warning", "info", "light", "dark" };
+        return ok.Contains(x) ? x : "danger";
+    }
+
+    string IconFor(string tipo)
+    {
+        switch (tipo)
+        {
+            case "success": return "bi-check-circle-fill";
+            case "warning": return "bi-exclamation-circle-fill";
+            case "info":
+            case "primary": return "bi-info-circle-fill";
+            case "light":
+            case "secondary": return "bi-info-circle";
+            case "dark": return "bi-shield-exclamation";
+            default: return "bi-exclamation-triangle-fill";
+        }
+    }
+}
+@foreach (var item in items)
+{
+    var tipo = NormalizeType(item.AlertType);
+    var icone = IconFor(tipo);
+    <div class="alert alert-@tipo d-flex align-items-start gap-2 mt-2 mb-0" role="alert">
+        <i class="bi @icone flex-shrink-0 mt-1" aria-hidden="true"></i>
+        <div class="flex-grow-1">@Html.Raw(item.Html)</div>
+    </div>
+}

@@ -1,0 +1,535 @@
+@model GdiPlataform.Db.g_produtos
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gProdutos" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.id_produto)
+                    @Html.HiddenFor(model => model.is_servico)
+                    @Html.HiddenFor(model => model.codigo_auxiliar)
+                    @Html.HiddenFor(model => model.id_produto_grupo)
+                    @Html.HiddenFor(model => model.nome_etiqueta)
+                    @Html.HiddenFor(model => model.codigo_barras)
+                    @Html.HiddenFor(model => model.id_coligada)
+                    @Html.HiddenFor(model => model.id_filial)
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+
+                    @if (@Model.bloqueado == true)
+                    {
+                        @Html.Partial("_AlertMsg", AlertMsgItem.Maybe("<strong class=\"text-dark\">ATENÇÃO: Esse PRODUTO não poderá ser alterado!</strong>", "warning"))
+                    }
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                        @if (@Model.id_produto > 0)
+                        {
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabAudit_tab" data-bs-toggle="pill" href="#tabAudit" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-magnifying-glass-arrow-right fa-sm" aria-hidden="true"></i>Audit</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-0" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <!-- ABA DADOS - INÍCIO -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-boxes-stacked me-1" aria-hidden="true"></i>Dados do Produto</div>
+                                        <div class="card-body m-1 p-1" style="height: 100%">
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("id_produto_tipo", "Tipo", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.DropDownListFor(model => model.id_produto_tipo, ViewBag.comboProdutosTipos as List<SelectListItem>, new { @class = "form-control" })
+                                                </div>
+                                                @Html.Label("codigo", "PN", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-2">
+                                                    @Html.EditorFor(model => model.codigo, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    &nbsp;
+                                                </div>
+                                                @if (@Model.is_servico == false)
+                                                {
+
+                                                    if ((CachePersister.userIdentity.Roles.Contains("g_Produtos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionupdate")))
+                                                    {
+                                                        <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                                                            <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                                @Html.CheckBoxFor(model => model.importado, new { @class = "form-check-input", role = "switch" })
+                                                                <span class="form-check-label ms-1 mb-0">Produto Validado</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (@Model.importado == true)
+                                                        {
+                                                            <div class="col-sm-1 text-sm-start">
+                                                                @Html.Label("importado", "Produto Validado", htmlAttributes: new { @class = "col-form-label", @style = "margin-top:5px; color:#0E6655;" })
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="col-sm-1 text-sm-start">
+                                                                @Html.Label("importado", "Produto Temporário", htmlAttributes: new { @class = "col-form-label", @style = "margin-top:5px; color:#9A0202;" })
+                                                            </div>
+                                                        }
+                                                    }
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                                            @Html.CheckBoxFor(model => model.has_corecharge, new { @class = "form-check-input", role = "switch" })
+                                                            <span class="form-check-label ms-1 mb-0">Core Charge</span>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    @Html.HiddenFor(model => model.importado)
+                                                    @Html.HiddenFor(model => model.has_corecharge)
+                                                }
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("nome", "Produto", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-8">
+                                                    @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                                @if (@Model.is_servico == false)
+                                                {
+                                                    @Html.Label("nome", "Saldo BH", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.saldo_01_disponivel, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                }
+
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("descricao", "Descrição", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                <div class="col-sm-8">
+                                                    @Html.TextAreaFor(model => model.descricao, new { @class = "form-control", @rows = "3" })
+                                                </div>
+                                                @if (@Model.is_servico == false)
+                                                {
+                                                    @Html.Label("nome", "Saldo SP", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.saldo_03_disponivel, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @if (@Model.is_servico == false)
+                                                {
+                                                    @Html.Label("NCM", "NCM", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-3">
+                                                        @Html.DropDownListFor(model => model.id_produto_ncm, ViewBag.comboProdutosNCM as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("Un", "Un", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-1">
+                                                        @Html.DropDownListFor(model => model.id_unidade_medida_compra, ViewBag.comboUnidadeMedida as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("Peso", "Peso", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.peso, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                }
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    @if (@Model.is_servico == false)
+                                    {
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>FOB</div>
+                                            <div class="card-body m-1 p-1" style="height: 100%">
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("fob1_dollar", "Fob1 (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.fob1_dollar, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                    @Html.Label("fob1_id_importacao", "Importação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-5">
+                                                        @Html.DropDownListFor(model => model.fob1_id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("fob2_dollar", "Fob2 (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.fob2_dollar, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                    @Html.Label("fob2_id_importacao", "Importação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-5">
+                                                        @Html.DropDownListFor(model => model.fob2_id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("fob3_dollar", "Fob3 (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.fob3_dollar, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                    @Html.Label("fob3_id_importacao", "Importação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                    <div class="col-sm-5">
+                                                        @Html.DropDownListFor(model => model.fob3_id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Parâmetros</div>
+                                            <div class="card-body m-1 p-1" style="height: 100%">
+
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_regulado_ibama, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_regulado_ibama", "Regulado IBAMA")
+                                                    </div>
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_regulado_anp, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_regulado_anp", "Regulado ANP")
+                                                    </div>
+                                                    @Html.Label("codigo_anp", "Código ANP", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.EditorFor(model => model.codigo_anp, new { htmlAttributes = new { @class = "form-control" } })
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_regulado_pf, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_regulado_pf", "Regulado PF")
+                                                    </div>
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_regulado_joguelimpo, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_regulado_pf", "Regulado Jogue Limpo")
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.controla_estoque, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("controla_estoque", "Controla Estoque")
+                                                    </div>
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.controla_serial, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("controla_serial", "Controla Serial")
+                                                    </div>
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.controla_lote, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("controla_lote", "Controla Lote")
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_venda, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_venda", "Item Venda")
+                                                    </div>
+
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_revenda, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_revenda", "Item Revenda")
+                                                    </div>
+
+                                                    <div class="col-sm-1 text-sm-end" style="margin-top:7px;">
+                                                        <div class="form-check form-switch d-flex justify-content-end">
+                                                            @Html.CheckBoxFor(model => model.item_uso_consumo, new { @class = "form-check-input", role = "switch" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
+                                                        @Html.Label("item_uso_consumo", "Item Consumo")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>Endereçamento - Estoque BH</div>
+                                            <div class="card-body m-1 p-1" style="height: 100%">
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("id_estoque01_area", "Área", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque01_area, ViewBag.comboEstoqueEnderecoAreaBH as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("id_estoque01_secao", "Seção", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque01_secao, ViewBag.comboEstoqueEnderecoSecaoBH as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("id_estoque01_corredor", "Corredor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque01_corredor, ViewBag.comboEstoqueEnderecoCorredorBH as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("id_estoque01_prateleira", "Prateleira", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque01_prateleira, ViewBag.comboEstoqueEnderecoPrateleiraBH as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="section-header"><i class="fa-solid fa-location-dot me-1" aria-hidden="true"></i>Endereçamento - Estoque SP</div>
+                                            <div class="card-body m-1 p-1" style="height: 100%">
+                                                <div class="form-group row text-sm-end m-0 pt-1">
+                                                    @Html.Label("id_estoque03_area", "Área", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque03_area, ViewBag.comboEstoqueEnderecoAreaSP as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("id_estoque03_secao", "Seção", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque03_secao, ViewBag.comboEstoqueEnderecoSecaoSP as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("id_estoque03_corredor", "Corredor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque03_corredor, ViewBag.comboEstoqueEnderecoCorredorSP as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                    @Html.Label("id_estoque03_prateleira", "Prateleira", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                                    <div class="col-sm-2">
+                                                        @Html.DropDownListFor(model => model.id_estoque03_prateleira, ViewBag.comboEstoqueEnderecoPrateleiraSP as List<SelectListItem>, new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <!-- ABA DADOS - FIM -->
+
+                            <!-- Aba AUDIT - INÍCIO -->
+                            <div class="tab-pane fade" id="tabAudit" role="tabpanel" aria-labelledby="tabAudit_tab">
+                                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Trilha de Auditoria</div>
+                                        <div class="card-body m-0 p-1" style="height: 100%">
+                                            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAudit">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>@Html.Raw("Dt/Hora")</th>
+                                                            <th>@Html.Raw("Audit Trail")</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Aba AUDIT - FIM -->
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    @if ((CachePersister.userIdentity.Roles.Contains("g_Produtos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionupdate")))
+                    {
+                        <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Produtos",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                        if (@Model.bloqueado == false) { <button type="button" name="btnSalvar" title="Salvar" onclick="JsAjaxCreateEditProduto()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button> };
+                    }
+                    else
+                    {
+                        <button type="button" name="btnCancelar" title="Fechar" class="btn btn-secondary float-end d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Produtos",new { Area = "g" })')"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Fechar</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    var otableGProdutosAudit;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            $('#saldo_01_disponivel').attr('readonly', 'readonly');
+            $('#saldo_03_disponivel').attr('readonly', 'readonly');
+            if ('@CachePersister.userIdentity.IdPerfil' != '1')
+            {
+                $('#fob1_dollar').attr('readonly', 'readonly');
+                $('#fob2_dollar').attr('readonly', 'readonly');
+                $('#fob3_dollar').attr('readonly', 'readonly');
+                $('#fob1_id_importacao').attr('disabled', true);
+                $('#fob2_id_importacao').attr('disabled', true);
+                $('#fob3_id_importacao').attr('disabled', true);
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    $('#tabAudit_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableGProdutosAudit == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGProdutosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetAuditTrail", "Audit", new { area = "a" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_produto').val().toString(),
+                                yesCustomField01: "g_produtos",
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 20,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "15%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "85%", orderable: false, className: 'text-sm-start', targets: [1] }
+                    ],
+                    order: [[0, 'asc']],
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[tabAudit_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function JsAjaxCreateEditProduto()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            var form = $('#formCreateEdit_gProdutos');
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxEditProduto", "Produtos", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        LibMessageProcessando("");
+                                        window.location = '@Url.Action("", "Produtos", new { Area = "g" })';
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[JsAjaxCreateEditProduto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

@@ -1,0 +1,484 @@
+@model GdiPlataform.Areas.g.Models.cstViewVendedoresTabelasModel
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gVendedores" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    @Html.HiddenFor(model => model.g_vendedores.id_vendedor)
+                    @Html.HiddenFor(model => model.g_vendedores.id_usuario_cadastro)
+                    @Html.HiddenFor(model => model.g_vendedores.datahora_cadastro)
+                    @Html.HiddenFor(model => model.g_vendedores.id_coligada)
+                    @Html.HiddenFor(model => model.g_vendedores.id_filial)
+                    <input type="hidden" id="id_vendedor_get" value="@Model.g_vendedores.id_vendedor" name="id_vendedor_get" />
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+                    <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
+                        <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-file-pen fa-sm" aria-hidden="true"></i>Dados</a></li>
+                        @if ((Model.g_vendedores.id_vendedor > 0) && (CachePersister.allSistemas.Where(p => p.id_sistema == 3).SingleOrDefault().ativo))
+                        {
+                            <!-- A Aba só é exibida para em modo de edição e no módulo GDC-->
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabRegrasComissao_tab" data-bs-toggle="pill" href="#tabRegrasComissao" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regras Comissão</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabRegras1_tab" data-bs-toggle="pill" href="#tabRegras1" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regra 1</a></li>
+                            <li class="nav-item"><a class="d-flex align-items-center nav-link" id="tabRegras2_tab" data-bs-toggle="pill" href="#tabRegras2" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regra 2</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-body m-0 p-2" style="height: 100%">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="tab-content" id="crud-tabs-content">
+                            <!-- TabDados -->
+                            <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
+                                <div class="card-body m-0 p-1" style="height: 100%">
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.ativo, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-1 text-sm-start" style="margin-top:7px;">
+                                            <div class="form-check form-switch">
+                                                @Html.CheckBoxFor(model => model.g_vendedores.ativo, new { @class = "form-check-input", role = "switch" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.g_vendedores.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.id_revenda, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.DropDownListFor(model => model.g_vendedores.id_revenda, ViewBag.comboRevenda as List<SelectListItem>, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.email, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.g_vendedores.email, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.telefone_1, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.g_vendedores.telefone_1, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.login, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.g_vendedores.login, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.LabelFor(model => model.g_vendedores.senha, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-3">
+                                            @Html.EditorFor(model => model.g_vendedores.senha, new { htmlAttributes = new { @class = "form-control" } })
+                                        </div>
+                                    </div>
+                                    <div class="form-group row text-sm-end m-0 pt-1">
+                                        @Html.Label("NFe Customizada", "NFe Customizada", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                                            <div class="form-check form-switch">
+                                                @Html.CheckBoxFor(model => model.g_vendedores.nome_nf_customizada, new { @class = "form-check-input", role = "switch" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @if ((Model.g_vendedores.id_vendedor > 0) && (CachePersister.allSistemas.Where(p => p.id_sistema == 3).SingleOrDefault().ativo))
+                            {
+                                <!-- TabRegras de Comissao -->
+                                <div class="tab-pane fade" id="tabRegrasComissao" role="tabpanel" aria-labelledby="tabRegrasComissao_tab">
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        @Html.Label("Escolha Regra", "Escolha Regra", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-1">
+                                                @Html.RadioButtonFor(model => model.g_vendedores.regra_parametrizada, "1", htmlAttributes: new { onclick = "jsValidarRegraParametrizada()", @class = "col-sm-1 col-form-label" })
+                                            </div>
+                                            <div class="col-sm-4 text-sm-start">
+                                                @Html.Label("regra1", "Regra 1", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            <div class="col-sm-1">
+                                                @Html.RadioButtonFor(model => model.g_vendedores.regra_parametrizada, "2", htmlAttributes: new { onclick = "jsValidarRegraParametrizada()", @class = "col-sm-1 col-form-label" })
+                                            </div>
+                                            <div class="col-sm-4 text-sm-start">
+                                                @Html.Label("regra2", "Regra 2", htmlAttributes: new { @class = "col-sm-4 col-form-label" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- TabRegras1 -->
+                                <div class="tab-pane fade" id="tabRegras1" role="tabpanel" aria-labelledby="tabRegras1_tab">
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("% Aplicado Valor Total Boleto", "% Aplicado Valor Total Boleto", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1" style="margin-top:0px">
+                                                @Html.EditorFor(model => model.g_vendedores.regra1_perce_total_boleto, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-6 text-sm-start" style="margin-top:5px">
+                                                % Percentual a ser aplicado no valor total do BOLETO
+                                            </div>
+                                        </div>
+                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                            @Html.Label("% Aplicado Valor Total Boleto Sem Consulta", "% Aplicado Valor Total Boleto Sem Consulta", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                            <div class="col-sm-1">
+                                                @Html.EditorFor(model => model.g_vendedores.regra1_perce_total_boleto_sem_consulta, new { htmlAttributes = new { @class = "form-control" } })
+                                            </div>
+                                            <div class="col-sm-6 text-sm-start" style="margin-top:7px">
+                                                % Percentual a ser aplicado no valor total do BOLETO QUANDO NÃO HOUVER CONSULTA
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- TabRegras2 -->
+                                <div class="tab-pane fade" id="tabRegras2" role="tabpanel" aria-labelledby="tabRegras2_tab">
+                                    <div class="card-body m-0 p-1" style="height: 100%">
+                                        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="d-flex align-items-center nav-link active" id="tabRegras2dados_tab" data-bs-toggle="pill" href="#tabRegras2dados" role="tab" aria-controls="tabRegras2dados" aria-selected="true"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regra 2 - Dados</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="d-flex align-items-center nav-link" id="tabRegras2Tabela_tab" data-bs-toggle="pill" href="#tabRegras2Tabela" role="tab" aria-controls="tabRegras2Tabela" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regra 2 - Tabela Preços Vendedor</a>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content" id="pills-tabContent">
+                                            <div class="tab-pane fade show active" id="tabRegras2dados" role="tabpanel" aria-labelledby="tabRegras2dados_tab">
+                                                <div class="card-body m-0 p-1" style="height: 100%">
+                                                    <div class="form-horizontal m-0 p-0">
+                                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                                            @Html.Label("", "Percentual %", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                            <div class="col-sm-1">
+                                                                @Html.EditorFor(model => model.g_vendedores.regra2_perce_total_boleto_sem_consulta, new { htmlAttributes = new { @class = "form-control" } })
+                                                            </div>
+                                                            @Html.Label("", "% Percentual a ser aplicado no valor total do BOLETO QUANDO NÃO HOUVER CONSULTAS", htmlAttributes: new { @class = "col-sm-6 col-form-label text-sm-start" })
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="card mt-5">
+                                                        <div class="card-header text-sm-center bg-light"><b>Comissão Serviço "TIPO MENSALIDADE</b>"</div>
+                                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width: 100%" id="dataTables-ServicoTipoMens">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 5%">Id.</th>
+                                                                    <th style="width: 40%">Produto/Serviço</th>
+                                                                    <th style="width: 25%">Percentual Comissão</th>
+                                                                    <th style="width: 20%">Valor Comissão</th>
+                                                                    <th style="width: 10%">Remover</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+
+                                                    <div class="card-body text-sm-center m-1 p-1">
+                                                        <button type="button" name="btnCadastrarServTipoMensalidade" onclick="jsModalAdicionarServTipoMensalidade()" title="Adicionar Serviço Tipo Mensalidade" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Adicionar Serviço Tipo Mensalidade</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade" id="tabRegras2Tabela" role="tabpanel" aria-labelledby="tabRegras2Tabela-tab">
+                                                <div class="card-body m-0 p-1" style="height: 100%">
+                                                    <!-- Acessos do Sistema Backoffice -->
+                                                    @if (CachePersister.allSistemas.Where(p => p.id_sistema == 2).SingleOrDefault().ativo)
+                                                    {
+                                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width: 80%" align="center">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 10%">Id.</th>
+                                                                    <th style="width: 70%">Consulta</th>
+                                                                    <th style="width: 10%">Valor (R$)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @for (int i = 0; i < Model.allcstVendedoresTabelasDetalhesModel.Count; i++)
+                                                                {
+                                                                    <tr>
+                                                                        @Html.HiddenFor(model => model.allcstVendedoresTabelasDetalhesModel[i].id_consulta_tabela_vendedor)
+                                                                        @Html.HiddenFor(model => model.allcstVendedoresTabelasDetalhesModel[i].id_consulta)
+                                                                        <td>@Html.LabelFor(model => model.allcstVendedoresTabelasDetalhesModel[i].id_consulta, Model.allcstVendedoresTabelasDetalhesModel[i].id_consulta.ToString())</td>
+                                                                        <td>@Html.LabelFor(model => model.allcstVendedoresTabelasDetalhesModel[i].nome, Model.allcstVendedoresTabelasDetalhesModel[i].nome.ToString(), htmlAttributes: new { @class = "col-form-label" })</td>
+                                                                        <td>@Html.EditorFor(model => model.allcstVendedoresTabelasDetalhesModel[i].valor_unit, new { htmlAttributes = new { @class = "form-control" } })</td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    }
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between m-0 p-1">
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("","Vendedores",new { Area = "g" })')"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                    <button type="button" name="btnSalvar" title="Salvar" onclick="jsSalvarDados()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var otableGVendedores;
+
+	$(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsValidarRegraParametrizada();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+
+    function jsValidarRegraParametrizada()
+    {
+        try {
+            var _regraparametrizada = document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra_parametrizada"].value;
+            if (_regraparametrizada == "1") {
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto"].disabled = false;
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto_sem_consulta"].disabled = false;
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra2_perce_total_boleto_sem_consulta"].disabled = true;
+            }
+            else if (_regraparametrizada == "2") {
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra2_perce_total_boleto_sem_consulta"].disabled = false;
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto"].disabled = true;
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto_sem_consulta"].disabled = true;
+            }
+            else {
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto"].disabled = true;
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto_sem_consulta"].disabled = true;
+                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra2_perce_total_boleto_sem_consulta"].disabled = true;
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsValidarRegraParametrizada] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    $('#tabRegras2_tab').on('click', function (e)
+    {
+        try
+        {
+            if (otableGVendedores == null)
+            {
+                $.fn.dataTable.ext.errMode = 'none';
+                otableGVendedores = $('#dataTables-ServicoTipoMens').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                    processing: true,
+                    bServerSide: true,
+                    ajax: {
+                        url: '@Url.Action("GetDadosServicoTipoMens", "Vendedores", new { Area = "g" })',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType: 'json',
+                        cache: false,
+                        data: function (d) {
+                            return {
+                                sEcho: d.draw,
+                                iDisplayStart: d.start,
+                                iDisplayLength: d.length,
+                                yesCustomIdPK: $('#id_vendedor_get').val().toString(),
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive: true,
+                    bFilter: false,
+                    bLengthChange: false,
+                    bProcessing: true,
+                    pageLength: 10,
+                    scrollX: false,
+                    scrollCollapse: false,
+                    fixedColumns: false,
+                    bAutoWidth: false,
+                    pagingType: 'full_numbers',
+                    aoColumnDefs: [
+                        { "width": "5%", orderable: false, className: 'text-sm-center', targets: [0] },
+                        { "width": "40%", orderable: false, className: 'text-sm-center', targets: [1] },
+                        { "width": "25%", orderable: false, className: 'text-sm-center', targets: [2] },
+                        { "width": "20%", orderable: false, className: 'text-sm-center', targets: [3] },
+                        { "width": "10%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [4], data: null, defaultContent: "", render: function (data, type, row) { return '<button type="button" title="Remover ' + data[1] + '" class="btn btn-outline-danger btn-sm p-1 d-inline-flex align-items-center" onclick="jsRemoverRegraComissaoServicoMensalidade(' + data[0] + ',\'' + data[1] + '\');"><i class="fa-regular fa-trash-alt"></i></button>' } }
+                    ],
+                    select: {
+                        style: 'multi',
+                        selector: 'td:not(.dt-no-row-select)',
+                        headerCheckbox: true
+                    },
+                    order: [[0, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+                });
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[tabRegras2_tab] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsModalAdicionarServTipoMensalidade()
+    {
+        try {
+            var id = $(this).attr("data-id");
+            var idVendedor = $('#id_vendedor_get').val().toString();
+            $("#mainModal").load('@Url.Action("ModalAdicionarServTipoMensalidade", "Vendedores", new { area = "g" })?idVendedor=' + idVendedor, function ()
+            {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalAdicionarServTipoMensalidade] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRemoverRegraComissaoServicoMensalidade(idVedendorRegra, servico)
+    {
+        try {
+            GdiSwal2.dialog({
+                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                closeButton: false,
+                message: "Deseja <b>Realmente</b> remover a regra de comissão do serviço <b><br/>" + servico + "</b> ?" + "<br/><br/>" + "<b>Atenção:</b> O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
+                centerVertical: true,
+                onEscape: false,
+                backdrop: true,
+                buttons: {
+                    cancelar: {
+                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
+                        className: 'btn-outline-warning',
+                        callback: function () {
+                            GdiSwal2.hideAll();
+                        }
+                    },
+                    confirmar: {
+                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                        className: 'btn-outline-success',
+                        callback: function () {
+                            jsSendRemoverRegraComissaoServicoMensalidade(idVedendorRegra);
+                        }
+                    }
+                }
+            })
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsRemoverRegraComissaoServicoMensalidade] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+
+    function jsSendRemoverRegraComissaoServicoMensalidade(idVedendorRegra)
+    {
+        try {
+            LibMessageProcessando("Removendo Regra . . .")
+            var dataForm =
+            {
+                record_g_vendedores_regra2_mensalidade:
+                {
+                    'id_vendedor_regra': idVedendorRegra,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxRemoverComiServMensalidade", "Vendedores", new { area = "g" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        $("#dataTables-ServicoTipoMens").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendRemoverRegraComissaoServicoMensalidade] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsSalvarDados()
+    {
+        try {
+            if (isEmpty($('#g_vendedores_nome').val().toString().trim())) {
+                LibMessageAlert("Atenção", "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>");
+            }
+            else {
+                LibMessageProcessando("Salvando Dados . . .")
+                $("#formCreateEdit_gVendedores").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

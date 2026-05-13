@@ -1,0 +1,359 @@
+@model IEnumerable<GdiPlataform.Db.gc_estoque_inventario>
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormIndex_GcEstoqueInventario" }))
+{
+    <div class="row">
+        <div class="col-lg-12 m-0 p-0">
+            <div class="card m-0 p-0">
+                <div class="card-title m-0 p-1">
+                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                    <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                    <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                    <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                </div>
+                <div class="card-header m-0 p-1">
+                    @if ((CachePersister.userIdentity.Roles.Contains("gc_EstoqueInventario_*")) || (CachePersister.userIdentity.Roles.Contains("gc_EstoqueInventario_Actionmanager")))
+                    {
+                        <button type="button" name="btnRegistroNovo" title="Novo Inventário" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateInventario()"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo Inventário</button>
+
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" class="btn btn-outline-info dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Processos">
+                                <i class="fa-solid fa-cog me-2" aria-hidden="true"></i>Processos
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsRelatorioEstoqueInventario(TableGcInventario, 'Id.')"><i class="fa-solid fa-file-lines me-2" aria-hidden="true"></i>Relatório do Inventário</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalFinalizarInventario(TableGcInventario, 'Id.')"><i class="fa-solid fa-check-double me-2" aria-hidden="true"></i>Finalizar Inventário</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-header m-0 p-1">
+                    <div class="form-horizontal m-0 p-0">
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("Local Estoque", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                            <div class="col-sm-6">
+                                @Html.DropDownList("id_local_estoque_index", ViewBag.comboLocaisEstoque as List<SelectListItem>, htmlAttributes: new { @id = "id_local_estoque", @class = "form-control", @title = "Estoque", @onchange = "jsAjaxPesquisarInventarios();", @onblur = "jsAjaxPesquisarInventarios();" })
+                            </div>
+                            <div class="col-sm-4 text-sm-start" style="margin-bottom:2px">
+                                <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarInventarios()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcInventario">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>@Html.Raw("Id.")</th>
+                                    <th>@Html.Raw("Status")</th>
+                                    <th>@Html.Raw("Tipo")</th>
+                                    <th>@Html.Raw("Estoque")</th>
+                                    <th><i class="fa-solid fa-table-list" style="cursor:pointer; color:#5dade2" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens Inventário"></i></th>
+                                    <th><i class="fa-solid fa-magnifying-glass-plus" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens Conferidos"></i></th>
+                                    <th><i class="fa-solid fa-equals" style="cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens Saldo Correto"></i></th>
+                                    <th><i class="fa-solid fa-arrow-up-wide-short" style="cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens Saldo Maior"></i></th>
+                                    <th><i class="fa-solid fa-arrow-down-wide-short" style="cursor:pointer;" data-bs-toggle="tooltip" data-bs-placement="top" title="Itens Saldo Menor"></i></th>
+                                    <th>@Html.Raw("Início")</th>
+                                    <th>@Html.Raw("Fim")</th>
+                                    <th><i class="fa-regular fa-edit"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    var TableGcInventario;
+
+    $(function ()
+    {
+        try
+        {
+            jsInitForm();
+            jsCreateTable();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            document.forms["FormIndex_GcEstoqueInventario"]["id_local_estoque_index"].value = "-1";
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsCreateTable()
+    {
+        try
+        {
+            $.fn.dataTable.ext.errMode = 'none';
+            TableGcInventario = $('#dtGcInventario')
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff); })
+                .DataTable({
+            "drawCallback": function (settings) {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+            },
+            "footerCallback": function (row, data, start, end, display) {
+                LibMessageProcessandoHide();
+            },
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDadosInventario", "EstoqueInventario", new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
+                        yesFilterText: $('#yesFilterText').val().toString(),
+                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        yesCustomField01: emptyIfNull($('#id_local_estoque_index').val()).toString(),
+                    };
+                },
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "26%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [7] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [8] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [9] },
+                { "width": "15%", orderable: false, className: 'text-sm-center', targets: [10] },
+                { "width": "15%", orderable: false, className: 'text-sm-center', targets: [11] },
+                { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditInventario" title="Itens Inventário ' + data[4] + '" class="btn btn-outline-warning btnEditInventario d-inline-flex align-items-center gap-2" onclick="jsFormInventarioItens(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+
+                language:
+                {
+                    sEmptyTable: 'Nenhum registro encontrado',
+                    sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
+                    sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
+                    sInfoFiltered: ' (Filtrados de _MAX_ registros)',
+                    sInfoPostFix: '',
+                    sInfoThousands: '.',
+                    sLengthMenu: '_MENU_ registros por página',
+                    sZeroRecords: 'Nenhum registro encontrado',
+                    sSearch: 'Pesquisar',
+                    oPaginate:
+                    {
+                        sNext: '>',
+                        sPrevious: '<',
+                        sFirst: '<<',
+                        sLast: '>>'
+                    },
+                    select: {
+                        rows: {
+                            0: "",
+                            1: " [ %d registro selecionado ] ",
+                            _: " [ %d registros selecionados ] "
+                        }
+                    }
+                },
+                oAria: {
+                    sSortAscending: ': Ordenar colunas de forma ascendente',
+                    sSortDescending: ': Ordenar colunas de forma descendente'
+                }
+            });
+            $('#dtGcInventario tbody').on('dblclick', 'tr td', function () {
+                var data = TableGcInventario.row($(this).closest('tr')).data();
+                jsFormInventarioItens(data[1]);
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+    function jsFormInventarioItens(id)
+    {
+        try
+        {
+            LibMessageProcessando("Processando . . .");
+            window.location = '@Url.Action("FormInventarioItens", "EstoqueInventario", new { area = "gc" })?id=' + id;
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsFormInventarioItens] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAjaxPesquisarInventarios()
+    {
+        try {
+            LibMessageProcessando('Pesquisando Inventários . . .');
+            $("#dtGcInventario").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarInventarios] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsModalFinalizarInventario(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Inventário!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    LibMessageProcessando("");
+                    $("#mainModal").load('@Url.Action("ModalFinalizarInventario", "EstoqueInventario", new { Area = "gc" })?IdInventario=' + selectedIds, function () {
+                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                    })
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Inventário!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFinalizarInventario] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsRelatorioEstoqueInventario(TableName, columnName)
+    {
+        try {
+            var selectedIds = JsGetSelectedRows(TableName, columnName);
+            if (!selectedIds || selectedIds.length == 0)
+            {
+                LibMessageAlert("Atenção", "Selecione o Inventário!");
+            }
+            else {
+                if (selectedIds.indexOf(',') == -1)
+                {
+                    jsExecRelatorioEstoqueInventario(selectedIds)
+                }
+                else
+                {
+                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Inventário!");
+                }
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalFinalizarInventario] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsExecRelatorioEstoqueInventario(IdInventario)
+    {
+        try
+        {
+            LibMessageProcessando();
+
+            var dataForm =
+            {
+                ViewRecordInventario:
+                {
+                    'id_inventario': IdInventario,
+                }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxRelatorioEstoqueInventario", "EstoqueInventario", new { area = "gc" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success == true)
+                    {
+                        GdiSwal2.dialog({
+                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: '&nbsp;OK',
+                                    className: 'btn btn-info',
+                                    callback: function ()
+                                    {
+                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        GdiSwal2.hideAll();
+                                    }
+                                }
+                            }
+                        })
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias(result.msg)
+                    }
+                },
+                error: function (result)
+                {
+                    GdiAjaxNotifyInconsistencias(result.msg)            }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+
+
+    function jsModalCreateInventario()
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateInventario", "EstoqueInventario", new { area = "gc" })', function () {
+                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+            });
+        }
+        catch (e) {
+            LibMessageError("Atenção", "[jsModalCadastrarDestinatario] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+
+</script>
+
