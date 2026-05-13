@@ -27,6 +27,7 @@ namespace GdiPlataform.Robos.Aws
         {
             if (string.IsNullOrWhiteSpace(bucketName) || string.IsNullOrWhiteSpace(objectKey))
                 return null;
+            GdiAwsS3BucketRules.ThrowIfBucketNotAllowed(bucketName, "BuildPublicObjectUrl");
             var encodedKey = string.Join("/", objectKey.Split(new[] { '/' }, StringSplitOptions.None).Select(s => Uri.EscapeDataString(s)));
             var region = GdiAwsS3Credentials.ResolveRegion();
             return string.Format("https://{0}.s3.{1}.amazonaws.com/{2}", bucketName.Trim(), region.SystemName, encodedKey);
@@ -36,6 +37,7 @@ namespace GdiPlataform.Robos.Aws
         {
             try
             {
+                GdiAwsS3BucketRules.ValidateGedUpload(BucketNameS3, publicRead, "Upload S3");
                 using (AmazonS3Client s3Client = GdiAwsS3Credentials.CreateS3Client())
                 using (TransferUtility transferUtility = new TransferUtility(s3Client))
                 {

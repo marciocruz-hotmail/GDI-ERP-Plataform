@@ -15,7 +15,6 @@ namespace GdiPlataform.Areas.qa.Controllers
 {
     public class TreinamentosController : Controller
     {
-        private const string BucketName = "bucket-erp-gdi";
         private GdiPlataformEntities db;
 
         public TreinamentosController()
@@ -62,11 +61,13 @@ namespace GdiPlataform.Areas.qa.Controllers
 
         private string GerarPresignedGetUrl(string s3Key)
         {
+            var bucket = GdiAwsS3Credentials.ResolveBucketErp();
+            GdiAwsS3BucketRules.ThrowIfBucketNotAllowed(bucket, "LMS / treinamentos S3");
             using (var s3Client = GdiAwsS3Credentials.CreateS3Client())
             {
                 var request = new GetPreSignedUrlRequest
                 {
-                    BucketName = BucketName,
+                    BucketName = bucket,
                     Key = s3Key,
                     Verb = HttpVerb.GET,
                     Expires = DateTime.UtcNow.AddMinutes(120)

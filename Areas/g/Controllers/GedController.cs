@@ -534,6 +534,8 @@ namespace GdiPlataform.Areas.g.Controllers
                     db.SaveChanges();
 
                     String BucketNameS3 = RecordGedArquivosTipos.bucket_s3;
+                    GdiAwsS3BucketRules.ThrowIfGedRowBucketDiffersFromTipo(RecordGedArquivosTipos.bucket_s3, RecordGedArquivos.bucket, "GED download contrato");
+                    GdiAwsS3BucketRules.ThrowIfBucketNotAllowed(BucketNameS3, "GED download contrato");
                     using (AmazonS3Client client = GdiAwsS3Credentials.CreateS3Client())
                     {
                         var bucketName = BucketNameS3;
@@ -594,13 +596,24 @@ namespace GdiPlataform.Areas.g.Controllers
                 // Verificar se é um arquivo público
                 if (RecordGedArquivos.public_url.EmptyIfNull().ToString().Trim().Length > 0)
                 {
-                    sucesso = true;
-                    urlS3 = RecordGedArquivos.public_url.EmptyIfNull().ToString().Trim();
+                    var urlCandidata = RecordGedArquivos.public_url.EmptyIfNull().ToString().Trim();
+                    if (!GdiAwsS3BucketRules.TryValidateStoredPublicUrl(urlCandidata, out var msgUrl))
+                    {
+                        sucesso = false;
+                        msgRetorno = msgUrl;
+                    }
+                    else
+                    {
+                        sucesso = true;
+                        urlS3 = urlCandidata;
+                    }
                 }
                 else
                 {
                     //String BucketNameS3 = RecordGedArquivosTipos.bucket_s3;
                     String BucketNameS3 = RecordGedArquivos.bucket.EmptyIfNull().ToString();
+                    GdiAwsS3BucketRules.ThrowIfGedRowBucketDiffersFromTipo(RecordGedArquivosTipos.bucket_s3, RecordGedArquivos.bucket, "GED download");
+                    GdiAwsS3BucketRules.ThrowIfBucketNotAllowed(BucketNameS3, "GED download");
                     using (AmazonS3Client client = GdiAwsS3Credentials.CreateS3Client())
                     {
                         var bucketName = BucketNameS3;

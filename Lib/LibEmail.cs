@@ -17,8 +17,8 @@ namespace GdiPlataform.Lib
             try
             {
                 string param_email_SMTPServer = "email-smtp.sa-east-1.amazonaws.com";
-                string param_email_SMTPUsuario = "AKIASM3FO7S4APPY26LH";
-                string param_email_SMTPSenha = "BLR/qy8fIQT2/VYhKvcqxzodkm2pDKZz56hPssyCOOsj";
+                string param_email_SMTPUsuario = "(ver GdiAwsSesSmtpCredentials / aws-ses-smtp.local.json ou aws-ses-smtp.template.json)";
+                string param_email_SMTPSenha = "(ver GdiAwsSesSmtpCredentials / aws-ses-smtp.local.json ou aws-ses-smtp.template.json)";
 
                 if (paramFromEmail.Trim().Length == 0) { paramFromEmail = "financeiro@gdiaviacao.com.br"; };
                 if (paramFromNome.Trim().Length == 0) { paramFromNome = paramFromEmail; };

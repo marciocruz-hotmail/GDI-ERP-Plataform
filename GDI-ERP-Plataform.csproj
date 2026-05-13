@@ -1163,6 +1163,8 @@
     <Compile Include="Robos\Aws\BotAwsEmail.cs" />
     <Compile Include="Robos\Aws\BotAwsS3.cs" />
     <Compile Include="Robos\Aws\GdiAwsS3Credentials.cs" />
+    <Compile Include="Robos\Aws\GdiAwsSesSmtpCredentials.cs" />
+    <Compile Include="Robos\Aws\GdiAwsS3BucketRules.cs" />
     <Compile Include="Robos\CotacaoDolar\RoboCotacaoDolar.cs" />
     <Compile Include="Robos\CpfCnpj\RoboCpfCnpj.cs" />
     <Compile Include="Robos\ENotas\Nfe\CartaCorrecao\CartaCorrecao.cs" />
@@ -1838,6 +1840,7 @@
     <Content Include="Scripts\jquery-3.7.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.1.min.map" />
     <Content Include="App_Data\Secrets\aws-s3.local.json.example" />
+    <Content Include="App_Data\Secrets\aws-ses-smtp.template.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

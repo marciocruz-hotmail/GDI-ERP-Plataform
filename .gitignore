@@ -525,6 +525,8 @@ FodyWeavers.xsd
 
 # Credenciais AWS S3 (cópia local a partir de App_Data/Secrets/aws-s3.local.json.example)
 App_Data/Secrets/aws-s3.local.json
+# Credenciais AWS SES SMTP (runtime; modelo versionado = aws-ses-smtp.template.json)
+App_Data/Secrets/aws-ses-smtp.local.json
 
 # Pasta temporária do projeto (arquivos gerados em runtime)
 _filestemp/

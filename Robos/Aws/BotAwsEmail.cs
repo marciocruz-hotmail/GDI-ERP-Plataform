@@ -17,11 +17,11 @@ namespace GdiPlataform.Robos.Aws
             // Parâmetros de Emails
             try
             {
-                string param_email_SMTPServer = "email-smtp.sa-east-1.amazonaws.com";
-                //string param_email_SMTPUsuario = "AKIASM3FO7S4APPY26LH"; // Yes
-                //string param_email_SMTPSenha = "BLR/qy8fIQT2/VYhKvcqxzodkm2pDKZz56hPssyCOOsj"; // Yes
-                string param_email_SMTPUsuario = "AKIAWN25MZHFCEWLGD6L"; // Start
-                string param_email_SMTPSenha = "BN7N3m0Pqu+8cGO9KOYiXtDpqlsMlAXWBPHszMm4YNwk"; // Start
+                var ses = GdiAwsSesSmtpCredentials.Resolve();
+                string param_email_SMTPServer = ses.Host;
+                string param_email_SMTPUsuario = ses.Username;
+                string param_email_SMTPSenha = ses.Password;
+                int smtpPort = ses.Port;
 
                 if (paramFromEmail.Trim().Length == 0) { paramFromEmail = "financeiro@gdiaviacao.com.br"; };
                 if (paramFromNome.Trim().Length == 0) { paramFromNome = paramFromEmail; };
@@ -35,8 +35,8 @@ namespace GdiPlataform.Robos.Aws
 
                 System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient();
                 client.Host = param_email_SMTPServer;
-                client.Port = 587;
-                client.UseDefaultCredentials = true;
+                client.Port = smtpPort;
+                client.UseDefaultCredentials = false;
                 client.EnableSsl = true;
                 client.Credentials = new System.Net.NetworkCredential(param_email_SMTPUsuario, param_email_SMTPSenha);
                 MailMessage mail = new MailMessage();

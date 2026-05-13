@@ -47,6 +47,115 @@
 
 ---
 
+### [2026-05-13] — S3: atualização de credenciais em `aws-s3.local.json` (gitignored)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `App_Data/Secrets/aws-s3.local.json` (gitignored; não versionado)
+
+**Problema / Demanda:**
+Atualizar access key / secret access key do IAM S3 no ficheiro local de credenciais.
+
+**O que foi feito:**
+- Preenchido `aws-s3.local.json` com as novas chaves; região e buckets mantidos (`sa-east-1`, `bucket-erp-gdi`, `bucket-gdi-public-files`).
+
+**O que foi evitado e por quê:**
+- Não alterar `aws-s3.local.json.example` (continua só com placeholders no repositório).
+
+---
+
+### [2026-05-13] — SES: um ficheiro de runtime + modelo `aws-ses-smtp.template.json` (remove `.local.json.example`)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `App_Data/Secrets/aws-ses-smtp.template.json` (novo, versionado, sem segredos)
+- Removido `App_Data/Secrets/aws-ses-smtp.local.json.example` (confundia com o ficheiro gitignored)
+- `GDI-ERP-Plataform.csproj`, `.gitignore`, `Robos/Aws/GdiAwsSesSmtpCredentials.cs`, `.cursor/CHANGELOG-DEV.md` (referências históricas alinhadas)
+
+**Problema / Demanda:**
+Dois nomes SES pareciam ambos “credenciais”; clarificar: só `aws-ses-smtp.local.json` tem segredos em runtime.
+
+**O que foi feito:**
+- Modelo renomeado para **`aws-ses-smtp.template.json`**; runtime continua **`aws-ses-smtp.local.json`** (gitignored).
+
+---
+
+### [2026-05-13] — SES SMTP: credenciais locais + região São Paulo (`sa-east-1`)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Robos/Aws/GdiAwsSesSmtpCredentials.cs` — constante `AwsSesSmtpRegionSaoPaulo` = `sa-east-1`; `ResolveSmtpHost`; env opcional `AWS_SES_SMTP_REGION`; campo JSON opcional `SmtpRegion`
+- `App_Data/Secrets/aws-ses-smtp.local.json` (gitignored, runtime)
+
+**Problema / Demanda:**
+Credenciais SES e região São Paulo; endpoint omissão `email-smtp.sa-east-1.amazonaws.com`.
+
+**O que foi feito:**
+- Resolução via variáveis de ambiente ou JSON local; modelo versionado posteriormente renomeado para `aws-ses-smtp.template.json` (ver entrada acima).
+
+**Atenção para próximas intervenções:**
+- Se a conta SES estiver noutra região, definir `SmtpHost` ou `SmtpRegion` / `AWS_SES_SMTP_REGION` em conformidade.
+
+---
+
+### [2026-05-13] — S3: regras por bucket (ERP vs público) centralizadas e aplicadas no GED/BotAws
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Robos/Aws/GdiAwsS3BucketRules.cs` (novo) — lista branca de buckets (`ResolveBucketErp` / `ResolveBucketPublicFiles`); GED privado não grava no bucket público; validação de `public_url`; consistência `ged_arquivos.bucket` vs `ged_arquivos_tipos.bucket_s3`
+- `Robos/Aws/BotAwsS3.cs` — `ValidateGedUpload` no upload; `ThrowIfBucketNotAllowed` em `BuildPublicObjectUrl`
+- `Areas/g/Controllers/GedController.cs` — downloads contrato/arquivo: validações antes de presign / devolução de URL pública
+- `Areas/qa/Controllers/TreinamentosController.cs` — presign LMS só após validação do bucket ERP
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Garantir regras explícitas de leitura/gravação por bucket (`bucket-erp-gdi` vs `bucket-gdi-public-files`).
+
+**O que foi feito:**
+- **Gravação:** `BotAwsS3.UploadStreamS3` chama `ValidateGedUpload` — anexo privado (`publicRead == false`) recusa bucket público.
+- **Leitura GED:** presigned só com bucket na lista branca; `public_url` só aceita HTTPS virtual-hosted (e variante dualstack) para um dos dois buckets; deteta divergência tipo vs registo.
+- **LMS:** bucket de presign validado contra a lista branca (usa `ResolveBucketErp()`).
+
+**O que foi evitado e por quê:**
+- Não alterar dezenas de URLs estáticas nas views (bucket público já fixo em HTML); escopo mantém-se no SDK/presign/GED.
+
+**Atenção para próximas intervenções:**
+- URLs `public_url` fora do padrão virtual-hosted (ex.: CloudFront) exigem alargar `TryValidateStoredPublicUrl`.
+
+---
+
+### [2026-05-13] — S3: buckets GDI no modelo local + `ResolveBucketErp` / `ResolveBucketPublicFiles`
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Robos/Aws/GdiAwsS3Credentials.cs` — campos opcionais `BucketErp` / `BucketPublicFiles` no JSON; resolução por `AWS_S3_BUCKET_ERP` / `AWS_S3_BUCKET_PUBLIC`; omissões = `bucket-erp-gdi` / `bucket-gdi-public-files`
+- `App_Data/Secrets/aws-s3.local.json.example` — alinhado ao IAM **GDI-User-S3-ERP-AppAndPublicFiles-Access** e buckets oficiais (sem segredos no repo)
+- `Areas/qa/Controllers/TreinamentosController.cs` — bucket do presign via `ResolveBucketErp()`
+
+**Problema / Demanda:**
+Documentar e centralizar buckets do utilizador S3 dedicado ao ERP e ficheiros públicos, mantendo access/secret só em ficheiro local ou env.
+
+**O que foi evitado e por quê:**
+- Não gravar access key / secret no repositório nem no chat em ficheiros versionados.
+
+---
+
+### [2026-05-13] — AWS SES SMTP: credenciais fora do código (`aws-ses-smtp.local.json` + env)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Robos/Aws/GdiAwsSesSmtpCredentials.cs` (novo)
+- `Robos/Aws/BotAwsEmail.cs` — lê credenciais via resolver; `UseDefaultCredentials = false` para autenticação explícita
+- `App_Data/Secrets/aws-ses-smtp.template.json` (modelo versionado; nome final após refactor — antes `.example`)
+- `.gitignore` — `App_Data/Secrets/aws-ses-smtp.local.json`
+- `Lib/LibEmail.cs` — bloco comentado: removidos segredos em texto claro (referência ao resolver)
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Credenciais SES SMTP não podem permanecer hardcoded; alinhar ao padrão já usado para S3.
+
+**O que foi feito:**
+- **`GdiAwsSesSmtpCredentials.Resolve()`**: `AWS_SES_SMTP_USERNAME` / `AWS_SES_SMTP_PASSWORD` (opcionais `AWS_SES_SMTP_HOST`, `AWS_SES_SMTP_PORT`, `AWS_SES_SMTP_REGION`) ou JSON local **`App_Data/Secrets/aws-ses-smtp.local.json`** com `SmtpHost`, `SmtpPort`, `SmtpUsername`, `SmtpPassword`, `SmtpRegion` opcional.
+
+**Atenção para próximas intervenções:**
+- S3 e SES podem ser IAM users distintos: ficheiros **`aws-s3.local.json`** e **`aws-ses-smtp.local.json`** separados.
+
+---
+
 ### [2026-05-13] — AWS S3: credenciais fora do código (env + `aws-s3.local.json` gitignored)
 **Tipo:** Implementação
 **Arquivos tocados:**
