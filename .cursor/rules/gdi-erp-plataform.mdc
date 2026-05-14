@@ -31,7 +31,7 @@ alwaysApply: true
 
 | Tema | Nota |
 |------|------|
-| Política de ambiente, metodologia, `CHANGELOG-DEV`, formato de resposta, português BR | §§2–7 deste `.mdc` e `CLAUDE.md` na **raiz deste** repo |
+| Política de ambiente, metodologia, `CHANGELOG-DEV`, formato de resposta (incl. linha de commit Git na §6), português BR | §§2–7 deste `.mdc` e `CLAUDE.md` na **raiz deste** repo |
 | E-mails com `[LinkPortalDireto]` | URL pública do **mesmo** site que serve o ERP (ex.: `UserIdentity/AcessoPortal` em host `*.portalflightx.com`); ver `Areas/gc/Controllers/MovimentosController.cs` e templates |
 
 ---
@@ -127,8 +127,19 @@ Responder **nesta ordem** (alinhado a `CLAUDE.md`):
 | 5 | Atenção para o Publish | IIS, `Web.config`, SQL, bundles, validação manual. |
 | 6 | O que NÃO foi alterado | Preservações intencionais e porquê. |
 | 7 | Registro para o CHANGELOG-DEV.md | Bloco pronto a colar no topo do histórico. |
+| 8 | Linha de commit (Git) | Uma linha no padrão da §6.1 (**só** quando houver implementação, melhoria ou ajuste com alteração de ficheiros no repo; omitir em análise pura sem mudanças). |
 
 Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **Arquivos afetados**, …) desde que a ordem e o conteúdo acima se mantenham.
+
+### 6.1 Linha de commit (Git) — padrão obrigatório
+
+- **Quando:** ao concluir relatório de intervenção que **alterou** código, views, JS, SQL, `.mdc`, `CHANGELOG-DEV`, etc.
+- **Quando não:** perguntas só informativas, avaliação sem alteração de ficheiros, ou pedido explícito de não incluir.
+- **Formato (uma linha, copiar para mensagem de commit):**  
+  `AAAA_MM_DD - ` + resumo curto em **português brasileiro** (o que mudou e onde, numa frase).  
+  - Use a **data da intervenção** (campo *Today's date* do ambiente ou data acordada na conversa).  
+  - **Separador de data:** sublinhado (`_`), não hífen, na parte da data: `2026_05_14` (exemplo).
+- **Exemplo:** `2026_05_14 - Menu lateral: overlay LibMessageProcessando ao navegar por links MVC (start.js)`
 
 ---
 

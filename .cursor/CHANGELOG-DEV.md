@@ -48,6 +48,25 @@
 
 ---
 
+### [2026-05-14] — Regras Cursor + `CLAUDE.md`: linha de commit Git no fim do relatório
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `.cursor/rules/gdi-erp-plataform.mdc`
+- `CLAUDE.md`
+
+**Problema / Demanda:**
+Padronizar mensagem de commit numa linha ao fim de cada relatório de implementação/ajuste.
+
+**O que foi feito:**
+- §6 do `.mdc`: nova ordem **8 — Linha de commit (Git)** e subsecção **6.1** com formato `AAAA_MM_DD - resumo` (data com `_`), PT-BR, só quando houve alteração de ficheiros.
+- `CLAUDE.md`: alinhamento do formato de resposta com remissão à §6.1.
+- Tabela §0.2: referência à linha de commit no formato de resposta.
+
+**Impactos conhecidos:**
+- Respostas futuras do agente devem incluir a linha após o bloco do CHANGELOG quando aplicável.
+
+---
+
 ### [2026-05-14] — Menu lateral: `LibMessageProcessando` antes da navegação MVC
 **Tipo:** Implementação
 **Arquivos tocados:**

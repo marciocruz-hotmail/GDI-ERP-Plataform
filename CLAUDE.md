@@ -243,6 +243,9 @@ O que foi preservado e a razão, especialmente onde havia risco de alteração i
 ### 📝 Registro para o CHANGELOG-DEV.md
 Bloco de registro já formatado e pronto para colar no topo do histórico.
 
+### Linha de commit (Git)
+Uma linha no padrão `AAAA_MM_DD - resumo em português numa linha` (data com `_`; detalhe em `.cursor/rules/gdi-erp-plataform.mdc` §6.1). **Só** quando a intervenção alterou ficheiros no repositório; omitir se for só análise sem mudanças.
+
 ---
 
 ## LEMBRETES RÁPIDOS
