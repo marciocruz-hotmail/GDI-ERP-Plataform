@@ -815,6 +815,23 @@ div.dataTables_wrapper > .row {
     gap: 0 !important;
 }
 
+/* Logo GDI na 2.ª faixa sidebar-brand: min-height cobre logo + paddings da faixa; img até 88px com py-0 no link (ver _Navbar). */
+.app-sidebar .sidebar-brand.gdi-sidebar-brand-logo {
+    height: auto;
+    min-height: calc(72px + 1rem + 1.625rem);
+    box-sizing: border-box;
+}
+
+.app-sidebar .sidebar-brand.gdi-sidebar-brand-logo .gdi-sidebar-brand-logo-img {
+    max-width: 100%;
+    max-height: 88px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
 /* Cinto de segurança: evita scroll horizontal do documento */
 html, body {
     overflow-x: hidden;

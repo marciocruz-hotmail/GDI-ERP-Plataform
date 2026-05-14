@@ -48,6 +48,68 @@
 
 ---
 
+### [2026-05-14] — Sidebar logo GDI: imagem maior dentro da mesma faixa (sem alterar `gdi-sidebar-brand-logo`)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/Shared/_Navbar.cshtml`
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css`
+
+**Problema / Demanda:**
+Logo ainda pequeno face ao espaço útil da faixa; manter bloco `.gdi-sidebar-brand-logo` (min-height / height) inalterado.
+
+**O que foi feito:**
+- `max-height` da imagem **72px → 88px** (proporção com `width/height: auto` + `object-fit: contain`).
+- Link do logo: **`py-2` → `py-0`** para libertar **1rem** de padding vertical dentro da mesma altura mínima da faixa, evitando corte sem mexer nas regras do contentor.
+
+**O que foi evitado e por quê:**
+- Sem alterar `.app-sidebar .sidebar-brand.gdi-sidebar-brand-logo { … }` (min-height / height / box-sizing).
+
+**Impactos conhecidos:**
+- Área clicável vertical do link fica só na altura do logo (aceitável nesta faixa).
+
+---
+
+### [2026-05-14] — Sidebar logo GDI: contentor + imagem (corte `overflow` / `3.5rem`)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/Shared/_Navbar.cshtml`
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css`
+
+**Problema / Demanda:**
+Com `max-height` maior no `<img>` sem aumentar a faixa `.sidebar-brand`, o AdminLTE (`height: 3.5rem`, `overflow: hidden`) cortava o logo (ex.: texto inferior).
+
+**O que foi feito:**
+- 2.º `sidebar-brand`: classe **`gdi-sidebar-brand-logo`**; imagem com classe **`gdi-sidebar-brand-logo-img`** (estilos retirados do inline).
+- Em **`start.css`**: só `.app-sidebar .sidebar-brand.gdi-sidebar-brand-logo` com `height: auto`, `min-height: calc(72px + 1rem + 1.625rem)` (72px logo + `py-2` + padding vertical padrão da faixa); regras do `<img>` com `max-height: 72px`, `object-fit: contain`, `flex-shrink: 0`.
+- Primeira faixa (Microsoft/AWS) e `adminlte.css` inalterados.
+
+**O que foi evitado e por quê:**
+- Sem editar `adminlte.min.css`; override mínimo e escopado.
+
+**Impactos conhecidos:**
+- `start.css` carrega com `?v=VersionERP` no layout — se o browser mantiver CSS antigo, incrementar `VersionERP` no fluxo habitual do projeto.
+
+---
+
+### [2026-05-14] — Sidebar: logo GDI (`max-height` no `_Navbar`)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/Shared/_Navbar.cshtml`
+
+**Problema / Demanda:**
+Logo `logoGdi.png` (222×110) na segunda faixa `sidebar-brand` aparecia pequeno por `max-height: 48px` no `<img>`.
+
+**O que foi feito:**
+- `max-height` do `<img>` do GDI de **48px → 64px**; mantidos `max-width: 100%`, `width`/`height: auto`, `object-fit: contain` (proporção ~2:1).
+
+**O que foi evitado e por quê:**
+- Sem alterar `adminlte.css` nem altura global de `.sidebar-brand` — ajuste pontual só no markup do logo.
+
+**Impactos conhecidos:**
+- Se em algum zoom/viewport notar corte, avaliar classe só nesse `sidebar-brand` ou reduzir para 56px (ainda dentro do intervalo sugerido).
+
+---
+
 ### [2026-05-14] — Navbar `user-menu`: indicador visual de dropdown
 **Tipo:** Implementação
 **Arquivos tocados:**
