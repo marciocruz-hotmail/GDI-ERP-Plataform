@@ -7620,6 +7620,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     BodyEmail = BodyEmail.Replace("[CodigoCliente]", ClienteCodigo);
                     BodyEmail = BodyEmail.Replace("[NomeCliente]", ClienteNome);
                     BodyEmail = BodyEmail.Replace("[DocumentoCliente]", ClienteDocumento);
+                    // Link para o portal do cliente servido por este mesmo ERP (GDI-PortalCliente-Plataform descontinuado)
                     LinkPortalDireto = "https://portalflightx.com/UserIdentity/AcessoPortal?codigocliente=" + ClienteCodigo + "&documentocliente=" + ClienteDocumento;
                     BodyEmail = BodyEmail.Replace("[LinkPortalDireto]", LinkPortalDireto);
 

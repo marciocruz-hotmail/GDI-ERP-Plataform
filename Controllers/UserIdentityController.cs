@@ -847,7 +847,7 @@ namespace GdiPlataform.Controllers
             };
             allTenants.Add(tenant5);
 
-            // Portal do cliente (DNS portalflightx.com / homologacao.portalflightx.com — mesmo connection name do monólito Portal)
+            // Portal do cliente: DNS público (app = este ERP monólito; legado GDI-PortalCliente-Plataform descontinuado)
             cstTenant tenantPortalCliente = new cstTenant
             {
                 subDominio = "portalflightx",
@@ -986,7 +986,7 @@ namespace GdiPlataform.Controllers
             return hostWithoutPort.Substring(0, index);
         }
 
-        /// <summary>GET público usado pelos e-mails de pedido (paridade com o repositório Portal).</summary>
+        /// <summary>GET público para links em e-mail: entrada no portal integrado neste ERP (AcessoPortal).</summary>
         [HttpGet]
         public ActionResult AcessoPortal(string codigocliente, string documentocliente)
         {

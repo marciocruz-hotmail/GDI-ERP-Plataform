@@ -20,6 +20,16 @@
 - **Deploy:** Publicação via Visual Studio (Publish) → servidor Windows remoto (IIS)
 - **Linguagem de resposta:** Português brasileiro
 
+### Portal do cliente (integrado neste ERP, 2026)
+
+O repositório **GDI-PortalCliente-Plataform** foi descontinuado; o portal público do cliente corre **neste** monólito.
+
+- **Entrada pública / e-mail:** `UserIdentity/AcessoPortal` (`codigocliente`, `documentocliente`), hosts `*.portalflightx.com` (`UserIdentityController.IsPortalClienteHost`), tenant `portalflightx` em `SetTenants`.
+- **Sessão autenticada:** área **`crm`** (`/crm/Pedidos/Index`, `GlobalController`), autorização **`gc_PortalCliente_PortalFinanceiro`**.
+- **Links em templates:** placeholder `[LinkPortalDireto]` — URL do **mesmo** site que serve o ERP (ex.: `https://portalflightx.com/UserIdentity/AcessoPortal?...`); ver `Areas/gc/Controllers/MovimentosController.cs` e `g_templates`.
+- **Área `g`:** `PortalCliente/PortalFinanceiro` é fluxo **interno** (legado); não confundir com o portal **externo** em **`crm`**.
+- **Não** assumir segundo repositório nem stack AdminLTE 3 / Bootstrap 4 do produto antigo; seguir a stack deste `CLAUDE.md`.
+
 ---
 
 ## MÓDULOS DO SISTEMA

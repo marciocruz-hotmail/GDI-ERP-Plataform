@@ -48,6 +48,26 @@
 
 ---
 
+### [2026-05-14] — Documentação: portal integrado no ERP; fim de referências ao repo GDI-PortalCliente-Plataform
+**Tipo:** Refatoração (docs + comentários)
+**Arquivos tocados:**
+- `.cursor/rules/gdi-erp-plataform.mdc` — §0 reescrita (repositório único; mapa `UserIdentity` / `Areas/crm`); §§2 e 8 sem segundo repo; frontmatter
+- `CLAUDE.md` — secção «Portal do cliente (integrado neste ERP)»
+- `Controllers/UserIdentityController.cs` — comentários `SetTenants` / `AcessoPortal`
+- `Areas/gc/Controllers/MovimentosController.cs` — comentário `[LinkPortalDireto]`
+
+**Problema / Demanda:**
+O projeto **GDI-PortalCliente-Plataform** foi excluído; funcionalidades migradas para este ERP — remover ligações e instruções que pressupunham repositório irmão.
+
+**O que foi feito:**
+- Regras Cursor e `CLAUDE.md` passam a descrever o portal **só** dentro deste monólito; histórico de migração remete ao `CHANGELOG-DEV`.
+- Comentários em código alinhados (URLs públicas = mesma app ERP).
+
+**O que foi evitado e por quê:**
+- Reescrever entradas antigas do `CHANGELOG-DEV` (mantêm-se como arquivo histórico).
+
+---
+
 ### [2026-05-14] — `_Navbar`: menu utilizador portal só «Sair» + deteção por role
 **Tipo:** Correção
 **Arquivos tocados:**

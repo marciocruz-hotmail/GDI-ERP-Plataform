@@ -1,5 +1,5 @@
 ---
-description: Regras globais do ERP GDI Aviação — stack .NET 4.7.2, relação com Portal Cliente (ficheiro único de regras no Portal), fonte de verdade .md na raiz, contexto .cursor, restrições de git/deploy e formato de resposta.
+description: Regras globais do ERP GDI Aviação — stack .NET 4.7.2, portal do cliente integrado neste repo, fonte de verdade .md na raiz, contexto .cursor, restrições de git/deploy e formato de resposta.
 alwaysApply: true
 ---
 
@@ -11,33 +11,28 @@ alwaysApply: true
 
 ---
 
-## 0. Relação com GDI-PortalCliente-Plataform (repositório irmão)
+## 0. Portal do cliente e repositório único
 
-> **Dois repositórios distintos** na mesma máquina de desenvolvimento. São **semelhantes** (ASP.NET MVC, .NET Framework, SQL Server, ecossistema GDI), porém **código, convenções e versões de UI/libs não são intercambiáveis** salvo evidência explícita no repositório em que se está a trabalhar.
+> O produto **GDI-PortalCliente-Plataform** (repositório / site separado) foi **descontinuado**; as funcionalidades do portal público do cliente vivem **neste** monólito **GDI-ERP-Plataform**. **Não** assumir um segundo repositório “irmão” nem caminhos absolutos a outro projeto para regras ou código.
 
-### 0.1 Pastas no disco (fonte única de caminho)
+### 0.1 Onde está o portal no código (referência rápida)
 
-| Projeto | Pasta |
-|---------|--------|
-| **GDI-ERP-Plataform** (este repositório) | `C:\Marcio\Projetos\GDI-ERP-Plataform` |
-| **GDI-PortalCliente-Plataform** (irmão, distinto) | `C:\Marcio\Projetos\GDI-PortalCliente-Plataform` |
+| Fluxo | Local principal |
+|-------|-------------------|
+| Login / links em e-mail (`AcessoPortal`) | `Controllers/UserIdentityController.cs` — `IsPortalClienteHost`, `CompletePortalClienteLogin`, tenant `portalflightx` em `SetTenants` |
+| Área autenticada (pedidos, boleto, ficheiros) | `Areas/crm/` — `PedidosController`, `GlobalController`; role `gc_PortalCliente_PortalFinanceiro` |
+| UI partilhada | `Views/Shared/_Layout.cshtml`, `_Navbar.cshtml`, `Views/UserIdentity/Index.cshtml` |
+| Legado área **g** (portal financeiro interno / vendedor) | `Areas/g/Views/PortalCliente/PortalFinanceiro.cshtml` — **não** confundir com o portal **externo** em `crm` |
 
-- **Regras específicas de tecnologia** (versões de Bootstrap/AdminLTE/DataTables, bundles, helpers `GdiDt*` / `GdiAjax*` em `start.js`, scripts Python de verificação do ERP, áreas `gc`/`g`, módulos COMEX, etc.) devem constar **apenas** no ficheiro de instruções **deste** repositório: **este `.mdc`** + **`CLAUDE.md`** na raiz do ERP.
-- **No Portal:** `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\rules\gdi-portal-cliente-plataform.mdc` + **`CLAUDE.md`** na raiz do Portal. A relação Portal↔ERP (pastas, o que do ERP **não** se aplica ao Portal) está na **secção 9** desse `.mdc` (regras Cursor do Portal estão **consolidadas** nesse único ficheiro em `.cursor/rules/`). **Não** confundir com **este** `gdi-erp-plataform.mdc` no repositório do **ERP**.
-- **Manutenção sem drift:** convenções comuns (ex.: política de `CHANGELOG-DEV`, restrições de ambiente, ordem sugerida nas respostas) podem ser alinhadas **em separado** em cada repositório; **não** copiar blocos longos de stack de um produto para o `CLAUDE.md` ou `.mdc` do outro.
+- **Stack:** seguir sempre a **§1** deste ficheiro (Bootstrap 5, AdminLTE 4, etc.). **Não** reintroduzir padrões do portal legado separado (ex.: AdminLTE 3 / Bootstrap 4) salvo pedido explícito de migração documentada.
+- **Histórico da migração:** decisões e ficheiros tocados estão em **`.cursor/CHANGELOG-DEV.md`** (pesquisar `portal`, `crm`, `AcessoPortal`).
 
-### 0.2 O que as regras do Portal implicam para o ERP
+### 0.2 Processo e documentação (única codebase)
 
-Referência analisada: `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\rules\gdi-portal-cliente-plataform.mdc` (inclui contexto cruzado Portal↔ERP na **secção 9** desse ficheiro).
-
-| Tema nas regras do Portal | Aplicável ao ERP? | Nota |
-|---------------------------|-------------------|------|
-| Política de ambiente (só raiz do repo, sem git remoto, sem deploy remoto, PRs remotas, IIS fora do local, alterações só locais) | Sim | Já espelhada na §3 deste ficheiro; manter coerente. |
-| Metodologia (causa raiz, mudança mínima, impacto, build) | Sim | Alinhada à §4. |
-| `CHANGELOG-DEV` + `.cursor/context/` + formato de resposta | Sim | Alinhado às §§2, 5 e 6. |
-| Português brasileiro; TLS sem SSL3 | Sim | Explícito no cabeçalho e §7. |
-| Identidade de stack do **Portal** (AdminLTE 3.x, Bootstrap 4.x, DataTables 1.13.x, EF6 como único padrão dominante, secrets em `App_Data/Secrets`, etc.) | **Não** | Pertence **só** ao Portal; **não** presumir ao editar o ERP. |
-| Tabela “o que no ERP aplica ao Portal” (**secção 9** de `gdi-portal-cliente-plataform.mdc` no repo Portal) | Contexto | Útil para humanos/agentes em **multi-root**; ao editar **este** repo, prevalecem a stack e o `CLAUDE.md` **do ERP**. |
+| Tema | Nota |
+|------|------|
+| Política de ambiente, metodologia, `CHANGELOG-DEV`, formato de resposta, português BR | §§2–7 deste `.mdc` e `CLAUDE.md` na **raiz deste** repo |
+| E-mails com `[LinkPortalDireto]` | URL pública do **mesmo** site que serve o ERP (ex.: `UserIdentity/AcessoPortal` em host `*.portalflightx.com`); ver `Areas/gc/Controllers/MovimentosController.cs` e templates |
 
 ---
 
@@ -57,12 +52,12 @@ Referência analisada: `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\r
 
 ## 2. Ordem de leitura antes de agir
 
-1. **`.cursor/CHANGELOG-DEV.md`** — obrigatório em toda sessão com alteração ou análise relevante. Contém decisões, fases (ex.: DataTables/Ajax), armadilhas e ficheiros críticos. Não contradizer o que está registado sem justificativa explícita no próprio changelog ou na resposta. Se o ficheiro **não existir**, **criá-lo** na primeira intervenção significativa e manter entradas objetivas (alinhado ao Portal).
+1. **`.cursor/CHANGELOG-DEV.md`** — obrigatório em toda sessão com alteração ou análise relevante. Contém decisões, fases (ex.: DataTables/Ajax), armadilhas e ficheiros críticos. Não contradizer o que está registado sem justificativa explícita no próprio changelog ou na resposta. Se o ficheiro **não existir**, **criá-lo** na primeira intervenção significativa e manter entradas objetivas.
 2. **`.cursor/context/`** — quando a alteração tocar a área documentada (ex.: `migracao-472-481.md` para `Robos/`, `Web.config`, NuGet, TLS, `ComexImportacoesController.cs`).
 3. **`CLAUDE.md`** (raiz) — padrões longos já consolidados (helpers `GdiDt*` / `GdiAjax*`, fases de migração de mensagens, ficheiros sensíveis). Usar como complemento; evitar duplicar aqui listas extensas que já lá estão.
-4. **Manutenção do `CLAUDE.md` (como no projeto Portal, adaptado ao ERP):** este `.mdc` é a regra **Cursor**; o `CLAUDE.md` é memória longa e índice de padrões **deste** repositório. Registar decisões estáveis durante as sessões (no Cursor: editar diretamente; no Claude Code: fluxo `#` já descrito no próprio `CLAUDE.md`). Manter entradas **objetivas** e **específicas do ERP** — **não** copiar para cá secções longas do **GDI-PortalCliente-Plataform** (stack, paths ou convenções do Portal). Para intervenções pontuais, preferir primeiro o **CHANGELOG-DEV**; usar o `CLAUDE.md` para padrões que devam sobreviver várias sessões.
+4. **Manutenção do `CLAUDE.md`:** este `.mdc` é a regra **Cursor**; o `CLAUDE.md` é memória longa e índice de padrões **deste** repositório. Registar decisões estáveis durante as sessões (no Cursor: editar diretamente; no Claude Code: fluxo `#` já descrito no próprio `CLAUDE.md`). Manter entradas **objetivas** e **específicas do ERP**. Para intervenções pontuais, preferir primeiro o **CHANGELOG-DEV**; usar o `CLAUDE.md` para padrões que devam sobreviver várias sessões.
 
-*Perfis de publish e pastas de artefactos **são os deste** repositório (ex.: `Properties/PublishProfiles/`). Não presumir nomes usados no Portal Cliente (ex.: `CI-Filesystem.pubxml`, `artifacts/webpublish/`) salvo existirem **aqui** com o mesmo propósito.*
+*Perfis de publish e pastas de artefactos **são os deste** repositório (ex.: `Properties/PublishProfiles/`). Não presumir nomes de outro produto salvo existirem **aqui** com o mesmo propósito.*
 
 ---
 
@@ -71,7 +66,7 @@ Referência analisada: `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\r
 Salvo pedido **explícito e inequívoco** do utilizador numa mensagem dedicada:
 
 | Tema | O que não fazer |
-|------|-------------------|
+|------|-----------------|
 | **Workspace** | Não criar, editar nem apagar ficheiros/pastas **fora da raiz deste repositório** (`GDI-ERP-Plataform`). |
 | **Git remoto** | Não `git push`, force-push, alterar remoto/branches/tags remotas, nem criar PRs remotas. Alterações git ficam no working tree local. |
 | **Deploy / infra** | Não deploy remoto (Publish para IIS remoto, MSDeploy remoto, FTP, Azure remoto, pipelines que publiquem para remoto). Não configurar IIS remoto, vhosts ou servidores fora do ambiente local do developer. |
@@ -124,7 +119,7 @@ Após **toda** intervenção relevante (correção, implementação, refatoraç�
 Responder **nesta ordem** (alinhado a `CLAUDE.md`):
 
 | Ordem | Secção | Conteúdo |
-|-------|--------|----------|
+|-------|--------|-----------|
 | 1 | Diagnóstico | Problema, onde ocorre, causa raiz. |
 | 2 | Arquivos afetados | Lista completa (C#, Razor, JS, SQL, etc.). |
 | 3 | Análise de impacto | Dependências, rotas, views, riscos em produção. |
@@ -150,4 +145,4 @@ Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **
 
 - Detalhe fino de contratos JSON DataTables, listas de controllers por fase e scripts Python de verificação — manter em **`CLAUDE.md`** e **`CHANGELOG-DEV.md`**.
 - Documentação de migração 4.7.2→4.8.1 — **`.cursor/context/`**.
-- **Stack, secrets e checklist do Portal Cliente** — apenas em `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\rules\gdi-portal-cliente-plataform.mdc` e no **`CLAUDE.md`** da raiz desse repositório; consultar **só** quando o trabalho for **explicitamente** na pasta do Portal (fora do escopo de edição deste workspace, salvo pedido explícito do utilizador).
+- **Portal do cliente:** o comportamento e rotas estão no **código** (`UserIdentity`, `Areas/crm`, templates de e-mail); não existe ficheiro de regras Cursor noutro repositório para consultar.
