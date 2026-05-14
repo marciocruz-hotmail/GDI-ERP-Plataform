@@ -42,7 +42,7 @@ namespace GdiPlataform.Areas.a.Controllers
             List<string[]> list = new List<string[]>();
             foreach (var a in displayedRecords)
             {
-                String _ativo = a.sistemas.ativo == true ? LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle", "Inativo", "red", "");
+                String _ativo = a.sistemas.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
 
                 list.Add(new[] {
                                     a.sistemas.id_sistema.ToString(),

@@ -77,7 +77,7 @@ namespace GdiPlataform.Areas.g.Controllers
             List<string[]> list = new List<string[]>();
             foreach (var c in displayedRecords)
             {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle", "Inativo", "red", "");
+                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
                 String _pagamento = c.pagamento == true ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Habilitado para Pagamentos", "#008000", "fa-lg") : LibIcons.getIcon("fa-regular fa-thumbs-down", "Desabilitado para Pagamentos", "cc0000", "");
                 String _recebimento = c.recebimento == true ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Habilitado para Recebimentos", "#008000", "fa-lg") : LibIcons.getIcon("fa-regular fa-thumbs-down", "Desabilitado para Recebimentos", "cc0000", "");
                 String _baixaAutomatica = c.baixa_automatica == true ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Baixa Automática Ativada", "#008000", "fa-lg") : LibIcons.getIcon("fa-regular fa-thumbs-down", "Baixa Automática Desativada", "cc0000", "");

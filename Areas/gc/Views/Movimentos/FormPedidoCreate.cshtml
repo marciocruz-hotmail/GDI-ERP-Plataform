@@ -105,7 +105,7 @@
                                             <div class="col-sm-6">
                                                 @Html.DropDownList("id_cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "id_cliente", @class = "form-control", @onfocus = "jsSetDadosCliente();", @onchange = "jsSetDadosCliente();", @onblur = "jsSetDadosCliente();" })
                                             </div>
-                                            <div class="col-sm-2 mt-1">
+                                            <div class="col-sm-2 mt-1 text-sm-start">
                                                 <div class="form-check form-switch form-switch-lg">
                                                     @Html.CheckBoxFor(model => model.has_beneficio_aviacao, htmlAttributes: new { @class = "form-check-input switch-success", @id = "has_beneficio_aviacao", role = "switch" })
                                                     <label class="form-check-label" for="has_beneficio_aviacao" id="label_has_beneficio_aviacao">Benefício Aviação</label>
@@ -330,27 +330,27 @@
                                     <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
                                         <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da Cotação no Fornecedor</div>
                                         <div class="form-group row text-sm-end m-0 pt-1">
-                                            <div class="col-sm-2">
+                                            <div class="col-sm-2 text-sm-start">
                                             </div>
-                                            <div class="col-sm-3">
+                                            <div class="col-sm-3 text-sm-start">
                                                 <div class="form-check form-switch form-switch-lg">
                                                     @Html.CheckBoxFor(model => model.fornecedor_cotacao_solicitar, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_solicitar", role = "switch" })
                                                     <label class="form-check-label" for="fornecedor_cotacao_solicitar" id="label_fornecedor_cotacao_solicitar">Solicitar Cotação Fornecedor</label>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-2">
+                                            <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch form-switch-lg">
                                                     @Html.CheckBoxFor(model => model.fornecedor_cotacao_solicitada, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_solicitada", role = "switch" })
                                                     <label class="form-check-label" for="fornecedor_cotacao_solicitada" id="label_fornecedor_cotacao_solicitada">Cotação Solicitada?</label>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-2">
+                                            <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch form-switch-lg">
                                                     @Html.CheckBoxFor(model => model.fornecedor_cotacao_respondida, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_respondida", role = "switch" })
                                                     <label class="form-check-label" for="fornecedor_cotacao_respondida" id="label_fornecedor_cotacao_respondida">Cotação Respondida?</label>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-2">
+                                            <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch form-switch-lg">
                                                     @Html.CheckBoxFor(model => model.fornecedor_cotacao_aprovada, htmlAttributes: new { @class = "form-check-input switch-success", @id = "fornecedor_cotacao_aprovada", role = "switch" })
                                                     <label class="form-check-label" for="fornecedor_cotacao_aprovada" id="label_fornecedor_cotacao_aprovada">Cotação Aprovada?</label>
@@ -488,18 +488,18 @@
                                             <div class="col-sm-2">
                                                 @Html.EditorFor(model => model.contato_nome, new { htmlAttributes = new { @class = "form-control" } })
                                             </div>
-                                            @Html.Label("contato_telefone", "Telefone/Celular", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            @Html.Label("contato_telefone", "Telefone/Celular", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                             <div class="col-sm-2">
                                                 @Html.EditorFor(model => model.contato_telefone, new { htmlAttributes = new { @class = "form-control" } })
                                             </div>
                                         </div>
 
-                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="form-group row text-sm-end m-0 pt-1 pb-1">
                                             @Html.Label("email", "E-mail", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                             <div class="col-sm-6">
                                                 @Html.EditorFor(model => model.contato_email, new { htmlAttributes = new { @class = "form-control", @title = "E-mail", @placeholder = "E-mail" } })
                                             </div>
-                                            @Html.Label("datahora_contato", "Data Contato", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                                            @Html.Label("datahora_contato", "Data Contato", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                             <div class="col-sm-2">
                                                 <div class='input-group date' id='ig_gc_mov_form_ped_create_contato'>
                                                     @Html.EditorFor(model => model.posvenda_datahora_contato, new { htmlAttributes = new { @class = "form-control", type = "text" } })
@@ -517,7 +517,7 @@
                                             </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_pedido_recebido, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_pedido_recebido, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_pedido_recebido"><b>Pedido Recebido?</b></label>
                                                 </div>
                                             </div>
@@ -525,7 +525,7 @@
                                             </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_recebimento_conforme_combinado, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_recebimento_conforme_combinado, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_recebimento_conforme_combinado"><b>Conforme Combinado?</b></label>
                                                 </div>
                                             </div>
@@ -533,7 +533,7 @@
                                             </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_mercadoria_estado_fisico_ok, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_mercadoria_estado_fisico_ok, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_mercadoria_estado_fisico_ok"><b>Estado Físico OK?</b></label>
                                                 </div>
                                             </div>
@@ -543,7 +543,7 @@
                                             </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_itens_correspondem_pedido_nf, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_itens_correspondem_pedido_nf, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_itens_correspondem_pedido_nf"><b>Itens x Pedido/NF?</b></label>
                                                 </div>
                                             </div>
@@ -551,7 +551,7 @@
                                             </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_informacoes_tecnicas_ok, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_informacoes_tecnicas_ok, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_informacoes_tecnicas_ok"><b>Informações Técnicas OK?</b></label>
                                                 </div>
                                             </div>
@@ -559,7 +559,7 @@
                                             </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_documentacao_correta, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_documentacao_correta, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_documentacao_correta"><b>Documentação Correta?</b></label>
                                                 </div>
                                             </div>
@@ -569,12 +569,12 @@
                                             </div>
                                             <div class="col-sm-10 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_houve_dificuldade_documentacao, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_houve_dificuldade_documentacao, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_houve_dificuldade_documentacao"><b>Dificuldade na Documentação?</b></label>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="form-group row text-sm-end m-0 pt-1 pb-1">
                                             @Html.Label("observacao_recebimento_pedido", "Obs Recebimento", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                             <div class="col-sm-10">
                                                 @Html.TextAreaFor(model => model.posvenda_observacao_recebimento_pedido, new { @class = "form-control", @id = "observacao_recebimento_pedido", @rows = "3", @title = "Observações do recebimento", @placeholder = "Observações do recebimento" })
@@ -583,7 +583,7 @@
 
 
                                         <div class="section-header"><i class="fa-solid fa-note-sticky me-1" aria-hidden="true"></i>Notas Avaliações (1 a 5)</div>
-                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="form-group row text-sm-end m-0 pt-1 pb-1">
                                             @Html.Label("posvenda_nota_avaliacao_prazo_entrega", "Prazo Entrega?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                             <div class="col-sm-1">
                                                 @Html.EditorFor(model => model.posvenda_nota_avaliacao_prazo_entrega, new { htmlAttributes = new { @class = "form-control", @title = "Nota prazo de entrega" } })
@@ -605,17 +605,15 @@
                                         <div class="form-group row text-sm-end m-0 pt-1">
                                             <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
                                             </div>
-                                            <div class="col-sm-2 text-sm-start">
+                                            <div class="col-sm-4 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_pedido_nao_conforme, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_pedido_nao_conforme, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_pedido_nao_conforme"><b>Apresentou Não Conformidade?</b></label>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
-                                            </div>
                                             <div class="col-sm-2 text-sm-start">
                                                 <div class="form-check form-switch mt-1">
-                                                    @Html.CheckBoxFor(model => model.posvenda_cliente_sugeriu_melhoria, new { @class = "form-check-input", role = "switch" })
+                                                    @Html.CheckBoxFor(model => model.posvenda_cliente_sugeriu_melhoria, new { @class = "form-check-input switch-success", role = "switch" })
                                                     <label class="form-check-label" for="posvenda_cliente_sugeriu_melhoria"><b>Cliente Sugeriu Melhoria?</b></label>
                                                 </div>
                                             </div>
@@ -632,22 +630,24 @@
                                                 @Html.TextAreaFor(model => model.posvenda_descricao_sugestao_melhoria, new { @class = "form-control", @id = "descricao_sugestao_melhoria", @rows = "3", @title = "Sugestão de melhoria", @placeholder = "Sugestão de melhoria" })
                                             </div>
                                         </div>
-                                        <div class="form-group row text-sm-end m-0 pt-1">
+                                        <div class="form-group row text-sm-end m-0 pt-1 pb-1">
                                             @Html.Label("posvenda_observacoes_internas", "Observações Internas", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                             <div class="col-sm-10">
                                                 @Html.TextAreaFor(model => model.posvenda_observacoes_internas, new { @class = "form-control", @id = "observacoes_internas", @rows = "3", @title = "Observações internas", @placeholder = "Observações internas" })
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
 
-                                <div class="card-body text-sm-center m-1 p-0">
+                                <div class="card-body text-sm-center m-0 p-1">
                                     <div class="row justify-content-center">
-                                        <button type="button" name="btnSavePosVenda" title="Nova Tarefa" onclick="jsAjaxPosVendaPedido()" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa-solid fa-medal me-2" aria-hidden="true"></i>Salvar Avaliação Pós-Venda</button>
+                                        <div class="col-6" style="text-align:center">
+                                            <button type="button" name="btnSavePosVenda" title="Pós Venda" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPosVendaPedido()"><i class="fa-solid fa-medal fa-lg me-2" aria-hidden="true"></i>Salvar Avaliação Pós-Venda</button>
+                                        </div>
                                     </div>
                                 </div>
+
+
                             </div>
                             <!-- Aba POSVENDA - FIM -->
                             <!-- Aba AUDIT - INÍCIO -->
@@ -682,7 +682,7 @@
                     }
                     else
                     {
-                        <button type="button" name="btnSair" title="Sair" class="btn btn-info float-end d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })')"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Sair</button>
+                        <button type="button" name="btnSair" title="Sair" class="btn btn-primary float-end d-inline-flex align-items-center gap-2" onclick="jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })')"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Sair</button>
                     }
                 </div>
 

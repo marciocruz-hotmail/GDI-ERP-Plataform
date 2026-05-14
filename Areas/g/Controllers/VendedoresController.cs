@@ -147,7 +147,7 @@ namespace GdiPlataform.Areas.g.Controllers
 
             foreach (var c in displayedRecords)
             {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle", "Inativo", "red", "");
+                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
                 String NomeRevenda = String.Empty;
                 if ((c.id_revenda.EmptyIfNull().ToString().Equals(String.Empty)) || (c.id_revenda.EmptyIfNull().ToString() == "0"))
                 {

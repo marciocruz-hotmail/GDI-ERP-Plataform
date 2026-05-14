@@ -48,6 +48,212 @@
 
 ---
 
+### [2026-05-14] — Navbar `user-menu`: indicador visual de dropdown
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Views/Shared/_Navbar.cshtml`
+
+**Problema / Demanda:**
+O trigger do menu do utilizador não mostrava indício de submenu; o AdminLTE remove o `::after` de `.navbar-nav > .user-menu > .nav-link`.
+
+**O que foi feito:**
+- Ícone **`fa-chevron-down`** (Font Awesome, `aria-hidden="true"`) no fim do `<a class="nav-link dropdown-toggle">`, com `ms-1 small` — só no bloco `user-menu`, sem CSS global nem alteração a `adminlte.css`.
+
+**O que foi evitado e por quê:**
+- Restaurar o pseudo-elemento `::after` via override — duplicaria o caret do Bootstrap e competiria com regras do tema.
+
+**Impactos conhecidos:**
+- Apenas o link do utilizador na navbar; outros dropdowns inalterados.
+
+---
+
+### [2026-05-14] — Login `UserIdentity`: HTML válido (`BeginForm` só no `body`) + scroll residual
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/UserIdentity/Index.cshtml`
+- `Views/UserIdentity/TrocaObrigatoriaSenha.cshtml`
+
+**Problema / Demanda:**
+Barra de scroll vertical residual na página de login apesar de `100dvh` / padding em `box-sizing`.
+
+**O que foi feito:**
+- **`Html.BeginForm` deixou de envolver `<!DOCTYPE>` / `<html>` / `<head>`** — o `<form>` fica só dentro de `<body>`, envolvendo `.login-page-wrap` (DOM válido; evita normalização estranha do browser).
+- Removido o bloco `<style>` de `.app-content` (irrelevante com `Layout = null`).
+- CSS: cadeia **`html` → `body` → `#UserIdentity` / `#formTrocaObrigatoriaSenha` → `.login-page-wrap`** com `height`/`min-height`/`max-height` + `overflow-y: auto` só no wrapper (documento sem crescer por “fantasma”).
+- **`TrocaObrigatoriaSenha`:** mesmo arranjo de documento; **`<form>` interno aninhado** trocado por `<div class="troca-senha-fields">` para um único POST no `BeginForm` MVC; scripts antes de `</body>`.
+
+**O que foi evitado e por quê:**
+- `overflow: hidden` em `html`/`body` — poderia interferir com overlays (ex.: SweetAlert2); o scroll extra fica confinado ao `.login-page-wrap` quando necessário.
+- Sem alterações a `start.css`, `Login.css`, `_Layout`.
+
+**Impactos conhecidos:**
+- Troca de senha: o botão **Alterar senha** passa a submeter o formulário MVC externo (comportamento pretendido; antes o `<form>` interno podia isolar o submit).
+
+**Atenção para próximas intervenções:**
+- Outras views autónomas com `BeginForm` à volta do documento inteiro: mesmo padrão.
+
+---
+
+### [2026-05-14] — Login `UserIdentity`: scroll vertical fantasma (viewport + `100dvh` + fundo)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/UserIdentity/Index.cshtml`
+- `Views/UserIdentity/TrocaObrigatoriaSenha.cshtml`
+
+**Problema / Demanda:**
+Página de login a forçar scroll vertical sem necessidade de conteúdo extra.
+
+**O que foi feito:**
+- Meta viewport sem `height=device-height` (só `width=device-width, initial-scale=1`).
+- `min-height`: fallback **`100vh`** + **`100dvh`** em `body` e `.login-page-wrap`; **`box-sizing: border-box`** explícito; **`background-attachment: scroll`** em vez de `fixed` (evita inflação da altura do documento em alguns browsers).
+- `html { height: 100%; }` no bloco inline (coerente com `Login.css` nestas páginas isoladas).
+
+**O que foi evitado e por quê:**
+- Sem alterações a `start.css`, `Login.css`, `_Layout` — resto do ERP inalterado.
+
+---
+
+### [2026-05-14] — Reversão: bloco `form-switch` / `form-switch-lg` / `switch-success` em `start.css`
+**Tipo:** Correção (reversão)
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css`
+
+**O que foi feito:**
+- Desfeitas as alterações do comando anterior: restaurado o CSS de `switch-success` / `form-switch-lg` ao estado imediatamente anterior (sem `:focus` extra, sem wrapper `padding-left`/`margin-left` ampliados, sem variantes `form-check-reverse`).
+
+---
+
+### [2026-05-14] — UI global: `.section-header` — `font-size` fixo **1rem** (`start.css`)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css`
+
+**Problema / Demanda:**
+Refinar o cabeçalho de secção após o aumento para 1.275rem: passar a **`font-size: 1rem`** (raiz típica BS5) e alinhar comentário de manutenção.
+
+**O que foi feito:**
+- `font-size`: **1.275rem** → **1rem**; comentário do bloco atualizado (histórico 0.85rem → 1.275rem → 1rem).
+- `padding`, `gap`, `font-weight` e restantes propriedades de `.section-header` mantidos — já adequados a 1rem.
+
+---
+
+### [2026-05-14] — UI global: `.section-header` — `font-size` +50% (`start.css`)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css`
+
+**Problema / Demanda:**
+Aumentar em 50% o tamanho da fonte dos cabeçalhos de secção (`.section-header`), de forma centralizada.
+
+**O que foi feito:**
+- `font-size`: **0.85rem** → **1.275rem** (0.85 × 1.5); restantes propriedades da classe inalteradas.
+
+**Atenção para próximas intervenções:**
+- O layout referencia `start.css?v=@VersionERP`; após publish, utilizadores com sessão antiga podem precisar de refresh forçado ou nova versão em `ControlVersion` para invalidar cache do CSS.
+
+---
+
+### [2026-05-14] — Botões `name="btnSair"` em footer: `btn-info` → `btn-primary`
+**Tipo:** Refatoração (UI mínima)
+**Arquivos tocados:**
+- `Areas/gc/Views/Estoque/FormRecebimentoItensEstoque.cshtml` — `card-footer`
+- `Areas/gc/Views/Estoque/FormRecebimentoItensImportacao.cshtml` — `card-footer`
+- `Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml` — `card-footer`
+- `Areas/gc/Views/Movimentos/ModalPedidoViewAnexos.cshtml` — `modal-footer`
+- `Areas/gc/Views/FinanceiroLancamentos/ModalFinanceiroViewAnexos.cshtml` — `modal-footer`
+- `Areas/gc/Views/EstoqueLotes/ModalCreateEdit.cshtml` — `modal-footer` (ramo bloqueado)
+
+**Problema / Demanda:**
+Padronizar cor do «Sair» (`btnSair`) em rodapés: trocar `btn-info` por `btn-primary` (Bootstrap 5 / AdminLTE 4).
+
+**O que foi feito:**
+- Apenas o botão `name="btnSair"` em `card-footer` / `modal-footer`; sem alterar `onclick` / `data-bs-dismiss`.
+
+**O que foi evitado e por quê:**
+- `FormPedidoCreate` já estava `btn-primary`; CRM `Pedidos/Index` — `btnSair` em `row` (não footer semântico) e `outline-secondary`; `ModalViewFichaEstoqueProduto` — `btn-secondary` (fora do pedido `btn-info`).
+
+---
+
+### [2026-05-14] — Views: `text-sm-start` em colunas com checkbox + `<label class="form-check-label">` sob `text-sm-end`
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml` — aba Fornecedor Cotação (cinco colunas com switches + label)
+- `Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml` — coluna «Lote nn Conferido?» (5 repetições)
+- `Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml` — idem
+- `Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml` — idem
+
+**Problema / Demanda:**
+Mesmo padrão do switch «Benefício Aviação»: linha com `text-sm-end` empurra o texto do label para longe do input quando checkbox e label estão na mesma `form-check`.
+
+**O que foi feito:**
+- `text-sm-start` na `div` coluna que envolve `form-check` + label (Bootstrap 5), alinhado ao que já existia em `ModalPedidoExpedicao` / checklist pós-venda em `FormPedidoCreate`.
+
+**Impactos conhecidos:**
+- Varredura por `form-check-label`: restantes usam `text-sm-start` na coluna, ou `span` + `d-inline-flex` (sem o mesmo bug).
+
+---
+
+### [2026-05-14] — Pedido (`FormPedidoCreate`): switch «Benefício Aviação» — `text-sm-start` na coluna
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml`
+
+**Problema / Demanda:**
+Label do switch afastado do toggle: a linha usa `text-sm-end` (alinhamento de rótulos); o bloco do switch herdava `text-align: end`.
+
+**O que foi feito:**
+- `text-sm-start` na `div.col-sm-2` do switch (igual ao padrão já usado nos switches da checklist pós-venda na mesma view); neutraliza `text-sm-end` da linha.
+
+---
+
+### [2026-05-14] — Sidebar: `gdi-sidebar-nav.css` — folga ícone↔texto (1.125rem + `p` 0.25rem)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Content/gdi-sidebar-nav.css`
+
+**Problema / Demanda:**
+Após afinação máxima (0.875rem + 0.125rem), ícones ficaram colados ao texto — aumentar um pouco o espaçamento.
+
+**O que foi feito:**
+- Nível 1 e `.nav-treeview`: coluna `.nav-icon` **1.125rem**; `p` com **0.25rem** `padding-left` (antes 0.875rem / 0.125rem).
+
+---
+
+### [2026-05-14] — Sidebar nível 1: `gdi-sidebar-nav.css` (mesma coluna 0.875rem + `p` 0.125rem)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Content/gdi-sidebar-nav.css`
+
+**Problema / Demanda:**
+Afinar também o espaço ícone↔texto nos itens de **nível 1** do menu lateral (antes só `.nav-treeview`).
+
+**O que foi feito:**
+- Overrides com `> .nav-item > .nav-link` a partir de `ul.sidebar-menu` (só ramo nível 1; subitens mantêm regras `.nav-treeview` existentes).
+- Mesmos valores do submenu: coluna `.nav-icon` **0.875rem**; `p` **0.125rem** `padding-left`.
+
+**O que foi evitado e por quê:**
+- Seletores sem `>` em `.sidebar-menu` para nível 1 → evitar afetar outros `nav-link` fora da árvore principal.
+
+**Atenção para próximas intervenções:**
+- Se algum ícone FA de nível 1 parecer apertado, avaliar `min-width`/`max-width` ligeiramente acima de 0.875rem só nesse bloco.
+
+---
+
+### [2026-05-14] — Sidebar submenu: `gdi-sidebar-nav.css` (coluna ícone 0.875rem, só `.nav-treeview`)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Content/gdi-sidebar-nav.css` (novo)
+- `Views/Shared/_Layout.cshtml` — `<link>` após `gdi-section-cards.css`
+- `GDI-ERP-Plataform.csproj` — `Content Include`
+
+**Problema / Demanda:**
+Reduzir espaço entre ícone (`nav-icon`) e texto nos itens do submenu lateral (AdminLTE 4 usa 1.5rem + `padding-left` 0.5rem no `p`).
+
+**O que foi feito:**
+- Override cirúrgico só em `.sidebar-menu .nav-treeview > .nav-item > .nav-link`: coluna `.nav-icon` **0.875rem**; `p` com **0.125rem** `padding-left` (o pedido de 0.875rem aplica-se à coluna do ícone).
+
+---
+
 ### [2026-05-14] — Documentação: portal integrado no ERP; fim de referências ao repo GDI-PortalCliente-Plataform
 **Tipo:** Refatoração (docs + comentários)
 **Arquivos tocados:**

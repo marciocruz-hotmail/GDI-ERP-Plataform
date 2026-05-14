@@ -512,8 +512,8 @@ namespace GdiPlataform.Areas.g.Controllers
             foreach (var r in page)
             {
                 string iconAtivo = r.ativo
-                    ? LibIcons.getIcon("fa-solid fa-toggle-on", "Contato Ativo", "green", "fa-lg")
-                    : LibIcons.getIcon("fa-solid fa-toggle-off", "Contato Inativo", "red", "fa-lg");
+                    ? LibIcons.getIcon("fa-solid fa-circle-check", "Contato Ativo", "green", "fa-lg")
+                    : LibIcons.getIcon("fa-solid fa-circle-xmark", "Contato Inativo", "red", "fa-lg");
 
                 list.Add(new[]
                 {

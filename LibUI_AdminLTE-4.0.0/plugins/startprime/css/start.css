@@ -955,12 +955,12 @@ select.select2-hidden-accessible.input-validation-error ~ .field-validation-erro
     padding-bottom: .25rem;
 }
 
-/* 2. Cabeçalho de seção padronizado */
+/* 2. Cabeçalho de seção padronizado (1rem — alinhado à raiz BS5; histórico: 0.85rem → 1.275rem → 1rem) */
 .section-header {
     background: var(--bs-secondary-bg);
     color: var(--bs-secondary-color);
     padding: .35rem .75rem;
-    font-size: .85rem;
+    font-size: 1rem;
     font-weight: 600;
     border-radius: var(--bs-border-radius-sm);
     margin-bottom: .5rem;

@@ -95,12 +95,12 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             foreach (var c in displayedRecords)
             {
-                String _DifalGeralCalcular = c.difal_geral_calcular == true ? LibIcons.getIcon("fa-solid fa-circle", "Difal Geral Calcular - Sim", "green", "") : "";
-                String _DifalGeralZerar = c.difal_geral_zerar == true ? LibIcons.getIcon("fa-solid fa-circle", "Difal Geral Zerar - Sim", "green", "") : "";
-                String _DifalGeralNaoinformar = c.difal_geral_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle", "Difal Geral Não Informar - Sim", "green", "") : "";
-                String _DifalCombCalcular = c.difal_comb_calcular == true ? LibIcons.getIcon("fa-solid fa-circle", "Difal Combustível Calcular - Sim", "green", "") : "";
-                String _DifalCombZerar = c.difal_comb_zerar == true ? LibIcons.getIcon("fa-solid fa-circle", "Difal Combustível Zerar - Sim", "green", "") : "";
-                String _DifalCombNaoinformar = c.difal_comb_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle", "Difal Combustível Não Informar - Sim", "green", "") : "";
+                String _DifalGeralCalcular = c.difal_geral_calcular == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Calcular - Sim", "green", "") : "";
+                String _DifalGeralZerar = c.difal_geral_zerar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Zerar - Sim", "green", "") : "";
+                String _DifalGeralNaoinformar = c.difal_geral_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Não Informar - Sim", "green", "") : "";
+                String _DifalCombCalcular = c.difal_comb_calcular == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Calcular - Sim", "green", "") : "";
+                String _DifalCombZerar = c.difal_comb_zerar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Zerar - Sim", "green", "") : "";
+                String _DifalCombNaoinformar = c.difal_comb_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Não Informar - Sim", "green", "") : "";
 
                 list.Add(new[] {
                                     "", // Coluna de Seleção

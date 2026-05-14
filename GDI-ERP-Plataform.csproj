@@ -1237,6 +1237,7 @@
     <Content Include="Content\site.css" />
     <Content Include="Content\gdi-datatables-bs5.css" />
     <Content Include="Content\gdi-section-cards.css" />
+    <Content Include="Content\gdi-sidebar-nav.css" />
     <Content Include="Content\kaushan-script-local.css" />
     <Content Include="Content\fonts\kaushanscript-latin.woff2" />
     <Content Include="Content\fonts\kaushanscript-latin-ext.woff2" />

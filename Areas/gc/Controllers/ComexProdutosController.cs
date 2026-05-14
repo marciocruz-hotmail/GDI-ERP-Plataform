@@ -133,8 +133,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     foreach (var c in page)
                     {
                         string ativoIcon = c.ativo == true
-                            ? LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "")
-                            : LibIcons.getIcon("fa-solid fa-circle", "Inativo", "red", "");
+                            ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                            : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
 
                         string descTraducao = c.description.EmptyIfNull().ToString();
                         if (c.traducao.EmptyIfNull().ToString().Length > 0)
@@ -259,8 +259,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 foreach (var c in pageLinq)
                 {
                     string ativoIcon = c.ativo == true
-                        ? LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "")
-                        : LibIcons.getIcon("fa-solid fa-circle", "Inativo", "red", "");
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
 
                     string descTraducao = c.description.EmptyIfNull().ToString();
                     if (c.traducao.EmptyIfNull().ToString().Length > 0)
@@ -420,8 +420,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 foreach (var c in page)
                 {
                     string ativoIcon = c.ativo
-                        ? LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "")
-                        : LibIcons.getIcon("fa-solid fa-circle", "Inativo", "red", "");
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
 
                     string nomeProdutoGdi = "";
                     if (c.id_produto > 0 && produtosMap.TryGetValue(c.id_produto, out var nomeGdi))

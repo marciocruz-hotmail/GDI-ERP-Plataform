@@ -37,7 +37,7 @@
                                                 @Html.HiddenFor(model => model[i].id_comex_produto)
                                                 <td style="text-align:left;">@Html.LabelFor(model => model[i].description, Model[i].description.ToString(), htmlAttributes: new { @class = "col-form-label" })</td>
                                                 <td style="text-align:left;">@Html.TextAreaFor(model => model[i].traducao, new { @class = "form-control", @rows = "3" } )</td>
-                                                <td style="text-align:center;"><div class="form-check form-switch d-inline-flex justify-content-center">@Html.CheckBoxFor(model => model[i].tag1, new { @class = "form-check-input", role = "switch" })</div></td>
+                                                <td style="text-align:center;"><div class="form-check form-switch d-inline-flex justify-content-center">@Html.CheckBoxFor(model => model[i].tag1, new { @class = "form-check-input switch-success", role = "switch" })</div></td>
                                             </tr>
                                         }
                                     </tbody>

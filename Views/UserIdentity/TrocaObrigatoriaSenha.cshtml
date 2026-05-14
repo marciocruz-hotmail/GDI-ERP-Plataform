@@ -8,21 +8,11 @@
         : Url.Content("~/" + wallPaper.TrimStart('~', '/'));
 }
 
-<style>
-    .app-content .container-fluid,
-    .app-content {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-</style>
-
-@using (Html.BeginForm("TrocaObrigatoriaSenhaExecute", "UserIdentity", FormMethod.Post, new { id = "formTrocaObrigatoriaSenha" }))
-{
-    <!DOCTYPE html>
-    <html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/favicon-v2.ico">
         <link rel="shortcut icon" href="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/favicon-v2.ico">
         <title>Aero FlightX - @ViewBag.Version</title>
@@ -49,24 +39,48 @@
 
         <!-- ===================== CSS ===================== -->
         <style>
+            /* Login isolado: HTML válido (form só no body) + altura encadeada para evitar scroll no documento */
+            html {
+                height: 100%;
+            }
+
             body {
                 margin: 0;
                 padding: 0;
+                box-sizing: border-box;
+                height: 100%;
+                min-height: 100%;
+                min-height: 100dvh;
                 background-color: rgba(0, 0, 0, 0.76);
                 background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('@wallPaperUrl');
                 background-repeat: no-repeat;
                 background-size: cover;
                 background-position: center center;
-                background-attachment: fixed;
-                min-height: 100vh;
+                background-attachment: scroll;
+            }
+
+            #formTrocaObrigatoriaSenha {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                height: 100%;
+                min-height: 100%;
+                min-height: 100dvh;
             }
 
             .login-page-wrap {
-                min-height: 100vh;
+                box-sizing: border-box;
+                height: 100%;
+                min-height: 100%;
+                min-height: 100dvh;
+                max-height: 100vh;
+                max-height: 100dvh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 padding: 24px 16px;
+                overflow-x: hidden;
+                overflow-y: auto;
             }
 
             a {
@@ -150,6 +164,8 @@
 
 
     <body style="margin: 0; padding: 0;">
+@using (Html.BeginForm("TrocaObrigatoriaSenhaExecute", "UserIdentity", FormMethod.Post, new { id = "formTrocaObrigatoriaSenha" }))
+{
         <div class="login-page-wrap">
             @Html.AntiForgeryToken()
             <!-- ===== LOGIN ===== -->
@@ -168,7 +184,7 @@
                         </div>
                         <br/>
                     </div>
-                    <form>
+                    <div class="troca-senha-fields">
                         <div class="alert alert-info">
                             Sua senha expirou. Informe a senha atual e defina uma nova senha para continuar.
                         </div>
@@ -199,13 +215,10 @@
                         </div>
                         <button type="submit" class="btn btn-lg btn-success w-100"><i class="fa-solid fa-check">&nbsp;&nbsp;</i>Alterar senha</button>
                         @Html.ActionLink("Cancelar", "TrocaObrigatoriaSenhaCancelar", "UserIdentity", null, new { @class = "btn btn-lg btn-secondary w-100 mt-2" })
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-
-    </body>
-</html>
 }
 
 <script type="text/javascript">
@@ -226,3 +239,6 @@
         LibMessageProcessando('Alterando senha...');
     });
 </script>
+
+    </body>
+</html>

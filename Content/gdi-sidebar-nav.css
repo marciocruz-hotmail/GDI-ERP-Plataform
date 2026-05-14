@@ -1,0 +1,25 @@
+/**
+ * GDI — afinação do menu lateral (AdminLTE 4).
+ * Carregar depois de adminlte.min.css.
+ * Ref. tema: .nav-icon 1.5rem + .nav-link p padding-left 0.5rem — aqui afinação intermédia (não colado).
+ *
+ * Nível 1: filhos diretos de ul.sidebar-menu (> .nav-item > .nav-link).
+ * Submenu: .nav-treeview > .nav-item > .nav-link (não duplica o nível 1 graças ao >).
+ */
+.sidebar-wrapper .sidebar-menu > .nav-item > .nav-link > .nav-icon {
+    min-width: 1.125rem;
+    max-width: 1.125rem;
+}
+
+.sidebar-wrapper .sidebar-menu > .nav-item > .nav-link > p {
+    padding-left: 0.25rem;
+}
+
+.sidebar-wrapper .sidebar-menu .nav-treeview > .nav-item > .nav-link > .nav-icon {
+    min-width: 1.125rem;
+    max-width: 1.125rem;
+}
+
+.sidebar-wrapper .sidebar-menu .nav-treeview > .nav-item > .nav-link > p {
+    padding-left: 0.25rem;
+}

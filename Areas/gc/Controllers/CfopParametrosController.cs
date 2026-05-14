@@ -92,7 +92,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             foreach (var c in displayedRecords)
             {
-                String _ativo = LibIcons.getIcon("fa-solid fa-circle", "Ativo", "green", "");
+                String _ativo = LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "");
                 list.Add(new[] {
                                     "", // Coluna de Seleção
                                     c.id_cfop_parametro.ToString(),
