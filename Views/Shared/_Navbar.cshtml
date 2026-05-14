@@ -1,10 +1,19 @@
 @model GdiPlataform.Domain.ContextoModel
 @using GdiPlataform.Security
+@using System
 @{
     var counterNavbarItemsMessage = 0;
     var counterNavbarItemsTask = 0;
     var counterNavbarItemsAlert = 0;
     var counterNavbarItemsAtividades = 0;
+    Layout = null;
+    var wallPaper = (ViewBag.WallPaper ?? "").ToString();
+    var wallPaperUrl = wallPaper.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+        ? wallPaper
+        : Url.Content("~/" + wallPaper.TrimStart('~', '/'));
+    /* Portal cliente: perfil com role dedicada (RenderAction não herda ViewBag do login). */
+    var isPortalClienteNav = CachePersister.userIdentity != null
+        && new CustomPrincipal(CachePersister.userIdentity).IsInRole("gc_PortalCliente_PortalFinanceiro");
 }
 
 
@@ -156,72 +165,82 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa fa-database me-2"></i>Ambiente
-                            <span class="float-end text-secondary fs-7">@Model.userIdentity.AmbienteDatabase</span>
-                        </a>
-                    </li>
+                    @if (isPortalClienteNav)
+                    {
+                        <li>
+                            <a href="@Url.Action("Logout","UserIdentity", new { area = "" })" class="dropdown-item">
+                                <i class="fa fa-sign-out-alt me-2"></i>&nbsp;Sair do Sistema
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa fa-database me-2"></i>Ambiente
+                                <span class="float-end text-secondary fs-7">@Model.userIdentity.AmbienteDatabase</span>
+                            </a>
+                        </li>
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa fa-building me-2"></i> Empresa
-                            <span class="float-end text-secondary fs-7">@Model.userIdentity.NomeColigada</span>
-                        </a>
-                    </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa fa-building me-2"></i> Empresa
+                                <span class="float-end text-secondary fs-7">@Model.userIdentity.NomeColigada</span>
+                            </a>
+                        </li>
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa fa-cubes me-2"></i> Filial
-                            <span class="float-end text-secondary fs-7">@Model.userIdentity.FilialNome</span>
-                        </a>
-                    </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa fa-cubes me-2"></i> Filial
+                                <span class="float-end text-secondary fs-7">@Model.userIdentity.FilialNome</span>
+                            </a>
+                        </li>
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa-regular fa-address-card me-2"></i> Perfil
-                            <span class="float-end text-secondary fs-7">@Model.userIdentity.PerfilNome</span>
-                        </a>
-                    </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa-regular fa-address-card me-2"></i> Perfil
+                                <span class="float-end text-secondary fs-7">@Model.userIdentity.PerfilNome</span>
+                            </a>
+                        </li>
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa fa-hashtag me-2"></i> Versão
-                            <span class="float-end text-secondary fs-7">@Model.versaoPlataforma</span>
-                        </a>
-                    </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa fa-hashtag me-2"></i> Versão
+                                <span class="float-end text-secondary fs-7">@Model.versaoPlataforma</span>
+                            </a>
+                        </li>
 
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa-solid fa-tag me-2"></i> Tag
-                            <span class="float-end text-secondary fs-7">@CachePersister.userIdentity.GoogleTag</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="fa-solid fa-text-width me-2"></i> Width;Height
-                            <span class="float-end text-secondary fs-7">@CachePersister.userIdentity.DisplayScreenWidth;@CachePersister.userIdentity.DisplayScreenHeight</span>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider" /></li>
-                    <li>
-                        <a href="#" onclick="jsYesShowNavigator(); return false;" class="dropdown-item">
-                            <i class="fa-solid fa-tablet-alt me-2"></i>&nbsp;Dados Device
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider" /></li>
-                    <li>
-                        <a href="#" onclick="jsModalUsuarioTrocarSenha(); return false;" class="dropdown-item">
-                            <i class="fa fa-user-lock me-2"></i>&nbsp;Trocar Senha
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider" /></li>
-                    <li>
-                        <a href="@Url.Action("Logout","UserIdentity", new { area = "" })" class="dropdown-item">
-                            <i class="fa fa-sign-out-alt me-2"></i>&nbsp;Sair do Sistema
-                        </a>
-                    </li>
-
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa-solid fa-tag me-2"></i> Tag
+                                <span class="float-end text-secondary fs-7">@CachePersister.userIdentity.GoogleTag</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fa-solid fa-text-width me-2"></i> Width;Height
+                                <span class="float-end text-secondary fs-7">@CachePersister.userIdentity.DisplayScreenWidth;@CachePersister.userIdentity.DisplayScreenHeight</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <a href="#" onclick="jsYesShowNavigator(); return false;" class="dropdown-item">
+                                <i class="fa-solid fa-tablet-alt me-2"></i>&nbsp;Dados Device
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <a href="#" onclick="jsModalUsuarioTrocarSenha(); return false;" class="dropdown-item">
+                                <i class="fa fa-user-lock me-2"></i>&nbsp;Trocar Senha
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <a href="@Url.Action("Logout","UserIdentity", new { area = "" })" class="dropdown-item">
+                                <i class="fa fa-sign-out-alt me-2"></i>&nbsp;Sair do Sistema
+                            </a>
+                        </li>
+                    }
                 </ul>
             </li>
             <!-- USER MENU - END -->

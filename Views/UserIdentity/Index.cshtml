@@ -1,11 +1,13 @@
 @model GdiPlataform.ViewModels.IdentityViewModel
 @using GdiPlataform.Security
+@using System
 @{
     Layout = null;
     var wallPaper = (ViewBag.WallPaper ?? "").ToString();
     var wallPaperUrl = wallPaper.StartsWith("http", StringComparison.OrdinalIgnoreCase)
         ? wallPaper
         : Url.Content("~/" + wallPaper.TrimStart('~', '/'));
+    var portalClienteLogin = ViewBag.PortalClienteLogin as bool? == true;
 }
 
 <style>
@@ -25,7 +27,7 @@
         <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
         <link rel="icon" href="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/favicon-v2.ico">
         <link rel="shortcut icon" href="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/favicon-v2.ico">
-        <title>Aero FlightX - @ViewBag.Version</title>
+        <title>@(portalClienteLogin ? "GDI - Portal do Cliente" : ("Aero FlightX - " + ViewBag.Version))</title>
 
         <link rel="stylesheet" href="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap-icons-1.13.1/bootstrap-icons.min.css" />
         <link href="~/Content/kaushan-script-local.css" rel="stylesheet" />
@@ -163,12 +165,26 @@
                                 <br />
                             </div>
 
-                            <div class="logo mb-3">
-                                <div class="col-md-12 text-center">
-                                    <h1>Aero FlightX</h1>
+                            @if (portalClienteLogin)
+                            {
+                                <div class="logo mb-3">
+                                    <div class="col-md-12 text-center">
+                                        <h1>Portal do Cliente GDI</h1>
+                                    </div>
+                                    <br />
                                 </div>
-                                <br/>
-                            </div>
+                            }
+                            else
+                            {
+                                <div class="logo mb-3">
+                                    <div class="col-md-12 text-center">
+                                        <h1>Aero FlightX</h1>
+                                    </div>
+                                    <br />
+                                </div>
+                            }
+
+
                             @if (ViewBag.Error != null)
                             {
                                 <div class="alert alert-danger">
@@ -187,19 +203,38 @@
                                     <strong>@TempData["Info"]</strong>
                                 </div>
                             }
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                                @Html.EditorFor(model => model.userIdentity.Acesso, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true", placeholder = "Enter Username", title = "Enter Username", required = true, type = "text" } })
-                            </div>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                                @Html.EditorFor(model => model.userIdentity.Password, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter Password", title = "Enter Password", required = true, type = "password" } })
-                            </div>
-                            @Html.HiddenFor(model => model.userIdentity.DisplayScreenWidth)
-                            @Html.HiddenFor(model => model.userIdentity.DisplayScreenHeight)
-                            <div class="col-md-12 text-center">
-                                <button type="button" class="btn w-100 mybtn btn-primary tx-tfm" onclick="jsValidarAcesso()">Login</button>
-                            </div>
+                            @if (portalClienteLogin)
+                            {
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                    @Html.EditorFor(model => model.userIdentity.ClienteIdentificador, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true", placeholder = "Código do cliente", title = "Código do cliente", type = "text" } })
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                                    @Html.EditorFor(model => model.userIdentity.ClienteCpfCnpj, new { htmlAttributes = new { @class = "form-control", placeholder = "CPF ou CNPJ (somente números)", title = "CPF ou CNPJ", type = "text" } })
+                                </div>
+                                @Html.HiddenFor(model => model.userIdentity.DisplayScreenWidth)
+                                @Html.HiddenFor(model => model.userIdentity.DisplayScreenHeight)
+                                <div class="col-md-12 text-center">
+                                    <button type="button" class="btn w-100 mybtn btn-primary tx-tfm" onclick="jsValidarPortalCliente()">Entrar no portal</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                    @Html.EditorFor(model => model.userIdentity.Acesso, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true", placeholder = "Enter Username", title = "Enter Username", required = true, type = "text" } })
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                    @Html.EditorFor(model => model.userIdentity.Password, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter Password", title = "Enter Password", required = true, type = "password" } })
+                                </div>
+                                @Html.HiddenFor(model => model.userIdentity.DisplayScreenWidth)
+                                @Html.HiddenFor(model => model.userIdentity.DisplayScreenHeight)
+                                <div class="col-md-12 text-center">
+                                    <button type="button" class="btn w-100 mybtn btn-primary tx-tfm" onclick="jsValidarAcesso()">Login</button>
+                                </div>
+                            }
                         </div>
                     </div>
         </div>
@@ -214,7 +249,7 @@
     $(function () {
         $("input[type=text]").keypress(function (e) {
             if (e.keyCode == 13) {
-                jsValidarAcesso();
+                @(portalClienteLogin ? "jsValidarPortalCliente();" : "jsValidarAcesso();")
             }
         });
         $("input[type=password]").keypress(function (e) {
@@ -223,6 +258,24 @@
             }
         });
     });
+
+    function jsValidarPortalCliente() {
+        try {
+            $('#userIdentity_DisplayScreenWidth').val($(window).width());
+            $('#userIdentity_DisplayScreenHeight').val($(window).height());
+            var cod = $('#userIdentity_ClienteIdentificador').val();
+            var doc = $('#userIdentity_ClienteCpfCnpj').val();
+            if (isEmpty((cod || '').toString().trim()) || isEmpty((doc || '').toString().trim())) {
+                LibMessageAlert("Atenção", "Preencha o <b>código do cliente</b> e o <b>CPF/CNPJ</b>.");
+            } else {
+                LibMessageProcessando("Validando acesso ao portal…");
+                $("#UserIdentity").submit();
+            }
+        }
+        catch (err) {
+            LibMessageError("Atenção", (err && err.message) ? err.message.toString() : String(err));
+        }
+    }
 
     function jsValidarAcesso() {
         try {

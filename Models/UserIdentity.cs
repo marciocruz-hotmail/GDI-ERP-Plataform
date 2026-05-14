@@ -30,6 +30,10 @@ namespace GdiPlataform.Models
         public string Acesso { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+        /// <summary>Login público portal do cliente (código + CPF/CNPJ).</summary>
+        public string ClienteIdentificador { get; set; }
+        public string ClienteCpfCnpj { get; set; }
+        public int IdCliente { get; set; }
         public string Dominio { get; set; }
         public string SubDominio { get; set; }
         public string ImgLogoSubdominio { get; set; }

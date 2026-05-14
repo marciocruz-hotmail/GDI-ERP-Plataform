@@ -1,0 +1,213 @@
+@model GdiPlataform.Areas.crm.Models.cstListaPedidosPortal
+@using GdiPlataform.Security
+@{
+    ViewBag.PortalClienteBrowserTitle = true;
+}
+<div class="row">
+    <div class="col-lg-12 p-0">
+        <div class="card m-0">
+            <div class="card-title m-0 px-3 py-2 bg-body-secondary border-bottom">
+                <h5 class="mb-0">@Html.Raw(ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
+                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
+                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+
+            <div class="card-header text-center py-2 m-0 bg-body-tertiary border-bottom">
+                <span class="fw-semibold text-secondary" style="font-size:1.05rem;">@CachePersister.userIdentity.Username</span>
+            </div>
+
+            <div class="card-body p-2">
+                @for (int i = 0; i < Model.ListaPedidos.Count; i++)
+                {
+                    <div class="card border shadow-sm mb-3">
+                        <div class="card-header text-center py-2 m-0 bg-body-secondary border-bottom">
+                            <span class="fw-semibold text-secondary" style="font-size:1.05rem;">Pedido Nº @Model.ListaPedidos[i].PedidoNumero&nbsp;&nbsp;-&nbsp;&nbsp;Data:&nbsp;@Model.ListaPedidos[i].PedidoData</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="card card-outline card-secondary h-100 m-0 shadow-none">
+                                        <div class="card-header py-2 text-center bg-transparent border-bottom-0 pb-0">
+                                            <span class="fw-semibold">Dados do Pedido</span>
+                                        </div>
+                                        <div class="card-body pt-2 pb-3 small">
+                                            <div class="row g-1 mb-1">
+                                                <div class="col-5 text-md-end text-muted">Nº Pedido</div>
+                                                <div class="col-7 text-md-start">@Model.ListaPedidos[i].PedidoNumero</div>
+                                            </div>
+                                            <div class="row g-1 mb-1">
+                                                <div class="col-5 text-md-end text-muted">Data</div>
+                                                <div class="col-7 text-md-start">@Model.ListaPedidos[i].PedidoData</div>
+                                            </div>
+                                            <div class="row g-1 mb-1">
+                                                <div class="col-5 text-md-end text-muted">R$ Valor</div>
+                                                <div class="col-7 text-md-start">@Model.ListaPedidos[i].PedidoValor</div>
+                                            </div>
+                                            <div class="row g-1 mb-1">
+                                                <div class="col-5 text-md-end text-muted">Qtd. Itens</div>
+                                                <div class="col-7 text-md-start">@Model.ListaPedidos[i].PedidoQtdItens</div>
+                                            </div>
+                                            <div class="row g-1 mb-0">
+                                                <div class="col-5 text-md-end text-muted">Consultor</div>
+                                                <div class="col-7 text-md-start">@Model.ListaPedidos[i].ConsultorNome</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="card card-outline card-primary h-100 m-0 shadow-none">
+                                        <div class="card-header py-2 text-center bg-transparent border-bottom-0 pb-0">
+                                            <span class="fw-semibold">Documentos do Pedido</span>
+                                        </div>
+                                        <div class="card-body pt-2 pb-3">
+
+                                            @if (Model.ListaPedidos[i].PedidoQtdNotas > 0)
+                                            {
+                                                <div class="row g-2 mb-2">
+                                                    @if (Model.ListaPedidos[i].NFe1DanfeURL.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe1DanfeURL')"><i class="fa-regular fa-file-pdf fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe1DanfeDescricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].NFe1XmlDescricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe1XmlURL')"><i class="fa-regular fa-file-code fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe1XmlDescricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].NFe2DanfeURL.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe2DanfeURL')"><i class="fa-regular fa-file-pdf fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe2DanfeDescricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].NFe2XmlDescricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe2XmlURL')"><i class="fa-regular fa-file-code fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe2XmlDescricao</button></div>}
+                                                </div>
+                                            }
+
+                                            @if (Model.ListaPedidos[i].PedidoQtdNotas > 2)
+                                            {
+                                                <div class="row g-2 mb-2">
+                                                    @if (Model.ListaPedidos[i].NFe3DanfeURL.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe3DanfeURL')"><i class="fa-regular fa-file-pdf fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe3DanfeDescricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].NFe3XmlDescricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe3XmlURL')"><i class="fa-regular fa-file-code fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe3XmlDescricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].NFe4DanfeURL.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe4DanfeURL')"><i class="fa-regular fa-file-pdf fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe4DanfeDescricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].NFe4XmlDescricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsDownloadNfe('@Model.ListaPedidos[i].NFe4XmlURL')"><i class="fa-regular fa-file-code fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].NFe4XmlDescricao</button></div>}
+                                                </div>
+                                            }
+
+                                            @if (Model.ListaPedidos[i].PedidoQtdFinanceiro > 0)
+                                            {
+                                                <div class="row g-2 mb-2">
+                                                    @if (Model.ListaPedidos[i].Financeiro1Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro1Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro1Descricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].Financeiro2Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro2Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro2Descricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].Financeiro3Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro3Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro3Descricao</button></div>}
+                                                </div>
+                                            }
+
+                                            @if (Model.ListaPedidos[i].PedidoQtdFinanceiro > 3)
+                                            {
+                                                <div class="row g-2 mb-2">
+                                                    @if (Model.ListaPedidos[i].Financeiro4Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro4Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro4Descricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].Financeiro5Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro5Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro5Descricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].Financeiro6Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro6Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro6Descricao</button></div>}
+                                                </div>
+                                            }
+
+                                            @if (Model.ListaPedidos[i].PedidoQtdFinanceiro > 6)
+                                            {
+                                                <div class="row g-2 mb-2">
+                                                    @if (Model.ListaPedidos[i].Financeiro7Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro7Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro7Descricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].Financeiro8Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro8Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro8Descricao</button></div>}
+                                                    @if (Model.ListaPedidos[i].Financeiro9Descricao.Length > 0)
+                                                    {<div class="col-md-4 text-md-start"><button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsDownloadFinanceiro('@Model.ListaPedidos[i].Financeiro9Id')"><i class="fa-solid fa-barcode fa-lg" aria-hidden="true"></i>@Model.ListaPedidos[i].Financeiro9Descricao</button></div>}
+                                                </div>
+                                            }
+
+                                            <div class="row mt-3">
+                                                <div class="col-12 text-end">
+                                                    <button type="button" name="btnSair" title="Sair" onclick="jsSairPortal('@Url.Action("Logout","UserIdentity", new { area = "" })')" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa-solid fa-right-from-bracket fa-lg" aria-hidden="true"></i>Sair do Portal</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        try {
+            if (typeof jsInitForm === 'function') jsInitForm();
+            getValidationSummary(@Html.Raw(Json.Encode((Html.ValidationSummary() == null ? "" : Html.ValidationSummary().ToHtmlString()))));
+        } catch (err) {
+            LibMessageError("Atenção", "[Portal Pedidos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsDownloadFinanceiro(id) {
+        if (id === "-1") {
+            LibMessageAlert("Atenção", "Prezado Cliente esse título está configurado para ser liquidado através de Cartão de Crédito!");
+        } else if (id === "-2") {
+            LibMessageAlert("Atenção", "Prezado Cliente esse título está configurado para ser liquidado através de Ted/Doc/Pix!");
+        } else {
+            jsFinanceiroLancamentoBoleto(id);
+        }
+    }
+
+    function jsFinanceiroLancamentoBoleto(idFinanceiroLancamento) {
+        try {
+            LibMessageProcessando("Processando…");
+            var dataForm = {
+                view_record_gc_financeiro_lancamentos: { id_lancamento: idFinanceiroLancamento }
+            };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjaxFinanceiroBoletoGCPDF", "Pedidos", new { area = "crm" })',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(dataForm),
+                dataType: "json",
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success === true) {
+                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { area = "crm" })' + "?id=" + result.idProcessamento;
+                    } else {
+                        LibMessageAlert("Atenção", result.msg || "Falha ao gerar o boleto.");
+                    }
+                },
+                error: function (xhr) {
+                    LibMessageProcessandoHide();
+                    var msg = (xhr && xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : (xhr && xhr.statusText ? xhr.statusText : "Erro de rede.");
+                    LibMessageAlert("Atenção", msg);
+                }
+            });
+        } catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsFinanceiroLancamentoBoleto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsDownloadNfe(url) {
+        window.open(url, '_blank').focus();
+    }
+
+    function jsSairPortal(urlNew) {
+        try {
+            window.location.href = urlNew;
+        } catch (err) {
+            LibMessageError("Atenção", "[jsSairPortal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>

@@ -1,0 +1,153 @@
+---
+description: Regras globais do ERP GDI Aviação — stack .NET 4.7.2, relação com Portal Cliente (ficheiro único de regras no Portal), fonte de verdade .md na raiz, contexto .cursor, restrições de git/deploy e formato de resposta.
+alwaysApply: true
+---
+
+# GDI-ERP-Plataform — Regras do agente (Cursor)
+
+**Objetivo desta regra:** orientar intervenções no repositório **GDI-ERP-Plataform** com contexto mínimo duplicado, prioridade clara e ações verificáveis. **Língua das respostas ao utilizador:** português brasileiro.
+
+**Fonte de verdade na raiz:** em conflito entre outros `.md` (ou documentação Markdown geral) na **raiz deste** repositório e o **código-fonte**, `.csproj` ou `Views/`, **prevalece o repositório** (código e manifestos do projeto).
+
+---
+
+## 0. Relação com GDI-PortalCliente-Plataform (repositório irmão)
+
+> **Dois repositórios distintos** na mesma máquina de desenvolvimento. São **semelhantes** (ASP.NET MVC, .NET Framework, SQL Server, ecossistema GDI), porém **código, convenções e versões de UI/libs não são intercambiáveis** salvo evidência explícita no repositório em que se está a trabalhar.
+
+### 0.1 Pastas no disco (fonte única de caminho)
+
+| Projeto | Pasta |
+|---------|--------|
+| **GDI-ERP-Plataform** (este repositório) | `C:\Marcio\Projetos\GDI-ERP-Plataform` |
+| **GDI-PortalCliente-Plataform** (irmão, distinto) | `C:\Marcio\Projetos\GDI-PortalCliente-Plataform` |
+
+- **Regras específicas de tecnologia** (versões de Bootstrap/AdminLTE/DataTables, bundles, helpers `GdiDt*` / `GdiAjax*` em `start.js`, scripts Python de verificação do ERP, áreas `gc`/`g`, módulos COMEX, etc.) devem constar **apenas** no ficheiro de instruções **deste** repositório: **este `.mdc`** + **`CLAUDE.md`** na raiz do ERP.
+- **No Portal:** `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\rules\gdi-portal-cliente-plataform.mdc` + **`CLAUDE.md`** na raiz do Portal. A relação Portal↔ERP (pastas, o que do ERP **não** se aplica ao Portal) está na **secção 9** desse `.mdc` (regras Cursor do Portal estão **consolidadas** nesse único ficheiro em `.cursor/rules/`). **Não** confundir com **este** `gdi-erp-plataform.mdc` no repositório do **ERP**.
+- **Manutenção sem drift:** convenções comuns (ex.: política de `CHANGELOG-DEV`, restrições de ambiente, ordem sugerida nas respostas) podem ser alinhadas **em separado** em cada repositório; **não** copiar blocos longos de stack de um produto para o `CLAUDE.md` ou `.mdc` do outro.
+
+### 0.2 O que as regras do Portal implicam para o ERP
+
+Referência analisada: `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\rules\gdi-portal-cliente-plataform.mdc` (inclui contexto cruzado Portal↔ERP na **secção 9** desse ficheiro).
+
+| Tema nas regras do Portal | Aplicável ao ERP? | Nota |
+|---------------------------|-------------------|------|
+| Política de ambiente (só raiz do repo, sem git remoto, sem deploy remoto, PRs remotas, IIS fora do local, alterações só locais) | Sim | Já espelhada na §3 deste ficheiro; manter coerente. |
+| Metodologia (causa raiz, mudança mínima, impacto, build) | Sim | Alinhada à §4. |
+| `CHANGELOG-DEV` + `.cursor/context/` + formato de resposta | Sim | Alinhado às §§2, 5 e 6. |
+| Português brasileiro; TLS sem SSL3 | Sim | Explícito no cabeçalho e §7. |
+| Identidade de stack do **Portal** (AdminLTE 3.x, Bootstrap 4.x, DataTables 1.13.x, EF6 como único padrão dominante, secrets em `App_Data/Secrets`, etc.) | **Não** | Pertence **só** ao Portal; **não** presumir ao editar o ERP. |
+| Tabela “o que no ERP aplica ao Portal” (**secção 9** de `gdi-portal-cliente-plataform.mdc` no repo Portal) | Contexto | Útil para humanos/agentes em **multi-root**; ao editar **este** repo, prevalecem a stack e o `CLAUDE.md` **do ERP**. |
+
+---
+
+## 1. Identidade do projeto (referência rápida)
+
+| Área | Padrão |
+|------|--------|
+| Backend | ASP.NET MVC, **.NET Framework 4.7.2** |
+| Dados | SQL Server — manter **um** padrão por fluxo (Entity Framework **ou** ADO.NET; não misturar) |
+| UI | Bootstrap 5, AdminLTE 4, Font Awesome 7.2.0 |
+| JS | DataTables (datatables.net-bs5 2.3.2), SweetAlert2, Tempus Dominus 6.9.4 |
+| Publicação | Visual Studio Publish → IIS (Windows); o agente **não** publica em remoto (ver §3) |
+
+**Empresa / domínio:** GDI Aviação — ERP de importação, comercialização e distribuição de peças aeronáuticas (matriz BH-MG, filial SP).
+
+---
+
+## 2. Ordem de leitura antes de agir
+
+1. **`.cursor/CHANGELOG-DEV.md`** — obrigatório em toda sessão com alteração ou análise relevante. Contém decisões, fases (ex.: DataTables/Ajax), armadilhas e ficheiros críticos. Não contradizer o que está registado sem justificativa explícita no próprio changelog ou na resposta. Se o ficheiro **não existir**, **criá-lo** na primeira intervenção significativa e manter entradas objetivas (alinhado ao Portal).
+2. **`.cursor/context/`** — quando a alteração tocar a área documentada (ex.: `migracao-472-481.md` para `Robos/`, `Web.config`, NuGet, TLS, `ComexImportacoesController.cs`).
+3. **`CLAUDE.md`** (raiz) — padrões longos já consolidados (helpers `GdiDt*` / `GdiAjax*`, fases de migração de mensagens, ficheiros sensíveis). Usar como complemento; evitar duplicar aqui listas extensas que já lá estão.
+4. **Manutenção do `CLAUDE.md` (como no projeto Portal, adaptado ao ERP):** este `.mdc` é a regra **Cursor**; o `CLAUDE.md` é memória longa e índice de padrões **deste** repositório. Registar decisões estáveis durante as sessões (no Cursor: editar diretamente; no Claude Code: fluxo `#` já descrito no próprio `CLAUDE.md`). Manter entradas **objetivas** e **específicas do ERP** — **não** copiar para cá secções longas do **GDI-PortalCliente-Plataform** (stack, paths ou convenções do Portal). Para intervenções pontuais, preferir primeiro o **CHANGELOG-DEV**; usar o `CLAUDE.md` para padrões que devam sobreviver várias sessões.
+
+*Perfis de publish e pastas de artefactos **são os deste** repositório (ex.: `Properties/PublishProfiles/`). Não presumir nomes usados no Portal Cliente (ex.: `CI-Filesystem.pubxml`, `artifacts/webpublish/`) salvo existirem **aqui** com o mesmo propósito.*
+
+---
+
+## 3. Restrições absolutas (sem exceção)
+
+Salvo pedido **explícito e inequívoco** do utilizador numa mensagem dedicada:
+
+| Tema | O que não fazer |
+|------|-------------------|
+| **Workspace** | Não criar, editar nem apagar ficheiros/pastas **fora da raiz deste repositório** (`GDI-ERP-Plataform`). |
+| **Git remoto** | Não `git push`, force-push, alterar remoto/branches/tags remotas, nem criar PRs remotas. Alterações git ficam no working tree local. |
+| **Deploy / infra** | Não deploy remoto (Publish para IIS remoto, MSDeploy remoto, FTP, Azure remoto, pipelines que publiquem para remoto). Não configurar IIS remoto, vhosts ou servidores fora do ambiente local do developer. |
+| **Onde ficam as alterações** | Apenas na cópia de trabalho local; sem envio automático para remotos. |
+
+*Compilar localmente ou gerar pasta de publish no disco é permitido; não usar isso como passo para publicar em remoto.*
+
+---
+
+## 4. Metodologia de trabalho
+
+### 4.1 Análise e causa raiz
+
+- Entender o erro ou pedido; localizar ficheiro, método, view ou query exatos.
+- Mapear referências (Controllers, Views, Models, helpers, JS) ao trecho afetado.
+- Identificar **causa raiz** antes de alterar código.
+
+### 4.2 Alterações mínimas (“cirurgia”)
+
+- Alterar só o necessário ao pedido; sem refactors cosméticos fora de escopo.
+- Não remover métodos, propriedades, `ViewBag`/`ViewData` ou rotas sem confirmação de não uso.
+- Não alterar `_Layout.cshtml` nem partials partilhadas sem verificar consumidores.
+- Melhorias fora de escopo → sugerir como nota para o CHANGELOG, não implementar sem pedido.
+
+### 4.3 Stack e dados
+
+- Não introduzir NuGet nem libs JS não alinhadas à stack da §1 sem aprovação explícita.
+- Não mudar versões de Bootstrap, AdminLTE, DataTables, SweetAlert2, Tempus Dominus.
+- Não alterar schema SQL Server nem SPs sem necessidade explícita; não hardcodar connection strings.
+
+### 4.4 Impacto (checklist mental)
+
+- Outras actions/views/rotas afetadas? O mesmo bug noutros sítios? Comportamento em produção? Partials e bundles? Model/ViewModel reutilizado?
+
+### 4.5 Qualidade antes de concluir
+
+- Build sem erros; evitar warnings novos causados pela alteração.
+- Views `.cshtml` novas ou com helpers `GdiAjax*` / `GdiDt*`: garantir inclusão no `GDI-ERP-Plataform.csproj` quando aplicável (ver CHANGELOG / `Scripts/gdi_verify_csproj_gdi_helpers.py`).
+- `Web.config` / `connectionStrings.config`, `BundleConfig.cs`, `App_Start`, `Filters`, `RouteConfig`: só tocar com intenção documentada.
+- **`Web.Release.config`**, cabeçalhos em `Global.asax.cs` ou endpoint de **health**: ao tocar em release/hardening, seguir o que **este** repo já implementa; não copiar checklist de outro produto sem verificar ficheiros e rotas **aqui**.
+
+## 5. Registo obrigatório após intervenção
+
+Após **toda** intervenção relevante (correção, implementação, refatoração autorizada, análise que fixe estado do projeto), acrescentar entrada no **topo** do histórico em `.cursor/CHANGELOG-DEV.md`, no formato já definido no próprio CHANGELOG (bloco com data, tipo, ficheiros, problema, solução, decisões, evitado, impactos, atenções). Manter **objetivo e curto**.
+
+---
+
+## 6. Formato obrigatório das respostas ao utilizador
+
+Responder **nesta ordem** (alinhado a `CLAUDE.md`):
+
+| Ordem | Secção | Conteúdo |
+|-------|--------|----------|
+| 1 | Diagnóstico | Problema, onde ocorre, causa raiz. |
+| 2 | Arquivos afetados | Lista completa (C#, Razor, JS, SQL, etc.). |
+| 3 | Análise de impacto | Dependências, rotas, views, riscos em produção. |
+| 4 | Solução | Alterações concretas; citar código quando útil. |
+| 5 | Atenção para o Publish | IIS, `Web.config`, SQL, bundles, validação manual. |
+| 6 | O que NÃO foi alterado | Preservações intencionais e porquê. |
+| 7 | Registro para o CHANGELOG-DEV.md | Bloco pronto a colar no topo do histórico. |
+
+Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **Arquivos afetados**, …) desde que a ordem e o conteúdo acima se mantenham.
+
+---
+
+## 7. Lembranças técnicas curtas
+
+- Razor: respeitar `@Html.*`, `@Url.*`, `@model`, `@ViewBag`.
+- UI: preferir padrões AdminLTE 4 do projeto; DataTables e Ajax seguir exemplos existentes e helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (detalhe em `CLAUDE.md`).
+- Evitar `alert()` / `confirm()` nativos onde o projeto usa SweetAlert2 / `LibMessage*`.
+- TLS em código novo: não replicar SSL3; preferir **Tls12** ou **Tls12 \| Tls13** (ver `.cursor/context/` quando aplicável).
+
+---
+
+## 8. O que esta regra não substitui
+
+- Detalhe fino de contratos JSON DataTables, listas de controllers por fase e scripts Python de verificação — manter em **`CLAUDE.md`** e **`CHANGELOG-DEV.md`**.
+- Documentação de migração 4.7.2→4.8.1 — **`.cursor/context/`**.
+- **Stack, secrets e checklist do Portal Cliente** — apenas em `C:\Marcio\Projetos\GDI-PortalCliente-Plataform\.cursor\rules\gdi-portal-cliente-plataform.mdc` e no **`CLAUDE.md`** da raiz desse repositório; consultar **só** quando o trabalho for **explicitamente** na pasta do Portal (fora do escopo de edição deste workspace, salvo pedido explícito do utilizador).

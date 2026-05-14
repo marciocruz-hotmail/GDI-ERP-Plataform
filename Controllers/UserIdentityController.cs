@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Data.Entity;
+using System.Globalization;
 using System.IO;
 using System.IO.Hashing;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.SessionState;
 using GdiPlataform.Db;
@@ -43,6 +45,9 @@ namespace GdiPlataform.Controllers
                 CachePersister.logout();
                 HttpContext.Session["TokenId"] = HttpContext.Session.SessionID.ToString();
                 System.Web.HttpContext context = System.Web.HttpContext.Current;
+
+                string hostTenant = GetHostWithoutPort(Request);
+                ViewBag.PortalClienteLogin = IsPortalClienteHost(hostTenant);
 
                 string host = this.Request.Headers["Host"].ToLower().Replace("http://", "").Replace("https://", "").Replace("www.", "").Trim().ToLowerInvariant();
                 int.TryParse(DateTime.Now.ToString("HH"), out int horaAtual);
@@ -123,7 +128,7 @@ namespace GdiPlataform.Controllers
                 ViewBag.WallPaper = "Images/defaultWallpaper.jpg";
             }
             ViewBag.Version = ControlVersion.getShortVersion();
-            return View();
+            return View(new IdentityViewModel { userIdentity = new UserIdentity() });
         }
 
         [HttpPost]
@@ -163,6 +168,74 @@ namespace GdiPlataform.Controllers
                 else
                 {
                     subDominio = host.Substring(0, index);
+                }
+
+                ViewBag.PortalClienteLogin = IsPortalClienteHost(host);
+
+                if (IsPortalClienteHost(host))
+                {
+                    if (avm?.userIdentity == null)
+                    {
+                        ViewBag.Error = "Conta inválida!";
+                        return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                    }
+
+                    string clienteIdentificador = LibStringFormat.SomenteNumeros(avm.userIdentity.ClienteIdentificador.EmptyIfNull().ToString()).Trim();
+                    string clienteCpfCnpj = LibStringFormat.SomenteNumeros(avm.userIdentity.ClienteCpfCnpj.EmptyIfNull().ToString()).Trim();
+
+                    if (clienteCpfCnpj.Length != 11 && clienteCpfCnpj.Length != 14)
+                    {
+                        ViewBag.Error = "CPF/CNPJ Inválido!";
+                        return View("Index", avm);
+                    }
+                    if (clienteIdentificador.Length == 0)
+                    {
+                        ViewBag.Error = "Código do Cliente Inválido!";
+                        return View("Index", avm);
+                    }
+
+                    var allTenantsPortal = SetTenants();
+                    cstTenant currentTenantPortal = allTenantsPortal.FirstOrDefault(t => t.subDominio == subDominio);
+                    if (currentTenantPortal == null)
+                    {
+                        ViewBag.Error = "Domínio inválido [" + subDominio + "]!";
+                        return View("Index", avm);
+                    }
+
+                    LibDB.CheckConnectionDB(currentTenantPortal.database);
+                    db = new GdiPlataformEntities(currentTenantPortal.database);
+
+                    int clienteIdentificadorInt = int.Parse(clienteIdentificador);
+                    g_clientes recordClientePortal = db.g_clientes.Find(clienteIdentificadorInt);
+                    if (recordClientePortal == null)
+                    {
+                        ViewBag.Error = "Cliente não localizado!";
+                        return View("Index", avm);
+                    }
+                    if (recordClientePortal.ativo == false)
+                    {
+                        ViewBag.Error = "Cliente Inativo!";
+                        return View("Index", avm);
+                    }
+                    if (recordClientePortal.cpf != clienteCpfCnpj && recordClientePortal.cnpj != clienteCpfCnpj)
+                    {
+                        ViewBag.Error = "CPF/CNPJ Inválido!";
+                        return View("Index", avm);
+                    }
+
+                    string dataLimiteSqlP = Convert.ToDateTime(DateTime.Now.AddYears(-1), new CultureInfo("en-US")).ToString("yyyy-MM-dd 00:00:00");
+                    string sqlPedidosP = " select mov.* from gc_movimentos mov where id_cliente = " + recordClientePortal.id_cliente.ToString()
+                        + " and mov.id_movimento_tipo in (3,4,8) "
+                        + " and mov.id_movimento_status = 2 and mov.id_movimento_posicao >= 4 "
+                        + " and mov.datahora_aprovacao > '" + dataLimiteSqlP + "' "
+                        + " order by mov.datahora_aprovacao desc ";
+                    if (db.gc_movimentos.SqlQuery(sqlPedidosP).ToList().Count == 0)
+                    {
+                        ViewBag.Error = "Não há pedidos para o cliente!";
+                        return View("Index", avm);
+                    }
+
+                    return CompletePortalClienteLogin(db, recordClientePortal, currentTenantPortal, dominio, subDominio);
                 }
 
                 // SessionID
@@ -774,9 +847,232 @@ namespace GdiPlataform.Controllers
             };
             allTenants.Add(tenant5);
 
+            // Portal do cliente (DNS portalflightx.com / homologacao.portalflightx.com — mesmo connection name do monólito Portal)
+            cstTenant tenantPortalCliente = new cstTenant
+            {
+                subDominio = "portalflightx",
+                ImgLogoSubdominio = "logoGdi.png",
+                database = "GdiPlataformEntities_gdi_producao",
+                GoogleTag = "G-F73ZPQ7GLY",
+                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
+            };
+            allTenants.Add(tenantPortalCliente);
+
             return allTenants;
         }
         #endregion
+
+        /// <summary>Sessão portal cliente (CachePersister + role) — usado por AcessoPortal e POST Index em hosts portal.</summary>
+        private ActionResult CompletePortalClienteLogin(GdiPlataformEntities dbCtx, g_clientes recordCliente, cstTenant currentTenant, string dominio, string subDominio)
+        {
+            a_parametros recordAParametros = dbCtx.a_parametros.FirstOrDefault();
+            g_parametros recordGParametros = dbCtx.g_parametros.FirstOrDefault();
+            if (recordAParametros == null)
+            {
+                ViewBag.Error = "Parâmetros administrativos não localizados.";
+                ViewBag.PortalClienteLogin = true;
+                ViewBag.Version = ControlVersion.getShortVersion();
+                return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+            }
+
+            UserIdentity userIdentity = new UserIdentity
+            {
+                DataHoraExpiracao = LibDateTime.getDataHoraBrasilia().AddHours(4),
+                VersionERP = ControlVersion.getShortVersion(),
+                EmpresaID = recordAParametros.empresa_id.GetValueOrDefault(),
+                EmpresaNome = recordAParametros.empresa_nome.ToString(),
+                record_g_parametros = recordGParametros ?? new g_parametros(),
+                IdPerfil = -900,
+                IdUsuario = -900,
+                IdCliente = recordCliente.id_cliente,
+                TokenAcesso = "C" + recordCliente.id_cliente,
+                Administrador = false,
+                Username = recordCliente.nome,
+                Acesso = recordCliente.nome,
+                Email = recordCliente.email_principal,
+                Password = recordCliente.senha_portal,
+                Dominio = dominio,
+                SubDominio = subDominio,
+                ImgLogoSubdominio = currentTenant.ImgLogoSubdominio,
+                GoogleTag = currentTenant.GoogleTag,
+                GoogleTagURL = currentTenant.GoogleTagURL,
+                UrlSair = string.Empty,
+                PerfilNome = "Portal do Cliente"
+            };
+
+            string connStr = ConfigurationManager.ConnectionStrings[currentTenant.database].ConnectionString;
+            if (connStr.IndexOf("homologacao", StringComparison.OrdinalIgnoreCase) >= 0) userIdentity.AmbienteDatabase = "Homologação";
+            else if (connStr.IndexOf("producao", StringComparison.OrdinalIgnoreCase) >= 0) userIdentity.AmbienteDatabase = "Produção";
+            else userIdentity.AmbienteDatabase = "Desconhecido";
+
+            CachePersister.dataBase = currentTenant.database;
+
+            var contexto = new Contexto();
+            var contextoModel = new ContextoModel { allNavbarItemMenu = contexto.getNavbarItemsMenu().ToList() };
+            CachePersister.contextoModel = contextoModel;
+
+            CachePersister.userIdentity = userIdentity;
+            CachePersister.userIdentity.id_coligada = recordCliente.id_coligada;
+            CachePersister.userIdentity.NomeColigada = dbCtx.g_filiais.Find(recordCliente.id_filial).nome.ToString();
+            CachePersister.userIdentity.id_filial = recordCliente.id_filial;
+            CachePersister.userIdentity.FilialNome = dbCtx.g_filiais.Find(recordCliente.id_filial).nome.ToString();
+
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            dbCtx.g_filtros.RemoveRange(dbCtx.g_filtros.Where(f => f.token == token).ToList());
+            dbCtx.SaveChanges();
+
+            var regrasAcesso = new List<string> { "gc_PortalCliente_PortalFinanceiro" };
+            CachePersister.userIdentity.Roles = regrasAcesso.ToArray();
+            contextoModel.allNavbarItemMenu.Clear();
+            const int portalMenuGrupoId = -910001;
+            const int portalMenuPedidosId = -910002;
+            contextoModel.allNavbarItemMenu.Add(new NavbarItemMenu
+            {
+                Id = portalMenuGrupoId,
+                level = 1,
+                Ordem = 0,
+                nameOption = "Portal do Cliente",
+                imageClass = "fa-solid fa-building-user",
+                status = true,
+                isParent = true,
+                parentId = 0
+            });
+            contextoModel.allNavbarItemMenu.Add(new NavbarItemMenu
+            {
+                Id = portalMenuPedidosId,
+                level = 2,
+                Ordem = 1,
+                nameOption = "Pedidos",
+                controller = "Pedidos",
+                action = "Index",
+                area = "crm",
+                imageClass = "",
+                status = true,
+                isParent = false,
+                parentId = portalMenuGrupoId
+            });
+
+            return RedirectToAction("Index", "Pedidos", new { area = "crm" });
+        }
+
+        /// <summary>Hosts onde o login é exclusivo do portal do cliente (não o login staff).</summary>
+        private static bool IsPortalClienteHost(string hostWithoutPort)
+        {
+            if (string.IsNullOrWhiteSpace(hostWithoutPort)) return false;
+            var h = hostWithoutPort.Trim().ToLowerInvariant();
+            if (h.StartsWith("www.", StringComparison.Ordinal)) h = h.Substring(4);
+            if (h.EndsWith("portalflightx.com", StringComparison.Ordinal)) return true;
+            if (h.IndexOf("portalflightx", StringComparison.Ordinal) >= 0
+                && (string.Equals(h, "portalflightx", StringComparison.Ordinal)
+                    || h.EndsWith(".local", StringComparison.Ordinal)))
+                return true;
+            return false;
+        }
+
+        private static string GetHostWithoutPort(HttpRequestBase request)
+        {
+            string host = request.Headers["Host"].EmptyIfNull().ToString().ToLowerInvariant()
+                .Replace("http://", "").Replace("https://", "").Replace("www.", "").Trim();
+            int c = host.IndexOf(":");
+            if (c >= 0) host = host.Substring(0, c);
+            return host.Trim();
+        }
+
+        private static string GetSubDominio(string hostWithoutPort)
+        {
+            if (string.IsNullOrEmpty(hostWithoutPort)) return string.Empty;
+            int index = hostWithoutPort.IndexOf(".");
+            if (index < 0) return hostWithoutPort.Trim();
+            return hostWithoutPort.Substring(0, index);
+        }
+
+        /// <summary>GET público usado pelos e-mails de pedido (paridade com o repositório Portal).</summary>
+        [HttpGet]
+        public ActionResult AcessoPortal(string codigocliente, string documentocliente)
+        {
+            try
+            {
+                CachePersister.logout();
+                HttpContext.Session["TokenId"] = HttpContext.Session.SessionID.ToString();
+
+                string host = GetHostWithoutPort(Request);
+                string dominio = Request.Headers["Host"].EmptyIfNull().ToString().ToLowerInvariant().Trim();
+                string subDominio = GetSubDominio(host);
+                ViewBag.PortalClienteLogin = true;
+
+                if (string.IsNullOrEmpty(codigocliente) || string.IsNullOrEmpty(documentocliente))
+                {
+                    ViewBag.Error = "Conta inválida!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+
+                var allTenants = SetTenants();
+                cstTenant currentTenant = allTenants.FirstOrDefault(t => t.subDominio == subDominio);
+                if (currentTenant == null)
+                {
+                    ViewBag.Error = "Domínio inválido [" + subDominio + "]!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+
+                LibDB.CheckConnectionDB(currentTenant.database);
+                db = new GdiPlataformEntities(currentTenant.database);
+
+                string clienteIdentificador = LibStringFormat.SomenteNumeros(codigocliente.EmptyIfNull().ToString()).Trim();
+                string clienteCpfCnpj = LibStringFormat.SomenteNumeros(documentocliente.EmptyIfNull().ToString()).Trim();
+
+                if (clienteCpfCnpj.Length != 11 && clienteCpfCnpj.Length != 14)
+                {
+                    ViewBag.Error = "CPF/CNPJ Inválido!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+                if (clienteIdentificador.Length == 0)
+                {
+                    ViewBag.Error = "Código do Cliente Inválido!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+
+                int clienteIdentificadorInt = int.Parse(clienteIdentificador);
+                g_clientes recordCliente = db.g_clientes.Find(clienteIdentificadorInt);
+                if (recordCliente == null)
+                {
+                    ViewBag.Error = "Cliente não localizado!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+                if (recordCliente.ativo == false)
+                {
+                    ViewBag.Error = "Cliente Inativo!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+                if (recordCliente.cpf != clienteCpfCnpj && recordCliente.cnpj != clienteCpfCnpj)
+                {
+                    ViewBag.Error = "CPF/CNPJ Inválido!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+
+                string dataLimiteSql = Convert.ToDateTime(DateTime.Now.AddYears(-1), new CultureInfo("en-US")).ToString("yyyy-MM-dd 00:00:00");
+                string sqlPedidos = " select mov.* from gc_movimentos mov where id_cliente = " + recordCliente.id_cliente.ToString()
+                    + " and mov.id_movimento_tipo in (3,4,8) "
+                    + " and mov.id_movimento_status = 2 and mov.id_movimento_posicao >= 4 "
+                    + " and mov.datahora_aprovacao > '" + dataLimiteSql + "' "
+                    + " order by mov.datahora_aprovacao desc ";
+                if (db.gc_movimentos.SqlQuery(sqlPedidos).ToList().Count == 0)
+                {
+                    ViewBag.Error = "Não há pedidos para o cliente!";
+                    return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+                }
+
+                return CompletePortalClienteLogin(db, recordCliente, currentTenant, dominio, subDominio);
+            }
+            catch (Exception ex)
+            {
+                CachePersister.logout();
+                string msgErro = LibExceptions.getExceptionShortMessage(ex);
+                msgErro = msgErro.Replace("The underlying provider failed on Open", "Falha ao conectar com o Banco de Dados");
+                ViewBag.Error = "Erro [" + msgErro + "]";
+                ViewBag.PortalClienteLogin = true;
+                return View("Index", new IdentityViewModel { userIdentity = new UserIdentity() });
+            }
+        }
     }
 }
 

@@ -38,12 +38,275 @@
 
 **Armadilhas conhecidas:**
 - Publish Web (VS/MSBuild): pasta obsoleta `obj\...\PackageTmp\...\plugins\bootbox-compat` herdada de build antigo pode ficar **somente leitura** (`d-r---`) e gerar *Warning: Access to the path 'bootbox-compat' is denied* em `Microsoft.Web.Publishing.targets`. **Solução:** apagar `obj` (ou só `obj\Release\Package`) antes de publicar; o projeto fonte não inclui mais `bootbox-compat` (usa `sweetalert2\`).
+- Mesmo ficheiro de targets: *Access to the path 'context' is denied* ao limpar `PackageTmp` — restos de `.cursor\context` ou exclusão incompleta de `.cursor`. O `.csproj` define `ExcludeFoldersFromDeployment` + `ExcludeFromPackageFolders` para `.cursor`; se o aviso persistir, apagar `obj\...\Package\PackageTmp` antes de publicar.
 
 ---
 
 ## HISTÓRICO DE INTERVENÇÕES
 
 > As entradas mais recentes ficam sempre no TOPO desta seção.
+
+---
+
+### [2026-05-14] — `_Navbar`: menu utilizador portal só «Sair» + deteção por role
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/Shared/_Navbar.cshtml` — `isPortalClienteNav` via `CustomPrincipal.IsInRole("gc_PortalCliente_PortalFinanceiro")`; ramo portal com única opção «Sair do Sistema»
+
+**Problema / Demanda:**
+Perfil portal ainda via Ambiente/Empresa/Filial/Perfil/Versão no dropdown; deve ver **apenas** «Sair do Sistema».
+
+**O que foi feito:**
+- Deteção alinhada ao `[CustomAuthorize(Roles = "gc_PortalCliente_PortalFinanceiro")]` da área `crm`. Conteúdo do ramo portal reduzido a um único `<li>`.
+
+---
+
+### [2026-05-14] — `_Navbar`: portal (menu utilizador + sidebar) via `IdCliente`; menu lateral Pedidos
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Views/Shared/_Navbar.cshtml` — `isPortalClienteNav` (`Model.userIdentity.IdCliente > 0`); dropdown portal com Ambiente/Empresa/Filial/Perfil/Versão + Sair (sem Trocar Senha/Device)
+- `Controllers/UserIdentityController.cs` — `PerfilNome` no login portal; após `allNavbarItemMenu.Clear()` itens sintéticos grupo «Portal do Cliente» + «Pedidos» (`crm`)
+
+**Problema / Demanda:**
+`ViewBag.PortalClienteLogin` não existe no `RenderAction` do Navbar → ramo portal do dropdown não aplicado como previsto; com `Clear()` do menu a sidebar ficava sem entradas (só «uma opção» ou vazio).
+
+**O que foi feito:**
+- Deteção de portal autenticado pela sessão (`IdCliente`), alinhada ao `CompletePortalClienteLogin`.
+- Menu lateral mínimo para voltar a `Pedidos/Index` na área `crm`.
+
+---
+
+### [2026-05-14] — Portal cliente título: CS0103 em `_ViewStart` (`ViewBag` indisponível)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/crm/Views/_ViewStart.cshtml` — removido `ViewBag` (StartPage não expõe `ViewBag` em runtime/compilação)
+- `Areas/crm/Views/Pedidos/Index.cshtml` — `ViewBag.PortalClienteBrowserTitle = true` no topo da view (WebViewPage)
+
+**Problema / Demanda:**
+Produção: `CS0103: The name 'ViewBag' does not exist in the current context` em `Areas/crm/Views/_ViewStart.cshtml`.
+
+**O que foi feito:**
+- `_ViewStart` só define `Layout`. O sinal para `<title>` do portal fica em `Pedidos/Index.cshtml` (executa antes do `_Layout` e tem `ViewBag`). Novas views `crm` com `_Layout` devem repetir a linha ou definir no respetivo controller.
+
+---
+
+### [2026-05-14] — Portal cliente: `<title>GDI - Portal do Cliente` (área `crm` + login portal)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Views/Shared/_Layout.cshtml` — `<title>` condicional com `ViewBag.PortalClienteBrowserTitle`
+- `Areas/crm/Views/Pedidos/Index.cshtml` — `ViewBag.PortalClienteBrowserTitle = true` (após correção CS0103; não usar `ViewBag` em `_ViewStart`)
+- `Views/UserIdentity/Index.cshtml` — título do documento quando `portalClienteLogin`
+- `Areas/crm/Views/Pedidos/BoletoPdfFebraban.cshtml` — `<title>` (view `Layout = null`)
+
+**Problema / Demanda:**
+No perfil portal, o título do browser era o mesmo do staff (`aeroflightx.com - versão`); deve ser `GDI - Portal do Cliente` só nas páginas desse perfil, sem alteração global desnecessária.
+
+**O que foi feito:**
+- `_Layout` altera apenas a linha do `<title>` quando `ViewBag.PortalClienteBrowserTitle` está ativo na view que corre antes do layout.
+- Login portal (`UserIdentity/Index` com `ViewBag.PortalClienteLogin`) e PDF boleto (`Layout = null`) com título explícito.
+
+**O que foi evitado e por quê:**
+- Duplicar `_Layout` inteiro só para o portal.
+
+---
+
+### [2026-05-14] — Publish Web: target `GdiStripPackageTmpDotCursorBeforeWppCopy` (aviso `context` / RemoveEmptyDirectories)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `GDI-ERP-Plataform.csproj` — target MSBuild `BeforeTargets="CopyAllFilesToSingleFolderForMsdeploy;CopyAllFilesToSingleFolderForPackage"` (Windows): remove `$(WPPAllFilesInSingleFolder)\.cursor` com `attrib` + `rmdir`
+
+**Problema / Demanda:**
+Aviso persistente `Microsoft.Web.Publishing.targets(2693,5)` — *Access to the path 'context' is denied* em `RemoveEmptyDirectories`, mesmo com `ExcludeFoldersFromDeployment` / `ExcludeFromPackageFolders` para `.cursor`.
+
+**O que foi feito:**
+- Restos em `obj\...\PackageTmp\.cursor` (ex. `context` só leitura ou bloqueado pelo IDE) impedem apagar pastas vazias. O target corre **antes** da cópia WPP e força remoção recursiva da pasta `.cursor` no `PackageTmp` em `Windows_NT`.
+
+**O que foi evitado e por quê:**
+- Não alterar targets Microsoft; extensão só no `.csproj` do projeto.
+
+**Atenção para próximas intervenções:**
+- Build/publish em não-Windows: o target não corre (`OS` ≠ `Windows_NT`); manter limpeza manual de `PackageTmp` se necessário.
+
+---
+
+### [2026-05-14] — Análise: timeout / logout → login portal vs staff (`UserIdentity/Index`)
+**Tipo:** Análise
+**Arquivos tocados:**
+- (nenhum — apenas verificação de código)
+
+**Problema / Demanda:**
+Confirmar se, em timeout de sessão, utilizador no **contexto portal do cliente** volta ao **login de portal** e não ao login staff.
+
+**O que foi verificado:**
+- `CustomAuthorizeAttribute` (não-Ajax) e `UserIdentityController.Logout` (inatividade via `sessionInactivity.js`) redirecionam para **`UserIdentity/Index`** no **mesmo host** da requisição.
+- O GET `UserIdentityController.Index()` define `ViewBag.PortalClienteLogin = IsPortalClienteHost(GetHostWithoutPort(Request))`, logo em FQDN reconhecido (ex.: `*.portalflightx.com`, regras `portalflightx`/`.local`) a view `Views/UserIdentity/Index.cshtml` já apresenta o fluxo de portal.
+- AJAX 401: `gdi-session-handler.js` usa `window.GDI_LoginUrl` (`_Layout`: `Url.Action("Index","UserIdentity")`) — URL relativa ao origin atual; mesmo comportamento.
+- **Limite:** se o portal for acedido por host **não** coberto por `IsPortalClienteHost` (ex.: `localhost` puro, conforme decisão já registada), o login continua o de staff — por desenho. `X-Forwarded-Host` não está tratado no código; atrás de proxy que altere `Host`, validar cabeçalhos no IIS.
+
+---
+
+### [2026-05-14] — CRM `Pedidos/Index`: callout verde + UI alinhada AdminLTE 4 / área `g`
+**Tipo:** Correção + Refatoração (UI)
+**Arquivos tocados:**
+- `Areas/crm/Views/Pedidos/Index.cshtml`
+
+**Problema / Demanda:**
+`callout callout-success` com `h-100` pintava todo o painel com fundo verde (AdminLTE 4 aplica `--lte-callout-bg` em todo o bloco). Modernizar cabeçalhos, cartões e botões ao padrão já usado (ex.: `PortalFinanceiro`).
+
+**O que foi feito:**
+- Substituídos callouts por `card card-outline card-secondary` (dados) e `card card-outline card-primary` (documentos): destaque só na borda superior, corpo neutro.
+- Removidos estilos inline `#EAEDED` / `#aeb6bf`; uso de `bg-body-secondary`, `bg-body-tertiary`, `text-secondary`, `text-muted`, `border`, `shadow-sm`, espaçamento `g-*` / `mb-3`.
+- Botões: `btn-outline-secondary` + `d-inline-flex align-items-center gap-2` para NF/XML; `btn-outline-info` para boletos; `btn-outline-secondary` no Sair (antes `btn-info`).
+
+**O que foi evitado e por quê:**
+- Manter `callout-success` com overrides CSS locais — preferível usar componentes AdminLTE 4 já previstos (`card-outline`).
+
+**Impactos conhecidos:**
+- Apenas visual/semântica de classes; JS e rotas inalterados.
+
+---
+
+### [2026-05-14] — Publish Web: excluir pasta `.cursor` do pacote (aviso `context` / RemoveEmptyDirectories)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `GDI-ERP-Plataform.csproj` — `ExcludeFoldersFromDeployment` = `.cursor`; `ItemGroup` `ExcludeFromPackageFolders` para `.cursor`
+
+**Problema / Demanda:**
+Aviso em `Microsoft.Web.Publishing.targets(2693,5)`: *Access to the path 'context' is denied* (tarefa `RemoveEmptyDirectories` sobre `PackageTmp`, frequentemente ligado a `.cursor\context`).
+
+**O que foi feito:**
+- Exclusão explícita da pasta `.cursor` do pipeline de packaging Web (alinhado a `ProcessItemToExcludeFromDeployment` / `ExcludeFilesFromPackage` nos targets Microsoft), para não copiar nem deixar subpastas problemáticas no `PackageTmp`.
+
+**Atenção para próximas intervenções:**
+- Se o aviso continuar após um publish antigo, apagar `obj\<Config>\Package` (ou `PackageTmp`) e voltar a publicar.
+
+---
+
+### [2026-05-14] — Publish Web: `.cursor` em `Content` causava falha ao copiar `PackageTmp\.cursor\rules`
+**Tipo:** Correção
+**Arquivos tocados:**
+- `GDI-ERP-Plataform.csproj` — `.cursor\CHANGELOG-DEV.md`, `.cursor\context\migracao-472-481.md` e regra Cursor passam de `Content` para `None`; `.cursor\rules` substituído por `.cursor\rules\gdi-erp-plataform.mdc`
+
+**Problema / Demanda:**
+`Copying file .cursor\rules to obj\Release\Package\PackageTmp\.cursor\rules failed. Access to the path '.cursor\rules' is denied.`
+
+**O que foi feito:**
+- Ficheiros só de desenvolvimento não devem ir como `Content` para o pacote IIS. `None` mantém-os no projeto no Visual Studio sem os copiar no publish.
+
+**Atenção para próximas intervenções:**
+- Não voltar a marcar `.cursor\**` como `Content` salvo requisito explícito de entrega no site publicado.
+
+---
+
+### [2026-05-14] — Antlr3: `Antlr3 (1).Runtime.dll` em `bin` (FileLoadException 0x80131040)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `GDI-ERP-Plataform.csproj` — target `RemoveMisnamedAntlrDuplicatesFromBin` após `CopyFilesToOutputDirectory`
+- `bin\Antlr3 (1).Runtime.dll` / `.pdb` — removidos na cópia de trabalho (cópia duplicada do Explorer)
+
+**Problema / Demanda:**
+IIS Express / ASP.NET falha ao iniciar: não carrega `Antlr3 (1).Runtime` — manifesto incompatível com a referência (HRESULT 0x80131040).
+
+**O que foi feito:**
+- Causa raiz: ficheiros `Antlr3 (1).Runtime.dll` (e `.pdb`) em `bin` ao lado de `Antlr3.Runtime.dll` (nome típico de “cópia (1)” no Windows). O runtime tenta carregar todos os `.dll` de `bin`; o nome do ficheiro não corresponde ao assembly identity interno.
+- Target MSBuild remove padrões `Antlr3.Runtime (*).dll` e `Antlr3 (*).Runtime*.dll` após cada build para evitar recorrência.
+
+**Atenção para próximas intervenções:**
+- Se o erro persistir, apagar também a pasta temporária do ASP.NET para este site em `%LOCALAPPDATA%\Temp\Temporary ASP.NET Files\` (subpasta do VS/IIS correspondente).
+
+---
+
+### [2026-05-14] — Unificação portal do cliente: área `crm`, `AcessoPortal`, tenant `portalflightx`
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Controllers/UserIdentityController.cs` — `AcessoPortal` (GET), `CompletePortalClienteLogin`, `SetTenants` (+ `portalflightx` → `GdiPlataformEntities_gdi_producao`), deteção `IsPortalClienteHost` / `GetHostWithoutPort`, POST `Index` com ramo portal em hosts `*.portalflightx.com` (e `portalflightx`/`.local` para dev)
+- `Views/UserIdentity/Index.cshtml` — formulário portal (código + CPF/CNPJ) vs staff; `LibMessage*` no portal
+- `Models/UserIdentity.cs` — `IdCliente`, `ClienteIdentificador`, `ClienteCpfCnpj`
+- `Security/CustomPrincipal.cs` — `Roles` nulo não quebra `IsInRole`
+- `Areas/crm/**` — `crmAreaRegistration`, `PedidosController`, `GlobalController`, models `cstListaPedidosPortal` / `cstDadosPedidoPortal`, views `Pedidos/Index`, `Pedidos/BoletoPdfFebraban` (modelo `Areas.g.Models.cstFinanceiroBoletos`), `Views/web.config`, `_ViewStart`
+- `GDI-ERP-Plataform.csproj` — `Compile` + `Content` da área `crm`
+
+**Problema / Demanda:**
+Unificar o portal do cliente no monólito ERP (URLs públicas `UserIdentity/AcessoPortal`, `/crm/Pedidos/Index`, AJAX boleto, download), modernizar UI/JS ao padrão AdminLTE 4 + BS5 + `start.js`, e mapear tenant `portalflightx` com as mesmas connection names usadas no repositório Portal.
+
+**O que foi feito:**
+- Área MVC `crm` com paridade de rotas (`crm/{controller}/{action}`), autorização `[CustomAuthorize(Roles = "gc_PortalCliente_PortalFinanceiro")]` em `Pedidos` e `Global`.
+- `AjaxFinanceiroBoletoGCPDF` e PDF via Rotativa alinhados ao código do Portal; modelo de boleto reutiliza `GdiPlataform.Areas.g.Models.cstFinanceiroBoletos` e `LibFinanceiroBoletos` em `Areas.g.Lib`.
+- `GlobalController.AjaxGetFileProcessamento` com guard de `db` nulo (padrão área `g`).
+- Login portal: hosts cujo FQDN termina em `portalflightx.com`, ou contém `portalflightx` e termina em `.local` / host `portalflightx` (IIS Express / hosts file); **não** força login portal em `localhost` puro (mantém login staff local).
+
+**Decisões técnicas relevantes:**
+- `homologacao.portalflightx.com` continua a resolver primeiro segmento `homologacao` → `GdiPlataformEntities_gdi_homologacao` (já existente no ERP), alinhado ao DNS unificado staff/portal no mesmo IIS.
+- Sessão portal: `IdPerfil = -900`, `TokenAcesso` = `C{idCliente}`, role `gc_PortalCliente_PortalFinanceiro`, `GoogleTag` / `GoogleTagURL` corretos (corrige dupla atribuição ao campo `GoogleTag` do Portal legado).
+
+**O que foi evitado e por quê:**
+- Não alterar `MovimentosController` (link `LinkPortalDireto` já aponta para `UserIdentity/AcessoPortal`); não duplicar `cstFinanceiroBoletos` na área `crm`.
+
+**Impactos conhecidos:**
+- Staff em `aeroflightx` / `localhost` inalterado; build Debug OK.
+
+**Atenção para próximas intervenções:**
+- **Segurança:** `AcessoPortal` e validações por CPF/CNPJ + pedidos continuam passíveis de enumeração; rate limit fora de escopo.
+- Publicar: confirmar bindings IIS para `portalflightx.com` e `homologacao.portalflightx.com` na mesma app; incrementar versão se alterar `start.js` (não alterado nesta entrega).
+
+---
+
+### [2026-05-14] — Regras Cursor: relação ERP ↔ Portal + manutenção do `CLAUDE.md`
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `.cursor/rules/gdi-erp-plataform.mdc`
+- `.cursor/CHANGELOG-DEV.md`
+
+**Problema / Demanda:**
+Alinhar o ficheiro de regras do ERP ao trabalho já feito no repositório **GDI-PortalCliente-Plataform** (`.cursor/rules`): caminhos absolutos dos dois produtos, separação estrita de stack por repo, e instruções de atualização do `CLAUDE.md` equivalentes às do Portal.
+
+**O que foi feito:**
+- Nova secção **§0** com tabela de pastas (`C:\Marcio\Projetos\GDI-ERP-Plataform` vs `GDI-PortalCliente-Plataform`), aviso de não misturar tecnologias, onde vive cada `.mdc`/`CLAUDE.md`, manutenção sem drift e tabela de aplicabilidade (o que nas regras do Portal **não** vale para o ERP).
+- **§2** alargada com ponto **4** sobre manutenção do `CLAUDE.md` (memória longa, `#` no Claude Code, não copiar secções longas do Portal; CHANGELOG para intervenções pontuais).
+- **§8** com remessa explícita à stack do Portal apenas quando o trabalho for na pasta do Portal.
+- `description` do frontmatter atualizada para mencionar a relação com o Portal.
+
+**Decisões técnicas relevantes:**
+- Espelhar simetria conceitual ao ficheiro `gdi-erp-plataform.mdc` **dentro** do repo Portal (contexto cruzado), sem duplicar listas técnicas do Portal no ERP.
+
+**O que foi evitado e por quê:**
+- Não editar ficheiros no diretório do Portal a partir desta intervenção → fora do escopo e da política de workspace do ERP.
+
+**Impactos conhecidos:**
+- Agentes em workspace só-ERP ficam com caminho canónico do irmão e regra clara de não importar stack do Portal.
+
+**Atenção para próximas intervenções:**
+- Se a política comum (CHANGELOG / ambiente) mudar num produto, replicar manualmente no outro conforme §0.1.
+
+---
+
+### [2026-05-14] — Reestruturação de `.cursor/rules/gdi-erp-plataform.mdc` (frontmatter + deduplicação)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `.cursor/rules/gdi-erp-plataform.mdc`
+
+**Problema / Demanda:**
+O ficheiro de regras do Cursor não seguia o formato `.mdc` com frontmatter YAML; repetia instruções (CHANGELOG, metodologia); o nome do repositório na restrição de workspace estava incorreto (`GDI-PortalCliente-Plataform`).
+
+**O que foi feito:**
+- Adicionado frontmatter (`description`, `alwaysApply: true`).
+- Reorganizado em secções numeradas: identidade, ordem de leitura, restrições, metodologia, registo CHANGELOG, formato de resposta, lembretes, limites da regra.
+- Corrigido o nome do repositório nas restrições de workspace; tabela única para git/deploy/infra.
+- Reduzida duplicação com `CLAUDE.md` (referência explícita em vez de repetir fases DataTables); checklist longo de publish fundido na metodologia §4.5.
+- Secção 6 alinhada a `CLAUDE.md` (tabela de ordem das respostas).
+
+**Decisões técnicas relevantes:**
+- Manter `alwaysApply: true` para regra global do monorepo ERP.
+- Não duplicar template completo do CHANGELOG no `.mdc` — remeter ao formato já documentado no próprio `CHANGELOG-DEV.md`.
+
+**O que foi evitado e por quê:**
+- Não copiar para o `.mdc` listas extensas de fases/controllers já em `CLAUDE.md` → tokens e drift entre ficheiros.
+
+**Impactos conhecidos:**
+- Agentes passam a carregar metadados da regra no picker do Cursor; conteúdo mais curto favorece aderência.
+
+**Atenção para próximas intervenções:**
+- Se `CLAUDE.md` e este `.mdc` divergirem, atualizar ambos ou concentrar detalhe só num deles e manter o outro como índice.
 
 ---
 

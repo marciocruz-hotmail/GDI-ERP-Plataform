@@ -32,7 +32,14 @@
     <NoWarn>$(NoWarn);MSB3247;MSB3277</NoWarn>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3247;MSB3277</MSBuildWarningsAsMessages>
     <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense>
+    <!-- Publish Web: excluir .cursor do pacote (evita aviso RemoveEmptyDirectories / acesso negado em subpastas ex. context). -->
+    <ExcludeFoldersFromDeployment>.cursor</ExcludeFoldersFromDeployment>
   </PropertyGroup>
+  <ItemGroup>
+    <ExcludeFromPackageFolders Include=".cursor">
+      <FromTarget>Project</FromTarget>
+    </ExcludeFromPackageFolders>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -426,6 +433,11 @@
     <Compile Include="Areas\a\Controllers\FiltrosController.cs" />
     <Compile Include="Areas\a\Controllers\ParametrosController.cs" />
     <Compile Include="Areas\a\Models\CstFiltroModel.cs" />
+    <Compile Include="Areas\crm\crmAreaRegistration.cs" />
+    <Compile Include="Areas\crm\Controllers\GlobalController.cs" />
+    <Compile Include="Areas\crm\Controllers\PedidosController.cs" />
+    <Compile Include="Areas\crm\Models\cstDadosPedidoPortal.cs" />
+    <Compile Include="Areas\crm\Models\cstListaPedidosPortal.cs" />
     <Compile Include="Areas\gc\Controllers\CfopController.cs" />
     <Compile Include="Areas\gc\Controllers\CfopOperacoesController.cs" />
     <Compile Include="Areas\gc\Controllers\CfopParametrosController.cs" />
@@ -1417,6 +1429,10 @@
     <Content Include="Areas\a\Views\Filtros\ModalFiltroGenericoView.cshtml" />
     <Content Include="Areas\a\Views\Parametros\Index.cshtml" />
     <Content Include="Areas\a\Views\web.config" />
+    <Content Include="Areas\crm\Views\Pedidos\BoletoPdfFebraban.cshtml" />
+    <Content Include="Areas\crm\Views\Pedidos\Index.cshtml" />
+    <Content Include="Areas\crm\Views\web.config" />
+    <Content Include="Areas\crm\Views\_ViewStart.cshtml" />
     <Content Include="Areas\gc\Views\CfopOperacoes\Index.cshtml" />
     <Content Include="Areas\gc\Views\CfopOperacoes\ModalCreateEditOperacao.cshtml" />
     <Content Include="Areas\gc\Views\CfopParametros\Index.cshtml" />
@@ -1774,12 +1790,16 @@
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.less" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\responsive.less" />
     <Content Include="CLAUDE.md" />
-    <Content Include=".cursor\CHANGELOG-DEV.md" />
-    <Content Include=".cursor\context\migracao-472-481.md" />
-    <Content Include=".cursor\rules" />
+    <!-- Dev/agente: não usar Content — o Publish Web copia para PackageTmp e falha (ex.: .cursor\rules é pasta ou ficheiro só leitura). -->
+    <None Include=".cursor\CHANGELOG-DEV.md" />
+    <None Include=".cursor\CHANGELOG-DEV.md" />
+    <None Include=".cursor\context\migracao-472-481.md" />
+    <None Include=".cursor\context\migracao-472-481.md" />
+    <None Include=".cursor\rules\gdi-erp-plataform.mdc" />
     <Content Include=".md\investigacao-timeout-sessao.md" />
     <Content Include=".md\relatorio-migracao-netframework-472-481.md" />
     <Content Include=".md\roadmap.md" />
+    <None Include=".cursor\rules\gdi-erp-plataform.mdc" />
     <None Include="Properties\PublishProfiles\aeroflightx.com.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -1842,9 +1862,7 @@
     <Content Include="App_Data\Secrets\aws-s3.local.json.example" />
     <Content Include="App_Data\Secrets\aws-ses-smtp.template.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
@@ -1950,4 +1968,22 @@
   <Import Project="packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets" Condition="Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets')" />
   <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets')" />
   <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets')" />
+  <!-- Publish Web (WPP): apagar PackageTmp\.cursor antes de CopyAllFilesToSingleFolder* — evita aviso RemoveEmptyDirectories "Access to the path 'context' is denied" quando restos ficam só leitura ou o IDE segura ficheiros em .cursor\context. -->
+  <Target Name="GdiStripPackageTmpDotCursorBeforeWppCopy" BeforeTargets="CopyAllFilesToSingleFolderForMsdeploy;CopyAllFilesToSingleFolderForPackage" Condition="'$(WPPAllFilesInSingleFolder)' != '' And '$(OS)' == 'Windows_NT'">
+    <PropertyGroup>
+      <_GdiWppTmp>$([System.IO.Path]::GetFullPath($(WPPAllFilesInSingleFolder)))</_GdiWppTmp>
+      <_GdiCursorPkg>$([System.IO.Path]::Combine($(_GdiWppTmp), '.cursor'))</_GdiCursorPkg>
+    </PropertyGroup>
+    <Exec Command="cmd /c if exist &quot;$(_GdiCursorPkg)&quot; (attrib -r &quot;$(_GdiCursorPkg)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiCursorPkg)&quot; 2&gt;nul)" IgnoreExitCode="true" />
+  </Target>
+  <!-- Evita FileLoadException 0x80131040: cópias duplicadas no Explorer geram "Antlr3 (1).Runtime.dll" em bin; o ASP.NET carrega todos os .dll e o nome não bate com o manifesto. -->
+  <Target Name="RemoveMisnamedAntlrDuplicatesFromBin" AfterTargets="CopyFilesToOutputDirectory">
+    <ItemGroup>
+      <_MisnamedAntlr Include="$(OutputPath)Antlr3.Runtime (*).dll" />
+      <_MisnamedAntlr Include="$(OutputPath)Antlr3.Runtime (*).pdb" />
+      <_MisnamedAntlr Include="$(OutputPath)Antlr3 (*).Runtime.dll" />
+      <_MisnamedAntlr Include="$(OutputPath)Antlr3 (*).Runtime.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_MisnamedAntlr)" ContinueOnError="true" />
+  </Target>
 </Project>

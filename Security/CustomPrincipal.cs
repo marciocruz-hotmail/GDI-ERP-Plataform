@@ -24,6 +24,8 @@ namespace GdiPlataform.Security
 
         public bool IsInRole(string role)
         {
+            if (this.UserIndentity?.Roles == null || string.IsNullOrEmpty(role))
+                return false;
             var roles = role.Split(new char[] { ',' });
             return roles.Any(r => this.UserIndentity.Roles.Contains(r));
         }
