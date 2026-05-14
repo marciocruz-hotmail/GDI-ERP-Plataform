@@ -680,6 +680,33 @@ function LibMessageProcessandoHide() {
     }
 }
 
+/** Navegação MVC a partir do menu lateral: overlay "processando" antes do full load (mesmo padrão que JsNewRecord). Só .app-sidebar; ignora novo separador / modificadores / download / target extra. */
+(function gdiSidebarNavProcessando() {
+    document.addEventListener('click', function (e) {
+        try {
+            if (e.defaultPrevented || e.button !== 0) return;
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+            var t = e.target;
+            if (!t || !t.closest) return;
+            var side = t.closest('.app-sidebar');
+            if (!side) return;
+            var a = t.closest('a[href]');
+            if (!a || !side.contains(a)) return;
+            var href = a.getAttribute('href');
+            if (!href || href === '#' || /^\s*javascript:/i.test(href)) return;
+            if (a.hasAttribute('download')) return;
+            var tgt = (a.getAttribute('target') || '').trim().toLowerCase();
+            if (tgt === '_blank') return;
+            if (tgt && tgt !== '_self') return;
+            e.preventDefault();
+            if (typeof LibMessageProcessando === 'function') {
+                LibMessageProcessando('Carregando . . .');
+            }
+            window.location.href = a.href;
+        } catch (err1) { /* navegação nativa */ }
+    }, false);
+}());
+
 function yesDestroyModal(selector)
 {
     try

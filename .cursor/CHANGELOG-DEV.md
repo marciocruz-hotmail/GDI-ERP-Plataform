@@ -48,6 +48,26 @@
 
 ---
 
+### [2026-05-14] — Menu lateral: `LibMessageProcessando` antes da navegação MVC
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js`
+
+**Problema / Demanda:**
+Clique em opção do menu esquerdo sem feedback visual até a nova página carregar.
+
+**O que foi feito:**
+- Listener delegado em `click`: só âncoras dentro de **`.app-sidebar`** com `href` navegável; ignora `#`, `javascript:`, **Ctrl/Cmd/Shift/Alt**, botão não primário, `download`, `target="_blank"` (e outros `target` que não `_self`).
+- `preventDefault` + `LibMessageProcessando('Carregando . . .')` + `location.href` — alinhado a `JsNewRecord` / `JsNewWindow`.
+
+**O que foi evitado e por quê:**
+- Sem alterar `_Navbar.cshtml` nem links; sem handler global fora do sidebar.
+
+**Impactos conhecidos:**
+- Incrementar **`VersionERP`** no fluxo habitual se o browser mantiver `start.js` em cache.
+
+---
+
 ### [2026-05-14] — Sidebar logo GDI: imagem maior dentro da mesma faixa (sem alterar `gdi-sidebar-brand-logo`)
 **Tipo:** Correção
 **Arquivos tocados:**
