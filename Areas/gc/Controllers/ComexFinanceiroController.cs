@@ -39,6 +39,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_ComexFinanceiro_*,gc_ComexFinanceiro_Actionread")]
         public ActionResult GetDadosPagamentos(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             string errorMessage = "";
             string stackTrace = "";
             string saldoContaImportacao = "0,00";

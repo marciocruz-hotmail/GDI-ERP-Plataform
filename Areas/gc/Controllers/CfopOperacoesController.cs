@@ -36,6 +36,9 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_CfopOperacoes_*,g_CfopOperacoes_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            try
+            {
             // Parâmetros
             bool filterDb = false;
             bool filterAdvanced = false;
@@ -107,6 +110,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             return Json(new
             {
+                errorMessage = "",
+                stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = allRecords.Count(),
@@ -114,6 +119,27 @@ namespace GdiPlataform.Areas.gc.Controllers
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return JsonDataTableException(e, param);
+            }
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
+        {
+            string errorMessage = LibExceptions.getExceptionShortMessage(e);
+            return Json(new
+            {
+                errorMessage = errorMessage,
+                severity = "error",
+                stackTrace = e.ToString(),
+                yesFilterOnOff = "0",
+                sEcho = param != null ? param.sEcho : null,
+                iTotalRecords = 0,
+                iTotalDisplayRecords = 0,
+                aaData = new List<string[]>()
+            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

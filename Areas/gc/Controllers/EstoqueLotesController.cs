@@ -42,6 +42,9 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueLotes_*,gc_EstoqueLotes_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            try
+            {
             string filtroCodigoLote = (param.yesCustomField01 ?? "").Trim();
             string filtroSerialLote = (param.yesCustomField02 ?? "").Trim();
             string filtroProduto = (param.yesCustomField03 ?? "").Trim();
@@ -130,12 +133,39 @@ namespace GdiPlataform.Areas.gc.Controllers
                 };
             }).ToList();
 
+            string yesFilterOnOff = (!string.IsNullOrWhiteSpace(filtroCodigoLote) || !string.IsNullOrWhiteSpace(filtroSerialLote) ||
+                !string.IsNullOrWhiteSpace(filtroProduto) || !string.IsNullOrWhiteSpace(filtroImportacao)) ? "1" : "0";
+
             return Json(new
             {
+                errorMessage = "",
+                stackTrace = "",
+                yesFilterOnOff = yesFilterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
                 iTotalDisplayRecords = totalRecords,
                 aaData = list
+            }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return JsonDataTableException(e, param);
+            }
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
+        {
+            string errorMessage = LibExceptions.getExceptionShortMessage(e);
+            return Json(new
+            {
+                errorMessage = errorMessage,
+                severity = "error",
+                stackTrace = e.ToString(),
+                yesFilterOnOff = "0",
+                sEcho = param != null ? param.sEcho : null,
+                iTotalRecords = 0,
+                iTotalDisplayRecords = 0,
+                aaData = new List<string[]>()
             }, JsonRequestBehavior.AllowGet);
         }
         #endregion

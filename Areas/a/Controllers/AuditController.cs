@@ -33,6 +33,9 @@ namespace GdiPlataform.Areas.a.Controllers
         #region GetAuditTrail
         public ActionResult GetAuditTrail(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            try
+            {
             int IdTable = 0;
             int QtdRegistros = 0;
             int.TryParse(param.yesCustomIdPK, out IdTable);
@@ -154,6 +157,8 @@ namespace GdiPlataform.Areas.a.Controllers
             }
             return Json(new
             {
+                errorMessage = "",
+                stackTrace = "",
                 yesFilterOnOff = "0",
                 sEcho = param.sEcho,
                 iTotalRecords = QtdRegistros,
@@ -161,6 +166,27 @@ namespace GdiPlataform.Areas.a.Controllers
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return JsonDataTableException(e, param);
+            }
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
+        {
+            string errorMessage = LibExceptions.getExceptionShortMessage(e);
+            return Json(new
+            {
+                errorMessage = errorMessage,
+                severity = "error",
+                stackTrace = e.ToString(),
+                yesFilterOnOff = "0",
+                sEcho = param != null ? param.sEcho : null,
+                iTotalRecords = 0,
+                iTotalDisplayRecords = 0,
+                aaData = new List<string[]>()
+            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

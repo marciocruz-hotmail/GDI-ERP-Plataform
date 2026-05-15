@@ -406,7 +406,7 @@
             if (otableGProdutosAudit == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableGProdutosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                otableGProdutosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {

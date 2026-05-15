@@ -38,6 +38,9 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueControle,gc_EstoqueControle_*,gc_EstoqueControle_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            try
+            {
             var allRecords = new List<Db.g_produtos_controle>();
             var allRecordsProdutos = db.g_produtos.Select(p => new { p.id_produto, p.descricao }).ToList();
             var allRecordsProdutosStatus = db.g_produtos_status.Select(s => new { s.id_produto_status, s.descricao }).ToList();
@@ -71,8 +74,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     "", // Coluna de Seleção
                                     c.id_produto_controle.ToString(),
                                     c.serial.EmptyIfNull().ToString(),
-                                    allRecordsProdutos.Find(p => p.id_produto == c.id_produto).descricao.EmptyIfNull().ToString(),
-                                    allRecordsProdutosStatus.Find(s => s.id_produto_status == c.id_produto_status).descricao.EmptyIfNull().ToString(),
+                                    allRecordsProdutos.Find(p => p.id_produto == c.id_produto)?.descricao.EmptyIfNull().ToString() ?? "",
+                                    allRecordsProdutosStatus.Find(s => s.id_produto_status == c.id_produto_status)?.descricao.EmptyIfNull().ToString() ?? "",
                                     c.lote.EmptyIfNull().ToString(),
                                     c.data_validade.EmptyIfNull().ToString(),
                                     "" // Botão Editar
@@ -81,12 +84,36 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             return Json(new
             {
+                errorMessage = "",
+                stackTrace = "",
+                yesFilterOnOff = "0",
                 sEcho = param.sEcho,
                 iTotalRecords = allRecords.Count(),
                 iTotalDisplayRecords = allRecords.Count(),
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return JsonDataTableException(e, param);
+            }
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
+        {
+            string errorMessage = LibExceptions.getExceptionShortMessage(e);
+            return Json(new
+            {
+                errorMessage = errorMessage,
+                severity = "error",
+                stackTrace = e.ToString(),
+                yesFilterOnOff = "0",
+                sEcho = param != null ? param.sEcho : null,
+                iTotalRecords = 0,
+                iTotalDisplayRecords = 0,
+                aaData = new List<string[]>()
+            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

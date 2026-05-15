@@ -1251,7 +1251,7 @@
             if (otableGcMovimentosAudit == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableGcMovimentosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                otableGcMovimentosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {

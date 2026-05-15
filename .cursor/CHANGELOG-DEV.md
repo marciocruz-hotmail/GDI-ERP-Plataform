@@ -48,6 +48,87 @@
 
 ---
 
+### [2026-05-14] — Fase 18: DataTables g e gc — audit e correção de controllers/views faltantes
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/gc/Controllers/CfopController.cs`
+- `Areas/gc/Controllers/CfopOperacoesController.cs`
+- `Areas/gc/Controllers/CfopParametrosController.cs`
+- `Areas/gc/Controllers/EstoqueControleController.cs`
+- `Areas/gc/Controllers/EstoqueLotesController.cs`
+- `Areas/gc/Controllers/FinanceiroParametroDifalController.cs`
+- `Areas/gc/Controllers/ComexFinanceiroController.cs`
+- `Areas/gc/Views/EstoqueControle/Index.cshtml`
+
+**Problema / Demanda:**
+Audit das áreas g e gc revelou 7 controllers gc que não tinham o padrão DataTables completo (Fases 8–16 não os cobriram): 6 totalmente legados (sem param null, sem try/catch, sem errorMessage/stackTrace) e 1 com inline pattern mas sem null guard.
+
+**O que foi feito:**
+- `CfopController`, `CfopOperacoesController`, `CfopParametrosController`: param null guard + try/catch + `JsonDataTableException` privado + `errorMessage`/`stackTrace`/`yesFilterOnOff` no JSON de sucesso.
+- `EstoqueControleController`: mesmo padrão + proteção NRE com `?.` nas chamadas `Find(...).descricao` (produto/status podem estar ausentes na lista).
+- `EstoqueLotesController`: mesmo padrão + `yesFilterOnOff` computado pelos 4 filtros customizados (`yesCustomField01–04`).
+- `FinanceiroParametroDifalController`: param null guard + try/catch + `JsonDataTableException` + `errorMessage`/`stackTrace` no sucesso (yesFilterOnOff já existia).
+- `ComexFinanceiroController.GetDadosPagamentos`: apenas param null guard (inline pattern com errorMessage/stackTrace/severity já estava correto).
+- `EstoqueControle/Index.cshtml`: adicionado `xhr.dt` → `GdiDtNotifyJsonErrorMessage` no `dtGcProdutosControle` (view estava sem, único gap de view nesta fase).
+
+**Decisões técnicas relevantes:**
+- `EstoqueLotes`: yesFilterOnOff calculado por `filtroCodigoLote || filtroSerialLote || filtroProduto || filtroImportacao` (a view não usa `btnFiltro`, mas o contrato fica consistente).
+- Areas g: todas conformes após análise (ClientesController.GetDados usa método longo com catch no fim — 260 linhas; NfeController, AtendimentosController, FinanceiroController confirmados).
+
+**O que foi evitado e por quê:**
+- Não alteradas views Cfop/Index, CfopOperacoes/Index, CfopParametros/Index, EstoqueLotes/Index, FinanceiroParametroDifal/Index, ComexFinanceiro/Index — já tinham `xhr.dt` correto.
+- Não alterado EstoqueControle/CreateEdit — `otableAfericoes` usa data source diferente de `GetDados`.
+- Não alterado `GedSGQController` (qa) — já coberto como "baixa prioridade" na Fase 17.
+
+**Impactos conhecidos:**
+- `EstoqueControleController.GetDados`: o `?.` no `Find()` retorna `""` em vez de lançar NRE quando produto/status não está na lista — comportamento mais seguro em produção.
+- Migração DataTables agora completa em todas as áreas: g, gc, crm, qa, a.
+
+**Atenção para próximas intervenções:**
+- `GetDadosPops` (qa/GedSGQController) — código morto confirmado; candidato a remoção.
+- GedSGQController JSONs de sucesso sem `errorMessage`/`stackTrace` — inócuo funcionalmente, cosmético.
+
+---
+
+### [2026-05-14] — Fase 17: DataTables área `a` — AuditController + ParametrosController + 5 views
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/a/Controllers/AuditController.cs`
+- `Areas/a/Controllers/ParametrosController.cs`
+- `Areas/g/Views/Clientes/CreateEdit.cshtml`
+- `Areas/g/Views/Produtos/CreateEdit.cshtml`
+- `Areas/gc/Views/ComexImportacoes/CreateEdit.cshtml`
+- `Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml`
+- `Areas/a/Views/Parametros/Index.cshtml`
+
+**Problema / Demanda:**
+Área `a` era a única com controllers DataTables sem try/catch, sem JsonDataTableException e sem errorMessage/stackTrace. `GetAuditTrail` é consumido por 4 views em áreas g e gc já na fase completa, mas sem xhr.dt — erro de servidor seria silencioso.
+
+**O que foi feito:**
+- `AuditController.GetAuditTrail`: param null guard + envolvimento em try/catch + JSON sucesso com `errorMessage: ""` / `stackTrace: ""` + método privado `JsonDataTableException`.
+- `ParametrosController.GetDadosSistemas`: mesmo padrão + `yesFilterOnOff: "0"` no sucesso (ausente antes).
+- 5 views: adicionado `.on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); })` nas inicializações `otableGClientesAudit`, `otableGProdutosAudit`, `otableGcComexAudit`, `otableGcMovimentosAudit`, `otableAParametros`.
+
+**Decisões técnicas relevantes:**
+- `JsonDataTableException` em `AuditController` sem parâmetro `yesFilterOnOff` (método não tem filtro ativo — fixo em `"0"`).
+- `try/catch` envolve todo o corpo do método; os `try/catch` internos para NRE de `NomeUsuario` foram preservados intactos.
+
+**O que foi evitado e por quê:**
+- Não alterado `GedSGQController` (qa) — já tem try/catch e JsonDataTableException corretos; ausência de errorMessage/stackTrace no sucesso é inócua funcionalmente.
+- Não alterado `GetDadosPops` (qa) — método sem consumidor nas views (código morto); remover seria fora do escopo.
+- Não alterado `LmsEvidenceController` — contrato `{ok, error}` próprio, não DataTables.
+
+**Impactos conhecidos:**
+- `GetAuditTrail` é usado em Clientes, Produtos, ComexImportacoes e FormPedidoCreate: comportamento de sucesso inalterado; erros agora chegam ao `GdiDtNotifyJsonErrorMessage` via `xhr.dt`.
+- Área `crm`: sem GetDados DataTables — não é alvo de fase.
+
+**Atenção para próximas intervenções:**
+- `GetDadosPops` em `GedSGQController` é código morto — nenhuma view o chama. Candidato à remoção futura com validação.
+- JSONs de sucesso em `GedSGQController` (qa) sem `errorMessage`/`stackTrace` — cosmético, baixa prioridade.
+- Fases DataTables agora completas em todas as áreas mapeadas (g, gc, crm, qa, a).
+
+---
+
 ### [2026-05-14] — Remoção de `GerarNFPImportacaoByMovimentoNF_OLD` (código morto)
 **Tipo:** Refatoração
 **Arquivos tocados:**
