@@ -1674,9 +1674,9 @@ namespace GdiPlataform.Robos.ENotas
                     // Dados Principais
                     NfeGateway.Add("idExterno", IdentificadorNFE);
                     NfeGateway.Add("ambienteEmissao", AmbienteEmissaoNFE);
-                    NfeGateway.Add("numeroRps", RecordMovimento.id_movimento.EmptyIfNull().ToString().Trim());
+                    //NfeGateway.Add("numeroRps", RecordMovimento.id_movimento.EmptyIfNull().ToString().Trim());
                     // GW3001: série RPS só numérica 1–49999; opcional por filial em g_nfe_gateway.key3
-                    NfeGateway.Add("serieRps", NormalizarSerieRpsEnotas(RecordNfeGateway.key3));
+                    //NfeGateway.Add("serieRps", NormalizarSerieRpsEnotas(RecordNfeGateway.key3));
                     NfeGateway.Add("valorTotal", "|" + LibNumbers.DecimalToJson(RecordMovimento.valor_total_bruto) + "|");
                     NfeGateway.Add("descontos", "0");
 
