@@ -44,6 +44,14 @@ namespace GdiPlataform.Lib
 
         public static String getWebException(WebException ex)
         {
+            if (ex == null)
+            {
+                return string.Empty;
+            }
+            if (ex.Response == null)
+            {
+                return ex.Message.EmptyIfNull().ToString();
+            }
             string MsgWebException = string.Empty;
             using (var stream = ex.Response.GetResponseStream())
             using (var reader = new StreamReader(stream))
@@ -51,6 +59,10 @@ namespace GdiPlataform.Lib
                 MsgWebException = reader.ReadToEnd();
             }
             MsgWebException = MsgWebException.Replace("[", "").Replace("]", "").Replace("{", "").Replace("}", "").Replace(",", " - ");
+            if (string.IsNullOrWhiteSpace(MsgWebException))
+            {
+                return ex.Message.EmptyIfNull().ToString();
+            }
             return MsgWebException;
         }
     }

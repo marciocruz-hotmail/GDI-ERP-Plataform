@@ -39,12 +39,81 @@ namespace GdiPlataform.Robos.ENotas
         }
         #endregion
 
+        #region Falha transmissão eNotas (NF-e / NFS-e)
+
+        /// <summary>Atualiza <c>gc_movimentos_nf.id_nfe_status</c> para 14 e grava <c>g_nfe_logs</c> em falha de rede/IO ao enviar JSON à API eNotas (ex.: conexão recusada). Erros secundários ao persistir são ignorados para não mascarar a exceção original.</summary>
+        private void PersistirFalhaTransmissaoJsonEnotasMovimentoNf(gc_movimentos_nf nf, string identificadorNfe, Exception ex, DateTime dataHora)
+        {
+            if (nf == null || nf.id_movimento_nf <= 0)
+            {
+                return;
+            }
+            try
+            {
+                string det = LibExceptions.getExceptionShortMessage(ex);
+                WebException wex = ex as WebException;
+                if (wex != null)
+                {
+                    string web = LibExceptions.getWebException(wex);
+                    if (!string.IsNullOrWhiteSpace(web))
+                    {
+                        det = web;
+                    }
+                }
+                det = det.Replace("\r", " ").Replace("\n", " ");
+                string logText = "Erro transmissão eNotas: " + det;
+                if (logText.Length > 250)
+                {
+                    logText = logText.Substring(0, 250);
+                }
+
+                int idCliente = 0;
+                if (nf.id_movimento > 0)
+                {
+                    gc_movimentos mv = db.gc_movimentos.Find(nf.id_movimento);
+                    if (mv != null)
+                    {
+                        idCliente = mv.id_cliente;
+                    }
+                }
+
+                nf.id_nfe_status = 14;
+                nf.datahora_alteracao = dataHora;
+                nf.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(nf).State = EntityState.Modified;
+
+                db.g_nfe_logs.Add(new g_nfe_logs
+                {
+                    ativo = true,
+                    id_nfe = 0,
+                    id_nfe_gateway = nf.id_nfe_gateway,
+                    id_movimento = nf.id_movimento,
+                    id_movimento_nf = nf.id_movimento_nf,
+                    id_cliente = idCliente,
+                    id_coligada = nf.id_coligada,
+                    id_filial = nf.id_filial,
+                    envio = true,
+                    retorno = true,
+                    identificador_nfe = identificadorNfe ?? string.Empty,
+                    log = logText,
+                    datahora_cadastro = dataHora,
+                    id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
+                });
+                db.SaveChanges();
+            }
+            catch
+            {
+            }
+        }
+
+        #endregion
 
         #region Gerar Nota Fiscal Produtos - Importação V2
         public bool GerarNFPImportacaoByMovimentoNF(gc_movimentos_nf record_gc_movimento_nf)
         {
             bool sucesso = false;
             DateTime dataHoraAtual = LibDateTime.getDataHoraBrasilia();
+            string identificadorNFE = string.Empty;
 
             g_nfe_gateway recordNfeGateway = db.g_nfe_gateway.Find(record_gc_movimento_nf.id_filial);
             if (recordNfeGateway == null)
@@ -58,8 +127,6 @@ namespace GdiPlataform.Robos.ENotas
 
             try
             {
-                string identificadorNFE = string.Empty;
-
                 var listaProdutos = db.g_produtos.SqlQuery(
                     "select p.* from g_produtos p join gc_movimentos_itens i on(p.id_produto = i.id_produto) where i.id_movimento = " +
                     record_gc_movimento_nf.id_movimento.EmptyIfNull().ToString()).ToList();
@@ -323,6 +390,25 @@ namespace GdiPlataform.Robos.ENotas
 
                 record_gc_movimento_nf.xml_erp = strJson;
 
+                record_gc_movimento_nf.id_cfop = 22;
+                record_gc_movimento_nf.qtd_itens = recordMovimento.qtd_itens;
+                record_gc_movimento_nf.qtd_produtos = recordMovimento.qtd_produtos;
+                record_gc_movimento_nf.valor_total_produtos = recordMovimento.valor_total_produtos;
+                record_gc_movimento_nf.valor_total_liquido = recordMovimento.valor_total_liquido;
+                record_gc_movimento_nf.valor_total_bruto = recordMovimento.valor_total_bruto;
+                record_gc_movimento_nf.id_nfe_status = 1;
+                record_gc_movimento_nf.nf_data_geracao = dataHoraAtual;
+                record_gc_movimento_nf.nf_id_usuario_geracao = CachePersister.userIdentity.IdUsuario;
+                record_gc_movimento_nf.nf_identificador = identificadorNFE;
+                record_gc_movimento_nf.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                record_gc_movimento_nf.datahora_cadastro = dataHoraAtual;
+                record_gc_movimento_nf.id_nfe_gateway = 1;
+                record_gc_movimento_nf.id_coligada = 1;
+                record_gc_movimento_nf.id_filial = 1;
+
+                db.gc_movimentos_nf.Add(record_gc_movimento_nf);
+                db.SaveChanges();
+
                 string urlAuth = "https://api.enotasgw.com.br/v2/empresas/" + key2 + "/nf-e";
 
                 ServicePointManager.Expect100Continue = false;
@@ -350,25 +436,6 @@ namespace GdiPlataform.Robos.ENotas
                     }
 
                     sucesso = true;
-
-                    record_gc_movimento_nf.id_cfop = 22;
-                    record_gc_movimento_nf.qtd_itens = recordMovimento.qtd_itens;
-                    record_gc_movimento_nf.qtd_produtos = recordMovimento.qtd_produtos;
-                    record_gc_movimento_nf.valor_total_produtos = recordMovimento.valor_total_produtos;
-                    record_gc_movimento_nf.valor_total_liquido = recordMovimento.valor_total_liquido;
-                    record_gc_movimento_nf.valor_total_bruto = recordMovimento.valor_total_bruto;
-                    record_gc_movimento_nf.id_nfe_status = 1;
-                    record_gc_movimento_nf.nf_data_geracao = dataHoraAtual;
-                    record_gc_movimento_nf.nf_id_usuario_geracao = CachePersister.userIdentity.IdUsuario;
-                    record_gc_movimento_nf.nf_identificador = identificadorNFE;
-                    record_gc_movimento_nf.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
-                    record_gc_movimento_nf.datahora_cadastro = dataHoraAtual;
-                    record_gc_movimento_nf.id_nfe_gateway = 1;
-                    record_gc_movimento_nf.id_coligada = 1;
-                    record_gc_movimento_nf.id_filial = 1;
-
-                    db.gc_movimentos_nf.Add(record_gc_movimento_nf);
-                    db.SaveChanges();
 
                     recordMovimento.id_nfe_status = 1;
                     recordMovimento.nf_key = identificadorNFE;
@@ -421,8 +488,9 @@ namespace GdiPlataform.Robos.ENotas
                     db.SaveChanges();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                PersistirFalhaTransmissaoJsonEnotasMovimentoNf(record_gc_movimento_nf, identificadorNFE, ex, dataHoraAtual);
                 throw;
             }
 
@@ -463,339 +531,6 @@ namespace GdiPlataform.Robos.ENotas
         }
         #endregion
 
-
-        #region Gerar Nota Fiscal Produtos - Importação 
-        public bool GerarNFPImportacaoByMovimentoNF_OLD(gc_movimentos_nf record_gc_movimento_nf)
-        {
-            bool sucesso = false;
-            DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-
-            g_nfe_gateway RecordNfeGateway = db.g_nfe_gateway.Find(record_gc_movimento_nf.id_filial);
-            if (RecordNfeGateway != null) { } else { RecordNfeGateway = db.g_nfe_gateway.Find(1); }
-            if (RecordNfeGateway.producao == true) { AmbienteEmissaoNFE = "Producao"; } else { AmbienteEmissaoNFE = "Homologacao"; };
-            String Key1 = RecordNfeGateway.key1.EmptyIfNull().ToString(); // Api Key
-            String Key2 = RecordNfeGateway.key2.EmptyIfNull().ToString(); // Empresa ID
-            bool ParametroCalcularDifal = RecordNfeGateway.calcular_difal;
-            bool ServidorContingencia = RecordNfeGateway.contingencia;
-
-            try
-            {
-                String IdentificadorNFE = String.Empty;
-                List<ItemNFP> ListaItensNF = new List<ItemNFP>();
-                var ListaProdutos = new List<Db.g_produtos>();
-                ListaProdutos = db.g_produtos.SqlQuery("select p.* from g_produtos p join gc_movimentos_itens i on(p.id_produto = i.id_produto) where i.id_movimento = " + record_gc_movimento_nf.id_movimento.EmptyIfNull().ToString()).ToList();
-                var ListaProdutosNCM = new List<Db.g_produtos_ncm>();
-                ListaProdutosNCM = db.g_produtos_ncm.SqlQuery("select n.*from g_produtos_ncm n join g_produtos p on (n.id_produto_ncm = p.id_produto_ncm) join gc_movimentos_itens i on (p.id_produto = i.id_produto) where i.id_movimento = " + record_gc_movimento_nf.id_movimento.EmptyIfNull().ToString()).ToList();
-                List<gc_movimentos_itens> ListaMovimentosItens = db.gc_movimentos_itens.Where(i => i.id_movimento == record_gc_movimento_nf.id_movimento).ToList();
-                List<gc_movimentos_nf> ListaMovimentosNF = db.gc_movimentos_nf.Where(i => i.id_movimento == record_gc_movimento_nf.id_movimento).ToList();
-                List<g_nfe_logs> ListaEnviosNFE = db.g_nfe_logs.Where(l => (l.id_movimento == record_gc_movimento_nf.id_movimento && l.envio == true)).ToList();
-                gc_movimentos RecordMovimento = db.gc_movimentos.Find(record_gc_movimento_nf.id_movimento);
-                IdentificadorNFE = record_gc_movimento_nf.id_movimento.EmptyIfNull().ToString().Trim() + "." + (ListaMovimentosNF.Count + 1).ToString();
-                if (AmbienteEmissaoNFE == "Homologacao") { IdentificadorNFE += ".h"; };
-
-                // Proporcionalizar o valor do frete nos itens
-                if (record_gc_movimento_nf.frete_valor > 0)
-                {
-                    Decimal ValorTotalProdutos = 0;
-                    Decimal FreteValorTotal = record_gc_movimento_nf.frete_valor;
-                    Decimal FreteValorRateio = 0;
-                    Decimal FreteTotalRateado = 0;
-                    Decimal FretePercentualRateio = 0;
-                    int Index = 0;
-
-                    foreach (gc_movimentos_itens ItemMovimento1 in ListaMovimentosItens)
-                    {
-                        ValorTotalProdutos += ItemMovimento1.valor_total;
-                    }
-                    foreach (gc_movimentos_itens ItemMovimento2 in ListaMovimentosItens)
-                    {
-                        Index += 1;
-                        if (Index < ListaMovimentosItens.Count())
-                        {
-                            FretePercentualRateio = ((ItemMovimento2.valor_total * 100) / ValorTotalProdutos);
-                            FreteValorRateio = ((FreteValorTotal) * (FretePercentualRateio / 100));
-                            ItemMovimento2.valor_frete = FreteValorRateio;
-                            FreteTotalRateado += FreteValorRateio;
-                        }
-                        else
-                        {
-                            FreteValorRateio = FreteValorTotal - FreteTotalRateado;
-                            ItemMovimento2.valor_frete = FreteValorRateio;
-                            FreteTotalRateado += FreteValorRateio;
-                        }
-                    }
-                }
-
-                foreach (gc_movimentos_itens ItemMovimento in ListaMovimentosItens)
-                {
-                    g_produtos RecordProduto = ListaProdutos.Find(p => p.id_produto == ItemMovimento.id_produto);
-                    g_produtos_ncm RecordProdutoNCM = ListaProdutosNCM.Find(p => p.id_produto_ncm == RecordProduto.id_produto_ncm);
-
-                    ItemNFP ItemNF = new ItemNFP
-                    {
-                        cfop = "3102", // Fixo - COMPRA PARA COMERCIALIZACAO
-                        codigo = LibStringFormat.SomenteAlfabetoSefaz(RecordProduto.codigo.EmptyIfNull().ToString()),
-                        descricao = LibStringFormat.SomenteAlfabetoSefaz(RecordProduto.descricao.EmptyIfNull().ToString()),
-                        ncm = RecordProdutoNCM.codigo_ncm.EmptyIfNull().ToString(),
-                        quantidade = ItemMovimento.quantidade,
-                        unidadeMedida = "UN",
-                        valorUnitario = ItemMovimento.valor_unit,
-                        frete = ItemMovimento.valor_frete,
-                        outrasDespesas = ItemMovimento.valor_despesas
-                    };
-
-                    // Percentual Aproximado dos Tributos
-                    ItemNF.impostos.percentualAproximadoTributos = new Imposto_PercentualAproximado
-                    {
-                        simplificado = new Imposto_PercentualAproximado_Simplificado()
-                    };
-                    ItemNF.impostos.percentualAproximadoTributos.simplificado.percentual = RecordProdutoNCM.tributo_federal_importado + RecordProdutoNCM.tributo_estadual + RecordProdutoNCM.tributo_municipal;
-                    ItemNF.impostos.percentualAproximadoTributos.fonte = "IBPT";
-
-                    // ICMS
-                    ItemNF.impostos.icms = new Imposto_ICMS
-                    {
-                        situacaoTributaria = ItemMovimento.icms_cst.EmptyIfNull().ToString(),
-                        origem = ItemMovimento.icms_orig,
-                        aliquota = ItemMovimento.icms_picms,
-                        baseCalculo = ItemMovimento.icms_vbc + ItemMovimento.valor_frete,
-                        modalidadeBaseCalculo = ItemMovimento.icms_modbc,
-                        percentualReducaoBaseCalculo = ItemMovimento.icms_predbc,
-                        valor = ItemMovimento.icms_vicms
-                    };
-
-                    // PIS
-                    ItemNF.impostos.pis = new Imposto_PIS
-                    {
-                        porAliquota = new Imposto_PercentualPorAliquota(),
-                        situacaoTributaria = ItemMovimento.pis_cst.EmptyIfNull().ToString()
-                    };
-                    if ((ItemNF.impostos.pis.situacaoTributaria.ToString().Trim() == "0") || (ItemNF.impostos.pis.situacaoTributaria.ToString().Trim() == "00") || (ItemNF.impostos.pis.situacaoTributaria.ToString().Trim() == "000")) { ItemNF.impostos.pis.situacaoTributaria = "08"; }; // 08 = Operação sem Incidência da Contribuição
-                    ItemNF.impostos.pis.porAliquota.aliquota = ItemMovimento.pis_ppis;
-                    ItemNF.impostos.pis.origem = 0;
-
-                    // COFINS
-                    string CofinsCST = ItemMovimento.cofins_cst.EmptyIfNull().ToString().Trim();
-                    ItemNF.impostos.cofins = new Imposto_COFINS
-                    {
-                        porAliquota = new Imposto_PercentualPorAliquota(),
-                        situacaoTributaria = CofinsCST
-                    };
-                    if ((ItemNF.impostos.cofins.situacaoTributaria.ToString().Trim() == "0") || (ItemNF.impostos.cofins.situacaoTributaria.ToString().Trim() == "00") || (ItemNF.impostos.cofins.situacaoTributaria.ToString().Trim() == "000")) { ItemNF.impostos.cofins.situacaoTributaria = "08"; }; // 08 = Operação sem Incidência da Contribuição
-                    ItemNF.impostos.cofins.porAliquota.aliquota = ItemMovimento.cofins_pcofins;
-                    ItemNF.impostos.cofins.origem = 0;
-
-                    // IPI
-                    ItemNF.impostos.ipi = new Imposto_IPI
-                    {
-                        porAliquota = new Imposto_PercentualPorAliquota(),
-                        situacaoTributaria = ItemMovimento.ipi_cst.EmptyIfNull().ToString().Trim()
-                    };
-                    ItemNF.impostos.ipi.porAliquota.aliquota = ItemMovimento.ipi_pipi;
-                    ItemNF.impostos.ipi.origem = 0;
-
-                    // II
-                    ItemNF.impostos.ii = new Imposto_II
-                    {
-                        despesasAduaneiras = ItemMovimento.ii_vdespadu,
-                        valor = ItemMovimento.ii_vii,
-                        iof = ItemMovimento.ii_viof
-                    };
-
-                    // Declaração de Importação
-                    ItemNF.declaracaoImportacao = new DeclaracaoImportacao
-                    {
-                        numero = ItemMovimento.di_numero.EmptyIfNull().ToString(),
-                        data = ItemMovimento.di_data.GetValueOrDefault().ToString("yyyy-MM-dd") + "T" + ItemMovimento.di_data.GetValueOrDefault().ToString("HH:mm:ss") + "Z",
-                        localDesembaraco = LibStringFormat.SomenteAlfabetoSefaz(ItemMovimento.di_loc_desemb.EmptyIfNull().ToString()),
-                        ufDesembaraco = LibStringFormat.SomenteAlfabetoSefaz(ItemMovimento.di_uf_desemb.EmptyIfNull().ToString()),
-                        dataDesembaraco = ItemMovimento.di_data_desemb.GetValueOrDefault().ToString("yyyy-MM-dd") + "T" + ItemMovimento.di_data_desemb.GetValueOrDefault().ToString("HH:mm:ss") + "Z",
-
-                        tipoViaTransporte = ItemMovimento.di_via_transp.EmptyIfNull().ToString(),
-                        valorAFRMM = ItemMovimento.afrmm_valor,
-                        tipoIntermedio = "ImportacaoPorContaPropria",
-                        cnpj = ItemMovimento.di_cnpj,
-                        ufTerceiro = ItemMovimento.di_uf_terceiro,
-                        codigoExportador = ItemMovimento.di_cod_exportador,
-
-                        // Adições
-                        adicoes = new List<DeclaracaoImportacaoAdicoes>()
-                    };
-                    DeclaracaoImportacaoAdicoes adicao1 = new DeclaracaoImportacaoAdicoes
-                    {
-                        numero = int.Parse(ItemMovimento.di_adicao_numero.EmptyIfNull().ToString().Trim()),
-                        codigoFabricante = ItemMovimento.di_adicao_fabricante,
-                        numeroDrawback = "000"
-                    };
-                    ItemNF.declaracaoImportacao.adicoes.Add(adicao1);
-
-                    // Lista de itens
-                    ListaItensNF.Add(ItemNF);
-                }
-
-                // Transporte
-                Transporte _transporte = new Transporte
-                {
-                    frete = new Frete()
-                };
-                if (record_gc_movimento_nf.id_frete_responsavel == 1) { _transporte.frete.modalidade = "PorContaDoEmitente"; }
-                else if (record_gc_movimento_nf.id_frete_responsavel == 2) { _transporte.frete.modalidade = "PorContaDoDestinatario"; }
-                else if (record_gc_movimento_nf.id_frete_responsavel == 3) { _transporte.frete.modalidade = "SemFrete"; }
-                else { _transporte.frete.modalidade = "PorContaDeTerceiros"; }
-                _transporte.frete.valor = record_gc_movimento_nf.frete_valor;
-
-                if (record_gc_movimento_nf.frete_qvol > 0)
-                {
-                    _transporte.volume = new Volume
-                    {
-                        quantidade = record_gc_movimento_nf.frete_qvol,
-                        especie = LibStringFormat.SomenteAlfabetoSefaz(record_gc_movimento_nf.frete_esp),
-                        marca = LibStringFormat.SomenteAlfabetoSefaz(record_gc_movimento_nf.frete_marca),
-                        numeracao = LibStringFormat.SomenteAlfabetoSefaz(record_gc_movimento_nf.frete_nvol)
-                    };
-                    if (record_gc_movimento_nf.frete_pesol > 0) { _transporte.volume.pesoLiquido = record_gc_movimento_nf.frete_pesol; };
-                    if (record_gc_movimento_nf.frete_pesob > 0) { _transporte.volume.pesoBruto = record_gc_movimento_nf.frete_pesob; };
-                }
-
-                String TextoInformacoesAdicionais = LibStringFormat.SomenteAlfabetoSefaz(record_gc_movimento_nf.informacoes_adicionais);
-
-                var nfpe = new NFPe()
-                {
-                    id = IdentificadorNFE,
-                    ambienteEmissao = AmbienteEmissaoNFE,
-                    naturezaOperacao = "Compra para comercialização",
-                    tipoOperacao = "Entrada",
-                    finalidade = "Normal",
-                    consumidorFinal = true,
-                    indicadorPresencaConsumidor = "NaoSeAplica",
-                    enviarPorEmail = false,
-                    transporte = _transporte,
-                    itens = ListaItensNF,
-                    cliente = new Cliente()
-                    {
-                        tipoPessoa = "F",
-                        nome = "SOUTHERN CROSS AVIATION, LLC",
-                        email = "teste@mail.com",
-                        cpfCnpj = null,
-                        indicadorContribuinteICMS = "NaoContribuinte",
-                        telefone = "0000000000",
-                        endereco = new Endereco()
-                        {
-                            logradouro = "NW 51 ST CT",
-                            numero = "1120",
-                            complemento = "33309",
-                            bairro = "Fort Lauderdale",
-                            cep = "99999999",
-                            uf = "EX",
-                            cidade = "EXTERIOR",
-                            pais = "Estados Unidos"
-                        }
-                    },
-                    informacoesAdicionais = TextoInformacoesAdicionais
-                };
-
-                var strJson = JsonConvert.SerializeObject(nfpe);
-                var strContent = new StringContent(strJson, Encoding.UTF8, "application/json");
-                record_gc_movimento_nf.xml_erp = strJson; // Guardar o Json que foi enviado!
-                string URLAuth = "https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e";
-
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
-
-                var request = (HttpWebRequest)WebRequest.Create(URLAuth);
-                request.ContentType = "application/json";
-                request.Headers.Add("Authorization", "Basic " + Key1);
-                request.Method = "POST";
-                request.ContentType = "application/json";
-
-                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-                {
-                    streamWriter.Write(strJson);
-                }
-
-                var response = (HttpWebResponse)request.GetResponse();
-                using (var streamReader = new StreamReader(response.GetResponseStream()))
-                {
-                    var responseData = streamReader.ReadToEnd();
-                    if (response.StatusCode == HttpStatusCode.OK)
-                    {
-                        sucesso = true;
-                        record_gc_movimento_nf.id_cfop = 22; // 3102 - COMPRA PARA COMERCIALIZACAO
-                        record_gc_movimento_nf.qtd_itens = RecordMovimento.qtd_itens;
-                        record_gc_movimento_nf.qtd_produtos = RecordMovimento.qtd_produtos;
-                        record_gc_movimento_nf.valor_total_produtos = RecordMovimento.valor_total_produtos;
-                        record_gc_movimento_nf.valor_total_liquido = RecordMovimento.valor_total_liquido;
-                        record_gc_movimento_nf.valor_total_bruto = RecordMovimento.valor_total_bruto;
-                        record_gc_movimento_nf.id_nfe_status = 1;
-                        record_gc_movimento_nf.nf_data_geracao = DataHoraAtual;
-                        record_gc_movimento_nf.nf_id_usuario_geracao = CachePersister.userIdentity.IdUsuario;
-                        record_gc_movimento_nf.nf_identificador = IdentificadorNFE;
-                        record_gc_movimento_nf.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
-                        record_gc_movimento_nf.datahora_cadastro = DataHoraAtual;
-                        record_gc_movimento_nf.id_nfe_gateway = 1;
-                        record_gc_movimento_nf.id_coligada = 1;
-                        record_gc_movimento_nf.id_filial = 1;
-                        db.gc_movimentos_nf.Add(record_gc_movimento_nf);
-                        db.SaveChanges();
-
-                        RecordMovimento.id_nfe_status = 1;
-                        RecordMovimento.nf_key = IdentificadorNFE;
-                        RecordMovimento.nf_id_usuario_geracao = CachePersister.userIdentity.IdUsuario; ;
-                        RecordMovimento.nf_data_geracao = DataHoraAtual;
-                        RecordMovimento.movimento_faturado = true;
-                        RecordMovimento.movimento_nf = true;
-                        if (RecordMovimento.id_movimento_status < 2) { RecordMovimento.id_movimento_status = 2; } // Fechado
-                        if (RecordMovimento.id_movimento_posicao < 4) { RecordMovimento.id_movimento_posicao = 4; } // Faturado
-                        RecordMovimento.id_usuario_faturamento = CachePersister.userIdentity.IdUsuario;
-                        RecordMovimento.datahora_faturamento = DataHoraAtual;
-                        RecordMovimento.datahora_alteracao = DataHoraAtual;
-                        RecordMovimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
-                        db.Entry(RecordMovimento).State = EntityState.Modified;
-
-                        // Criar o log da nfe
-                        g_nfe_logs record_g_nfe_logs = new g_nfe_logs
-                        {
-                            id_nfe = 0,
-                            id_movimento = RecordMovimento.id_movimento,
-                            id_movimento_nf = record_gc_movimento_nf.id_movimento_nf,
-                            id_cliente = RecordMovimento.id_cliente,
-                            envio = true,
-                            retorno = false,
-                            identificador_nfe = IdentificadorNFE,
-                            log = "NF Importação Transmitida com sucesso!",
-                            datahora_cadastro = DataHoraAtual,
-                            id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
-                        };
-                        db.g_nfe_logs.Add(record_g_nfe_logs);
-
-                        // Criar o log da utilização
-                        a_yesprodutos_extrato record_a_yesprodutos_extrato = new Db.a_yesprodutos_extrato
-                        {
-                            id_yesproduto = 2, // Nota Fiscal Eletrônica - Enotas
-                            log = "NFe - Importação - Id: " + record_gc_movimento_nf.id_movimento_nf.EmptyIfNull().ToString(),
-                            datahora_execucao = LibDateTime.getDataHoraBrasilia(),
-                            id_usuario_execucao = CachePersister.userIdentity.IdUsuario
-                        };
-                        ;
-                        db.Entry(record_a_yesprodutos_extrato).State = EntityState.Added;
-
-                        db.SaveChanges();
-                    }
-                    else
-                    {
-                        throw new Exception(responseData);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            return sucesso;
-        }
-        #endregion
 
         #region Gerar Nota Fiscal Produtos - Venda
         public bool GerarNFPVendaByMovimentoNF(gc_movimentos_nf record_gc_movimento_nf) 
@@ -1605,7 +1340,7 @@ namespace GdiPlataform.Robos.ENotas
                     record_gc_movimento_nf.icms_difal_calculado = ValorIcmsDifalContasPagar;
                     record_gc_movimento_nf.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
                     record_gc_movimento_nf.datahora_cadastro = DataHoraAtual;
-                    record_gc_movimento_nf.id_nfe_status = 14; // Erro nos dados
+                    record_gc_movimento_nf.id_nfe_status = 1;
                     record_gc_movimento_nf.nf_identificador = IdentificadorNFE;
                     record_gc_movimento_nf.nf_id_usuario_geracao = CachePersister.userIdentity.IdUsuario;
                     record_gc_movimento_nf.nf_data_geracao = DataHoraAtual;
@@ -1787,7 +1522,8 @@ namespace GdiPlataform.Robos.ENotas
             }
             catch (Exception ex)
             {
-                throw ex;
+                PersistirFalhaTransmissaoJsonEnotasMovimentoNf(record_gc_movimento_nf, IdentificadorNFE, ex, DataHoraAtual);
+                throw;
             }
             return sucesso;
         }
@@ -1850,7 +1586,7 @@ namespace GdiPlataform.Robos.ENotas
                 if (ListaMovimentosItens.Count > 1)
                 {
                     QtdErros += 1;
-                    MsgErro += "NFe de Seviços só poderá conter 1(um) único item!" + "<br/>";
+                    MsgErro += "NF-e de Serviços só poderá conter 1(um) único item!" + "<br/>";
                 }
                 else
                 {
@@ -1939,7 +1675,8 @@ namespace GdiPlataform.Robos.ENotas
                     NfeGateway.Add("idExterno", IdentificadorNFE);
                     NfeGateway.Add("ambienteEmissao", AmbienteEmissaoNFE);
                     NfeGateway.Add("numeroRps", RecordMovimento.id_movimento.EmptyIfNull().ToString().Trim());
-                    NfeGateway.Add("serieRps", "RPS");
+                    // GW3001: série RPS só numérica 1–49999; opcional por filial em g_nfe_gateway.key3
+                    NfeGateway.Add("serieRps", NormalizarSerieRpsEnotas(RecordNfeGateway.key3));
                     NfeGateway.Add("valorTotal", "|" + LibNumbers.DecimalToJson(RecordMovimento.valor_total_bruto) + "|");
                     NfeGateway.Add("descontos", "0");
 
@@ -1964,11 +1701,18 @@ namespace GdiPlataform.Robos.ENotas
                     record_gc_movimento_nf.valor_total_bruto = RecordMovimento.valor_total_bruto;
                     record_gc_movimento_nf.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
                     record_gc_movimento_nf.datahora_cadastro = DataHoraAtual;
-                    record_gc_movimento_nf.id_nfe_status = 1; // Erro nos dados
+                    record_gc_movimento_nf.id_nfe_status = 1;
                     record_gc_movimento_nf.nf_identificador = IdentificadorNFE;
                     record_gc_movimento_nf.nf_id_usuario_geracao = CachePersister.userIdentity.IdUsuario;
                     record_gc_movimento_nf.nf_data_geracao = DataHoraAtual;
                     record_gc_movimento_nf.id_nfe_gateway = 1;
+
+                    if (RecordMovimento.id_filial == 1) { record_gc_movimento_nf.id_nfe_gateway = 1; }
+                    else if (RecordMovimento.id_filial == 2) { record_gc_movimento_nf.id_nfe_gateway = 2; }
+                    else { record_gc_movimento_nf.id_nfe_gateway = 1; }
+
+                    record_gc_movimento_nf.id_coligada = RecordMovimento.id_coligada;
+                    record_gc_movimento_nf.id_filial = RecordMovimento.id_filial;
                     db.gc_movimentos_nf.Add(record_gc_movimento_nf);
                     db.SaveChanges();
 
@@ -1987,7 +1731,8 @@ namespace GdiPlataform.Robos.ENotas
                         id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
                     };
                     db.g_nfe_logs.Add(record_g_nfe_logs1);
-                    string URLAuth = "https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nfes";
+                    // NFS-e: documentação eNotas (POST emissão) usa /v1/empresas/{id}/nfes — /v2/.../nfes pode responder 404.
+                    string URLAuth = "https://api.enotasgw.com.br/v1/empresas/" + Key2 + "/nfes";
 
                     ServicePointManager.Expect100Continue = false;
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
@@ -2075,11 +1820,41 @@ namespace GdiPlataform.Robos.ENotas
             }
             catch (Exception ex)
             {
-                throw ex;
+                PersistirFalhaTransmissaoJsonEnotasMovimentoNf(record_gc_movimento_nf, IdentificadorNFE, ex, DataHoraAtual);
+                throw;
             }
             return sucesso;
         }
         #endregion
+
+        /// <summary>JSON salvo em xml_erp na emissão NFS-e (eNotas) contém raiz "servico" e não contém "itens" (NF-e produto).</summary>
+        private static bool IsJsonEnvioNfseServico(string xmlErp)
+        {
+            if (string.IsNullOrWhiteSpace(xmlErp)) { return false; }
+            try
+            {
+                JObject jo = JObject.Parse(xmlErp);
+                return jo["servico"] != null && jo["itens"] == null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>eNotas GW3001: série RPS apenas dígitos, inteiro 1–49999. Usar <paramref name="seriePreferida"/> (ex.: g_nfe_gateway.key3); inválido ou vazio → "1".</summary>
+        private static string NormalizarSerieRpsEnotas(string seriePreferida)
+        {
+            if (string.IsNullOrWhiteSpace(seriePreferida)) { return "1"; }
+            string s = seriePreferida.Trim();
+            foreach (char ch in s)
+            {
+                if (!char.IsDigit(ch)) { return "1"; }
+            }
+            if (!int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out int v)) { return "1"; }
+            if (v < 1 || v > 49999) { return "1"; }
+            return v.ToString(CultureInfo.InvariantCulture);
+        }
 
         #region Atualizar Nota Fiscal Enviada - Enotas
         public bool AtualizarStatusNFPbyMovimentoNF(gc_movimentos_nf record_gc_movimento_nf) // Implementado no Gateway 002
@@ -2105,7 +1880,16 @@ namespace GdiPlataform.Robos.ENotas
                 StreamReader responseReader;
                 string responseData;
                 string dadosEnviar = String.Empty;
-                dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/" + record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim();
+                // NFS-e: consulta por idExterno em /v1/.../nfes/porIdExterno/... — /v2/.../nf-e/{id} é NF-e produto (GUID) e falha com GEN002 se idExterno não for chave NF-e.
+                bool consultaNfseServicoV1 = IsJsonEnvioNfseServico(record_gc_movimento_nf.xml_erp);
+                if (consultaNfseServicoV1)
+                {
+                    dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/porIdExterno/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                }
+                else
+                {
+                    dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/" + record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim();
+                }
                 URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
 
                 ServicePointManager.Expect100Continue = false;
@@ -2128,13 +1912,56 @@ namespace GdiPlataform.Robos.ENotas
                     responseData = responseData.Replace("\"numero\":null", "\"numero\":0");
                     responseData = responseData.Replace("\"serie\":null", "\"serie\":0");
                     //DataNFPe dadosNfe = JsonConvert.DeserializeObject<DataNFPe>(responseData);
-                    NFPResponse dadosNfe = JsonConvert.DeserializeObject<NFPResponse>(responseData);
+                    string statusProvedor;
+                    string motivoStat;
+                    string linkPdfOuDanfe;
+                    string linkXml;
+                    string chaveAcesso;
+                    string sNumero;
+                    string sSerie;
+                    string sDataCriacao;
+                    string sDataEmissao;
+                    string sDataAutorizacao;
+                    string sDataUltimaAlteracao;
+
+                    if (consultaNfseServicoV1)
+                    {
+                        DataNFSe dns = JsonConvert.DeserializeObject<DataNFSe>(responseData);
+                        statusProvedor = dns.status;
+                        motivoStat = dns.motivoStatus.EmptyIfNull().ToString();
+                        linkPdfOuDanfe = dns.linkDownloadPDF.EmptyIfNull().ToString();
+                        linkXml = dns.linkDownloadXML.EmptyIfNull().ToString();
+                        chaveAcesso = dns.chaveAcesso.EmptyIfNull().ToString();
+                        if (!string.IsNullOrWhiteSpace(dns.numero)) { sNumero = dns.numero.Trim(); }
+                        else if (dns.numeroRps != 0) { sNumero = dns.numeroRps.ToString(CultureInfo.InvariantCulture); }
+                        else { sNumero = string.Empty; }
+                        sSerie = dns.serieRps.EmptyIfNull().ToString();
+                        sDataCriacao = dns.dataCriacao.EmptyIfNull().ToString();
+                        sDataEmissao = !string.IsNullOrWhiteSpace(dns.dataEmissao) ? dns.dataEmissao.EmptyIfNull().ToString() : dns.dataCompetenciaRps.EmptyIfNull().ToString();
+                        sDataAutorizacao = dns.dataAutorizacao.EmptyIfNull().ToString();
+                        sDataUltimaAlteracao = dns.dataUltimaAlteracao.EmptyIfNull().ToString();
+                    }
+                    else
+                    {
+                        NFPResponse dadosNfe = JsonConvert.DeserializeObject<NFPResponse>(responseData);
+                        statusProvedor = dadosNfe.status;
+                        motivoStat = dadosNfe.motivoStatus.EmptyIfNull().ToString();
+                        linkPdfOuDanfe = dadosNfe.linkDanfe.EmptyIfNull().ToString();
+                        linkXml = dadosNfe.linkDownloadXML.EmptyIfNull().ToString();
+                        chaveAcesso = dadosNfe.chaveAcesso.EmptyIfNull().ToString();
+                        sNumero = dadosNfe.numero.ToString(CultureInfo.InvariantCulture);
+                        sSerie = dadosNfe.serie.EmptyIfNull().ToString();
+                        sDataCriacao = dadosNfe.dataCriacao.EmptyIfNull().ToString();
+                        sDataEmissao = dadosNfe.dataEmissao.EmptyIfNull().ToString();
+                        sDataAutorizacao = dadosNfe.dataAutorizacao.EmptyIfNull().ToString();
+                        sDataUltimaAlteracao = dadosNfe.dataUltimaAlteracao.EmptyIfNull().ToString();
+                    }
 
                     if (record_gc_movimento_nf != null)
                     {
                         String statusNota = string.Empty;
                         var allRecordsNfeStatus = db.g_nfe_status.ToList();
-                        g_nfe_status record_g_nfe_status = allRecordsNfeStatus.Find(e => e.descricao_provedor == dadosNfe.status);
+                        g_nfe_status record_g_nfe_status = allRecordsNfeStatus.Find(e => e.descricao_provedor == statusProvedor);
 
                         if (record_g_nfe_status != null)
                         {
@@ -2144,7 +1971,7 @@ namespace GdiPlataform.Robos.ENotas
                             record_g_nfe_status = new Db.g_nfe_status
                             {
                                 id_nfe_status = 13,
-                                descricao = dadosNfe.status.EmptyIfNull().Trim().ToString()
+                                descricao = statusProvedor.EmptyIfNull().Trim().ToString()
                             };
                         }
 
@@ -2154,15 +1981,15 @@ namespace GdiPlataform.Robos.ENotas
                             RecordMovimento = db.gc_movimentos.Find(record_gc_movimento_nf.id_movimento);
 
                             record_gc_movimento_nf.id_nfe_status = record_g_nfe_status.id_nfe_status;
-                            record_gc_movimento_nf.nf_url_pdf = dadosNfe.linkDanfe;
-                            record_gc_movimento_nf.nf_url_xml = dadosNfe.linkDownloadXML;
-                            record_gc_movimento_nf.nf_chave_acesso = dadosNfe.chaveAcesso;
-                            record_gc_movimento_nf.nf_numero = dadosNfe.numero.ToString();
-                            record_gc_movimento_nf.nf_serie = dadosNfe.serie.ToString();
-                            DateTime DataCriacaoNFe = new DateTime(); DateTime.TryParse(dadosNfe.dataCriacao.EmptyIfNull().ToString(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataCriacaoNFe); if (DataCriacaoNFe > DataHoraAtual) { DataCriacaoNFe = DataHoraAtual; }
-                            DateTime DataEmissaoNFe = new DateTime(); DateTime.TryParse(dadosNfe.dataEmissao.EmptyIfNull().ToString(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataEmissaoNFe); if (DataEmissaoNFe > DataHoraAtual) { DataEmissaoNFe = DataHoraAtual; }
-                            DateTime DataAutorizacaoNFe = new DateTime(); DateTime.TryParse(dadosNfe.dataAutorizacao.EmptyIfNull().ToString(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataAutorizacaoNFe); if (DataAutorizacaoNFe > DataHoraAtual) { DataAutorizacaoNFe = DataHoraAtual; }
-                            DateTime DataUltimaAlteracaoNFe = new DateTime(); DateTime.TryParse(dadosNfe.dataUltimaAlteracao.EmptyIfNull().ToString(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataUltimaAlteracaoNFe); if (DataUltimaAlteracaoNFe > DataHoraAtual) { DataUltimaAlteracaoNFe = DataHoraAtual; }
+                            record_gc_movimento_nf.nf_url_pdf = linkPdfOuDanfe;
+                            record_gc_movimento_nf.nf_url_xml = linkXml;
+                            record_gc_movimento_nf.nf_chave_acesso = chaveAcesso;
+                            record_gc_movimento_nf.nf_numero = sNumero;
+                            record_gc_movimento_nf.nf_serie = sSerie;
+                            DateTime DataCriacaoNFe = new DateTime(); DateTime.TryParse(sDataCriacao, new CultureInfo("pt-BR"), DateTimeStyles.None, out DataCriacaoNFe); if (DataCriacaoNFe > DataHoraAtual) { DataCriacaoNFe = DataHoraAtual; }
+                            DateTime DataEmissaoNFe = new DateTime(); DateTime.TryParse(sDataEmissao, new CultureInfo("pt-BR"), DateTimeStyles.None, out DataEmissaoNFe); if (DataEmissaoNFe > DataHoraAtual) { DataEmissaoNFe = DataHoraAtual; }
+                            DateTime DataAutorizacaoNFe = new DateTime(); DateTime.TryParse(sDataAutorizacao, new CultureInfo("pt-BR"), DateTimeStyles.None, out DataAutorizacaoNFe); if (DataAutorizacaoNFe > DataHoraAtual) { DataAutorizacaoNFe = DataHoraAtual; }
+                            DateTime DataUltimaAlteracaoNFe = new DateTime(); DateTime.TryParse(sDataUltimaAlteracao, new CultureInfo("pt-BR"), DateTimeStyles.None, out DataUltimaAlteracaoNFe); if (DataUltimaAlteracaoNFe > DataHoraAtual) { DataUltimaAlteracaoNFe = DataHoraAtual; }
                             record_gc_movimento_nf.nf_data_criacao = DataCriacaoNFe;
                             record_gc_movimento_nf.nf_data_emissao = DataEmissaoNFe;
                             record_gc_movimento_nf.nf_data_autorizacao = DataAutorizacaoNFe;
@@ -2173,7 +2000,7 @@ namespace GdiPlataform.Robos.ENotas
                             db.Entry(record_gc_movimento_nf).State = EntityState.Modified;
 
                             // Criar o log da nfe
-                            statusNota = dadosNfe.status.EmptyIfNull().ToString().Trim() + " " + dadosNfe.motivoStatus.EmptyIfNull().ToString().Trim();
+                            statusNota = statusProvedor.EmptyIfNull().ToString().Trim() + " " + motivoStat.EmptyIfNull().ToString().Trim();
                             if (statusNota.Length > 250) { statusNota = statusNota.Substring(0, 250); };
                             g_nfe_logs record_g_nfe_logs = new g_nfe_logs
                             {
@@ -2302,13 +2129,8 @@ namespace GdiPlataform.Robos.ENotas
             }
             catch (WebException ex)
             {
-                string MsgWebException = string.Empty;
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    MsgWebException = reader.ReadToEnd();
-                }
-                MsgWebException = MsgWebException.Replace("[", "").Replace("]", "").Replace("{", "").Replace("}", "").Replace(",", " - ");
+                string MsgWebException = LibExceptions.getWebException(ex);
+                if (string.IsNullOrWhiteSpace(MsgWebException)) { MsgWebException = ex.Message.EmptyIfNull().ToString(); }
 
                 MsgWebException = "Erro [ " + MsgWebException + "]";
                 if (MsgWebException.Length > 250) { MsgWebException = MsgWebException.Substring(0, 250); };

@@ -48,6 +48,171 @@
 
 ---
 
+### [2026-05-14] — Remoção de `GerarNFPImportacaoByMovimentoNF_OLD` (código morto)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Robos/ENotas/RoboEnotasNFE.cs`
+- `.cursor/CHANGELOG-DEV.md`
+
+**Problema / Demanda:**
+Método legado não referenciado em nenhum ponto do repositório.
+
+**O que foi feito:**
+- Removida a região e o método **`GerarNFPImportacaoByMovimentoNF_OLD`** de **`RoboEnotasNFE`**. O fluxo ativo continua a ser **`GerarNFPImportacaoByMovimentoNF`** (ex.: `MovimentosEntradasController`).
+
+**O que foi evitado e por quê:**
+- Sem alteração ao método V2 nem ao controller.
+
+**Impactos conhecidos:**
+- Nenhum consumidor no código; comportamento de produção inalterado.
+
+**Atenção para próximas intervenções:**
+- Se existir referência externa ao `_OLD` (scripts, outro repo), ajustar para o V2.
+
+---
+
+### [2026-05-14] — eNotas: falha de transmissão JSON → `gc_movimentos_nf.id_nfe_status = 14` + `g_nfe_logs`
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Robos/ENotas/RoboEnotasNFE.cs`
+- `.cursor/CHANGELOG-DEV.md`
+
+**Problema / Demanda:**
+Em falhas de rede/IO ao enviar JSON à API eNotas (ex.: servidor remoto recusou conexão), o movimento NF e o log não refletiam o status de erro nos dados (**14**).
+
+**O que foi feito:**
+- Método **`PersistirFalhaTransmissaoJsonEnotasMovimentoNf`**: atualiza **`gc_movimentos_nf.id_nfe_status = 14`**, insere **`g_nfe_logs`** com mensagem truncada (via `LibExceptions` / `WebException`), campos obrigatórios do log preenchidos a partir do NF; erros secundários ao persistir são ignorados.
+- **`GerarNFPVendaByMovimentoNF`** e **`GerarNFServicoByMovimentoNF`**: no `catch` antes de relançar, chamada ao helper quando **`id_movimento_nf > 0`** (já gravado antes do POST).
+- **`GerarNFPImportacaoByMovimentoNF`** (V2): **`gc_movimentos_nf`** passa a ser gravado **antes** do HTTP (mesmos campos que no sucesso), para existir `id_movimento_nf` em falha de transmissão; `catch` chama o helper; ramo de sucesso deixa de duplicar `Add`/`SaveChanges` da NF.
+
+**Decisões técnicas relevantes:**
+- **`id_nfe_status`** existe em **`gc_movimentos_nf`**, não na entidade **`g_nfe_logs`**; o log descreve a falha de transmissão.
+
+**O que foi evitado e por quê:**
+- Não alterar outros `catch` do robô (consulta status, etc.) fora do escopo de emissão POST produto/serviço.
+
+**Impactos conhecidos:**
+- Importação: registo **`gc_movimentos_nf`** criado antes da resposta OK da eNotas (antes só após sucesso); em sucesso o movimento pedido continua a ser atualizado como antes.
+
+**Atenção para próximas intervenções:**
+- Se a API devolver HTTP não OK mas com corpo (ex.: validação), o fluxo atual continua a lançar **`Exception(responseData)`** sem passar pelo helper de transmissão (conexão estabelecida).
+
+---
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Robos/ENotas/RoboEnotasNFE.cs`
+
+**Problema / Demanda:**
+eNotas negou NFS-e (**GW3001**): série do RPS deve conter **apenas números** e estar entre **1 e 49.999**. O envio usava **`serieRps` = `"RPS"`** (letras).
+
+**O que foi feito:**
+- `NormalizarSerieRpsEnotas`: valida dígitos e intervalo; inválido ou vazio → **`"1"`**.
+- `GerarNFServicoByMovimentoNF`: `serieRps` passa a usar **`g_nfe_gateway.key3`** da filial do gateway (quando preenchido com número válido); caso contrário **`"1"`**.
+
+**O que foi evitado e por quê:**
+- Sem alteração de schema SQL: `key3` já existia na entidade e não era usada no código do robô.
+
+**Impactos conhecidos:**
+- Filiais que precisem de série específica (ex.: 2, 10) devem gravar esse valor em **`g_nfe_gateway.key3`** para o registo do gateway da filial usado na NFS-e.
+
+**Atenção para próximas intervenções:**
+- Se `key3` for reutilizado noutro contexto no futuro, extrair coluna dedicada ou documentar convenção no `CLAUDE.md`.
+
+---
+
+### [2026-05-14] — `AtualizarStatusNFPbyMovimentoNF`: consulta NFS-e em `/v1/nfes/porIdExterno` (evita GEN002)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Robos/ENotas/RoboEnotasNFE.cs`
+- `Robos/ENotas/Nfe/NFSe.cs`
+
+**Problema / Demanda:**
+Ao atualizar status de **NF de serviços** (`GetNotaFiscalPedido` → `AtualizarStatusNFPbyMovimentoNF`), a API eNotas devolvia **GEN002** (erro genérico): o código fazia **GET** `.../v2/empresas/{id}/nf-e/{nf_identificador}` pensando em **NF-e produto** (identificador GUID da nota), mas em NFS-e o `nf_identificador` é o **`idExterno`** enviado na emissão, não a chave da rota `nf-e`.
+
+**O que foi feito:**
+- Deteção de payload NFS-e: `xml_erp` JSON com **`servico`** na raiz e sem **`itens`** (`IsJsonEnvioNfseServico`).
+- Nesse caso: **GET** `https://api.enotasgw.com.br/v1/empresas/{Key2}/nfes/porIdExterno/{Uri.EscapeDataString(nf_identificador)}` (alinhado ao Yes-ERP-Cloud e ao download XML já existente no robô).
+- Deserialização com **`DataNFSe`**: PDF via **`linkDownloadPDF`**, demais campos mapeados para as mesmas variáveis usadas na atualização do `gc_movimentos_nf` (fluxo unificado com NF-e produto).
+- **`NFSe`**: propriedades opcionais para resposta da consulta (`numero`, `dataCompetenciaRps`, `chaveAcesso`, datas em string).
+- **`catch (WebException)`** neste método: uso de **`LibExceptions.getWebException`** (evita NRE se `Response` for nulo).
+
+**O que foi evitado e por quê:**
+- Não alterar `AtualizarStatusG_nfePorId` (usa `nfe_key` / NF-e avulsa) nem cancelamento.
+
+**Impactos conhecidos:**
+- Notas de serviço emitidas pelo `GerarNFServicoByMovimentoNF` (com `xml_erp` típico) passam a consultar o endpoint correto; NF-e produto mantém **`/v2/.../nf-e/...`**.
+
+**Atenção para próximas intervenções:**
+- Registos antigos sem `xml_erp` ou com JSON atípico continuam no fluxo **NF-e** (v2); se existirem, avaliar outro critério (ex.: CFOP operação serviço).
+
+---
+
+### [2026-05-14] — NFS-e eNotas: URL emissão `/v1/.../nfes` + `getWebException` sem `Response`
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Robos/ENotas/RoboEnotasNFE.cs`
+- `Lib/LibExceptions.cs`
+
+**Problema / Demanda:**
+`GerarNFServicoByMovimentoNF` chamava `POST .../v2/empresas/{id}/nfes`; em ambiente real surgiu **404 Não Localizado**, `WebException` e o modal (`AjaxModalPedidoNotaFiscal`) não recebia JSON útil se `getWebException` falhasse com `Response` nulo.
+
+**O que foi feito:**
+- URL de emissão NFS-e alinhada à documentação oficial da eNotas (**POST** `https://api.enotasgw.com.br/v1/empresas/{empresaId}/nfes`), coerente com o próprio projeto (`/v1/.../nfes/porIdExterno/.../xml`).
+- `LibExceptions.getWebException`: guardas para `ex`/`Response` nulos e corpo vazio → devolve `ex.Message` em vez de lançar.
+
+**O que foi evitado e por quê:**
+- Não alterar endpoints **NF-e produto** (`/v2/.../nf-e`) nem outros fluxos eNotas.
+
+**Impactos conhecidos:**
+- Emissão NFS-e passa a usar a mesma versão de path que a doc eNotas de emissão de nota fiscal (NFS-e).
+
+**Atenção para próximas intervenções:**
+- Se a eNotas descontinuar `v1/nfes`, rever doc do provedor e ajustar URL.
+
+---
+
+### [2026-05-14] — `AjaxModalPedidoNotaFiscal`: NF produto vs serviço (`gc_cfop_operacoes.is_servico`, eNotas)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/gc/Controllers/MovimentosController.cs`
+
+**Problema / Demanda:**
+Emissão eNotas no modal de NF do pedido chamava sempre `GerarNFPVendaByMovimentoNF`, ignorando operação de serviço.
+
+**O que foi feito:**
+- Com `IdGateway == 1` e `record_gc_cfop_operacao.is_servico == true` → **`GerarNFServicoByMovimentoNF`**; caso contrário → **`GerarNFPVendaByMovimentoNF`** (após validações existentes e com `record_gc_cfop_operacao` já garantido por `QtdErros == 0`).
+- `Sucesso` passa a refletir o **retorno bool** do robo; mensagem de sucesso distingue serviços vs pedido produto; em falha genérica sem exceção, mensagem orientando ver logs.
+
+**O que foi evitado e por quê:**
+- Ramo WebMania (`IdGateway == 2`) mantém-se comentado; sem alterar outros gateways.
+
+**Impactos conhecidos:**
+- Operações com `is_servico` na CFOP emissão pelo mesmo modal usam fluxo NFS-e (regras já no `RoboEnotasNFE`).
+
+---
+
+### [2026-05-14] — `RoboEnotasNFE.GerarNFServicoByMovimentoNF`: alinhamento fase 1 à NF venda (gateway/filial/status)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Robos/ENotas/RoboEnotasNFE.cs`
+
+**Problema / Demanda:**
+NFS-e serviço (escopo BH, 1 item) com persistência e status iniciais desalinhados de `GerarNFPVendaByMovimentoNF`.
+
+**O que foi feito:**
+- `id_nfe_status` inicial **1 → 14** (igual venda, pré-envio “Erro nos dados”).
+- **`id_coligada`** e **`id_filial`** a partir de `RecordMovimento` antes do `Add`.
+- **`id_nfe_gateway`** por filial (1/2) com fallback 1, mesmo bloco que venda (incl. atribuição inicial `= 1`).
+- Mensagem de validação: typo **Seviços** → **Serviços**; prefixo **NF-e** no texto do item único.
+
+**O que foi evitado e por quê:**
+- Sem alterar TLS, URL eNotas, `GerarNFPVendaByMovimentoNF` ou outros métodos do robo.
+
+**Impactos conhecidos:**
+- Registos `gc_movimentos_nf` de serviço passam a gravar coligada/filial e gateway como na venda; status inicial 14 até resposta OK (continua a definir `1` após sucesso, como já estava).
+
+---
+
 ### [2026-05-14] — Regras Cursor + `CLAUDE.md`: linha de commit Git no fim do relatório
 **Tipo:** Implementação
 **Arquivos tocados:**

@@ -44,5 +44,14 @@ namespace GdiPlataform.Robos.Nfe
         public string linkDownloadXML { get; set; }
         public string status { get; set; }
         public string motivoStatus { get; set; }
+
+        /// <summary>Resposta da consulta GET /v1/empresas/.../nfes/porIdExterno/... (campos opcionais conforme API).</summary>
+        public string numero { get; set; }
+        public string dataCompetenciaRps { get; set; }
+        public string chaveAcesso { get; set; }
+        public string dataCriacao { get; set; }
+        public string dataEmissao { get; set; }
+        public string dataAutorizacao { get; set; }
+        public string dataUltimaAlteracao { get; set; }
     }
 }

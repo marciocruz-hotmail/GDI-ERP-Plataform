@@ -4825,17 +4825,31 @@ namespace GdiPlataform.Areas.gc.Controllers
                     if (IdGateway == 1) // ENotas
                     {
                         RoboEnotasNFE _RoboFaturarNFP = new RoboEnotasNFE();
-                        _RoboFaturarNFP.GerarNFPVendaByMovimentoNF(viewrecord_gc_movimento_nf);
-                        MsgRetorno = "Nota Fiscal Pedido Nº  [<b>" + viewrecord_gc_movimento_nf.id_movimento.EmptyIfNull().ToString() + "</b>] transmitida com Sucesso!";
-                        Sucesso = true;
-                    }
-                    else if (IdGateway == 2) // WebManiaBR
-                    {
-                        /*LibRetornoProcessamento RetornoProcessamento = new LibRetornoProcessamento();
-                        RoboWebManiaBR _RoboFaturarNFP = new RoboWebManiaBR();
-                        RetornoProcessamento = _RoboFaturarNFP.GerarNFPVendaByMovimentoNF(viewrecord_gc_movimento_nf);
-                        Sucesso = RetornoProcessamento.Sucesso;
-                        MsgRetorno = RetornoProcessamento.MsgProcessamento;*/
+                        bool okNf;
+                        if (record_gc_cfop_operacao.is_servico == true)
+                        {
+                            okNf = _RoboFaturarNFP.GerarNFServicoByMovimentoNF(viewrecord_gc_movimento_nf);
+                        }
+                        else
+                        {
+                            okNf = _RoboFaturarNFP.GerarNFPVendaByMovimentoNF(viewrecord_gc_movimento_nf);
+                        }
+                        Sucesso = okNf;
+                        if (Sucesso)
+                        {
+                            if (record_gc_cfop_operacao.is_servico == true)
+                            {
+                                MsgRetorno = "Nota Fiscal de Serviços — Pedido Nº [<b>" + viewrecord_gc_movimento_nf.id_movimento.EmptyIfNull().ToString() + "</b>] transmitida com sucesso!";
+                            }
+                            else
+                            {
+                                MsgRetorno = "Nota Fiscal Pedido Nº  [<b>" + viewrecord_gc_movimento_nf.id_movimento.EmptyIfNull().ToString() + "</b>] transmitida com Sucesso!";
+                            }
+                        }
+                        else
+                        {
+                            MsgRetorno = "Falha na transmissão da nota fiscal. Verifique os logs da NF-e.";
+                        }
                     }
                 }
             }
