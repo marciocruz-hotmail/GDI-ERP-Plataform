@@ -18,12 +18,9 @@
                     @Html.HiddenFor(model => model.id_inventario)
                 </div>
                 @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
-                else
-                {
-                    <div class="card-header m-0 p-1">
-                        <button type="button" name="btnRegistroNovo" title="Registrar Novo Item" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateEditInventarioItem(0)"><i class="fa fa-plus me-2" aria-hidden="true"></i>Registrar Novo Item</button>
-                    </div>
-                }
+                <div class="card-header m-0 p-1">
+                    <button type="button" name="btnRegistroNovo" title="Registrar Novo Item" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateEditInventarioItem(0)"><i class="fa fa-plus me-2" aria-hidden="true"></i>Registrar Novo Item</button>
+                </div>
                 <div class="card-body m-0 p-1" style="height: 100%">
                     <div class="form-horizontal m-0 p-0">
                         <div class="form-group row text-sm-end m-0 pt-1">
