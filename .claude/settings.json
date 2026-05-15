@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python Scripts/gdi_verify_csproj_gdi_helpers.py)",
+      "Bash(python Scripts/gdi_inventory_datatables_g_area.py)",
+      "Bash(python Scripts/gdi_replace_alert_libmessage.py)",
+      "Bash(python Scripts/gdi_dedupe_libmessage_if_else.py)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(findstr*)",
+      "Bash(dir*)",
+      "Bash(ls*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/scripts/sync_changelog_recent.py"
+          }
+        ]
+      }
+    ]
+  }
+}

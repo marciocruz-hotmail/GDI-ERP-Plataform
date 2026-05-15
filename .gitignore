@@ -531,3 +531,6 @@ App_Data/Secrets/aws-ses-smtp.local.json
 # Pasta temporária do projeto (arquivos gerados em runtime)
 _filestemp/
 /Areas/g/Controllers/ProdutosController.cs
+
+# Claude Code — overrides pessoais (caminhos de máquina, permissões locais)
+.claude/settings.local.json
