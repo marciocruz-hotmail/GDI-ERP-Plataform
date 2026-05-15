@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\\\Marcio\\\\Projetos\\\\GDI-ERP-Plataform\\\\.claude\" 2>/dev/null)",
+      "Bash(ls \"C:\\\\Users\\\\consu\\\\.claude\" 2>/dev/null)",
+      "Bash(mkdir \"C:\\\\Marcio\\\\Projetos\\\\GDI-ERP-Plataform\\\\.claude\\\\worktrees\\\\objective-fermat-bb7b74\\\\.claude\")",
+      "Bash(mkdir \"C:\\\\Marcio\\\\Projetos\\\\GDI-ERP-Plataform\\\\.claude\\\\worktrees\\\\objective-fermat-bb7b74\\\\.claude\\\\commands\")",
+      "Bash(mkdir \".claude/scripts\" 2>/dev/null; echo \"OK\")",
+      "Bash(python .claude/scripts/sync_changelog_recent.py)",
+      "Bash(sed -n '37,75p' Areas/gc/Controllers/CfopOperacoesController.cs)",
+      "Bash(sed -n '37,75p' Areas/gc/Controllers/CfopParametrosController.cs)"
+    ]
+  }
+}
