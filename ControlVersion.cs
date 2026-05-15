@@ -9,7 +9,7 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.49.00 - 08/05/2026";
+            return "2026.49.00 - 15/05/2026";
         }
         public static String getShortVersion()
         {
