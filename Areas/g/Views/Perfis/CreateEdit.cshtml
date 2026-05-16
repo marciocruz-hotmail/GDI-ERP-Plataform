@@ -1,4 +1,4 @@
-@model GdiPlataform.Areas.g.Models.cstViewPerfisAcessosModel
+﻿@model GdiPlataform.Areas.g.Models.cstViewPerfisAcessosModel
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gPerfis" }))
@@ -7,7 +7,7 @@
         <div class="col-lg-12 m-0 p-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
-                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <h5>@ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.g_perfis.id_perfil)
                     @Html.HiddenFor(model => model.g_perfis.id_usuario_cadastro)
                     @Html.HiddenFor(model => model.g_perfis.datahora_cadastro)
@@ -174,20 +174,8 @@
         }
     });
 
-    function jsSalvarDados()
-    {
-        try {
-            if (isEmpty($('#g_perfis_nome').val().toString().trim())) {
-                LibMessageAlert("Atenção", "Campo <b>Nome do Perfil</b> é de preenchimento obrigatório!<br/>");
-            }
-            else {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gPerfis").submit();
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+    function jsSalvarDados() {
+        GdiSalvarDados({ campos: [{ id: '#g_perfis_nome', label: 'Nome do Perfil' }], formId: '#formCreateEdit_gPerfis' });
     };
 
 </script>

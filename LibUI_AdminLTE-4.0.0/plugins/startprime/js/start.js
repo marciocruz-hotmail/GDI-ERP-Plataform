@@ -513,6 +513,61 @@ function GdiAjaxNotifyInconsistencias(body, opcoes) {
     return true;
 }
 
+/**
+ * Helper parametrizável para validação e submit de formulários CreateEdit.
+ * Encapsula o padrão repetido em jsSalvarDados() nas views — use-o como corpo
+ * da função local, mantendo a assinatura jsSalvarDados() em cada view.
+ *
+ * config = {
+ *   campos:        Array de { id: '#fieldId', label: 'Rótulo exibido' }  (opcional)
+ *   formId:        Seletor jQuery do <form> a submeter                    (obrigatório se não usar onSalvar)
+ *   onValidar:     function() { return { ok: bool, msg: 'HTML' }; }      (validação extra — checkboxes, condicionais)
+ *   onAntesSalvar: function() { ... }                                    (ex.: habilitar campos disabled antes do submit)
+ *   onSalvar:      function() { ... }                                    (substitui $(formId).submit() — ex.: AJAX)
+ * }
+ */
+function GdiSalvarDados(config) {
+    try {
+        var campos = config.campos || [];
+        var hasError = false;
+        var msgError = 'Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>';
+
+        for (var i = 0; i < campos.length; i++) {
+            var c = campos[i];
+            var val = $(c.id).val();
+            if (isEmpty(val == null ? '' : val.toString().trim())) {
+                hasError = true;
+                msgError += 'Campo <b>' + c.label + '</b> é de preenchimento obrigatório!<br/>';
+            }
+        }
+
+        if (!hasError && typeof config.onValidar === 'function') {
+            var extra = config.onValidar();
+            if (!extra.ok) {
+                hasError = true;
+                msgError += extra.msg;
+            }
+        }
+
+        if (hasError) {
+            var msg = (campos.length === 1 && typeof config.onValidar !== 'function')
+                ? 'Campo <b>' + campos[0].label + '</b> é de preenchimento obrigatório!'
+                : msgError;
+            LibMessageAlert('Atenção', msg);
+        } else {
+            if (typeof config.onAntesSalvar === 'function') config.onAntesSalvar();
+            LibMessageProcessando('Salvando Dados . . .');
+            if (typeof config.onSalvar === 'function') {
+                config.onSalvar();
+            } else {
+                $(config.formId).submit();
+            }
+        }
+    } catch (err) {
+        LibMessageError('Atenção', '[jsSalvarDados] ' + (err && err.message ? err.message.toString() : String(err)));
+    }
+}
+
 /** Alias semântico para aviso (mesmo comportamento que LibMessageAlert: ícone warning por omissão). */
 function LibMessageWarning(Title, msg, opcoes) {
     LibMessageAlert(Title, msg, opcoes);

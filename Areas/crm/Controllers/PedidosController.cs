@@ -37,14 +37,17 @@ namespace GdiPlataform.Areas.crm.Controllers
         [OutputCache(Duration = 0, NoStore = true, VaryByParam = "*")]
         public ActionResult Index()
         {
-            String DataLimiteSQL = Convert.ToDateTime(DateTime.Now.AddYears(-1), new CultureInfo("en-US")).ToString("yyyy-MM-dd 00:00:00");
-            String SqlPedidos = String.Empty;
-            SqlPedidos += " select mov.* from gc_movimentos mov where id_cliente = " + CachePersister.userIdentity.IdCliente;
-            SqlPedidos += " and mov.id_movimento_tipo in (3, 4, 8) ";
-            SqlPedidos += " and mov.id_movimento_status = 2 and mov.id_movimento_posicao >= 4 ";
-            SqlPedidos += " and mov.datahora_aprovacao > '" + DataLimiteSQL + "' ";
-            SqlPedidos += " order by mov.datahora_aprovacao desc ";
-            List<Db.gc_movimentos> ListaPedidosCliente = db.gc_movimentos.SqlQuery(SqlPedidos).ToList();
+            var dataLimite = DateTime.Now.AddYears(-1);
+            List<Db.gc_movimentos> ListaPedidosCliente = db.gc_movimentos.SqlQuery(
+                "SELECT mov.* FROM gc_movimentos mov" +
+                " WHERE id_cliente = @idCliente" +
+                " AND mov.id_movimento_tipo IN (3, 4, 8)" +
+                " AND mov.id_movimento_status = 2 AND mov.id_movimento_posicao >= 4" +
+                " AND mov.datahora_aprovacao > @dataLimite" +
+                " ORDER BY mov.datahora_aprovacao DESC",
+                new System.Data.SqlClient.SqlParameter("@idCliente", CachePersister.userIdentity.IdCliente),
+                new System.Data.SqlClient.SqlParameter("@dataLimite", dataLimite)
+            ).ToList();
 
             cstListaPedidosPortal ListaPedidosPortal = new cstListaPedidosPortal();
             foreach (gc_movimentos RecordMovimento in ListaPedidosCliente)
@@ -54,8 +57,12 @@ namespace GdiPlataform.Areas.crm.Controllers
 
 
                 int IndexNfe = 0;
-                String SqlNFeAtivas = "select nf.* from gc_movimentos_nf nf where nf.id_movimento = " + RecordMovimento.id_movimento.EmptyIfNull().ToString() + " and nf.id_nfe_status in (select distinct id_nfe_status from g_nfe_status where nf_ativa = 1)";
-                List<Db.gc_movimentos_nf> ListaNFeAtivas = db.gc_movimentos_nf.SqlQuery(SqlNFeAtivas).ToList();
+                List<Db.gc_movimentos_nf> ListaNFeAtivas = db.gc_movimentos_nf.SqlQuery(
+                    "SELECT nf.* FROM gc_movimentos_nf nf" +
+                    " WHERE nf.id_movimento = @idMovimento" +
+                    " AND nf.id_nfe_status IN (SELECT DISTINCT id_nfe_status FROM g_nfe_status WHERE nf_ativa = 1)",
+                    new System.Data.SqlClient.SqlParameter("@idMovimento", RecordMovimento.id_movimento)
+                ).ToList();
                 foreach (gc_movimentos_nf RecordNF in ListaNFeAtivas)
                 {
                     IndexNfe += 1;

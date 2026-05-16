@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_nfe
+﻿@model GdiPlataform.Db.g_nfe
 @{ Layout = null; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalCancelarNfe_gNfe" }))
 {
@@ -7,7 +7,7 @@
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-file-alt fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                 @Html.HiddenFor(model => model.id_nfe)
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)

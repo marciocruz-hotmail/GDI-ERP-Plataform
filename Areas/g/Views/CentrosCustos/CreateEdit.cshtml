@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_centros_custos
+﻿@model GdiPlataform.Db.g_centros_custos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gCentrosCustos" }))
@@ -7,7 +7,7 @@
         <div class="col-lg-12 m-0 p-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
-                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <h5>@ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.id_centro_custo)
                     @Html.HiddenFor(model => model.id_usuario_cadastro)
                     @Html.HiddenFor(model => model.datahora_cadastro)
@@ -77,21 +77,8 @@
         }
     });
 
-    function jsSalvarDados()
-    {
-        try
-        {
-            if (isEmpty($('#nome').val().toString().trim())) {
-                LibMessageAlert("Atenção", "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>");
-            }
-            else {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gCentrosCustos").submit();
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+    function jsSalvarDados() {
+        GdiSalvarDados({ campos: [{ id: '#nome', label: 'Nome' }], formId: '#formCreateEdit_gCentrosCustos' });
     };
 
 </script>

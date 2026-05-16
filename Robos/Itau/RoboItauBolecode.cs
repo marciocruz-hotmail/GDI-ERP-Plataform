@@ -49,9 +49,8 @@ namespace GdiPlataform.Robos.Itau
             String TokenItau = String.Empty;
             string RetornoItau = String.Empty;
 
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
             var request = (HttpWebRequest)WebRequest.Create("https://sts.itau.com.br/api/oauth/token");
             request.ContentType = "application/x-www-form-urlencoded";
@@ -215,9 +214,8 @@ namespace GdiPlataform.Robos.Itau
                 String TokenItau = GetTokenApiItau(CertificadoPath);
                 string RetornoItau = String.Empty;
 
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 var request = (HttpWebRequest)WebRequest.Create("https://secure.api.itau/pix_recebimentos_conciliacoes/v2/boletos_pix");
                 request.ContentType = "application/json";

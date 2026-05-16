@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_usuarios
+﻿@model GdiPlataform.Db.g_usuarios
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gUsuarios" }))
@@ -7,7 +7,7 @@
         <div class="col-lg-12 m-0 p-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
-                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <h5>@ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.id_usuario)
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
@@ -99,36 +99,16 @@
         }
     });
 
-    function jsSalvarDados()
-    {
-        try {
-            var hasError = false;
-            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
-            if (isEmpty($('#email').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Email</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#nome').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#login').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Login</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#senha').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Senha</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (hasError) { LibMessageAlert("Atenção", msgError); }
-            else {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gUsuarios").submit();
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+    function jsSalvarDados() {
+        GdiSalvarDados({
+            campos: [
+                { id: '#email', label: 'Email' },
+                { id: '#nome', label: 'Nome' },
+                { id: '#login', label: 'Login' },
+                { id: '#senha', label: 'Senha' }
+            ],
+            formId: '#formCreateEdit_gUsuarios'
+        });
     };
 </script>
 

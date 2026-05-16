@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_classificacao_financeira
+﻿@model GdiPlataform.Db.g_classificacao_financeira
 @using GdiPlataform.Security
 @{Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gClassificacaoFinanceira" }))
@@ -7,7 +7,7 @@
         <div class="col-lg-12 m-0 p-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
-                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <h5>@ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.id_classificacao_financeira)
                     @Html.HiddenFor(model => model.id_usuario_cadastro)
                     @Html.HiddenFor(model => model.datahora_cadastro)
@@ -94,35 +94,20 @@
         }
     });
 
-    function jsSalvarDados()
-    {
-        try
-        {
-            var hasError = false;
-            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
-
-            if (isEmpty($('#codigo').val())) {
-                hasError = true;
-                msgError += "Campo <b>Código</b> é de preenchimento obrigatório!<br/>";
+    function jsSalvarDados() {
+        GdiSalvarDados({
+            campos: [
+                { id: '#codigo', label: 'Código' },
+                { id: '#nome', label: 'Nome' }
+            ],
+            formId: '#formCreateEdit_gClassificacaoFinanceira',
+            onValidar: function () {
+                if ($('#credito').is(':checked') === false && $('#debito').is(':checked') === false) {
+                    return { ok: false, msg: 'Informe se a classe é <b>Crédito</b>, <b>Débito</b> ou Ambos!<br/>' };
+                }
+                return { ok: true, msg: '' };
             }
-            if (isEmpty($('#nome').val())) {
-                hasError = true;
-                msgError += "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (($('#credito').is(":checked") == false) && ($('#debito').is(":checked") == false))
-            {
-                hasError = true;
-                msgError += "Informe se a classe é <b>Crédito</b>, <b>Débito</b> ou Ambos!<br/>";
-            }
-            if (hasError) { LibMessageAlert("Atenção", msgError); }
-            else {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gClassificacaoFinanceira").submit();
-            }
-        }
-        catch (e) {
-            LibMessageError("Atenção", "Erro [jsSalvarDados] (" + (e != null ? String(e) : "") + ")");
-        }
+        });
     };
 
 </script>

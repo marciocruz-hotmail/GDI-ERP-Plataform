@@ -1,3 +1,4 @@
+using GdiPlataform.Lib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,16 @@ namespace GDI_ERP_Plataform
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        protected void Application_Error()
+        {
+            Exception ex = Server.GetLastError();
+            if (ex != null)
+            {
+                string url = Request?.Url?.AbsolutePath ?? "?";
+                LibLogger.Error($"[Application_Error] {url}", ex);
+            }
         }
     }
 }

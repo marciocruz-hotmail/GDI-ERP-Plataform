@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_financeiro_faturamentos
+﻿@model GdiPlataform.Db.g_financeiro_faturamentos
 @{ Layout = null; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalEnviarEmailsClientes_gFinanceiroFaturamentos" }))
 {
@@ -7,7 +7,7 @@
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                 @Html.HiddenFor(model => model.id_financeiro_faturamento)
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)

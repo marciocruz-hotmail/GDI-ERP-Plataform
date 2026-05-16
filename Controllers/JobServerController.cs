@@ -76,8 +76,7 @@ namespace GdiPlataform.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Log da exceção (ajuste para seu mecanismo de log)
-                    System.Diagnostics.Debug.WriteLine($"[JobServer] Job {jobId} erro: {ex.Message}");
+                    LibLogger.Error($"[JobServer] Job {jobId} ({jobName}) erro no background", ex);
                 }
             });
 
@@ -96,7 +95,7 @@ namespace GdiPlataform.Controllers
         /// </summary>
         private static void RunJobInBackground(string jobId, string jobName, string parameters, System.Threading.CancellationToken cancellationToken, string database)
         {
-            System.Diagnostics.Debug.WriteLine($"[JobServer] Início job {jobId} | Nome: {jobName} | Params: {parameters}");
+            LibLogger.Info($"[JobServer] Início job {jobId} | Nome: {jobName} | Params: {parameters}");
 
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -123,7 +122,7 @@ namespace GdiPlataform.Controllers
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"[JobServer] Início job {jobId} | Nome: {jobId} | Params: {parameters}");
+                LibLogger.Info($"[JobServer] GerarRelatorioPosicaoEstoqueAtual iniciando | JobId: {jobId} | Params: {parameters}");
 
                 using (var db = new GdiPlataformEntities(database))
                 {
@@ -171,14 +170,14 @@ namespace GdiPlataform.Controllers
                                                 "FROM g_produtos WHERE(g_produtos.saldo_01_disponivel > 0 or g_produtos.saldo_03_disponivel > 0)";
                     int QtdRowsAtualizado = LibDB.dbQueryExec(SqlAtualizaSaldo, db);
 
-                    System.Diagnostics.Debug.WriteLine($"[JobServer] GerarRelatorioPosicaoEstoqueAtual iniciado. JobId={jobId}, Params={parameters}");
+                    LibLogger.Info($"[JobServer] GerarRelatorioPosicaoEstoqueAtual: delete={QtdRowsDeleteSaldo} insert={QtdRowsAtualizado} JobId={jobId}");
 
                     if (cancellationToken.IsCancellationRequested)
                         return;
 
                     // TODO: implementar a lógica real da geração do relatório de posição de estoque atual.
                     System.Threading.Thread.Sleep(100);
-                    System.Diagnostics.Debug.WriteLine($"[JobServer] GerarRelatorioPosicaoEstoqueAtual concluído. JobId={jobId}");
+                    LibLogger.Info($"[JobServer] GerarRelatorioPosicaoEstoqueAtual concluído JobId={jobId}");
 
                     RecordJobServer.qtd_rows_sucesso = QtdRowsDeleteSaldo + QtdRowsAtualizado;
                     RecordJobServer.concluido = true;
@@ -189,7 +188,7 @@ namespace GdiPlataform.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[JobServer] Job {jobId} erro: {ex.Message}");
+                LibLogger.Error($"[JobServer] GerarRelatorioPosicaoEstoqueAtual erro JobId={jobId}", ex);
             }
         }
     }

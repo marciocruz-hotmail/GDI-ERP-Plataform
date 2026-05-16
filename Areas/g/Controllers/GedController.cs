@@ -30,6 +30,24 @@ namespace GdiPlataform.Areas.g.Controllers
         private static readonly Regex RegexMultiplosUnderline = new Regex(@"_+", RegexOptions.Compiled);
         private static readonly Regex RegexMultiplosHifens = new Regex(@"-+", RegexOptions.Compiled);
 
+        // Extensões permitidas no GED — adicione novas extensões aqui conforme necessidade do negócio.
+        private static readonly HashSet<string> _extensoesGedPermitidas =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ".pdf", ".docx", ".doc", ".xlsx", ".xls",
+                ".jpg", ".jpeg", ".png", ".gif",
+                ".txt", ".xml", ".zip", ".p7s"
+            };
+
+        // Content-Types declarados pelo browser que indicam executável — bloqueados independentemente da extensão.
+        private static readonly HashSet<string> _mimeTypesBloqueados =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "application/x-msdownload", "application/x-msdos-program",
+                "application/x-dosexec",    "application/x-executable",
+                "application/x-sh",         "text/x-sh"
+            };
+
         public GedController()
         {
             if (!CachePersister.dataBase.EmptyIfNull().ToString().Equals(String.Empty))
@@ -222,7 +240,7 @@ namespace GdiPlataform.Areas.g.Controllers
         {
             int QtdErros = 0;
             String MsgErro = "";
-            String FileExtension = System.IO.Path.GetExtension(record_cstUploadGed.filesource.FileName).ToLowerInvariant();
+            String FileExtension = string.Empty;
             ged_arquivos record_ged_arquivo = new Db.ged_arquivos();
             try
             {
@@ -233,6 +251,16 @@ namespace GdiPlataform.Areas.g.Controllers
                     {
                         QtdErros += 1;
                         MsgErro += " - Campo [Arquivo] é de preenchimento obrigatório!<br/>";
+                    }
+                    else if (!_extensoesGedPermitidas.Contains(FileExtension))
+                    {
+                        QtdErros += 1;
+                        MsgErro += " - Tipo de arquivo não permitido [" + FileExtension + "]. Tipos aceitos: PDF, DOC(X), XLS(X), JPG, PNG, GIF, TXT, XML, ZIP, P7S.<br/>";
+                    }
+                    else if (_mimeTypesBloqueados.Contains(record_cstUploadGed.filesource.ContentType))
+                    {
+                        QtdErros += 1;
+                        MsgErro += " - Tipo de conteúdo do arquivo não é permitido [" + record_cstUploadGed.filesource.ContentType + "].<br/>";
                     }
                     if (record_cstUploadGed.id_arquivo_tipo == 0)
                     {

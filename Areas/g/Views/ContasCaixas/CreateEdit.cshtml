@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_contas_caixas
+﻿@model GdiPlataform.Db.g_contas_caixas
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gContasCaixas" }))
@@ -7,7 +7,7 @@
         <div class="col-lg-12 m-0 p-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
-                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <h5>@ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.id_conta_caixa)
                     @Html.HiddenFor(model => model.nossonumero)
                     @Html.HiddenFor(model => model.inicial_nossonumero)
@@ -319,22 +319,8 @@
         }
     });
 
-    function jsSalvarDados()
-    {
-        try {
-            if (isEmpty($('#nome').val().toString().trim()))
-            {
-                LibMessageAlert("Atenção", "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>");
-            }
-            else
-            {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gContasCaixas").submit();
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+    function jsSalvarDados() {
+        GdiSalvarDados({ campos: [{ id: '#nome', label: 'Nome' }], formId: '#formCreateEdit_gContasCaixas' });
     };
 
 </script>

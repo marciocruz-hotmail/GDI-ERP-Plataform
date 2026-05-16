@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_comex_importacoes
+﻿@model GdiPlataform.Db.gc_comex_importacoes
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormGcComexImportacoesCreateEdit" }))
@@ -9,7 +9,7 @@
                 <div class="card-title m-0 p-1">
                     <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.id_importacao)
                     @Html.HiddenFor(model => model.ativo)
                     @Html.HiddenFor(model => model.qtd_invoices)
@@ -587,28 +587,8 @@
         }
     });
 
-    function jsSalvarDados()
-    {
-        try
-        {
-            var hasError = false;
-            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
-
-            if (isEmpty($('#numero').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Número da Importação</b> é de preenchimento obrigatório!<br/>";
-            }
-
-            if (hasError) { LibMessageAlert("Atenção", msgError); }
-            else
-            {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#FormGcComexImportacoesCreateEdit").submit();
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+    function jsSalvarDados() {
+        GdiSalvarDados({ campos: [{ id: '#numero', label: 'Número da Importação' }], formId: '#FormGcComexImportacoesCreateEdit' });
     };
 
     $('#tabInvoicesExpandidas_tab').on('click', function (e)

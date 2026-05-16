@@ -1,4 +1,4 @@
-@model GdiPlataform.Areas.g.Models.cstModalFiltroAvancado
+﻿@model GdiPlataform.Areas.g.Models.cstModalFiltroAvancado
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalFiltroAvancadoView_GcFinanceiroLancamentos" }))
@@ -6,7 +6,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
-                <h5 class="modal-title"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>@Html.Raw(@ViewBag.Title)</h5>
+                <h5 class="modal-title"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>@ViewBag.Title</h5>
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>

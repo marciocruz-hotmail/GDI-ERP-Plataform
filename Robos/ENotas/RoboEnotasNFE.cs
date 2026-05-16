@@ -412,8 +412,8 @@ namespace GdiPlataform.Robos.ENotas
                 string urlAuth = "https://api.enotasgw.com.br/v2/empresas/" + key2 + "/nf-e";
 
                 ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 var request = (HttpWebRequest)WebRequest.Create(urlAuth);
                 request.ContentType = "application/json";
@@ -1372,9 +1372,8 @@ namespace GdiPlataform.Robos.ENotas
                     db.g_nfe_logs.Add(record_g_nfe_logs1);
                     string URLAuth = "https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e";
 
-                    ServicePointManager.Expect100Continue = false;
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                    ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                    ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                     var request = (HttpWebRequest)WebRequest.Create(URLAuth);
                     request.ContentType = "application/json";
@@ -1734,9 +1733,8 @@ namespace GdiPlataform.Robos.ENotas
                     // NFS-e: documentação eNotas (POST emissão) usa /v1/empresas/{id}/nfes — /v2/.../nfes pode responder 404.
                     string URLAuth = "https://api.enotasgw.com.br/v1/empresas/" + Key2 + "/nfes";
 
-                    ServicePointManager.Expect100Continue = false;
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                    ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                    ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                     var request = (HttpWebRequest)WebRequest.Create(URLAuth);
                     request.ContentType = "application/json";
@@ -1892,19 +1890,19 @@ namespace GdiPlataform.Robos.ENotas
                 }
                 URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
 
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
                 webRequest.Method = "GET";
                 webRequest.ContentType = "application/json";
                 webRequest.Headers.Add("Authorization", "Basic " + Key1);
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
                 webResponse = (HttpWebResponse)webRequest.GetResponse();
-                responseData = responseReader.ReadToEnd();
-                responseReader.Close();
-                webRequest.GetResponse().Close();
+                using (responseReader = new StreamReader(webResponse.GetResponseStream()))
+                {
+                    responseData = responseReader.ReadToEnd();
+                }
+                webResponse.Close();
                 if (webResponse.StatusCode == HttpStatusCode.OK)
                 {
                     responseData = responseData.Replace(@"\""", "'");
@@ -2198,8 +2196,8 @@ namespace GdiPlataform.Robos.ENotas
             try
             {
                 System.Net.ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
                 var options = new RestClientOptions("https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e/" + record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
                 var client = new RestClient(options);
                 var request = new RestRequest("");
@@ -2370,8 +2368,8 @@ namespace GdiPlataform.Robos.ENotas
                 string URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
 
                 ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 HttpWebRequest webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
                 webRequest.Method = "GET";
@@ -2472,8 +2470,8 @@ namespace GdiPlataform.Robos.ENotas
             try
             {
                 System.Net.ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
                 var options = new RestClientOptions("https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e/" + nfe.nfe_key.EmptyIfNull().ToString().Trim());
                 var client = new RestClient(options);
                 var request = new RestRequest("");
@@ -2567,8 +2565,8 @@ namespace GdiPlataform.Robos.ENotas
                 string URLAuth = "https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/";
 
                 ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 var request = (HttpWebRequest)WebRequest.Create(URLAuth);
                 request.ContentType = "application/json";
@@ -2652,19 +2650,19 @@ namespace GdiPlataform.Robos.ENotas
                 dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/" + record_g_nfe_carta_correcao.identificador.EmptyIfNull().ToString().Trim();
                 URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
 
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
                 webRequest.Method = "GET";
                 webRequest.ContentType = "application/json";
                 webRequest.Headers.Add("Authorization", "Basic " + Key1);
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
                 webResponse = (HttpWebResponse)webRequest.GetResponse();
-                responseData = responseReader.ReadToEnd();
-                responseReader.Close();
-                webRequest.GetResponse().Close();
+                using (responseReader = new StreamReader(webResponse.GetResponseStream()))
+                {
+                    responseData = responseReader.ReadToEnd();
+                }
+                webResponse.Close();
                 if (webResponse.StatusCode == HttpStatusCode.OK)
                 {
                     responseData = responseData.Replace(@"\""", "'");
@@ -2745,19 +2743,19 @@ namespace GdiPlataform.Robos.ENotas
                 dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/" + record_g_nfe_carta_correcao.identificador.EmptyIfNull().ToString().Trim();
                 URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
 
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
                 webRequest.Method = "GET";
                 webRequest.ContentType = "application/json";
                 webRequest.Headers.Add("Authorization", "Basic " + Key1);
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
                 webResponse = (HttpWebResponse)webRequest.GetResponse();
-                responseData = responseReader.ReadToEnd();
-                responseReader.Close();
-                webRequest.GetResponse().Close();
+                using (responseReader = new StreamReader(webResponse.GetResponseStream()))
+                {
+                    responseData = responseReader.ReadToEnd();
+                }
+                webResponse.Close();
                 if (webResponse.StatusCode == HttpStatusCode.OK)
                 {
                     responseData = responseData.Replace(@"\""", "'");
@@ -2849,19 +2847,19 @@ namespace GdiPlataform.Robos.ENotas
                 dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/porIdExterno/" + record_gc_movimentos_nf.nf_identificador.EmptyIfNull().Trim() + "/xml";
                 URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
 
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
 
                 webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
                 webRequest.Method = "GET";
                 webRequest.ContentType = "application/json";
                 webRequest.Headers.Add("Authorization", "Basic " + Key1);
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
                 webResponse = (HttpWebResponse)webRequest.GetResponse();
-                responseData = responseReader.ReadToEnd();
-                responseReader.Close();
-                webRequest.GetResponse().Close();
+                using (responseReader = new StreamReader(webResponse.GetResponseStream()))
+                {
+                    responseData = responseReader.ReadToEnd();
+                }
+                webResponse.Close();
                 if (webResponse.StatusCode == HttpStatusCode.OK)
                 {
                     responseData = responseData.Replace(@"\""", "'");

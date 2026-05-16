@@ -1146,6 +1146,7 @@
     <Compile Include="Lib\LibFilesDisk.cs" />
     <Compile Include="Lib\LibGDI.cs" />
     <Compile Include="Lib\LibIcons.cs" />
+    <Compile Include="Lib\LibLogger.cs" />
     <Compile Include="Lib\LibNumbers.cs" />
     <Compile Include="Lib\LibObjects.cs" />
     <Compile Include="Lib\PasswordPolicy.cs" />

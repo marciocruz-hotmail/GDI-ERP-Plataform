@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_contratos_aviacao
+﻿@model GdiPlataform.Db.g_contratos_aviacao
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gContratos" }))
@@ -7,7 +7,7 @@
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
-                <h5>@Html.Raw(@ViewBag.Title)</h5>
+                <h5>@ViewBag.Title</h5>
                 @Html.HiddenFor(model => model.id_contrato)
                 @Html.HiddenFor(model => model.ativo)
                 @Html.HiddenFor(model => model.anexo)
@@ -174,23 +174,8 @@
 
 
 
-    function jsSalvarDados()
-    {
-        try
-        {
-            if (isEmpty($('#descricao').val().toString().trim()))
-            {
-                LibMessageAlert("Atenção", "Campo <b>Descricao</b> é de preenchimento obrigatório!<br/>");
-            }
-            else
-            {
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gContratos").submit();
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+    function jsSalvarDados() {
+        GdiSalvarDados({ campos: [{ id: '#descricao', label: 'Descrição' }], formId: '#formCreateEdit_gContratos' });
     };
 
 </script>

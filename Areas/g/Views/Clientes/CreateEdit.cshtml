@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.g_clientes
+﻿@model GdiPlataform.Db.g_clientes
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gClientes" }))
@@ -7,7 +7,7 @@
         <div class="col-lg-12 m-0 p-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
-                    <h5>@Html.Raw(@ViewBag.Title)</h5>
+                    <h5>@ViewBag.Title</h5>
                     @Html.HiddenFor(model => model.id_cliente)
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
@@ -1013,54 +1013,27 @@
         }
     }
 
-    function jsSalvarDados()
-    {
-        try
-        {
-            var hasError = false;
-            var msgError = "Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>";
-            if (isEmpty($('#nome').val().toString().trim()))
-            {
-                hasError = true;
-                msgError += "Campo <b>Nome</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#razao_social').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Razão Social</b> é de preenchimento obrigatório!<br/>";
-            }
-            if ((isEmpty($('#cpf').val().toString().trim())) && (isEmpty($('#cnpj').val().toString().trim())))
-            {
-                hasError = true;
-                msgError += "Campo <b>CPF ou CNPJ</b> é de preenchimento obrigatório!<br/>";
-            }
-            if ((!isEmpty($('#cnpj').val().toString().trim())) && (isEmpty($('#razao_social').val().toString().trim()))) {
-                hasError = true;
-                msgError += "Campo <b>Razão Social</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#endereco_com').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Endereço</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#bairro_com').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>Bairro</b> é de preenchimento obrigatório!<br/>";
-            }
-            if (isEmpty($('#cep_com').val().toString().trim())) {
-                hasError = true;
-                msgError += "Campo <b>CEP</b> é de preenchimento obrigatório!<br/>";
-            }
-
-            if (hasError) { LibMessageAlert("Atenção", msgError); }
-            else
-            {
+    function jsSalvarDados() {
+        GdiSalvarDados({
+            campos: [
+                { id: '#nome', label: 'Nome' },
+                { id: '#razao_social', label: 'Razão Social' },
+                { id: '#endereco_com', label: 'Endereço' },
+                { id: '#bairro_com', label: 'Bairro' },
+                { id: '#cep_com', label: 'CEP' }
+            ],
+            formId: '#formCreateEdit_gClientes',
+            onValidar: function () {
+                var erros = '';
+                if (isEmpty($('#cpf').val().toString().trim()) && isEmpty($('#cnpj').val().toString().trim())) {
+                    erros += 'Campo <b>CPF ou CNPJ</b> é de preenchimento obrigatório!<br/>';
+                }
+                return { ok: erros === '', msg: erros };
+            },
+            onAntesSalvar: function () {
                 $('#id_vendedor').attr('disabled', false);
-                LibMessageProcessando("Salvando Dados . . .")
-                $("#formCreateEdit_gClientes").submit();
             }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsSalvarDados] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+        });
     };
 
     $('#tabAudit_tab').on('click', function (e)

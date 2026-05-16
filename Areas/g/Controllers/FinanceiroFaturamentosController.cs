@@ -974,30 +974,28 @@ namespace GdiPlataform.Areas.g.Controllers
                     db.g_financeiro_faturamentos.RemoveRange(db.g_financeiro_faturamentos.Where(f => f.id_financeiro_faturamento == record_g_financeiro.id_financeiro_faturamento).ToList());
                     db.SaveChanges();*/
 
-                    // APAGAR LANÇAMENTO TABELA G_FINANCEIRO_LANÇAMENTO
-                    String SqlDeleteLancamento = " DELETE FROM g_financeiro_lancamentos " +
-                                                 " WHERE id_financeiro_faturamento = " + record_g_financeiro.id_financeiro_faturamento + "";
+                    var paramIdFaturamento = new System.Data.SqlClient.SqlParameter("@id_financeiro_faturamento", record_g_financeiro.id_financeiro_faturamento);
 
-                    DataTable tableRegistroDeleteLancamento = LibDB.GetDataTable(SqlDeleteLancamento, db);
+                    // APAGAR LANÇAMENTOS — G_FINANCEIRO_LANCAMENTOS
+                    db.Database.ExecuteSqlCommand(
+                        "DELETE FROM g_financeiro_lancamentos WHERE id_financeiro_faturamento = @id_financeiro_faturamento",
+                        new System.Data.SqlClient.SqlParameter("@id_financeiro_faturamento", record_g_financeiro.id_financeiro_faturamento));
 
-                    // APAGAR TITULOS TABELAS G_FINANCEIRO
-                    String SqlDeleteTitulo = " DELETE FROM g_financeiro " +
-                                             " WHERE id_financeiro_faturamento = " + record_g_financeiro.id_financeiro_faturamento + "";
+                    // APAGAR TÍTULOS — G_FINANCEIRO
+                    db.Database.ExecuteSqlCommand(
+                        "DELETE FROM g_financeiro WHERE id_financeiro_faturamento = @id_financeiro_faturamento",
+                        new System.Data.SqlClient.SqlParameter("@id_financeiro_faturamento", record_g_financeiro.id_financeiro_faturamento));
 
-                    DataTable tableRegistroDeleteTitulo = LibDB.GetDataTable(SqlDeleteTitulo, db);
+                    // APAGAR FATURAMENTO — G_FINANCEIRO_FATURAMENTOS
+                    db.Database.ExecuteSqlCommand(
+                        "DELETE FROM g_financeiro_faturamentos WHERE id_financeiro_faturamento = @id_financeiro_faturamento",
+                        new System.Data.SqlClient.SqlParameter("@id_financeiro_faturamento", record_g_financeiro.id_financeiro_faturamento));
 
-                    // APAGAR FATURAMENTO DA TABELA G_FINANCEIRO_FATURAMENTO
-                    String SqlDeleteFaturamento = " DELETE FROM g_financeiro_faturamentos " +
-                                                  " WHERE id_financeiro_faturamento = " + record_g_financeiro.id_financeiro_faturamento + "";
-
-                    DataTable tableRegistroDeleteFaturamento = LibDB.GetDataTable(SqlDeleteFaturamento, db);
-
-                    // SQL PARA TRAZER OS ID DO PROCESSAMENTO PARA EDIÇÃO
-                    String SqlAllProcessamento = "SELECT DISTINCT(id_processamento) FROM gdc_consultas_extrato " +
-                                                 "WHERE id_financeiro_faturamento = " + record_g_financeiro.id_financeiro_faturamento;
-
-
-                    DataTable tableRegistro = LibDB.GetDataTable(SqlAllProcessamento, db);
+                    // SQL PARA TRAZER OS IDs DO PROCESSAMENTO PARA EDIÇÃO
+                    DataTable tableRegistro = LibDB.GetDataTable(
+                        "SELECT DISTINCT id_processamento FROM gdc_consultas_extrato WHERE id_financeiro_faturamento = @id_financeiro_faturamento",
+                        db,
+                        new System.Data.SqlClient.SqlParameter("@id_financeiro_faturamento", record_g_financeiro.id_financeiro_faturamento));
                     List<DataRow> rowsTableRegistro = tableRegistro.AsEnumerable().ToList();
 
                     // LISTA DE PROCESSO PARA EDIÇÃO
@@ -1021,11 +1019,10 @@ namespace GdiPlataform.Areas.g.Controllers
                     }
                     db.SaveChanges();
 
-                    // APAGAR CONSULTAS TABELA GDC_CONSULTAS_EXTRATO
-                    String SqlDeleteExtratos = " DELETE FROM gdc_consultas_extrato " +
-                                               " WHERE id_financeiro_faturamento = " + record_g_financeiro.id_financeiro_faturamento + "";
-
-                    DataTable tableRegistroDeleteExtratos = LibDB.GetDataTable(SqlDeleteExtratos, db);
+                    // APAGAR CONSULTAS — GDC_CONSULTAS_EXTRATO
+                    db.Database.ExecuteSqlCommand(
+                        "DELETE FROM gdc_consultas_extrato WHERE id_financeiro_faturamento = @id_financeiro_faturamento",
+                        new System.Data.SqlClient.SqlParameter("@id_financeiro_faturamento", record_g_financeiro.id_financeiro_faturamento));
 
 
                     sucesso = true;

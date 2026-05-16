@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace GdiPlataform
 {
@@ -25,7 +26,8 @@ namespace GdiPlataform
                 s = Convert.ToString(message);
             if (string.IsNullOrWhiteSpace(s))
                 return Enumerable.Empty<AlertMsgItem>();
-            var html = string.IsNullOrEmpty(prefixHtml) ? s : (prefixHtml + s);
+            var encodedMsg = System.Net.WebUtility.HtmlEncode(s);
+            var html = string.IsNullOrEmpty(prefixHtml) ? encodedMsg : (prefixHtml + encodedMsg);
             return new[]
             {
                 new AlertMsgItem

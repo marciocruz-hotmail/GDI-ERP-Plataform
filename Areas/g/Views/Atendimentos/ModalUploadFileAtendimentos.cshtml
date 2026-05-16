@@ -1,4 +1,4 @@
-@model GdiPlataform.Areas.g.Models.cstUploadGed
+﻿@model GdiPlataform.Areas.g.Models.cstUploadGed
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalUploadFileAtendimentos", enctype = "multipart/form-data" }))
@@ -8,7 +8,7 @@
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                 @Html.HiddenFor(model => model.id_atendimento)
                 @Html.HiddenFor(model => model.isAtendimento)
                 @Html.AntiForgeryToken()

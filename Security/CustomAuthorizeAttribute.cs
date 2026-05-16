@@ -1,7 +1,7 @@
-﻿using System;
+﻿using GdiPlataform.Lib;
+using System;
 using System.Web;
 using System.Web.Mvc;
-using GdiPlataform.Lib;
 
 namespace GdiPlataform.Security
 {
@@ -43,6 +43,10 @@ namespace GdiPlataform.Security
                 CustomPrincipal customPrincipal = new CustomPrincipal(CachePersister.userIdentity);
                 if (!customPrincipal.IsInRole(Roles))
                 {
+                    string url = filterContext?.HttpContext?.Request?.Url?.AbsolutePath ?? "?";
+                    string usuario = CachePersister.userIdentity?.Username ?? "?";
+                    LibLogger.Warn($"[Auth] Acesso negado | usuario={usuario} | role={Roles} | url={url}");
+
                     if (IsAjaxRequest(filterContext))
                     {
                         SetJsonForbidden(filterContext, mensagem: "Acesso negado.");

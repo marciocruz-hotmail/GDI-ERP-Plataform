@@ -1,4 +1,4 @@
-@model GdiPlataform.Areas.g.Models.cstUploadGed
+﻿@model GdiPlataform.Areas.g.Models.cstUploadGed
 @{ Layout = null; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGed", enctype = "multipart/form-data" }))
 {
@@ -7,7 +7,7 @@
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                 @Html.HiddenFor(model => model.id_arquivo)
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)

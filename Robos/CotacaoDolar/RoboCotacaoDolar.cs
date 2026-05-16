@@ -1,24 +1,23 @@
-﻿using Newtonsoft.Json;
+using GdiPlataform.Db;
+using GdiPlataform.Lib;
+using GdiPlataform.Security;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.IO;
-using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Threading;
-using System.Web;
-using GdiPlataform.Db;
-using GdiPlataform.Security;
-using GdiPlataform.Lib;
 
 namespace GdiPlataform.Robos.CotacaoDolar
 {
     public class RoboCotacaoDolar
     {
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         private GdiPlataformEntities db;
         private Decimal CotacaoDolarDiaAtualizada;
         private Boolean SucessoRobo;
+
         public RoboCotacaoDolar()
         {
             CotacaoDolarDiaAtualizada = 0;
@@ -70,42 +69,19 @@ namespace GdiPlataform.Robos.CotacaoDolar
 
         private void ThreadCotacaoDolarDiaAwesomeApi()
         {
-            String RetornoRobo = string.Empty;
             try
             {
-                string URLAuth = "";
-                HttpWebRequest webRequest;
-                HttpWebResponse webResponse;
-                StreamReader responseReader;
-                string responseData;
-                URLAuth = "https://economia.awesomeapi.com.br/last/USD-BRL";
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
-                webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
-                webRequest.Method = "GET";
-                webRequest.ContentType = "application/json";
-                webRequest.Headers.Add("Authorization", "Basic");
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
-                webResponse = (HttpWebResponse)webRequest.GetResponse();
-                responseData = responseReader.ReadToEnd();
-                responseReader.Close();
-                webRequest.GetResponse().Close();
-                if (webResponse.StatusCode == HttpStatusCode.OK)
-                {
-                    RetornoRobo = responseData;
-                    var data = (JObject)JsonConvert.DeserializeObject(RetornoRobo);
-                    try
-                    {
-                        string CotacaoStrRobo = data["USDBRL"]["bid"].Value<string>();
-                        CotacaoStrRobo = CotacaoStrRobo.Trim().Replace(" ", "");
-                        CotacaoStrRobo = CotacaoStrRobo.Trim().Replace(",", "").Trim();
-                        CotacaoStrRobo = CotacaoStrRobo.Trim().Replace(".", ",").Trim();
-                        Decimal.TryParse(CotacaoStrRobo, out CotacaoDolarDiaAtualizada);
-                        if (CotacaoDolarDiaAtualizada < 0 || CotacaoDolarDiaAtualizada > 10) { CotacaoDolarDiaAtualizada = 0; };
-                    }
-                    catch (Exception) { };
-                }
+                string url = "https://economia.awesomeapi.com.br/last/USD-BRL";
+                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                if (!response.IsSuccessStatusCode) return;
+
+                string responseData = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var data = (JObject)JsonConvert.DeserializeObject(responseData);
+                string CotacaoStrRobo = data["USDBRL"]["bid"].Value<string>();
+                CotacaoStrRobo = CotacaoStrRobo.Trim().Replace(" ", "").Replace(",", "").Replace(".", ",");
+                Decimal.TryParse(CotacaoStrRobo, out CotacaoDolarDiaAtualizada);
+                if (CotacaoDolarDiaAtualizada < 0 || CotacaoDolarDiaAtualizada > 10)
+                    CotacaoDolarDiaAtualizada = 0;
             }
             catch (Exception e)
             {
@@ -115,47 +91,26 @@ namespace GdiPlataform.Robos.CotacaoDolar
 
         private void ThreadCotacaoDolarDiaUol()
         {
-            String RetornoRobo = string.Empty;
             try
             {
-                string URLAuth = "";
-                HttpWebRequest webRequest;
-                HttpWebResponse webResponse;
-                StreamReader responseReader;
-                string responseData;
-                URLAuth = "https://api.cotacoes.uol.com/currency/intraday/list?currency=1&fields=bidvalue";
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
-                ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
-                webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
-                webRequest.Method = "GET";
-                webRequest.ContentType = "application/json";
-                webRequest.Headers.Add("Authorization", "Basic");
-                responseReader = new StreamReader(webRequest.GetResponse().GetResponseStream());
-                webResponse = (HttpWebResponse)webRequest.GetResponse();
-                responseData = responseReader.ReadToEnd();
-                responseReader.Close();
-                webRequest.GetResponse().Close();
-                if (webResponse.StatusCode == HttpStatusCode.OK)
+                string url = "https://api.cotacoes.uol.com/currency/intraday/list?currency=1&fields=bidvalue";
+                var response = _httpClient.GetAsync(url).GetAwaiter().GetResult();
+                if (!response.IsSuccessStatusCode) return;
+
+                string responseData = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                JObject JRoot = JObject.Parse(responseData);
+                if (JRoot.SelectToken("docs") != null)
                 {
-                    RetornoRobo = responseData;
-                    var data = (JObject)JsonConvert.DeserializeObject(RetornoRobo);
-                    try
+                    JArray JListaCotacoes = JArray.Parse(JRoot.SelectToken("docs").ToString());
+                    if (JListaCotacoes.Count > 0)
                     {
-                        JObject JRoot = JObject.Parse(RetornoRobo);
-                        if (JRoot.SelectToken("docs") != null)
-                        {
-                            JArray JListaCotacoes = JArray.Parse(JRoot.SelectToken("docs").ToString());
-                            if (JListaCotacoes.Count() > 0)
-                            {
-                                string CotacaoStrRobo = JListaCotacoes[0]["bidvalue"].ToString();
-                                CotacaoStrRobo = CotacaoStrRobo.Trim().Replace(" ", "");
-                                Decimal.TryParse(CotacaoStrRobo, out CotacaoDolarDiaAtualizada);
-                                if (CotacaoDolarDiaAtualizada < 0 || CotacaoDolarDiaAtualizada > 10) { CotacaoDolarDiaAtualizada = 0; } else { SucessoRobo = true; };
-                            }
-                        }
+                        string CotacaoStrRobo = JListaCotacoes[0]["bidvalue"].ToString().Trim().Replace(" ", "");
+                        Decimal.TryParse(CotacaoStrRobo, out CotacaoDolarDiaAtualizada);
+                        if (CotacaoDolarDiaAtualizada < 0 || CotacaoDolarDiaAtualizada > 10)
+                            CotacaoDolarDiaAtualizada = 0;
+                        else
+                            SucessoRobo = true;
                     }
-                    catch (Exception) { };
                 }
             }
             catch (Exception ex)
@@ -163,7 +118,5 @@ namespace GdiPlataform.Robos.CotacaoDolar
                 string msg = ex.Message.DefaultIfEmpty().ToString();
             }
         }
-
-
     }
 }

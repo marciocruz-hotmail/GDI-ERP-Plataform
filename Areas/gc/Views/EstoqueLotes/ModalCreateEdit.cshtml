@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_estoque_lotes
+﻿@model GdiPlataform.Db.gc_estoque_lotes
 @using GdiPlataform.Security
 @{
     Layout = "~/Views/Shared/_Modal.cshtml";
@@ -10,7 +10,7 @@
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-circle-info fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                 @Html.HiddenFor(model => model.id_estoque_lote)
                 @Html.HiddenFor(model => model.ativo)
                 @Html.HiddenFor(model => model.id_movimento_origem)

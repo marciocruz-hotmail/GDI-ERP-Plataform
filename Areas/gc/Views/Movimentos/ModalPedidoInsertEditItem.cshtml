@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_movimentos_itens
+﻿@model GdiPlataform.Db.gc_movimentos_itens
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 
@@ -32,7 +32,7 @@
                 {
                     <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
-    @Html.Raw(@ViewBag.Title)</h5>
+    @ViewBag.Title</h5>
                 }
                 @Html.HiddenFor(model => model.id_movimento)
                 @Html.HiddenFor(model => model.id_movimento_item)
