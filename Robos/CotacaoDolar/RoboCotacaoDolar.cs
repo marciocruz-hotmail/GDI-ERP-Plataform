@@ -85,7 +85,7 @@ namespace GdiPlataform.Robos.CotacaoDolar
             }
             catch (Exception e)
             {
-                string msg = e.Message.DefaultIfEmpty().ToString();
+                string msg = e.Message;
             }
         }
 
@@ -115,7 +115,7 @@ namespace GdiPlataform.Robos.CotacaoDolar
             }
             catch (Exception ex)
             {
-                string msg = ex.Message.DefaultIfEmpty().ToString();
+                string msg = ex.Message;
             }
         }
     }
