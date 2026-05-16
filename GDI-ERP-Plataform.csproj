@@ -1241,7 +1241,6 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\fonts-googleapis.css" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\Login.css" />
-    <Content Include="Db\InserirMetadata.exe" />
     <Content Include="Db\ModelDbGdiPlataform.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ModelDbGdiPlataform.Context1.cs</LastGenOutput>
@@ -1421,8 +1420,6 @@
     <Content Include="Lib\DDL\ddl-version.txt" />
     <Content Include="Rotativa\help-wkhtmltoimage.txt" />
     <Content Include="Rotativa\help-wkhtmltopdf.txt" />
-    <Content Include="Rotativa\wkhtmltoimage.exe" />
-    <Content Include="Rotativa\wkhtmltopdf.exe" />
     <Content Include="Areas\a\Views\Filtros\ModalFiltroGenericoView.cshtml" />
     <Content Include="Areas\a\Views\Parametros\Index.cshtml" />
     <Content Include="Areas\a\Views\web.config" />
@@ -1787,16 +1784,9 @@
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.less" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\responsive.less" />
     <Content Include="CLAUDE.md" />
-    <!-- Dev/agente: não usar Content — o Publish Web copia para PackageTmp e falha (ex.: .cursor\rules é pasta ou ficheiro só leitura). -->
-    <None Include=".cursor\CHANGELOG-DEV.md" />
-    <None Include=".cursor\CHANGELOG-DEV.md" />
-    <None Include=".cursor\context\migracao-472-481.md" />
-    <None Include=".cursor\context\migracao-472-481.md" />
-    <None Include=".cursor\rules\gdi-erp-plataform.mdc" />
     <Content Include=".md\investigacao-timeout-sessao.md" />
     <Content Include=".md\relatorio-migracao-netframework-472-481.md" />
     <Content Include=".md\roadmap.md" />
-    <None Include=".cursor\rules\gdi-erp-plataform.mdc" />
     <None Include="Properties\PublishProfiles\aeroflightx.com.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
