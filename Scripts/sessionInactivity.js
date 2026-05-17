@@ -1,17 +1,22 @@
 /**
  * Controle de inatividade da sessão - logout automático após 15 min sem interação.
  * Reinicia o contador em: mousemove, mousedown, keydown, scroll, touchstart, click.
+ * Envia keepalive ao servidor a cada 5 min enquanto o usuário estiver ativo,
+ * mantendo a ASP.NET Session e o MemoryCache vivos (SlidingExpiration).
  * Usa window.GDI_SessionTimeout se definido pelo layout; caso contrário usa valores padrão.
  */
 (function () {
     var DEFAULT_TIMEOUT_SECONDS = 900; /* 15 min - alinhado ao Web.config sessionState timeout="15" */
     var DEFAULT_LOGOUT_PATH = '/UserIdentity/Logout';
+    var KEEPALIVE_PATH = '/UserIdentity/KeepAlive';
+    var KEEPALIVE_INTERVAL_MS = 5 * 60 * 1000; /* ping ao servidor a cada 5 min */
 
     var config = window.GDI_SessionTimeout || {};
     var LOGOUT_URL = (config.logoutUrl && config.logoutUrl.length > 0) ? config.logoutUrl : DEFAULT_LOGOUT_PATH;
     var TIMEOUT_SECONDS = (config.timeoutSeconds > 0) ? config.timeoutSeconds : DEFAULT_TIMEOUT_SECONDS;
     var COUNTDOWN_ID = 'sessionCountdown';
     var lastReset = 0;
+    var lastKeepalive = 0;
     var throttleMs = 1000;
     var timer = null;
     var remaining = TIMEOUT_SECONDS;
@@ -30,7 +35,15 @@
     function resetCountdown() {
         remaining = TIMEOUT_SECONDS;
         updateDisplay();
-        lastReset = Date.now();
+    }
+
+    function sendKeepalive() {
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', KEEPALIVE_PATH, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send();
+        } catch (e) { /* silencioso */ }
     }
 
     function doLogout() {
@@ -45,6 +58,11 @@
         if (now - lastReset < throttleMs) return;
         lastReset = now;
         resetCountdown();
+        /* keepalive ao servidor: no máximo 1 vez a cada 5 min */
+        if (now - lastKeepalive >= KEEPALIVE_INTERVAL_MS) {
+            lastKeepalive = now;
+            sendKeepalive();
+        }
     }
 
     function startTimer() {
@@ -57,6 +75,7 @@
     }
 
     function init() {
+        lastKeepalive = Date.now(); /* evita ping imediato no carregamento da página */
         resetCountdown();
         startTimer();
 

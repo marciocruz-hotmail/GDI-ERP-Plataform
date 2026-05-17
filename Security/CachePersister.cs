@@ -38,7 +38,7 @@ namespace GdiPlataform.Security
                     String key = "userIdentity_" + HttpContext.Current.Session["TokenId"].EmptyIfNull().ToString().Trim();
                     CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
                     cacheItemPolicy.SlidingExpiration = TimeSpan.FromMinutes(15);
-                    _cache.Add(key, value, cacheItemPolicy);
+                    _cache.Set(key, value, cacheItemPolicy);
                 }
                 catch (Exception ex)
                 {
@@ -75,7 +75,7 @@ namespace GdiPlataform.Security
                     String key = "contextoModel_" + HttpContext.Current.Session["TokenId"].EmptyIfNull().ToString().Trim();
                     CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
                     cacheItemPolicy.SlidingExpiration = TimeSpan.FromMinutes(15);
-                    _cache.Add(key, value, cacheItemPolicy);
+                    _cache.Set(key, value, cacheItemPolicy);
                 }
                 catch (Exception ex)
                 {
@@ -121,7 +121,7 @@ namespace GdiPlataform.Security
                     String key = "dataBase_" + HttpContext.Current.Session["TokenId"].EmptyIfNull().ToString().Trim();
                     CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
                     cacheItemPolicy.SlidingExpiration = TimeSpan.FromMinutes(15);
-                    _cache.Add(key, value, cacheItemPolicy);
+                    _cache.Set(key, value, cacheItemPolicy);
                 }
                 catch (Exception ex)
                 {
@@ -156,7 +156,7 @@ namespace GdiPlataform.Security
                     String key = "allSistemas_" + HttpContext.Current.Session["TokenId"].EmptyIfNull().ToString().Trim();
                     CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
                     cacheItemPolicy.SlidingExpiration = TimeSpan.FromMinutes(15);
-                    _cache.Add(key, value, cacheItemPolicy);
+                    _cache.Set(key, value, cacheItemPolicy);
                 }
                 catch (Exception ex)
                 {
@@ -192,7 +192,7 @@ namespace GdiPlataform.Security
                     String key = "allSistemasModulos_" + HttpContext.Current.Session["TokenId"].EmptyIfNull().ToString().Trim();
                     CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
                     cacheItemPolicy.SlidingExpiration = TimeSpan.FromMinutes(15);
-                    _cache.Add(key, value, cacheItemPolicy);
+                    _cache.Set(key, value, cacheItemPolicy);
                 }
                 catch (Exception ex)
                 {
@@ -228,7 +228,7 @@ namespace GdiPlataform.Security
                     String key = "allYesProdutos_" + HttpContext.Current.Session["TokenId"].EmptyIfNull().ToString().Trim();
                     CacheItemPolicy cacheItemPolicy = new CacheItemPolicy();
                     cacheItemPolicy.SlidingExpiration = TimeSpan.FromMinutes(15);
-                    _cache.Add(key, value, cacheItemPolicy);
+                    _cache.Set(key, value, cacheItemPolicy);
                 }
                 catch (Exception ex)
                 {

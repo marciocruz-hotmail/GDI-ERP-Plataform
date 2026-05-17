@@ -8,7 +8,7 @@
             <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-file-alt fa-sm" aria-hidden="true"></i>
-    @ViewBag.Title</h5><br />
+    @Html.Raw(ViewBag.Title)</h5><br />
                 @Html.HiddenFor(model => model.param_zerar_difal)
                 @Html.HiddenFor(model => model.id_movimento)
                 @Html.HiddenFor(model => model.param_reducao_bc)

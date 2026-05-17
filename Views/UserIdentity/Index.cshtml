@@ -4,9 +4,10 @@
 @{
     Layout = null;
     var wallPaper = (ViewBag.WallPaper ?? "").ToString();
-    var wallPaperUrl = wallPaper.StartsWith("http", StringComparison.OrdinalIgnoreCase)
-        ? wallPaper
-        : Url.Content("~/" + wallPaper.TrimStart('~', '/'));
+    var wallPaperUrl = string.IsNullOrWhiteSpace(wallPaper) ? ""
+        : wallPaper.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            ? wallPaper
+            : Url.Content("~/" + wallPaper.TrimStart('~', '/'));
     var portalClienteLogin = ViewBag.PortalClienteLogin as bool? == true;
 }
 

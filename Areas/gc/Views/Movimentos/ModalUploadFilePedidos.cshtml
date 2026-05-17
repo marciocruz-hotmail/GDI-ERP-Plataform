@@ -8,7 +8,7 @@
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
-    @ViewBag.Title</h5>
+    @Html.Raw(ViewBag.Title)</h5>
                 @Html.HiddenFor(model => model.id_gc_movimento)
                 @Html.HiddenFor(model => model.isCotacaoPedido)
                 @Html.AntiForgeryToken()

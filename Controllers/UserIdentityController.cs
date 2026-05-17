@@ -125,7 +125,7 @@ namespace GdiPlataform.Controllers
             }
             catch (Exception)
             {
-                ViewBag.WallPaper = "Images/defaultWallpaper.jpg";
+                ViewBag.WallPaper = "";
             }
             ViewBag.Version = ControlVersion.getShortVersion();
             return View(new IdentityViewModel { userIdentity = new UserIdentity() });
@@ -759,6 +759,16 @@ namespace GdiPlataform.Controllers
             Session.Remove("TrocaObrigatoria_Database");
             Session.Remove("TrocaObrigatoria_IdColigada");
             Session.Remove("TrocaObrigatoria_IdFilial");
+        }
+        #endregion
+
+        #region KeepAlive
+        [HttpPost]
+        public ActionResult KeepAlive()
+        {
+            // A chegada da request já renova a ASP.NET Session e o SlidingExpiration do MemoryCache.
+            // Chamado pelo sessionInactivity.js a cada 5 min enquanto o usuário está ativo.
+            return new HttpStatusCodeResult(200);
         }
         #endregion
 

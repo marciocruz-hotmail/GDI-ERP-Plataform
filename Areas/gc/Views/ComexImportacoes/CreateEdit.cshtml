@@ -9,7 +9,7 @@
                 <div class="card-title m-0 p-1">
                     <h5 class="modal-title d-flex align-items-center gap-2">
     <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
-    @ViewBag.Title</h5>
+    @Html.Raw(ViewBag.Title)</h5>
                     @Html.HiddenFor(model => model.id_importacao)
                     @Html.HiddenFor(model => model.ativo)
                     @Html.HiddenFor(model => model.qtd_invoices)
