@@ -1225,8 +1225,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     if (m.id_movimento_tipo == 10)
                         desc += m.receb_estoque_processado
-                            ? "<br/>NFe Compra Nacional - Recebida/Conferida"
-                            : "<br/>NFe Compra Nacional - Recebimento/Conferência Pendente";
+                            ? "<br/>NFe Entrada Nacional - Recebida/Conferida"
+                            : "<br/>NFe Entrada Nacional - Recebimento/Conferência Pendente";
                     else if (m.id_movimento_tipo == 11)
                         desc += m.receb_estoque_processado
                             ? "<br/>NFe Devolução - Recebida/Conferida"
@@ -1820,7 +1820,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     if (RecordMovimento.id_movimento_tipo == 10) // Entrada - Fornecedor - Nacional
                     {
                         IdEstoqueMovimento = 7; // Entrada - Compra Nacional
-                        NomeTipoEntrada = "Recebimento de NFe Compra Nacional";
+                        NomeTipoEntrada = "Recebimento de NFe Entrada Nacional";
                     }
                     else if (RecordMovimento.id_movimento_tipo == 11) // Entrada - Devolução
                     {

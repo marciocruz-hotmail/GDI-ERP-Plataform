@@ -7,7 +7,6 @@
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">
-    <i class="fa-solid fa-file-import fa-sm" aria-hidden="true"></i>
     @Html.Raw(ViewBag.Title)</h5>
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
@@ -120,23 +119,13 @@
                     }
                     else
                     {
-                        LibMessageDialog({
-                            title: "<i class='fa-regular fa-window-close' style='color:#ff0000'>&nbsp&nbsp</i><b>Erro no Processamento</b>",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
-                            backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function () {
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        LibMessageHideAll();
-                                    }
-                                }
-                            }
-                        })
+                    LibMessageError("Erro no Processamento", result.msg, {
+                        callback: function ()
+                        {
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
+                        }
+                    })
                     }
                 },
                 error: function (result)
@@ -149,10 +138,13 @@
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
-
-
-</script>
-
+                    
+                    
+                    
+                    </script>
+                    
+                    
+                    
+                    
 
 

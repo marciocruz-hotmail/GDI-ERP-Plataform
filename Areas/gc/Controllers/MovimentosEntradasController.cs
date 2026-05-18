@@ -1726,7 +1726,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 int VersaoGedPDF = 0;
                                 String DescricaoGedPDF = String.Empty;
                                 if (record_cstImportacaoNFEntrada.id_movimento_tipo == 6) { DescricaoGedPDF = "NFe Importação - " + _numeroNF + " - " + ClienteNome + " - (pdf)"; }
-                                else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 5) { DescricaoGedPDF = "NFe Compra - " + _numeroNF + " - " + ClienteNome + " - (pdf)"; }
+                                else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 5) { DescricaoGedPDF = "NFe Entrada - " + _numeroNF + " - " + ClienteNome + " - (pdf)"; }
                                 else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 9) { DescricaoGedPDF = "NFe Devolução - " + _numeroNF + " - " + ClienteNome + " - (pdf)"; }
 
                                 IQueryable<ged_arquivos> listaGedPDF = db.ged_arquivos.Where(g => (g.ativo == true) && (g.descricao == DescricaoGedPDF));
@@ -1766,7 +1766,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 int VersaoGedXML = 0;
                                 String DescricaoGedXML = String.Empty;
                                 if (record_cstImportacaoNFEntrada.id_movimento_tipo == 6) { DescricaoGedXML = "NFe Importação - " + _numeroNF + " - " + ClienteNome + " - (xml)"; }
-                                else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 5) { DescricaoGedXML = "NFe Compra - " + _numeroNF + " - " + ClienteNome + " - (xml)"; }
+                                else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 5) { DescricaoGedXML = "NFe Entrada - " + _numeroNF + " - " + ClienteNome + " - (xml)"; }
                                 else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 9) { DescricaoGedXML = "NFe Devolução - " + _numeroNF + " - " + ClienteNome + " - (xml)"; }
                                 IQueryable<ged_arquivos> listaGedXML = db.ged_arquivos.Where(g => (g.ativo == true) && (g.descricao == DescricaoGedXML));
                                 if (listaGedXML.Count() > 0)
@@ -1808,7 +1808,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         if (RecordMovimentoNovo.nf_data_geracao != null) { DataNF = RecordMovimentoNovo.nf_data_geracao.GetValueOrDefault(); };
                         String TipoEntrada = String.Empty;
                         if (record_cstImportacaoNFEntrada.id_movimento_tipo == 6) { TipoEntrada = "NFe Importação"; }
-                        else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 5) { TipoEntrada = "NFe Compra Nacional"; }
+                        else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 5) { TipoEntrada = "NFe Entrada Nacional"; }
                         else if (record_cstImportacaoNFEntrada.id_movimento_tipo == 9) { TipoEntrada = "NFe Devolução"; };
                         IdMovTipo = record_cstImportacaoNFEntrada.id_movimento_tipo.EmptyIfNull().ToString();
                         IdMovimento = RecordMovimentoNovo.id_movimento.EmptyIfNull().ToString();
@@ -1852,13 +1852,13 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
-        #region NFe Compra Nacional
+        #region NFe Entrada Nacional
         public ActionResult ModalImportarNFCompraNacional()
         {
             cstImportacaoNFEntrada record_cstImportacaoNFEntrada = new cstImportacaoNFEntrada();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Compra Nacional - Upload/Processamento";
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Entrada Nacional - Upload/Processamento";
             var comboMovimentosTipos = new List<SelectListItem>();
-            comboMovimentosTipos.Add(new SelectListItem { Value = "5", Text = "1.1.1 - Compra - Fornecedor - Nacional" });
+            comboMovimentosTipos.Add(new SelectListItem { Value = "5", Text = "1.1.1 - Entrada - Fornecedor - Nacional" });
             ViewBag.comboMovimentosTipos = comboMovimentosTipos;
             record_cstImportacaoNFEntrada.id_movimento_tipo = 5;
             return View("ModalNFEntradaImportar", record_cstImportacaoNFEntrada);
@@ -2019,7 +2019,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             RecordMovimentoCompraNacionalItem.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
                             db.Entry(RecordMovimentoCompraNacionalItem).State = EntityState.Modified;
 
-                            LogAudit = "Vinculação dados externos ao produto (Código:" + Item.produto_externo_codigo.EmptyIfNull() + " Descrição: "+ Item.produto_externo_nome.EmptyIfNull() + ") ao produto | processamento NFe Compra Nacional";
+                            LogAudit = "Vinculação dados externos ao produto (Código:" + Item.produto_externo_codigo.EmptyIfNull() + " Descrição: "+ Item.produto_externo_nome.EmptyIfNull() + ") ao produto | processamento NFe Entrada Nacional";
                             if (LogAudit.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "g_produtos", RecordMovimentoCompraNacionalItem.id_produto, LogAudit); };
                         }
                     }
@@ -2027,7 +2027,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     db.SaveChanges();
                     Sucesso = true;
                     
-                    LogAudit = "NFe Compra Nacional Processada com Sucesso | ";
+                    LogAudit = "NFe Entrada Nacional Processada com Sucesso | ";
                     LogAudit += LibDB.CompareDataTable(OldRecordMovimentoCompraNacional, RecordMovimentoCompraNacional);
                     LogAudit += "Qtd. Itens: " + QtdItens.ToString();
                     if (LogAudit.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "gc_movimentos", RecordMovimentoCompraNacional.id_movimento, LogAudit); };
@@ -2220,7 +2220,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             origem_gc_movimentos_itens.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
                             db.Entry(origem_gc_movimentos_itens).State = EntityState.Modified;
 
-                            LogAudit = "Vinculação dados externos ao produto (Código:" + Item.produto_externo_codigo.EmptyIfNull() + " Descrição: " + Item.produto_externo_nome.EmptyIfNull() + ") ao produto | processamento NFe Compra Nacional";
+                            LogAudit = "Vinculação dados externos ao produto (Código:" + Item.produto_externo_codigo.EmptyIfNull() + " Descrição: " + Item.produto_externo_nome.EmptyIfNull() + ") ao produto | processamento NFe Entrada Nacional";
                             if (LogAudit.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "g_produtos", origem_gc_movimentos_itens.id_produto, LogAudit); };
                         }
                     }
@@ -2252,13 +2252,13 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
-        #region NFe Compra Exterior - Upload e Processamento
+        #region NFe Entrada Exterior - Upload e Processamento
         public ActionResult ModalImportarNFImportacao()
         {
             cstImportacaoNFEntrada record_cstImportacaoNFEntrada = new cstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-passport", "", "#B7950B", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importação - Upload (XML e Danfe)";
             var comboMovimentosTipos = new List<SelectListItem>();
-            comboMovimentosTipos.Add(new SelectListItem { Value = "6", Text = "1.1.2 - Compra - Fornecedor - Exterior" });
+            comboMovimentosTipos.Add(new SelectListItem { Value = "6", Text = "1.1.2 - Entrada - Fornecedor - Exterior" });
             ViewBag.comboMovimentosTipos = comboMovimentosTipos;
             record_cstImportacaoNFEntrada.id_movimento_tipo = 6;
             return View("ModalNFEntradaImportar", record_cstImportacaoNFEntrada);
@@ -2676,7 +2676,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
-        #region NFe Compra Exterior - Gerar NF Internalização
+        #region NFe Entrada Exterior - Gerar NF Internalização
         public ActionResult ModalNFEntradaGerarNF(int? id)
         {
             ViewBag.Title = "Faturar NF Importação";
@@ -2785,7 +2785,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
-        #region NFe Compra Exterior - Cancelar Movimento
+        #region NFe Entrada Exterior - Cancelar Movimento
         public ActionResult ModalNFEntradaCancelar(int? id)
         {
             int TempId = id.GetValueOrDefault();

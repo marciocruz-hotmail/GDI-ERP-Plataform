@@ -6,7 +6,7 @@
     <div class="modal-dialog modal-full modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header m-0 p-1" style="background-color: #D5F5E3">
-                <h4 class="modal-title d-flex align-items-center gap-2"><i class="fa-solid fa-clipboard-check fa-sm" aria-hidden="true"></i>@Html.Raw((String)ViewBag.Title)</h4>
+                <h4 class="modal-title d-flex align-items-center gap-2">@Html.Raw((String)ViewBag.Title)</h4>
                 @Html.HiddenFor(model => model.id_movimento)
                 @Html.HiddenFor(model => model.id_cliente)
                 @Html.HiddenFor(model => model.tag)
@@ -391,3 +391,4 @@
 
 
 </script>
+

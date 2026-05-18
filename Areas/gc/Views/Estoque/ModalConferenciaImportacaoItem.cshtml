@@ -12,7 +12,7 @@
     <div class="modal-dialog modal-full modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
-                <h5 class="modal-title d-flex align-items-center gap-2"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>@Html.Raw(ViewBag.Title)</h5>
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
                 @Html.HiddenFor(model => model.id_movimento_item)
                 @Html.AntiForgeryToken()
             </div>
@@ -313,3 +313,4 @@
         }
     }
 </script>
+

@@ -6,7 +6,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
-                <h4 class="modal-title d-flex align-items-center gap-2"><i class="fa-solid fa-file-lines" aria-hidden="true"></i>@Html.Raw((String)ViewBag.Title)</h4>
+                <h4 class="modal-title d-flex align-items-center gap-2">@Html.Raw((String)ViewBag.Title)</h4>
                 @Html.HiddenFor(model => model.id_arquivo)
                 @Html.HiddenFor(model => model.tag_string)
                 @Html.AntiForgeryToken()
@@ -76,6 +76,7 @@
         }
     };
 </script>
+
 
 
 

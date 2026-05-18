@@ -25,13 +25,11 @@
                 @if (ViewBag.ActionDuplicate == "1")
                 {
                     <h5 class="modal-title d-flex align-items-center gap-2">
-    <i class="fa-solid fa-copy fa-sm" aria-hidden="true"></i>
     @Html.Raw("<b>Duplicar Item</b>")</h5>
                 }
                 else
                 {
                     <h5 class="modal-title d-flex align-items-center gap-2">
-    <i class="fa-solid fa-clipboard-list fa-sm" aria-hidden="true"></i>
     @Html.Raw(ViewBag.Title)</h5>
                 }
                 @Html.HiddenFor(model => model.id_movimento)
@@ -445,3 +443,4 @@
 
 
 </script>
+
