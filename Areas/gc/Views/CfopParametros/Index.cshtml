@@ -171,7 +171,7 @@
             {
                 var selectedIds = JsGetSelectedRows(TableName, columnName);
                 if (!selectedIds || selectedIds.length == 0) {
-                    yesMessageAlertSmall("Atenção", "Selecione o registro");
+                    LibMessageAlert("Atenção", "Selecione o registro", { size: 'small' });
                 }
                 else
                 {
@@ -184,7 +184,7 @@
                         })
                     }
                     else {
-                        yesMessageAlertSmall("Atenção", "Selecione apenas 1(um) registro!");
+                        LibMessageAlert("Atenção", "Selecione apenas 1(um) registro!", { size: 'small' });
                     }
                 }
             }

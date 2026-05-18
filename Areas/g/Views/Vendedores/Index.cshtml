@@ -202,7 +202,7 @@
             var selectedNomeTabela = JsGetSelectedRows(TableName, columNomeTabela);
             if (!selectedIds || selectedIds.length == 0)
             {
-                GdiSwal2.hideAll();
+                LibMessageHideAll();
                 LibMessageAlert("Atenção", "Selecione o registro!");
             }
             else {
@@ -233,8 +233,8 @@
             else {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    GdiSwal2.dialog({
-                        title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                    LibMessageDialog({
+                        title: "Confirmação",
                         closeButton: false,
                         message: "Deseja <b>REALMENTE</b> exportar os preços da tabela <b>" + selectedNomeTabela + "</b> ?" + "<br/><br/>" + "<b>Atenção:</b> O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
                         centerVertical: true,
@@ -245,7 +245,7 @@
                                 label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                                 className: 'btn-outline-warning',
                                 callback: function () {
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             },
                             confirmar: {
@@ -289,8 +289,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -298,14 +298,13 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         $("#dtGVendedores").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
                                         window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

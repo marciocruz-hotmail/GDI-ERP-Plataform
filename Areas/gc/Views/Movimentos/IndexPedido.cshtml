@@ -681,8 +681,8 @@
             else {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    GdiSwal2.dialog({
-                        title: "<p style='color:red'><i class='fa-solid fa-hand me-2' aria-hidden='true'></i><b>Atenção Usuário</b></p>",
+                    LibMessageDialog({
+                        title: "Atenção Usuário",
                         closeButton: false,
                         message: "Essa opção só deverá ser utilizada quando se tratar de uma <b>NOVA VENDA</b> para o mesmo cliente!<br/>ou <b>SEPARAR</b> os itens desse pedido em mais de um pedido!",
                         centerVertical: true,
@@ -691,8 +691,7 @@
                         size: 'large',
                         buttons: {
                             confirmar: {
-                                label: '&nbsp;OK',
-                                className: 'btn btn-info',
+                                label: 'OK',
                                 callback: function ()
                                 {
                                     LibMessageProcessando("");

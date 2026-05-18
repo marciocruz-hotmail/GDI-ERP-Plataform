@@ -351,8 +351,8 @@
         try {
             if ((@Model.id_movimento_status <= 2) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
             {
-                GdiSwal2.dialog({
-                    title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                LibMessageDialog({
+                    title: "Confirmação",
                     message: "Confirma a exclusão do item ?" + "<br/><br/>" + "<b>" + produto + "</b>",
                     closeButton: false,
                     centerVertical: true,
@@ -363,7 +363,7 @@
                             label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                             className: 'btn-outline-warning',
                             callback: function () {
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         },
                         confirmar: {
@@ -477,8 +477,8 @@
                     if (result.success == true)
                     {
                         LibMessageProcessandoHide();
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -487,11 +487,10 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                         jsYesCancelRecord('@Url.Action("IndexCompras","MovimentosCompras",new { Area = "gc" })');
                                     }
                                 }
@@ -659,8 +658,8 @@
         try {
             if ((@Model.id_movimento_status <= 2) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
             {
-                GdiSwal2.dialog({
-                    title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                LibMessageDialog({
+                    title: "Confirmação",
                     message: "Confirma a exclusão do item ?" + "<br/><br/>" + "<b>" + produto + "</b>",
                     closeButton: false,
                     centerVertical: true,
@@ -671,7 +670,7 @@
                             label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                             className: 'btn-outline-warning',
                             callback: function () {
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         },
                         confirmar: {

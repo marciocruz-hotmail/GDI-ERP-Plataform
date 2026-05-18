@@ -99,8 +99,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -110,13 +110,12 @@
                             {
                                 confirmar:
                                 {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         LibMessageProcessando("");
                                         window.location = '@Url.Action("Index", "MovimentosEntradas", new { Area = "gc" })';
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

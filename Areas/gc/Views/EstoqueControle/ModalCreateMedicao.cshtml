@@ -69,7 +69,7 @@
         {
             if (isEmpty($('#tensao').val().toString().trim()))
             {
-                yesMessageAlertSmall("Atenção", "Preencha corretamente os campos");
+                LibMessageAlert("Atenção", "Preencha corretamente os campos", { size: 'small' });
             }
             else {
                 jsSendForm();
@@ -96,15 +96,12 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 $("#dtEstoqueControleMedicoes").DataTable().draw(false);
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }

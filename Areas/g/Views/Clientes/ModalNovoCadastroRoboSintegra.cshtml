@@ -62,7 +62,7 @@
         {
             if (isEmpty($('#cnpj').val().toString().trim()))
             {
-                yesMessageAlertSmall("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!");
+                LibMessageAlert("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!", { size: 'small' });
             }
             else
             {
@@ -91,15 +91,12 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }
@@ -122,7 +119,7 @@
     function jsCheckInputsReceitaFederal() {
         try {
             if (isEmpty($('#cnpj').val().toString().trim())) {
-                yesMessageAlertSmall("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!");
+                LibMessageAlert("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!", { size: 'small' });
             }
             else {
                 jsSendFormReceitaFederal();
@@ -150,15 +147,12 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }
@@ -181,7 +175,7 @@
     function jsCheckInputsNovoCliente() {
         try {
             if (isEmpty($('#cnpj').val().toString().trim())) {
-                yesMessageAlertSmall("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!");
+                LibMessageAlert("Atenção", "Campo <b>CPF/CNPJ<b> é de preenchimento obrigatório!", { size: 'small' });
             }
             else {
                 jsSendFormNovoCliente();
@@ -210,15 +204,12 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }

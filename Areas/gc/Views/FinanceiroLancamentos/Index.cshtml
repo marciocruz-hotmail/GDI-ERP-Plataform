@@ -565,15 +565,12 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }
@@ -723,14 +720,11 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }
@@ -764,14 +758,11 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }

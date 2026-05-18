@@ -183,7 +183,7 @@
                             $("#dtGcEstoqueLotes").DataTable().draw(false);
                             yesDestroyModal('#FormModalCreateEditGcEstoqueLotes');
                             document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     }
                     else

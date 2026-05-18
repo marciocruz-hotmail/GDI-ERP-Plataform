@@ -326,8 +326,8 @@
                             if (result.success == true)
                             {
                                 LibMessageProcessandoHide();
-                                GdiSwal2.dialog({
-                                    title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                                LibMessageDialog({
+                                    title: "Confirmação",
                                     closeButton: false,
                                     message: result.msg,
                                     centerVertical: true,
@@ -335,11 +335,10 @@
                                     backdrop: true,
                                     buttons: {
                                         confirmar: {
-                                            label: '&nbsp;OK',
-                                            className: 'btn btn-info',
+                                            label: 'OK',
                                             callback: function () {
                                                 $("#dtGcMovimentosIndexRecebimentoEstoque").DataTable().draw(false);
-                                                GdiSwal2.hideAll();
+                                                LibMessageHideAll();
                                             }
                                         }
                                     }
@@ -348,7 +347,7 @@
                             else
                             {
                                 LibMessageProcessandoHide();
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                                 GdiAjaxNotifyInconsistencias(result.msg);
                             }
                         },

@@ -55,7 +55,7 @@
         {
             if (isEmpty($('#editId').val().toString().trim()) && isEmpty($('#editNome').val().toString().trim()))
             {
-                yesMessageAlertSmall("Atenção", "Preencha corretamente os campos do <b>Filtro</b>");
+                LibMessageAlert("Atenção", "Preencha corretamente os campos do <b>Filtro</b>", { size: 'small' });
             }
             else
             {

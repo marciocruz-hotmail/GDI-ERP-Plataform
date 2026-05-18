@@ -112,10 +112,7 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 if (result.tag == "GcMovimentosIndexPedido")
@@ -124,12 +121,12 @@
                                     $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + $('#id_gc_movimento').val().toString(), function () {
                                         var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
                                     })
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                                 else if (result.tag == "GcMovimentosFormPedidoCreate") {
                                     $("#dtGcMovimentosGed").DataTable().draw(false);
                                     document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                                 else if (result.tag == "GcMovimentosPainelPedidos")
                                 {
@@ -137,12 +134,12 @@
                                     $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + $('#id_gc_movimento').val().toString(), function () {
                                         var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
                                     })
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                                 else
                                 {
                                     document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             }
                         })

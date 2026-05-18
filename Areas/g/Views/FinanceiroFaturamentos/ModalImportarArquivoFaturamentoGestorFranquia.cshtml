@@ -83,8 +83,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -92,15 +92,14 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
                                         if (result.idProcessamento != "0") // Se houver processamento, realizar o download do relatório
                                         {
                                             window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                         }
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -108,7 +107,7 @@
                     }
                     else
                     {
-                        GdiSwal2.dialog({
+                        LibMessageDialog({
                             title: "<i class='fa-regular fa-window-close' style='color:#ff0000'>&nbsp&nbsp</i><b>Erro no Processamento</b>",
                             closeButton: false,
                             message: result.msg,
@@ -117,11 +116,10 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

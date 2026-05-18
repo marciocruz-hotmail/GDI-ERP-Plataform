@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_movimentos
+﻿@model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewNotasFiscais" }))
@@ -290,19 +290,19 @@
                 LibMessageProcessandoHide();
                 if (result.success == true)
                 {
-                    GdiSwal2.dialog({
-                        title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                    LibMessageDialog({
+                        title: "Confirmação",
                         closeButton: false,
                         message: result.msg,
+                        icon: 'success',
                         centerVertical: true,
                         onEscape: false,
                         backdrop: true,
                         buttons: {
                             confirmar: {
-                                label: '&nbsp;OK',
-                                className: 'btn btn-info',
+                                label: 'OK',
                                 callback: function () {
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             }
                         }
@@ -350,20 +350,20 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
+                            icon: 'success',
                             centerVertical: true,
                             onEscape: false,
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                         window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                     }
                                 }
@@ -411,20 +411,20 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
+                            icon: 'success',
                             centerVertical: true,
                             onEscape: false,
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                         window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                     }
                                 }
@@ -451,6 +451,7 @@
 
     function jsCancelamentoNF_Step1(id) {
         Swal.fire({
+            theme: 'bootstrap-5-light',
             title: "Confirmação",
             html:
                 "Deseja <b>CANCELAR</b> a NFº " + id + " ?" +
@@ -477,6 +478,7 @@
 
     function jsCancelamentoNF_Step2(id) {
         Swal.fire({
+            theme: 'bootstrap-5-light',
             title: "Confirmação",
             html:
                 "Deseja <b>REALMENTE CANCELAR</b> a NFº " + id + " ?" +
@@ -507,6 +509,7 @@
     function jsCancelamentoNF_Step3(id) {
         try {
             Swal.fire({
+                theme: 'bootstrap-5-light',
                 target: document.querySelector(".modal.show") || document.body,
                 title: "Informe a Justificatica do Cancelamento",
                 input: "text",
@@ -539,6 +542,7 @@
     function jsCancelamentoNF_Step4(id, obs) {
         try {
             Swal.fire({
+                theme: 'bootstrap-5-light',
                 target: document.querySelector(".modal.show") || document.body,
                 title: "Informe o nº do protocolo do Siare",
                 html: "(ou 0 se menor que 24 horas da autorização)",
@@ -593,19 +597,19 @@
                 LibMessageProcessandoHide();
                 if (result.success == true)
                 {
-                    GdiSwal2.dialog({
-                        title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                    LibMessageDialog({
+                        title: "Confirmação",
                         closeButton: false,
                         message: result.msg,
+                        icon: 'success',
                         centerVertical: true,
                         onEscape: false,
                         backdrop: true,
                         buttons: {
                             confirmar: {
-                                label: '&nbsp;OK',
-                                className: 'btn btn-info',
+                                label: 'OK',
                                 callback: function () {
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             }
                         }

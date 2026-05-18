@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_estoque_inventario
+﻿@model GdiPlataform.Db.gc_estoque_inventario
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalFinalizarInventario" }))
@@ -69,8 +69,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -78,13 +78,12 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         $("#dtGcInventario").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

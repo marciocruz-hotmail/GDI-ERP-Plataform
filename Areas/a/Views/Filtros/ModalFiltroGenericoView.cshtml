@@ -85,7 +85,7 @@
             {
                 if (($('#filterOperador').val().toString().trim() != "Nulo") && ($('#filterOperador').val().toString().trim() != "Não Nulo"))
                 {
-                    yesMessageAlertSmall("Atenção", "Preencha corretamente o campo <b>Filtro</b>");
+                    LibMessageAlert("Atenção", "Preencha corretamente o campo <b>Filtro</b>", { size: 'small' });
                 }
                 else {
                     jsRunFiltroDefault($('#nome_campo').val().toString(), $('#filterOperador').val().toString(), $('#filterText').val().toString());

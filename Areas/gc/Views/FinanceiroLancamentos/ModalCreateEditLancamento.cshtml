@@ -548,8 +548,8 @@
     {
         try
         {
-            GdiSwal2.dialog({
-                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            LibMessageDialog({
+                title: "Confirmação",
                 message: "Deseja REALMENTE DESATIVAR esse arquivo anexo ?" + "<br/><br/>" + "<b>Atenção:</b> O Log dessa operação ficará armazenado no banco de dados para futuras auditorias!",
                 closeButton: false,
                 centerVertical: true,
@@ -560,7 +560,7 @@
                         label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                         className: 'btn-outline-warning',
                         callback: function () {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar: {

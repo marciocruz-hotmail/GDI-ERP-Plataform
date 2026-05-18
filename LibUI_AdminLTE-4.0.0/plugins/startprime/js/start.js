@@ -115,7 +115,7 @@ function JsEditRecord(TableName, columnName, urlEdit)
     {
         var selectedIds = JsGetSelectedRows(TableName, columnName);
         if (!selectedIds || selectedIds.length == 0) {
-            yesMessageAlertSmall("Atenção", "Selecione o registro");
+            LibMessageAlert("Atenção", "Selecione o registro", { size: 'small' });
         }
         else {
             if (selectedIds.indexOf(',') == -1) {
@@ -123,7 +123,7 @@ function JsEditRecord(TableName, columnName, urlEdit)
                 LibMessageProcessando();
             }
             else {
-                yesMessageAlertSmall("Atenção", "Selecione apenas 1(um) registro!");
+                LibMessageAlert("Atenção", "Selecione apenas 1(um) registro!", { size: 'small' });
             }
         }
     }
@@ -149,7 +149,7 @@ function JsNewWindow(urlNew) {
         $(window.document.location).attr('href', urlNew);
     }
     catch (err) {
-        alert("[JsNewRecord] " + err.message.toString());
+        alert("[JsNewWindow] " + err.message.toString());
     }
 }
 
@@ -284,11 +284,7 @@ function btnFiltro(yesFilterOnOff) {
         try { document.getElementById("btnFiltroDefault").innerHTML = document.getElementById("btnFiltroDefault").innerHTML.replace("Sync...", "Remover Filtro").replace("fa-solid fa-sync", "fa-solid fa-magnifying-glass-minus"); } catch (e) { };
         try { document.getElementById("btnFiltroAvancado").innerHTML = document.getElementById("btnFiltroAvancado").innerHTML.replace("Sync...", "Remover Filtro").replace("fa-solid fa-sync", "fa-solid fa-magnifying-glass-minus"); } catch (e) { };
     }
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.hideAll === 'function') {
-            GdiSwalCompat.hideAll();
-        }
-    } catch (e) { }
+    LibMessageHideAll();
 }
 
 function getValidationSummary(message) {
@@ -334,37 +330,18 @@ function windowLoading(show, typeWindow) {
 };
 
 
-function yesMessageInfo(Title, msg) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.alert === 'function') {
-            GdiSwalCompat.alert({
-                title: Title,
-                message: msg,
-                icon: 'info'
-            });
-        } else {
-            alert((Title ? Title + "\n\n" : "") + (msg || ""));
-        }
-    }
-    catch (err) {
-        alert("[yesMessageInfo] " + err.message.toString());
-    }
-}
-
-
 /**
- * Mensagens globais (GDI): delegam a GdiSwalCompat (SweetAlert2, ver `startprime/js/gdi-swal2-dialog-shim.js`).
- * LibMessageAlert(Title, msg, opcoes?) — opcoes: icon, size, backdrop, buttons.ok, etc.
+ * Helper interno: centraliza a chamada a GdiSwalCompat.alert com ícone variável.
+ * Elimina triplicação de LibMessageAlert/Success/Error — não chamar diretamente das views.
+ * opcoes: icon, size, backdrop, buttons.ok, callback, etc. (mesclados sobre cfg, icon de opcoes sobrepõe o padrão).
  */
-function LibMessageAlert(Title, msg, opcoes) {
+function _gdiSwalAlert(icon, Title, msg, opcoes) {
     try {
         if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.alert === 'function') {
-            var cfg = { title: Title, message: msg, icon: 'warning' };
+            var cfg = { title: Title, message: msg, icon: icon };
             if (opcoes && typeof opcoes === 'object') {
-                for (var ka in opcoes) {
-                    if (Object.prototype.hasOwnProperty.call(opcoes, ka)) {
-                        cfg[ka] = opcoes[ka];
-                    }
+                for (var k in opcoes) {
+                    if (Object.prototype.hasOwnProperty.call(opcoes, k)) cfg[k] = opcoes[k];
                 }
             }
             GdiSwalCompat.alert(cfg);
@@ -373,53 +350,21 @@ function LibMessageAlert(Title, msg, opcoes) {
         }
     }
     catch (err) {
-        alert("[yesMessageAlert] " + err.message.toString());
+        alert("[_gdiSwalAlert] " + err.message.toString());
     }
 }
+
+/**
+ * Mensagens globais (GDI): delegam a GdiSwalCompat (SweetAlert2, ver `startprime/js/gdi-swal2-dialog-shim.js`).
+ * LibMessageAlert(Title, msg, opcoes?) — opcoes: icon, size, backdrop, buttons.ok, etc.
+ */
+function LibMessageAlert(Title, msg, opcoes)   { _gdiSwalAlert('warning', Title, msg, opcoes); }
 
 /** Sucesso (ícone success). opcoes: mesmas extensões de GdiSwalCompat.alert. */
-function LibMessageSuccess(Title, msg, opcoes) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.alert === 'function') {
-            var c1 = { title: Title, message: msg, icon: 'success' };
-            if (opcoes && typeof opcoes === 'object') {
-                for (var ks in opcoes) {
-                    if (Object.prototype.hasOwnProperty.call(opcoes, ks)) {
-                        c1[ks] = opcoes[ks];
-                    }
-                }
-            }
-            GdiSwalCompat.alert(c1);
-        } else {
-            alert((Title ? Title + "\n\n" : "") + (msg || ""));
-        }
-    }
-    catch (err) {
-        alert("[LibMessageSuccess] " + err.message.toString());
-    }
-}
+function LibMessageSuccess(Title, msg, opcoes) { _gdiSwalAlert('success', Title, msg, opcoes); }
 
 /** Erro (ícone error). */
-function LibMessageError(Title, msg, opcoes) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.alert === 'function') {
-            var c2 = { title: Title, message: msg, icon: 'error' };
-            if (opcoes && typeof opcoes === 'object') {
-                for (var ke in opcoes) {
-                    if (Object.prototype.hasOwnProperty.call(opcoes, ke)) {
-                        c2[ke] = opcoes[ke];
-                    }
-                }
-            }
-            GdiSwalCompat.alert(c2);
-        } else {
-            alert((Title ? Title + "\n\n" : "") + (msg || ""));
-        }
-    }
-    catch (err) {
-        alert("[LibMessageError] " + err.message.toString());
-    }
-}
+function LibMessageError(Title, msg, opcoes)   { _gdiSwalAlert('error',   Title, msg, opcoes); }
 
 /**
  * Falha de carregamento/atualização de DataTables (evento error.dt ou callback ajax.error da grelha).
@@ -568,110 +513,6 @@ function GdiSalvarDados(config) {
     }
 }
 
-/** Alias semântico para aviso (mesmo comportamento que LibMessageAlert: ícone warning por omissão). */
-function LibMessageWarning(Title, msg, opcoes) {
-    LibMessageAlert(Title, msg, opcoes);
-}
-
-/**
- * Confirmação binária. callbackConfirmar() e callbackCancelar() opcionais.
- * opcoes: repassadas a GdiSwalCompat.confirm (ex.: size, backdrop, buttons.confirm/cancel labels).
- */
-function LibMessageConfirm(titulo, mensagem, callbackConfirmar, callbackCancelar, opcoes) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.confirm === 'function') {
-            var c3 = Object.assign({}, opcoes || {});
-            c3.title = titulo != null ? titulo : (c3.title || 'Confirmação');
-            c3.message = mensagem != null ? mensagem : (c3.message || '');
-            c3.callback = function (ok) {
-                if (ok && typeof callbackConfirmar === 'function') {
-                    callbackConfirmar();
-                }
-                if (!ok && typeof callbackCancelar === 'function') {
-                    callbackCancelar();
-                }
-            };
-            return GdiSwalCompat.confirm(c3);
-        }
-        if (window.confirm((titulo ? titulo + "\n\n" : "") + (typeof mensagem === 'string' ? mensagem.replace(/<[^>]+>/g, '') : ''))) {
-            if (typeof callbackConfirmar === 'function') {
-                callbackConfirmar();
-            }
-        } else if (typeof callbackCancelar === 'function') {
-            callbackCancelar();
-        }
-    }
-    catch (err) {
-        alert("[LibMessageConfirm] " + err.message.toString());
-    }
-}
-
-/**
- * Prompt simples (SweetAlert2 via GdiSwalCompat.prompt).
- * callbackConfirmar(valor), callbackCancelar() ao cancelar ou fechar sem valor.
- * opcoes: inputType, value, placeholder, required, buttons, backdrop, etc.
- */
-function LibMessagePrompt(titulo, mensagem, callbackConfirmar, callbackCancelar, opcoes) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.prompt === 'function') {
-            var c4 = Object.assign({}, opcoes || {});
-            c4.title = titulo != null ? titulo : c4.title;
-            c4.message = mensagem != null ? mensagem : c4.message;
-            c4.callback = function (value) {
-                if (value != null) {
-                    if (typeof callbackConfirmar === 'function') {
-                        callbackConfirmar(value);
-                    }
-                } else if (typeof callbackCancelar === 'function') {
-                    callbackCancelar();
-                }
-            };
-            return GdiSwalCompat.prompt(c4);
-        }
-        if (typeof callbackCancelar === 'function') {
-            callbackCancelar();
-        }
-    }
-    catch (err) {
-        alert("[LibMessagePrompt] " + err.message.toString());
-    }
-}
-
-/**
- * Alerta a partir de objeto de configuração (título HTML, message, callback, size, …).
- * Use LibMessageAlert / LibMessageSuccess quando forem só título + mensagem + ícone simples.
- */
-function LibMessageSwalAlertConfig(config) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.alert === 'function') {
-            return GdiSwalCompat.alert(config);
-        }
-        var m = config && (config.message || config.html || '');
-        alert(String(m).replace(/<[^>]+>/g, ''));
-        if (config && typeof config.callback === 'function') {
-            config.callback();
-        }
-    }
-    catch (err) {
-        alert("[LibMessageSwalAlertConfig] " + err.message.toString());
-    }
-}
-
-/** Prompt a partir de objeto de configuração (callbacks no próprio config). */
-function LibMessageSwalPromptConfig(config) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.prompt === 'function') {
-            return GdiSwalCompat.prompt(config);
-        }
-        if (config && typeof config.callback === 'function') {
-            config.callback(null);
-        }
-    }
-    catch (err) {
-        alert("[LibMessageSwalPromptConfig] " + err.message.toString());
-    }
-}
-
 /** Modal rico (footer HTML, vários botões) — repassa a GdiSwalCompat.dialog / SweetAlert2. */
 function LibMessageDialog(options) {
     try {
@@ -697,25 +538,6 @@ function LibMessageHideAll() {
         alert("[LibMessageHideAll] " + err.message.toString());
     }
 }
-
-function yesMessageAlertSmall(Title, msg) {
-    try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.alert === 'function') {
-            GdiSwalCompat.alert({
-                size: "small",
-                title: Title,
-                message: msg,
-                icon: 'warning'
-            });
-        } else {
-            alert((Title ? Title + "\n\n" : "") + (msg || ""));
-        }
-    }
-    catch (err) {
-        alert("[yesMessageAlertSmall] " + err.message.toString());
-    }
-}
-
 
 function LibMessageProcessando(msg) {
     try {
@@ -1026,9 +848,7 @@ function jsGetDateDDMMYYYY(data) {
 
 function jsInitForm() {
     try {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.hideAll === 'function') {
-            GdiSwalCompat.hideAll();
-        }
+        LibMessageHideAll();
         LibMessageProcessandoHide();
         gdiInitTooltips(document);
         $('select').each(function () {
@@ -1082,9 +902,7 @@ function jsInitModal()
 {
     try
     {
-        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.hideAll === 'function') {
-            GdiSwalCompat.hideAll();
-        }
+        LibMessageHideAll();
         LibMessageProcessandoHide();
         var modalEl = document.querySelector('.modal.show');
         gdiInitTooltips(modalEl || document);

@@ -139,10 +139,7 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 LibMessageProcessando("");

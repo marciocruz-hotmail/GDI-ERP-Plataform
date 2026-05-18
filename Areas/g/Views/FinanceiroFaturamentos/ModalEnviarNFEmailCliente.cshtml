@@ -85,7 +85,7 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
+                        LibMessageDialog({
                             title: 'Simulação de Envio NFe Por E-mail',
                             closeButton: false,
                             message: result.msg,
@@ -95,8 +95,7 @@
                             buttons: {
                                 confirmar:
                                 {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         $("#dtGFinanceiroFaturamentos").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
@@ -104,7 +103,7 @@
                                         {
                                             window.location = '@Url.Action("ajaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                         }
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -143,7 +142,7 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
+                        LibMessageDialog({
                             title: 'Processando Envio NFe Por E-mail',
                             closeButton: false,
                             message: result.msg,
@@ -153,8 +152,7 @@
                             buttons: {
                                 confirmar:
                                 {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         $("#dtGFinanceiroFaturamentos").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
@@ -162,7 +160,7 @@
                                         {
                                             window.location = '@Url.Action("ajaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                         }
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -201,8 +199,8 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -210,20 +208,19 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         $("#dtGFinanceiroFaturamentos").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
                         })
                     }
                     else {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Verifique as inconsistências!</b>",
+                        LibMessageDialog({
+                            title: "Verifique as inconsistências!",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -231,12 +228,11 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         $("#dtGFinanceiroFaturamentos").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

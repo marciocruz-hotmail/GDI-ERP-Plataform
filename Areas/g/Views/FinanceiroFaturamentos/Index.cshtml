@@ -272,8 +272,8 @@
             else {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    GdiSwal2.dialog({
-                        title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                    LibMessageDialog({
+                        title: "Confirmação",
                         closeButton: false,
                         message: "Deseja <b>REALMENTE</b> apagar o faturamento ?" + "<br/><br/>" + "<b>" + selectedIds + " - " + selectedNomeTabela + "</b>" + "<br/><br/>" + "<b>Atenção:</b> Só será possivel apagar faturamentos que não tiveram alterações em seus títulos financeiros!",
                         centerVertical: true,
@@ -284,7 +284,7 @@
                                 label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                                 className: 'btn-outline-warning',
                                 callback: function () {
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             },
                             confirmar: {
@@ -292,7 +292,7 @@
                                 className: 'btn-outline-success',
                                 callback: function () {
                                     jsSendDeleteFaturamentoCompleto(selectedIds);
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             }
                         }
@@ -330,8 +330,8 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -339,12 +339,11 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         $("#dtGFinanceiroFaturamentos").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

@@ -111,6 +111,7 @@
             {
                 $.fn.dataTable.ext.errMode = 'none';
                 oTableMovimentosEntrada = $('#dtGcMovimentosIndexEntrada')
+                    .css("font-size", 16)
                     .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
                     .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff); }).DataTable({
                     "drawCallback": function (settings) {
@@ -160,8 +161,8 @@
                     { "width": "0%", visible: false, targets: [9] },
                     { "width": "0%", visible: false, targets: [10] },
                     { "width": "0%", visible: false, targets: [11] },
-                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row, meta) { if (data[10] != '0') { return '<button type="button" name="btnPDF" data-bs-toggle="tooltip" data-bs-placement="top" title="Danfe/PDF" class="btn btn-outline-info btn-sm p-1 btnPDF d-inline-flex align-items-center" onclick="jsDownloadFileS3(' + data[10] + ');"><i class="fa-regular fa-file-pdf"></i></button>' } } },
-                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [13], data: null, defaultContent: "", render: function (data, type, row, meta) { if (data[11] != '0') { return '<button type="button" name="btnXML" data-bs-toggle="tooltip" data-bs-placement="top" title="XML" class="btn btn-outline-info btn-sm p-1 btnXML d-inline-flex align-items-center" onclick="jsDownloadFileS3(' + data[11] + ');"><i class="fa-regular fa-file-code"></i></button>' } } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [12], data: null, defaultContent: "", render: function (data, type, row, meta) { if (data[10] != '0') { return '<button type="button" name="btnPDF" data-bs-toggle="tooltip" data-bs-placement="top" title="Danfe/PDF" class="btn btn-primary btn-sm p-2 btnPDF d-inline-flex align-items-center" onclick="jsDownloadFileS3(' + data[10] + ');"><i class="fa-regular fa-file-pdf"></i></button>' } } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [13], data: null, defaultContent: "", render: function (data, type, row, meta) { if (data[11] != '0') { return '<button type="button" name="btnXML" data-bs-toggle="tooltip" data-bs-placement="top" title="XML" class="btn btn-primary btn-sm p-2 btnXML d-inline-flex align-items-center" onclick="jsDownloadFileS3(' + data[11] + ');"><i class="fa-regular fa-file-code"></i></button>' } } },
                 ],
                 "createdRow": function (row, data, dataIndex) {
                     var st = data[9];

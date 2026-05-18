@@ -208,8 +208,8 @@
                     if (result.success == true)
                     {
                         LibMessageProcessandoHide();
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -218,11 +218,10 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                         jsYesCancelRecord('@Url.Action("","EstoqueControle",new { Area = "gc" })')
                                     }
                                 }
@@ -348,8 +347,8 @@
 
     function jsConfirmaCancelamentoMedicao(id)
     {
-        GdiSwal2.dialog({
-            title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+        LibMessageDialog({
+            title: "Confirmação",
             closeButton: false,
             message: 'Deseja <b>CANCELAR</b> a Medição Nº ' + id + ' ?' + '</br></br>' + '<b>ATENÇÃO:</b></br> O Log dessa operação será armazenado no banco de dados do ERP para futuras consultas!',
             centerVertical: true,
@@ -364,7 +363,7 @@
                     className: 'btn-outline-success',
                     callback: function () {
                         jsCancelamentoMedicao(id);
-                        GdiSwal2.hideAll();
+                        LibMessageHideAll();
                     }
                 },
                 cancel:
@@ -372,7 +371,7 @@
                     label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Desistir',
                     className: 'btn-outline-warning',
                     callback: function () {
-                        GdiSwal2.hideAll();
+                        LibMessageHideAll();
                     }
                 }
             }
@@ -402,14 +401,11 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function () {
                                 $("#dtEstoqueControleMedicoes").DataTable().draw(false);
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         })
                     }

@@ -182,7 +182,7 @@
         {
             $.fn.dataTable.ext.errMode = 'none';
             otableGCIndexPedido = $('#dataTableGCIndexPedido')
-                .css("font-size", 14)
+                .css("font-size", 16)
                 .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (GdiDtNotifyJsonErrorMessage(json)) { }
@@ -241,17 +241,17 @@
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [4] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [5] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
-                { "width": "30%", orderable: false, className: 'text-sm-start', targets: [7] },
+                { "width": "31%", orderable: false, className: 'text-sm-start', targets: [7] },
                 { "width": "6%", orderable: false, className: 'text-sm-start', targets: [8] },
                 { "width": "6%", orderable: false, className: 'text-sm-center', targets: [9] },
                 { "width": "3%", orderable: false, className: 'text-sm-center', targets: [10] },
                 { "width": "3%", orderable: false, className: 'text-sm-center', targets: [11] },
-                { "width": "7%", orderable: false, className: 'text-sm-end', targets: [12] },
+                { "width": "8%", orderable: false, className: 'text-sm-end', targets: [12] },
                 { "width": "1%", orderable: false, className: 'text-sm-center', targets: [13] },
-                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [14], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewPedido" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Pedido Nº ' + data[2] + '" class="btn btn-info btn-sm p-1 btnGCPainelPedidosViewFinanceiro d-inline-flex align-items-center" onclick="jsAjaxReportInvoicePDF(' + data[2] + ');"><i class="fa-solid fa-search"></i></button>' } },
-                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [15], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewFinanceiro" data-bs-toggle="tooltip" data-bs-placement="top" title="Financeiro - Visualizar Lançamentos Nº ' + data[2] + '" class="btn btn-secondary btn-sm p-1 btnGCPainelPedidosViewFinanceiro d-inline-flex align-items-center" onclick="jsModalViewFinanceiroMovimentos(' + data[2] + ');"><i class="fa-regular fa-credit-card"></i></button>' } },
-                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [16], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewNotaFiscal" data-bs-toggle="tooltip" data-bs-placement="top" title="Notas Fiscais - Visualizar Nº ' + data[2] + '" class="btn btn-secondary btn-sm p-1 btnGCPainelPedidosViewNotaFiscal d-inline-flex align-items-center" onclick="jsModalViewNotasFiscais(' + data[2] + ');"><i class="fa-regular fa-file-alt"></i></button>' } } ,
-                { "width": "2%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [17], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosAnexos" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos do Pedido Nº ' + data[2] + '" class="btn btn-info btn-sm p-1 btnGCPainelPedidosAnexos d-inline-flex align-items-center" onclick="jsGCPainelPedidosAnexos(' + data[2] + ');"><i class="fa-solid fa-paperclip"></i></button>' } }
+                { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [14], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewPedido" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Pedido Nº ' + data[2] + '" class="btn btn-primary btn-sm p-2 btnGCPainelPedidosViewFinanceiro d-inline-flex align-items-center" onclick="jsAjaxReportInvoicePDF(' + data[2] + ');"><i class="fa-solid fa-search"></i></button>' } },
+                { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [15], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewFinanceiro" data-bs-toggle="tooltip" data-bs-placement="top" title="Financeiro - Visualizar Lançamentos Nº ' + data[2] + '" class="btn btn-primary btn-sm p-2 btnGCPainelPedidosViewFinanceiro d-inline-flex align-items-center" onclick="jsModalViewFinanceiroMovimentos(' + data[2] + ');"><i class="fa-regular fa-credit-card"></i></button>' } },
+                { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [16], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosViewNotaFiscal" data-bs-toggle="tooltip" data-bs-placement="top" title="Notas Fiscais - Visualizar Nº ' + data[2] + '" class="btn btn-primary btn-sm p-2 btnGCPainelPedidosViewNotaFiscal d-inline-flex align-items-center" onclick="jsModalViewNotasFiscais(' + data[2] + ');"><i class="fa-regular fa-file-alt"></i></button>' } } ,
+                { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [17], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCPainelPedidosAnexos" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos do Pedido Nº ' + data[2] + '" class="btn btn-primary btn-sm p-2 btnGCPainelPedidosAnexos d-inline-flex align-items-center" onclick="jsGCPainelPedidosAnexos(' + data[2] + ');"><i class="fa-solid fa-paperclip"></i></button>' } }
             ],
             "createdRow": function (row, data, dataIndex) {
                 var c = data[0];

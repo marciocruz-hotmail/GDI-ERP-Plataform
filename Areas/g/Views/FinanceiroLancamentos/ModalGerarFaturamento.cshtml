@@ -100,8 +100,8 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Simulação de Geração de Faturamento</b>",
+                        LibMessageDialog({
+                            title: "Simulação de Geração de Faturamento",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -109,12 +109,11 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -158,8 +157,8 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação de Geração de Faturamento</b>",
+                        LibMessageDialog({
+                            title: "Confirmação de Geração de Faturamento",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -167,12 +166,11 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         ajaxPesquisarLancamentos();
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

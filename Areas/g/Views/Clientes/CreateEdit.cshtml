@@ -893,8 +893,8 @@
     {
         try
         {
-            GdiSwal2.dialog({
-                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            LibMessageDialog({
+                title: "Confirmação",
                 closeButton: false,
                 message: "Deseja <b>REALMENTE</b> remover o Contato <b>" + contato + "</b> ?" + "<br/><br/>" + "<b>Atenção:</b> O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
                 centerVertical: true,
@@ -906,7 +906,7 @@
                         className: 'btn-outline-warning',
                         callback: function ()
                         {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar: {
@@ -915,7 +915,7 @@
                         callback: function ()
                         {
                             jsSendRemoverContato(idContato);
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     }
                 }
@@ -949,8 +949,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -958,12 +958,11 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         $("#dataTables-Contatos").DataTable().draw(false);
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

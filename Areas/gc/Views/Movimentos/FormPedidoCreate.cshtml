@@ -854,9 +854,9 @@
                     { "width": "58%", orderable: false, className: 'text-sm-start', targets: [4] },
                     { "width": "8%", orderable: false, className: 'text-sm-end', targets: [5] },
                     { "width": "8%", orderable: false, className: 'text-sm-end', targets: [6] },
-                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDuplicateRow" title="Duplicar item ' + data[4] + '" class="btn btn-outline-info btn-sm p-1 btnDuplicateRow d-inline-flex align-items-center" onclick="jsDuplicateRow(' + data[1] + ');"><i class="fa-solid fa-copy"></i></button>' } },
-                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditRow" title="Editar item ' + data[4] + '" class="btn btn-outline-warning btn-sm p-1 btnEditRow d-inline-flex align-items-center" onclick="jsEditRow(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } },
-                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [9], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDelRow" title="Excluir item ' + data[4] + '" class="btn btn-outline-danger btn-sm p-1 btnDelRow d-inline-flex align-items-center" onclick="jsDeleteRow(' + data[1] + "," + "\'" + data[3] + "\'" + ');"><i class="fa fa-trash"></i></button>' } }
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDuplicateRow" title="Duplicar item ' + data[4] + '" class="btn btn-outline-info p-1 btnDuplicateRow d-inline-flex align-items-center" onclick="jsDuplicateRow(' + data[1] + ');"><i class="fa-solid fa-copy"></i></button>' } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnEditRow" title="Editar item ' + data[4] + '" class="btn btn-outline-warning p-1 btnEditRow d-inline-flex align-items-center" onclick="jsEditRow(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } },
+                    { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [9], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDelRow" title="Excluir item ' + data[4] + '" class="btn btn-outline-danger p-1 btnDelRow d-inline-flex align-items-center" onclick="jsDeleteRow(' + data[1] + "," + "\'" + data[3] + "\'" + ');"><i class="fa fa-trash"></i></button>' } }
                 ],
                 select: {
                     style: 'multi',
@@ -949,8 +949,8 @@
         try {
             if ((@Model.id_movimento_status <= 2) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
             {
-                GdiSwal2.dialog({
-                    title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+                LibMessageDialog({
+                    title: "Confirmação",
                     message: "Confirma a exclusão do item ?" + "<br/><br/>" + "<b>" + produto + "</b>",
                     closeButton: false,
                     centerVertical: true,
@@ -961,7 +961,7 @@
                             label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                             className: 'btn-outline-warning',
                             callback: function () {
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                             }
                         },
                         confirmar: {
@@ -1066,8 +1066,8 @@
                     if (result.success == true)
                     {
                         LibMessageProcessandoHide();
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -1076,11 +1076,10 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                         jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
                                     }
                                 }
@@ -1123,8 +1122,8 @@
                     if (result.success == true)
                     {
                         LibMessageProcessandoHide();
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -1133,11 +1132,10 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                         jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
                                     }
                                 }
@@ -1558,8 +1556,8 @@
 
     function jsDesativarAnexo(id) {
         try {
-            GdiSwal2.dialog({
-                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            LibMessageDialog({
+                title: "Confirmação",
                 message: "Deseja REALMENTE DESATIVAR esse arquivo anexo ?" + "<br/><br/>" + "<b>Atenção:</b> O Log dessa operação ficará armazenado no banco de dados para futuras auditorias!",
                 closeButton: false,
                 centerVertical: true,
@@ -1570,7 +1568,7 @@
                         label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                         className: 'btn-outline-warning',
                         callback: function () {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar: {
@@ -1614,7 +1612,7 @@
                     {
                         $("#dtGcMovimentosGed").DataTable().draw(false);
                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                        GdiSwal2.hideAll();
+                        LibMessageHideAll();
                     }
                     else
                     {

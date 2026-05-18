@@ -172,7 +172,7 @@
                     </div>
                 </div>
                 <div class="card-footer justify-content-between m-0 p-1">
-                    <button type="button" name="btnCancelar" title="Fechar" class="btn btn-info d-inline-flex align-items-center gap-2" onclick="window.location.href='@Url.Action("", "Atendimentos", new { area = "g" })'" value="Redirect"><i class="fa-solid fa-door-open me-2" aria-hidden="true"></i>Fechar</button>
+                    <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" onclick="window.location.href='@Url.Action("", "Atendimentos", new { area = "g" })'" value="Redirect"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
                     @if (Model.id_atendimento > 0 && Model.concluido == false)
                     {
                         <button type="button" name="btnSaveEditAtendimento" id="btnSaveEditAtendimento" title="Salvar" onclick="jsAjaxCreateEditAtendimento()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa fa-save me-2" aria-hidden="true"></i>Salvar</button>
@@ -553,14 +553,11 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.alert({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
-                            centerVertical: true,
-                            message: result.msg,
+                        LibMessageSuccess("Confirmação", result.msg, {
                             callback: function ()
                             {
                                 document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                GdiSwal2.hideAll();
+                                LibMessageHideAll();
                                 LibMessageProcessando("");
                                 window.location.href = '@Url.Action("Index", "Atendimentos", new { area = "g" })';
                             }

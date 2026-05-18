@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_movimentos
+﻿@model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewCartaCorrecao" }))
@@ -193,8 +193,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -202,15 +202,14 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         if (result.idProcessamento != "0") // Se houver processamento, realizar o download do relatório
                                         {
                                             window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                         }
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -254,8 +253,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Chave de Acesso</b>",
+                        LibMessageDialog({
+                            title: "Chave de Acesso",
                             closeButton: false,
                             message: "Na página da Sefaz informe a chave de acesso abaixo:<br/><br/>" + result.chaveacesso,
                             centerVertical: true,
@@ -263,8 +262,7 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
                                         window.open(result.msg, '_blank').focus();

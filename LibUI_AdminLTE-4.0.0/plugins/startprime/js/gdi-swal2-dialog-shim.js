@@ -10,7 +10,7 @@
 var GdiSwal2 = (function () {
 
   var swalUi = (typeof Swal !== 'undefined' && typeof Swal.mixin === 'function')
-    ? Swal.mixin({ theme: 'bootstrap-5', buttonsStyling: true })
+    ? Swal.mixin({ theme: 'bootstrap-5-light', buttonsStyling: true, width: '32em' })
     : Swal;
 
   function btnLabel(btn, fallback) {
@@ -34,9 +34,10 @@ var GdiSwal2 = (function () {
         config = options;
       }
 
+      var sizeMap = { small: '22em', medium: '32em', large: '48em' };
       var widthOpt = {};
-      if (config.size === 'small') {
-        widthOpt.width = '22em';
+      if (config.size && sizeMap[config.size]) {
+        widthOpt.width = sizeMap[config.size];
       }
 
       var iconOpt = Object.prototype.hasOwnProperty.call(config, 'icon')
@@ -116,12 +117,51 @@ var GdiSwal2 = (function () {
     },
 
     /**
-     * GdiSwal2.dialog({ title, message, buttons, onEscape, backdrop, closeButton })
+     * GdiSwal2.dialog({ title, message, buttons, icon, onEscape, backdrop, closeButton })
+     * icon: mesmo conjunto do SweetAlert2 ('success'|'info'|'warning'|'error'|'question') ou false para ocultar.
+     * Botão único: usa confirmButton nativo (evita conflito de estilos no .swal2-footer do tema Bootstrap 5).
+     * Múltiplos botões: renderiza no footer como HTML customizado (comportamento legado preservado).
      */
     dialog: function (options) {
       var buttons = options.buttons || {};
       var btnKeys = Object.keys(buttons);
+      var showClose = options.closeButton !== false;
+      var iconOpt = Object.prototype.hasOwnProperty.call(options, 'icon') ? options.icon : false;
 
+      // --- Botão único: confirmButton nativo do SweetAlert2 ---
+      if (btnKeys.length === 1) {
+        var singleKey = btnKeys[0];
+        var singleBtn = buttons[singleKey];
+        var cls = singleBtn.className || 'btn-secondary';
+        var fullCls = (cls.indexOf('btn') === 0) ? cls : ('btn ' + cls);
+
+        var fireOpts = {
+          title: options.title || null,
+          html: options.message || '',
+          showConfirmButton: true,
+          confirmButtonText: singleBtn.label || singleKey,
+          showCloseButton: showClose,
+          allowOutsideClick: options.backdrop !== false,
+          allowEscapeKey: options.onEscape !== false,
+          buttonsStyling: false,
+          customClass: {
+            confirmButton: fullCls,
+            actions: 'justify-content-center'
+          }
+        };
+        if (iconOpt !== false && iconOpt) { fireOpts.icon = iconOpt; }
+
+        return swalUi.fire(fireOpts).then(function (result) {
+          if (result.isConfirmed && typeof singleBtn.callback === 'function') {
+            singleBtn.callback.call(null);
+          }
+          if (typeof options.onEscape === 'function' && !result.isConfirmed) {
+            options.onEscape();
+          }
+        });
+      }
+
+      // --- Múltiplos botões: footer HTML customizado (comportamento legado) ---
       var footerHtml = btnKeys.map(function (key) {
         var btn = buttons[key];
         var cls = btn.className || 'btn-secondary';
@@ -131,9 +171,7 @@ var GdiSwal2 = (function () {
           + '</button>';
       }).join(' ');
 
-      var showClose = options.closeButton !== false;
-
-      return swalUi.fire({
+      var fireMultiOpts = {
         title: options.title || null,
         html: options.message || '',
         showConfirmButton: false,
@@ -162,7 +200,10 @@ var GdiSwal2 = (function () {
             });
           }
         }
-      });
+      };
+      if (iconOpt !== false && iconOpt) { fireMultiOpts.icon = iconOpt; }
+
+      return swalUi.fire(fireMultiOpts);
     },
 
     /**

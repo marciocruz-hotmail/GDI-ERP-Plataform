@@ -140,8 +140,8 @@
     {
         try
         {
-            GdiSwal2.dialog({
-                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            LibMessageDialog({
+                title: "Confirmação",
                 message: 'Deseja Realmente ATIVAR o sistema <b>' + sistema + '<b> ?',
                 closeButton: false,
                 centerVertical: true,
@@ -155,7 +155,7 @@
                         className: 'btn-outline-warning',
                         callback: function ()
                         {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar:
@@ -165,7 +165,7 @@
                         callback: function ()
                         {
                             jsSendAtivarSistema(idSistema);
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     }
                 }
@@ -179,8 +179,8 @@
     function jsSistemaOFF(idSistema, sistema)
     {
         try {
-            GdiSwal2.dialog({
-                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            LibMessageDialog({
+                title: "Confirmação",
                 message: 'Deseja Realmente DESATIVAR o sistema <b>' + sistema + '<b> ?',
                 closeButton: false,
                 centerVertical: true,
@@ -192,7 +192,7 @@
                         className: 'btn-outline-warning',
                         callback: function ()
                         {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar:
@@ -202,7 +202,7 @@
                         callback: function ()
                         {
                             jsSendDesativarSistema(idSistema);
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     }
                 }
@@ -239,8 +239,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -248,8 +248,7 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         otableAParametros.draw(false);

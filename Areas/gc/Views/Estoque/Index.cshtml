@@ -15,10 +15,6 @@
             </div>
 
             <div class="card-header m-0 p-1">
-                @if ((CachePersister.userIdentity.Roles.Contains("gc_Movimentos_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Movimentos_IndexPedido_Create")))
-                {
-                    <button type="button" name="btnTransferenciaLocaisEstoque" title="Transferência Gerencial - Entre Locais de Estoques" class="btn btn-outline-info d-inline-flex align-items-center gap-2" onclick="jsModalTransferenciaGerencial()"><i class="fa-solid fa-truck-arrow-right me-2" aria-hidden="true"></i>Transferência Gerencial</button>
-                }
                 <button type="button" name="btnViewFichaEstoqueProduto" title="Produtos - Ficha Estoque" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalViewFichaPosicaoEstoque(oTableEstoque, 'Id.')"><i class="fa-solid fa-warehouse me-2" aria-hidden="true"></i>Produtos - Ficha Estoque</button>
                 <button type="button" name="btnRelatorioPosicaoEstoque" title="Relatório - Estoque Atual" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsRelatorioPosicaoEstoque()"><i class="fa-solid fa-file-lines fa-xl me-2" aria-hidden="true"></i>Relatório - Estoque Atual</button>
             </div>
@@ -250,8 +246,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Informações Financeiras</b>",
+                        LibMessageDialog({
+                            title: "Informações Financeiras",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -259,11 +255,10 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -297,8 +292,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -306,13 +301,12 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

@@ -77,7 +77,7 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
+                        LibMessageDialog({
                             title: 'Processando Envio NFe Por E-mail',
                             closeButton: false,
                             message: result.msg,
@@ -87,8 +87,7 @@
                             buttons: {
                                 confirmar:
                                 {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function () {
                                         $("#dtGNfe").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
@@ -96,7 +95,7 @@
                                         {
                                             window.location = '@Url.Action("ajaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                                         }
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }

@@ -184,7 +184,7 @@
                             detailsProduct += "<b>Estoque 3:</b> " + result.qtd_estoque_3.toString() + "<br/>";
                             detailsProduct += "<b>Estoque 4:</b> " + result.qtd_estoque_4.toString() + "<br/><br/>";
                             detailsProduct += "<b>R$ Venda:</b> " + JsFormatNumero(result.preco_venda);
-                            if (detailsProduct.trim().length > 0) { yesMessageInfo("Dados do Produto", detailsProduct); };
+                            if (detailsProduct.trim().length > 0) { LibMessageAlert("Dados do Produto", detailsProduct, { icon: 'info' }); };
                         }
                         else
                         {

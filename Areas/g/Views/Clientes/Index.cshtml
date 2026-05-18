@@ -353,8 +353,8 @@
             {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    GdiSwal2.dialog({
-                        title: "<i class='fa-solid fa-question me-2' style='color:#ff9900'></i><b>Confirmação</b>",
+                    LibMessageDialog({
+                        title: "Confirmação",
                         closeButton: false,
                         message: "Deseja REALMENTE atualizar os dados do Vendedor/Consultor do cliente?" + "<br/><br/>" + "ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
                         centerVertical: true,
@@ -368,7 +368,7 @@
                                 className: 'btn-outline-warning',
                                 callback: function ()
                                 {
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             },
                             confirmar: {
@@ -380,7 +380,7 @@
                                     $("#mainModal").load('@Url.Action("ModalAtualizarVendedorConsultor", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
                                         var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
                                     });
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             }
                         }
@@ -409,8 +409,8 @@
             {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    GdiSwal2.dialog({
-                        title: "<i class='fa-solid fa-question me-2' style='color:#ff9900'></i><b>Confirmação</b>",
+                    LibMessageDialog({
+                        title: "Confirmação",
                         closeButton: false,
                         message: "Deseja REALMENTE atualizar o Limite de Crédito do cliente?" + "<br/><br/>" + "ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
                         centerVertical: true,
@@ -424,7 +424,7 @@
                                 className: 'btn-outline-warning',
                                 callback: function ()
                                 {
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             },
                             confirmar: {
@@ -436,7 +436,7 @@
                                     $("#mainModal").load('@Url.Action("ModalAtualizarLimiteCredito", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
                                         var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
                                     });
-                                    GdiSwal2.hideAll();
+                                    LibMessageHideAll();
                                 }
                             }
                         }

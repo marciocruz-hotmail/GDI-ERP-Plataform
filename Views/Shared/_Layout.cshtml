@@ -23,13 +23,13 @@
     @* SweetAlert2: CSS base (obrigatório) + tema Bootstrap 5 (somente variáveis) *@
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/bootstrap-5.min.css" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/gdi-swal2-overrides.css" rel="stylesheet" />
+    <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/gdi-swal2-overrides.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/css/tempus-dominus.min.css" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap4-toggle/bootstrap4-toggle.min.css" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.css" rel="stylesheet" />
-    <link href="~/Content/gdi-datatables-bs5.css" rel="stylesheet" />
-    <link href="~/Content/gdi-section-cards.css" rel="stylesheet" />
-    <link href="~/Content/gdi-sidebar-nav.css" rel="stylesheet" />
+    <link href="~/Content/gdi-datatables-bs5.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
+    <link href="~/Content/gdi-section-cards.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
+    <link href="~/Content/gdi-sidebar-nav.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/themes/default/style.css" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/select2/select2.min.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/select2/select2-bootstrap-5-theme.min.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
@@ -152,7 +152,7 @@
         window.GDI_SessionTimeout = { logoutUrl: '@Url.Action("Logout", "UserIdentity", new { area = "" })', timeoutSeconds: 900 };
         window.GDI_LoginUrl = '@Url.Action("Index", "UserIdentity", new { area = "" })';
     </script>
-    <script src="~/Scripts/sessionInactivity.js"></script>
+    <script src="~/Scripts/sessionInactivity.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
     @* Sessão 401: gdi-session-handler exige jQuery + ~/bundles/libui-swal-compat + start.js (LibMessageError) antes — ver cabeçalho do .js *@
     <script src="~/Scripts/gdi-session-handler.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
     <script>

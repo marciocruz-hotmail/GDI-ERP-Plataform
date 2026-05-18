@@ -261,7 +261,7 @@
                     success: function (result) {
                         if (result.success == true)
                         {
-                            yesMessageInfo("Dados do Produto", result.msg);
+                            LibMessageAlert("Dados do Produto", result.msg, { icon: 'info' });
                         }
                         else
                         {
@@ -378,14 +378,14 @@
                     dataType: "json",
                     success: function (result) {
                         if (result.success == true) {
-                            yesMessageInfo("Histórico Comercial do Item", result.msg);
+                            LibMessageAlert("Histórico Comercial do Item", result.msg, { icon: 'info' });
                         }
                         else {
-                            yesMessageInfo("Verifique as inconsistências", result.msg);
+                            GdiAjaxNotifyInconsistencias(result.msg);
                         }
                     },
                     error: function (result) {
-                        yesMessageInfo("Verifique as inconsistências", result.msg);
+                        GdiAjaxNotifyInconsistencias(result.toString());
                     }
                 });
             }
@@ -421,14 +421,14 @@
                     dataType: "json",
                     success: function (result) {
                         if (result.success == true) {
-                            yesMessageInfo("Histórico Comercial do Item", result.msg);
+                            LibMessageAlert("Histórico Comercial do Item", result.msg, { icon: 'info' });
                         }
                         else {
-                            yesMessageInfo("Verifique as inconsistências", result.msg);
+                            GdiAjaxNotifyInconsistencias(result.msg);
                         }
                     },
                     error: function (result) {
-                        yesMessageInfo("Verifique as inconsistências", result.msg);
+                        GdiAjaxNotifyInconsistencias(result.toString());
                     }
                 });
             }

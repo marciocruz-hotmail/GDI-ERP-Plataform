@@ -9,16 +9,17 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.49.00 - 15/05/2026";
+            return "2026.50.00 - 19/05/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.49.00";
+            return "2026.50.00";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.50.00 - 19/05/2026 - Modernização e globalização de SweetAlert2
 // 2026.49.00 - 08/05/2026 - Validação de lotes nos movimentos
 // 2026.48.00 - 04/05/2026 - Módulo Compras
 // 2026.47.00 - 02/05/2026 - Pós Venda

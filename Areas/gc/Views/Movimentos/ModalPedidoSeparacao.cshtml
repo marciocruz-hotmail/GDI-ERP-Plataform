@@ -1,4 +1,4 @@
-@model GdiPlataform.Db.gc_movimentos
+﻿@model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoSeparacao" }))
@@ -329,7 +329,7 @@
     {
         try
         {
-            GdiSwal2.dialog({
+            LibMessageDialog({
                 title: "<b>" + '@CachePersister.userIdentity.Username' +"</b>  você confirma a conferência de todos os itens do checklist abaixo?",
                 message:
                             '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Itens/PNs, Lotes, Seriais, Quantidades?<br/>' +
@@ -357,7 +357,7 @@
                         className: 'btn-outline-warning',
                         callback: function ()
                         {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar:
@@ -367,7 +367,7 @@
                         callback: function ()
                         {
                             jsSendForm();
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     }
                 }
@@ -394,8 +394,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -403,13 +403,12 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         $("#dataTableGCIndexPedido").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
@@ -492,8 +491,8 @@
     {
         try
         {
-            GdiSwal2.dialog({
-                title: "<i class='fa-solid fa-question' style='color:#ff9900'>&nbsp&nbsp</i><b>Confirmação</b>",
+            LibMessageDialog({
+                title: "Confirmação",
                 message: 'Deseja Realmente Executar O Fechamento de Estoque da Competência Anterior?',
                 closeButton: false,
                 centerVertical: true,
@@ -506,7 +505,7 @@
                         label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
                         className: 'btn-outline-warning',
                         callback: function () {
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     },
                     confirmar:
@@ -515,7 +514,7 @@
                         className: 'btn-outline-success',
                         callback: function () {
                             jsFechamentoCompetenciaEstoque();
-                            GdiSwal2.hideAll();
+                            LibMessageHideAll();
                         }
                     }
                 }
@@ -542,8 +541,8 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        GdiSwal2.dialog({
-                            title: "<i class='fa-solid fa-check' style='color:#008000'>&nbsp&nbsp</i><b>Confirmação</b>",
+                        LibMessageDialog({
+                            title: "Confirmação",
                             closeButton: false,
                             message: result.msg,
                             centerVertical: true,
@@ -551,13 +550,12 @@
                             backdrop: true,
                             buttons: {
                                 confirmar: {
-                                    label: '&nbsp;OK',
-                                    className: 'btn btn-info',
+                                    label: 'OK',
                                     callback: function ()
                                     {
                                         $("#dataTableGCIndexPedido").DataTable().draw(false);
                                         document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        GdiSwal2.hideAll();
+                                        LibMessageHideAll();
                                     }
                                 }
                             }
