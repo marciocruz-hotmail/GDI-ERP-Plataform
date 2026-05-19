@@ -112,10 +112,7 @@
                     GdiDtNotifyLoadFailure(message);
                 })
                 .on('xhr.dt', function (e, settings, json, xhr) {
-                    if (GdiDtNotifyJsonErrorMessage(json)) { }
-                    else if (json && json.yesFilterOnOff !== undefined) {
-                        btnFiltro(json.yesFilterOnOff);
-                    }
+                    if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 })
                 .DataTable({
                 "footerCallback": function (row, data, start, end, display) {

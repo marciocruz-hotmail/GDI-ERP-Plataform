@@ -341,7 +341,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
         [HttpPost]
-        public ActionResult AjaxImportarNFEntrada(cstImportacaoNFEntrada record_cstImportacaoNFEntrada)
+        public ActionResult AjaxImportarNFEntrada(CstImportacaoNFEntrada record_cstImportacaoNFEntrada)
         {
             bool Processado = false;
             bool NFeExterior = false;
@@ -381,9 +381,9 @@ namespace GdiPlataform.Areas.gc.Controllers
             String NfeCFOP = string.Empty;
             String CnpjFilialDestino = string.Empty;
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            cstNfeEmitente record_NfeEmitente = new cstNfeEmitente();
-            cstNfeIcmsTotal record_NfeIcmsTotal = new cstNfeIcmsTotal();
-            cstNfeAutorizacao record_NfeAutorizacao = new cstNfeAutorizacao();
+            CstNfeEmitente record_NfeEmitente = new CstNfeEmitente();
+            CstNfeIcmsTotal record_NfeIcmsTotal = new CstNfeIcmsTotal();
+            CstNfeAutorizacao record_NfeAutorizacao = new CstNfeAutorizacao();
             gc_movimentos_nf record_gc_movimentos_nf_referencia = null;
             g_filiais RecordFilialDestino = null;
             XmlDocument xmlDocument = new XmlDocument();
@@ -1740,7 +1740,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     }
                                 }
                                 // Realizar o upload do PDF para o GED
-                                cstUploadGed record_cstUploadGedPDF = new cstUploadGed();
+                                CstUploadGed record_cstUploadGedPDF = new CstUploadGed();
                                 record_cstUploadGedPDF.id_arquivo = 0;
                                 record_cstUploadGedPDF.id_arquivo_tipo = 14; // Contabilidade > NFe - Entradas
                                 record_cstUploadGedPDF.filesource = record_cstImportacaoNFEntrada.filesourcePDF;
@@ -1780,7 +1780,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 }
 
                                 // Realizar o upload do PDF para o GED
-                                cstUploadGed record_cstUploadGedPDF = new cstUploadGed();
+                                CstUploadGed record_cstUploadGedPDF = new CstUploadGed();
                                 record_cstUploadGedPDF.id_arquivo = 0;
                                 record_cstUploadGedPDF.id_arquivo_tipo = 18; // Contabilidade > NFe - Entradas (XML)
                                 record_cstUploadGedPDF.filesource = record_cstImportacaoNFEntrada.filesourceXML;
@@ -1855,7 +1855,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region NFe Entrada Nacional
         public ActionResult ModalImportarNFCompraNacional()
         {
-            cstImportacaoNFEntrada record_cstImportacaoNFEntrada = new cstImportacaoNFEntrada();
+            CstImportacaoNFEntrada record_cstImportacaoNFEntrada = new CstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Entrada Nacional - Upload/Processamento";
             var comboMovimentosTipos = new List<SelectListItem>();
             comboMovimentosTipos.Add(new SelectListItem { Value = "5", Text = "1.1.1 - Entrada - Fornecedor - Nacional" });
@@ -1867,7 +1867,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult FormProcessarNFCompraNacional(int? id)
         {
             var comboProdutos = new List<SelectListItem>();
-            cstMovimentoEntradaNF record_cstMovimentoEntradaNF = new cstMovimentoEntradaNF();
+            CstMovimentoEntradaNF record_cstMovimentoEntradaNF = new CstMovimentoEntradaNF();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Entrada Nacional - Processamento";
             gc_movimentos RecordMovimentoCompraNacional = db.gc_movimentos.Find(id);
 
@@ -1899,7 +1899,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     decimal.TryParse(dsRowItem["quantidade"].EmptyIfNull().ToString(), out quantidade);
                     decimal.TryParse(dsRowItem["valor_unit"].EmptyIfNull().ToString(), out valorUnit);
                     decimal.TryParse(dsRowItem["valor_total"].EmptyIfNull().ToString(), out valorTotal);
-                    cstMovimentoEntradaNFItem record_cstMovimentoEntradaNFItem = new cstMovimentoEntradaNFItem();
+                    CstMovimentoEntradaNFItem record_cstMovimentoEntradaNFItem = new CstMovimentoEntradaNFItem();
                     record_cstMovimentoEntradaNFItem.id_movimento_item = idMovimentoItem;
                     record_cstMovimentoEntradaNFItem.sequencia = decimal.Truncate(sequencia);
                     record_cstMovimentoEntradaNFItem.id_produto = idProduto;
@@ -1954,7 +1954,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxProcessarNFCompraNacional(cstMovimentoEntradaNF view_cstMovimentoEntradaNF)
+        public ActionResult AjaxProcessarNFCompraNacional(CstMovimentoEntradaNF view_cstMovimentoEntradaNF)
         {
             bool Sucesso = false;
             int QtdErros = 0;
@@ -1967,7 +1967,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    foreach (cstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
+                    foreach (CstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
                     {
                         if (Item.id_produto <= 0)
                         {
@@ -2008,7 +2008,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     // Itens dos Movimentos
                     gc_movimentos OldRecordMovimentoCompraNacional = LibDB.CloneTObject(RecordMovimentoCompraNacional);
-                    foreach (cstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
+                    foreach (CstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
                     {
                         if (Item.id_produto > 0)
                         {
@@ -2055,7 +2055,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region NFe Devolução
         public ActionResult ModalImportarNFDevolucao()
         {
-            cstImportacaoNFEntrada record_cstImportacaoNFEntrada = new cstImportacaoNFEntrada();
+            CstImportacaoNFEntrada record_cstImportacaoNFEntrada = new CstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-arrow-rotate-left", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Devolução - Upload/Processamento";
             var comboMovimentosTipos = new List<SelectListItem>();
             comboMovimentosTipos.Add(new SelectListItem { Value = "9", Text = "1.1.4 - Devolução" });
@@ -2067,7 +2067,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult FormProcessarNFDevolucao(int? id)
         {
             var comboProdutos = new List<SelectListItem>();
-            cstMovimentoEntradaNF record_cstMovimentoEntradaNF = new cstMovimentoEntradaNF();
+            CstMovimentoEntradaNF record_cstMovimentoEntradaNF = new CstMovimentoEntradaNF();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Devolução - Upload/Processamento";
             gc_movimentos RecordMovimentoDevolucao = db.gc_movimentos.Find(id);
 
@@ -2101,7 +2101,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         decimal.TryParse(dsRowItem["quantidade"].EmptyIfNull().ToString(), out quantidade);
                         decimal.TryParse(dsRowItem["valor_unit"].EmptyIfNull().ToString(), out valorUnit);
                         decimal.TryParse(dsRowItem["valor_total"].EmptyIfNull().ToString(), out valorTotal);
-                        cstMovimentoEntradaNFItem record_cstMovimentoEntradaNFItem = new cstMovimentoEntradaNFItem();
+                        CstMovimentoEntradaNFItem record_cstMovimentoEntradaNFItem = new CstMovimentoEntradaNFItem();
                         record_cstMovimentoEntradaNFItem.id_movimento_item = idMovimentoItem;
                         record_cstMovimentoEntradaNFItem.sequencia = decimal.Truncate(sequencia);
                         record_cstMovimentoEntradaNFItem.id_produto = idProduto;
@@ -2158,7 +2158,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
         [HttpPost]
-        public ActionResult AjaxProcessarNFDevolucao(cstMovimentoEntradaNF view_cstMovimentoEntradaNF)
+        public ActionResult AjaxProcessarNFDevolucao(CstMovimentoEntradaNF view_cstMovimentoEntradaNF)
         {
             bool Sucesso = false;
             int QtdErros = 0;
@@ -2169,7 +2169,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    foreach (cstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
+                    foreach (CstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
                     {
                         if (Item.id_produto <= 0)
                         {
@@ -2209,7 +2209,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     db.Entry(RecordMovimentoDevolucao).State = EntityState.Modified;
 
                     gc_movimentos OldRecordMovimentoDevolucao = LibDB.CloneTObject(RecordMovimentoDevolucao);
-                    foreach (cstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
+                    foreach (CstMovimentoEntradaNFItem Item in view_cstMovimentoEntradaNF.allItens)
                     {
                         if (Item.id_produto > 0)
                         {
@@ -2255,7 +2255,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region NFe Entrada Exterior - Upload e Processamento
         public ActionResult ModalImportarNFImportacao()
         {
-            cstImportacaoNFEntrada record_cstImportacaoNFEntrada = new cstImportacaoNFEntrada();
+            CstImportacaoNFEntrada record_cstImportacaoNFEntrada = new CstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-passport", "", "#B7950B", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importação - Upload (XML e Danfe)";
             var comboMovimentosTipos = new List<SelectListItem>();
             comboMovimentosTipos.Add(new SelectListItem { Value = "6", Text = "1.1.2 - Entrada - Fornecedor - Exterior" });
@@ -2269,7 +2269,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.Title = "Processar NF Importação";
             gc_movimentos record_gc_movimento = db.gc_movimentos.Find(id);
             g_clientes record_g_cliente = db.g_clientes.Find(record_gc_movimento.id_cliente);
-            cstMovimentoEntradaNF record_cstMovimentoEntradaNF = new cstMovimentoEntradaNF();
+            CstMovimentoEntradaNF record_cstMovimentoEntradaNF = new CstMovimentoEntradaNF();
             if (record_gc_movimento.entrada_nfe_processada == true)
             {
                 record_cstMovimentoEntradaNF.movimento_permitido = false;
@@ -2302,7 +2302,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     decimal.TryParse(dsRowItem["quantidade"].EmptyIfNull().ToString(), out quantidade);
                     decimal.TryParse(dsRowItem["valor_unit"].EmptyIfNull().ToString(), out valorUnit);
                     decimal.TryParse(dsRowItem["valor_total"].EmptyIfNull().ToString(), out valorTotal);
-                    cstMovimentoEntradaNFItem record_cstMovimentoEntradaNFItem = new cstMovimentoEntradaNFItem();
+                    CstMovimentoEntradaNFItem record_cstMovimentoEntradaNFItem = new CstMovimentoEntradaNFItem();
                     record_cstMovimentoEntradaNFItem.id_movimento_item = idMovimentoItem;
                     record_cstMovimentoEntradaNFItem.sequencia = decimal.Truncate(sequencia);
                     record_cstMovimentoEntradaNFItem.id_produto = idProduto;
@@ -2320,7 +2320,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AjaxProcessarNFImportacao(cstMovimentoEntradaNF record_cstMovimentoEntradaNF)
+        public ActionResult AjaxProcessarNFImportacao(CstMovimentoEntradaNF record_cstMovimentoEntradaNF)
         {
             bool Sucesso = false;
             String MsgRetorno = String.Empty;
@@ -2680,7 +2680,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalNFEntradaGerarNF(int? id)
         {
             ViewBag.Title = "Faturar NF Importação";
-            cstDadosFaturamentoNF _cstFaturarNFImportacao = new cstDadosFaturamentoNF();
+            CstDadosFaturamentoNF _cstFaturarNFImportacao = new CstDadosFaturamentoNF();
             gc_movimentos record_gc_movimentos = db.gc_movimentos.Find(id);
             if (record_gc_movimentos != null)
             {
@@ -2734,7 +2734,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AjaxFaturarNFCompra(cstDadosFaturamentoNF record_cstFaturarNFImportacao)
+        public ActionResult AjaxFaturarNFCompra(CstDadosFaturamentoNF record_cstFaturarNFImportacao)
         {
             int IdGateway = 0;
             LibRetornoProcessamento RetornoProcessamento = new LibRetornoProcessamento();
@@ -2800,7 +2800,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 QtdNFAutorizadas += db.gc_movimentos_nf.Where(n => n.id_movimento == movimento.id_movimento && n.id_nfe_status == 8).ToList().Count(); // Qtd NF Autorizadas para o Movimento Relacionado
             }
 
-            cstDadosFaturamentoNF _cstFaturarNFImportacao = new cstDadosFaturamentoNF();
+            CstDadosFaturamentoNF _cstFaturarNFImportacao = new CstDadosFaturamentoNF();
             _cstFaturarNFImportacao.id_movimento = TempId;
             if (QtdNFAutorizadas == 0)
             {
@@ -2817,7 +2817,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
         [HttpPost]
-        public ActionResult AjaxCancelarNFCompra(cstDadosFaturamentoNF record_cstFaturarNFImportacao)
+        public ActionResult AjaxCancelarNFCompra(CstDadosFaturamentoNF record_cstFaturarNFImportacao)
         {
             bool Sucesso = false;
             int QtdErros = 0;
@@ -2872,7 +2872,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
-        public g_clientes GetClienteByEmitente(cstNfeEmitente record_NfeEmitente)
+        public g_clientes GetClienteByEmitente(CstNfeEmitente record_NfeEmitente)
         {
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
             g_clientes record_g_cliente = db.g_clientes.Where(p => p.cnpj == record_NfeEmitente.CNPJ.ToString()).FirstOrDefault();
@@ -2937,7 +2937,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             String MsgBloqueio = string.Empty;
             TitleModal = LibIcons.getIcon("fa-solid fa-eraser", "", "#008000", "fa-sm") + LibStringFormat.GetEspacesHtml(3) + "Carta de Correção";
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            cstNfeCartaCorrecao RecordCstNfeCartaCorrecao = new cstNfeCartaCorrecao();
+            CstNfeCartaCorrecao RecordCstNfeCartaCorrecao = new CstNfeCartaCorrecao();
             gc_movimentos RecordMovimento = db.gc_movimentos.Find(id);
             if (RecordMovimento != null)
             {

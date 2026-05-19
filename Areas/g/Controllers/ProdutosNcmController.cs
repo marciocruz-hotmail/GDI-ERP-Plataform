@@ -36,7 +36,21 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de NCM";
-            return View();
+            var model = new CstProdutosNcmIndex
+            {
+                ProdutosNcmIndex_id = String.Empty,
+                ProdutosNcmIndex_codigo_ncm = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, codigoRestore;
+            if (TryParseFiltroProdutosNcmSemicolon(filtroPersistido.sql_filtro, out idRestore, out codigoRestore))
+            {
+                model.ProdutosNcmIndex_id = idRestore;
+                model.ProdutosNcmIndex_codigo_ncm = codigoRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(codigoRestore);
+            }
+            return View(model);
         }
 
         #region PreencherLookupsCreateEdit
@@ -120,90 +134,161 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ProdutosNcm_*,g_ProdutosNcm_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
             string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-            var allRecords = new List<Db.g_produtos_ncm>();
-            List<string[]> list = new List<string[]>();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Verificação se há algum filtro ativo
-            if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
-
-            if ((filterDb == false) && (filterAdvanced == false))
-            {
-                allRecords = db.g_produtos_ncm.Select(p => p).ToList();
-            }
-            if (filterDb)
-            {
-                SentencaSQL = string.Empty;
-                if (record_g_filtro.advanced == true) { SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
-                else { SentencaSQL = "select * from g_produtos_ncm where " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); };
-                allRecords = db.g_produtos_ncm.SqlQuery(SentencaSQL).ToList();
-            }
-            else if (filterAdvanced)
-            {
-                allRecords = db.g_produtos_ncm.Select(p => p).ToList();
-            }
-
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_produtos_ncm, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_produto_ncm) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? Convert.ToString(c.codigo_ncm) :
-                                     "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_produto_ncm); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.codigo_ncm); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_produto_ncm); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.codigo_ncm); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            foreach (var c in displayedRecords)
-            {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
-                list.Add(new[] {
-                                        "", // Coluna de Seleção
-                                        c.id_produto_ncm.ToString(),
-                                        _ativo,
-                                        c.codigo_ncm.ToString()
-                                    });
-            }
+                var baseQuery = db.g_produtos_ncm.AsNoTracking().Where(p => p.id_produto_ncm > 0);
+                int totalRecords = baseQuery.Count();
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string codigoStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(codigoStr);
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroProdutosNcmSemicolon(recordFiltro.sql_filtro, out idStr, out codigoStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(codigoStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_produtos_ncm> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroProdutosNcmNaQuery(query, idStr, codigoStr);
+                    LibDB.setFilterByUser(MontarFiltroProdutosNcmPersistido(idStr, codigoStr), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoProdutosNcmNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(p => new { p.id_produto_ncm, p.ativo, p.codigo_ncm })
+                    .ToList();
+
+                var list = page.Select(p =>
+                {
+                    string _ativo = p.ativo == true
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
+                    return new[]
+                    {
+                        "",
+                        p.id_produto_ncm.ToString(),
+                        _ativo,
+                        p.codigo_ncm ?? ""
+                    };
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroProdutosNcmSemicolon(string raw, out string id, out string codigoNcm)
+        {
+            id = codigoNcm = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            codigoNcm = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(codigoNcm);
+        }
+
+        private static string MontarFiltroProdutosNcmPersistido(string id, string codigoNcm)
+        {
+            return (id ?? String.Empty) + ";" + (codigoNcm ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_produtos_ncm> AplicarFiltroProdutosNcmNaQuery(IQueryable<Db.g_produtos_ncm> query, string idStr, string codigoStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idNcm))
+            {
+                query = query.Where(p => p.id_produto_ncm == idNcm);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemCodigo(codigoStr, out string padraoCodigo))
+            {
+                query = query.Where(p => p.codigo_ncm != null && DbFunctions.Like(p.codigo_ncm, padraoCodigo));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_produtos_ncm> AplicarOrdenacaoProdutosNcmNaQuery(IQueryable<Db.g_produtos_ncm> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 3)
+                {
+                    return asc ? query.OrderBy(p => p.codigo_ncm) : query.OrderByDescending(p => p.codigo_ncm);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(p => p.id_produto_ncm) : query.OrderByDescending(p => p.id_produto_ncm);
+                }
+            }
+            return query.OrderBy(p => p.id_produto_ncm);
         }
         #endregion
 
@@ -327,13 +412,13 @@ namespace GdiPlataform.Areas.g.Controllers
 
         public ActionResult ModalAtualizarTabelaIBPT()
         {
-            cstUpload _cstUpload = new cstUpload();
+            CstUpload _cstUpload = new CstUpload();
             ViewBag.Title = "Atualizar Tabela IBPTax";
             return View(_cstUpload);
         }
 
         [HttpPost]
-        public ActionResult AjaxAtualizarTabelaIBPT(cstUpload record_cstUpload)
+        public ActionResult AjaxAtualizarTabelaIBPT(CstUpload record_cstUpload)
         {
             bool processado = false;
             bool erroProcessamento = false;

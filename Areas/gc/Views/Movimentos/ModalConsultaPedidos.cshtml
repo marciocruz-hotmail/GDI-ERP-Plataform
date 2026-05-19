@@ -1,4 +1,4 @@
-﻿@model GdiPlataform.Areas.gc.Models.cstModalRelatorio
+@model GdiPlataform.Areas.gc.Models.CstModalRelatorio
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidosHistorico" }))
@@ -119,7 +119,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGCIndexPedido = $('#dtGcModalPedidosHistorico').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGCIndexPedido = $('#dtGcModalPedidosHistorico').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                 },

@@ -195,7 +195,7 @@ namespace GdiPlataform.Controllers
                     }
 
                     var allTenantsPortal = SetTenants();
-                    cstTenant currentTenantPortal = allTenantsPortal.FirstOrDefault(t => t.subDominio == subDominio);
+                    CstTenant currentTenantPortal = allTenantsPortal.FirstOrDefault(t => t.subDominio == subDominio);
                     if (currentTenantPortal == null)
                     {
                         ViewBag.Error = "Domínio inválido [" + subDominio + "]!";
@@ -300,9 +300,9 @@ namespace GdiPlataform.Controllers
                 }
 
                 // Tenants
-                var allTenants = new List<cstTenant>();
+                var allTenants = new List<CstTenant>();
                 allTenants = SetTenants();
-                cstTenant currentTenant = allTenants.Where(t => t.subDominio == subDominio).FirstOrDefault();
+                CstTenant currentTenant = allTenants.Where(t => t.subDominio == subDominio).FirstOrDefault();
                 if (currentTenant == null)
                 {
                     ViewBag.Error = "Invalid domain [" + subDominio + "]!";
@@ -776,20 +776,8 @@ namespace GdiPlataform.Controllers
         public ActionResult Logout()
         {
             bool porInatividade = "inactivity".Equals(Request.QueryString["reason"], StringComparison.OrdinalIgnoreCase);
-            if (porInatividade)
-                TempData["Info"] = "A sessão foi encerrada devido à inatividade (15 minutos de inatividade). Por favor, faça login novamente.";
-
-            // Captura URL de saída antes de limpar cache/sessão; sempre chama logout para não deixar sessão órfã.
-            string enderecoSaida = string.Empty;
-            try
-            {
-                if (CachePersister.userIdentity != null)
-                    enderecoSaida = CachePersister.userIdentity.UrlSair.EmptyIfNull().ToString().Trim();
-            }
-            catch (Exception) { }
+            if (porInatividade) TempData["Info"] = "A sessão foi encerrada devido à inatividade (15 minutos de inatividade). Por favor, faça login novamente.";
             CachePersister.logout();
-            if (enderecoSaida.Length > 0)
-                return Redirect(enderecoSaida);
             return RedirectToAction("Index");
         }
         #endregion
@@ -803,11 +791,11 @@ namespace GdiPlataform.Controllers
         }
 
         #region setTenants
-        public List<cstTenant> SetTenants()
+        public List<CstTenant> SetTenants()
         {
-            var allTenants = new List<cstTenant>();
+            var allTenants = new List<CstTenant>();
 
-            cstTenant tenant1 = new cstTenant
+            CstTenant tenant1 = new CstTenant
             {
                 subDominio = "localhost",
                 ImgLogoSubdominio = "logoMicrosoft.png",
@@ -817,7 +805,7 @@ namespace GdiPlataform.Controllers
             };
             allTenants.Add(tenant1);
 
-            cstTenant tenant2 = new cstTenant
+            CstTenant tenant2 = new CstTenant
             {
                 subDominio = "gdidigital",
                 ImgLogoSubdominio = "logoGdi.png",
@@ -827,7 +815,7 @@ namespace GdiPlataform.Controllers
             };
             allTenants.Add(tenant2);
 
-            cstTenant tenant3 = new cstTenant
+            CstTenant tenant3 = new CstTenant
             {
                 subDominio = "gdidigitalhomologacao",
                 ImgLogoSubdominio = "logoGdi.png",
@@ -837,7 +825,7 @@ namespace GdiPlataform.Controllers
             };
             allTenants.Add(tenant3);
 
-            cstTenant tenant4 = new cstTenant
+            CstTenant tenant4 = new CstTenant
             {
                 subDominio = "aeroflightx",
                 ImgLogoSubdominio = "logoGdi.png",
@@ -847,7 +835,7 @@ namespace GdiPlataform.Controllers
             };
             allTenants.Add(tenant4);
 
-            cstTenant tenant5 = new cstTenant
+            CstTenant tenant5 = new CstTenant
             {
                 subDominio = "homologacao",
                 ImgLogoSubdominio = "logoGdi.png",
@@ -858,7 +846,7 @@ namespace GdiPlataform.Controllers
             allTenants.Add(tenant5);
 
             // Portal do cliente: DNS público (app = este ERP monólito; legado GDI-PortalCliente-Plataform descontinuado)
-            cstTenant tenantPortalCliente = new cstTenant
+            CstTenant tenantPortalCliente = new CstTenant
             {
                 subDominio = "portalflightx",
                 ImgLogoSubdominio = "logoGdi.png",
@@ -873,7 +861,7 @@ namespace GdiPlataform.Controllers
         #endregion
 
         /// <summary>Sessão portal cliente (CachePersister + role) — usado por AcessoPortal e POST Index em hosts portal.</summary>
-        private ActionResult CompletePortalClienteLogin(GdiPlataformEntities dbCtx, g_clientes recordCliente, cstTenant currentTenant, string dominio, string subDominio)
+        private ActionResult CompletePortalClienteLogin(GdiPlataformEntities dbCtx, g_clientes recordCliente, CstTenant currentTenant, string dominio, string subDominio)
         {
             a_parametros recordAParametros = dbCtx.a_parametros.FirstOrDefault();
             g_parametros recordGParametros = dbCtx.g_parametros.FirstOrDefault();
@@ -906,7 +894,6 @@ namespace GdiPlataform.Controllers
                 ImgLogoSubdominio = currentTenant.ImgLogoSubdominio,
                 GoogleTag = currentTenant.GoogleTag,
                 GoogleTagURL = currentTenant.GoogleTagURL,
-                UrlSair = string.Empty,
                 PerfilNome = "Portal do Cliente"
             };
 
@@ -1017,7 +1004,7 @@ namespace GdiPlataform.Controllers
                 }
 
                 var allTenants = SetTenants();
-                cstTenant currentTenant = allTenants.FirstOrDefault(t => t.subDominio == subDominio);
+                CstTenant currentTenant = allTenants.FirstOrDefault(t => t.subDominio == subDominio);
                 if (currentTenant == null)
                 {
                     ViewBag.Error = "Domínio inválido [" + subDominio + "]!";

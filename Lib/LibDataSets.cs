@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -499,17 +499,17 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboClientesContatosTipos));
         }
 
-        public static List<cstDatasetClientesContatos> LoadDatasetGcClientesContatos(GdiPlataformEntities db)
+        public static List<CstDatasetClientesContatos> LoadDatasetGcClientesContatos(GdiPlataformEntities db)
         {
             if ((CachePersister.contextoModel.gc_dataSetClientesContatos.Count == 0) || (LibDB.IsTableUpdate("g_clientes_contatos", "LoadDatasetGcClientesContatos", db) == true))
             {
-                var dataSetClientesContatos = new List<cstDatasetClientesContatos>();
+                var dataSetClientesContatos = new List<CstDatasetClientesContatos>();
                 try
                 {
                     var listaDbClientesContatos = db.g_clientes_contatos.Select(p => new { p.id_contato, p.ativo, p.id_cliente, p.contato, p.telefone, p.email }).Where(p => (p.ativo == true)).ToList();
                     foreach (var item_g_clientes_contatos in listaDbClientesContatos)
                     {
-                        cstDatasetClientesContatos record_cstDatasetClientesContatos = new cstDatasetClientesContatos();
+                        CstDatasetClientesContatos record_cstDatasetClientesContatos = new CstDatasetClientesContatos();
                         record_cstDatasetClientesContatos.id_cliente_contato = item_g_clientes_contatos.id_contato;
                         record_cstDatasetClientesContatos.id_cliente = item_g_clientes_contatos.id_cliente;
                         record_cstDatasetClientesContatos.contato = item_g_clientes_contatos.contato;
@@ -523,7 +523,7 @@ namespace GdiPlataform.Lib
             }
             else
             {
-                List<cstDatasetClientesContatos> ListaDataSetClientesContatos = CachePersister.contextoModel.gc_dataSetClientesContatos;
+                List<CstDatasetClientesContatos> ListaDataSetClientesContatos = CachePersister.contextoModel.gc_dataSetClientesContatos;
                 CachePersister.contextoModel.gc_dataSetClientesContatos = ListaDataSetClientesContatos;
             }
             return CachePersister.contextoModel.gc_dataSetClientesContatos;
@@ -715,12 +715,12 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboProdutosServicosImportados));
         }
 
-        public static List<cstDatasetProdutosServicos> LoadDatasetGcProdutosServicos(GdiPlataformEntities db)
+        public static List<CstDatasetProdutosServicos> LoadDatasetGcProdutosServicos(GdiPlataformEntities db)
         {
             // Produtos/Serviços
             if ((CachePersister.contextoModel.gc_dataSetProdutosServicos.Count == 0) || (LibDB.IsTableUpdate("g_produtos", "LoadDatasetGcProdutosServicos", db) == true))
             {
-                var dataSetProdutosServicos = new List<cstDatasetProdutosServicos>();
+                var dataSetProdutosServicos = new List<CstDatasetProdutosServicos>();
                 try
                 {
                     int _DisplayScreenWidth = 0;
@@ -734,7 +734,7 @@ namespace GdiPlataform.Lib
                     {
                         String NomeProduto = item_g_produtos.nome.EmptyIfNull().ToString().Trim();
                         if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                        cstDatasetProdutosServicos record_cstDatasetProdutosServicos = new cstDatasetProdutosServicos();
+                        CstDatasetProdutosServicos record_cstDatasetProdutosServicos = new CstDatasetProdutosServicos();
                         record_cstDatasetProdutosServicos.id_produto_servico = item_g_produtos.id_produto;
                         record_cstDatasetProdutosServicos.descricao_longa = NomeProduto; // Aqui
                         record_cstDatasetProdutosServicos.codigo = item_g_produtos.codigo;
@@ -758,7 +758,7 @@ namespace GdiPlataform.Lib
             }
             else
             {
-                List<cstDatasetProdutosServicos> ListaDataSetProdutosServicos = CachePersister.contextoModel.gc_dataSetProdutosServicos;
+                List<CstDatasetProdutosServicos> ListaDataSetProdutosServicos = CachePersister.contextoModel.gc_dataSetProdutosServicos;
                 CachePersister.contextoModel.gc_dataSetProdutosServicos = ListaDataSetProdutosServicos;
             }
             return CachePersister.contextoModel.gc_dataSetProdutosServicos;

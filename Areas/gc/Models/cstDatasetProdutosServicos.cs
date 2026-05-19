@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstDatasetProdutosServicos
+    public class CstDatasetProdutosServicos
     {
         public int id_produto_servico { get; set; }
         public decimal preco_venda { get; set; }

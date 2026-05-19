@@ -44,6 +44,804 @@
 
 ## HISTÓRICO DE INTERVENÇÕES
 
+---
+### [2026-05-19] — Lote 1: remoção hiddens legados yesFilterOperador/Text/AdvancedText
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- 40 views `Areas/**` (g, gc, qa, crm) — removidos `<input hidden>` e chaves ajax DataTables
+- `Scripts/gdi_remove_legacy_filter_hiddens_lote1.py` (script reutilizável)
+
+**Problema / Demanda:** Campos do modal genérico `a/Filtros` (já removido) permaneciam nas views sem JS que os preenchesse.
+
+**O que foi feito:** Remoção mecânica de `yesFilterOperador`, `yesFilterText` e `yesFilterAdvancedText` no markup e no `data` do DataTables. **Mantido** `yesFilterField` (sentinela `""` / `"*"` para Pesquisar/Limpar e `LibDB.getFilterByUser`).
+
+**O que foi evitado:** Alterar `jQueryDataTableParamModel`, `LibDB.getFilterByUser` e controllers (fase 2).
+
+**Atenção para próximas intervenções:** Propriedades no model e ramos servidor de filtro genérico SQL permanecem; limpeza opcional na fase 2.
+
+---
+### [2026-05-19] — Remoção módulo legado `a/Filtros` (modal genérico)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- Removidos: `Areas/a/Controllers/FiltrosController.cs`, `Areas/a/Models/CstFiltroModel.cs`, `Areas/a/Views/Filtros/ModalFiltroGenericoView.cshtml`
+- `GDI-ERP-Plataform.csproj` — entradas Compile/Content correspondentes
+
+**Problema / Demanda:** Modal de filtro genérico na área `a` sem consumidores após descontinuação de `g/ProdutosTipos` no projeto (fora do `.csproj`).
+
+**O que foi feito:** Remoção completa do controller, model e view; área `a` mantém `Parametros` e `Audit`. Filtros persistidos em sessão (`LibDB.getFilterByUser`, `UserIdentity.allFiltros`) **preservados** — usados pelos índices com filtro inline.
+
+**O que foi evitado:** Remover `LibDB` / `allFiltros`; remover área `a` inteira.
+
+**Atenção para próximas intervenções:** Ficheiros órfãos `Areas/g/Views/ProdutosTipos/*` e `ProdutosTiposController.cs` podem ainda existir no disco sem estar no `.csproj` — limpeza opcional separada.
+
+---
+### [2026-05-19] — jsAtualizarIndicadorFiltro*: wrappers para GdiAtualizarIndicadorFiltro (start.js)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- 17 índices `Areas/g` e `Areas/gc` (Cidades, Clientes, Produtos, Cfop*, Usuarios, Vendedores, etc.)
+- `Scripts/gdi_refactor_indicador_filtro.py`
+
+**O que foi feito:** Corpos duplicados das funções `jsAtualizarIndicadorFiltro{Modulo}` passam a delegar em `GdiAtualizarIndicadorFiltro` (mantidos nomes locais nos `xhr.dt`).
+
+---
+### [2026-05-19] — Migração btnFiltro lote 2: removido de start.js + 4 views finais
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` — `GdiAtualizarIndicadorFiltro`; removido `btnFiltro`
+- `Areas/g/Views/ProdutosTipos/Index.cshtml` — Filtro modal + Limpar; `GdiAtualizarIndicadorFiltro` no `xhr.dt`
+- `Areas/g/Views/Nfe/Index.cshtml`, `Areas/gc/Views/ComexProdutos/Index.cshtml`, `ProdutosPre.cshtml` — `xhr.dt` sem `btnFiltro`
+
+**Decisões:** ProdutosTipos deixa de alternar “Filtro/Remover” via `innerHTML`; botões separados. **Publish:** incrementar `VersionERP` (alteração em `start.js`).
+
+---
+### [2026-05-19] — Migração btnFiltro lote 1 (views sem #btnFiltroDefault)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- ~21 views em `Areas/g`, `Areas/gc`, `Areas/qa` (DataTables `xhr.dt`)
+- `Areas/gc/Views/FinanceiroLancamentos/Index.cshtml` (ordem notify → `jsUpdateDataView`)
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (comentário `@deprecated` em `btnFiltro`)
+- `Scripts/gdi_remove_btnfiltro_lote1.py` (verificação)
+
+**O que foi feito:** Removido `btnFiltro(json.yesFilterOnOff)` do `xhr.dt`; padrão `if (GdiDtNotifyJsonErrorMessage(json)) { return; }`. Spinner via `gdiDataTablesProcessandoAutoHide`. **Pendente lote 2:** `g/Nfe`, `g/ProdutosTipos`, `gc/ComexProdutos/Index`, `gc/ComexProdutos/ProdutosPre`.
+
+---
+### [2026-05-19] — qa/GedSGQ IndexDocsSGQ: botão Pesquisar sem função JS
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml`
+
+**Problema:** `onclick="jsAjaxPesquisarGedArquivos()"` sem definição na view (existe só em `g/Ged/Index.cshtml`) → ReferenceError e grelha não atualiza.
+
+**Solução:** Copiado `jsAjaxPesquisarGedArquivos` do padrão GED; download na coluna usa `row[1]` em vez de `data[1]`.
+
+**Atenção:** `IndexComunicados`, `IndexAtasReunioes` e `IndexPops` têm o mesmo gap — corrigir se reportarem.
+
+---
+### [2026-05-19] — gc/Estoque Index: Ficha de estoque in-line por linha
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/gc/Views/Estoque/Index.cshtml`
+
+**Problema:** Botão toolbar "Produtos - Ficha Estoque" exigia seleção na grelha.
+
+**Solução:** Removido botão do `card-header`; coluna **Ficha** (última) com botão por linha (`jsGcEstoqueFichaEstoque`), padrão `g/Produtos/Index` (sem exigir seleção na grelha).
+
+---
+### [2026-05-19] — g/Produtos Index: colunas Ficha e Editar invertidas
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Views/Produtos/Index.cshtml`
+
+**Problema:** Coluna Editar na penúltima posição e Ficha na última; pedido para inverter.
+
+**Solução:** `<th>` e `aoColumnDefs` reordenados — Ficha (índice 8) antes de Editar (índice 9 quando ambas visíveis).
+
+---
+### [2026-05-19] — g/Filiais CreateEdit: layout tab-pane abaixo do título
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Views/Filiais/CreateEdit.cshtml`
+
+**Problema:** `form-horizontal` envolvia `card-title`, `card-header` e `card-body`, colocando abas/conteúdo na mesma linha do título.
+
+**Solução:** Estrutura alinhada a `PagRecTipos`/`UF`: filhos diretos do `card` (`card-title` → `card-header` → `card-body` → `card-footer`); `tab-content` só dentro de `card-body`.
+
+---
+### [2026-05-19] — g/Filiais CreateEdit: título duplicado, Create POST e Edit seguro
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Controllers/FiliaisController.cs`
+- `Areas/g/Views/Filiais/CreateEdit.cshtml`
+
+**Problema:** Título Edit repetia o nome (`GDI BH - GDI BH`); tag `<b>Filial</b` sem fechar; Create POST forçava `id_filial=1` e `id_coligada=1`; Edit com `EntityState.Modified` zerava campos fora do formulário.
+
+**Solução:** `MontarTituloCreateEditFilial` com `id_filial - nome`; removido hardcode no Create; Edit atualiza entidade carregada do banco; validação JS de Coligada no save.
+
+---
+### [2026-05-19] — g/Filiais Index: Editar in-line por linha (padrão Produtos/Perfis)
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Filiais/Index.cshtml`
+
+**O que foi feito:** Removido botão toolbar «Editar» (`JsEditRecord` + seleção); coluna ação com `btnGFiliaisEditRow` + `jsGFiliaisEditRow` → `JsEditRecordDoubleClick`; `dt-no-row-select`; duplo clique na linha; roles `g_Filiais_*` / `Actionupdate`; `drawCallback` tooltips; `gdi-dt-zebra`. Hide do modal processando via listener global `start.js` (`xhr.dt`/`draw.dt`).
+
+---
+### [2026-05-19] — DataTables global: LibMessageProcessandoHide após xhr/draw/error.dt
+**Tipo:** Correção
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` — `gdiDataTablesProcessandoAutoHide()` em `$(document).on('xhr.dt error.dt draw.dt', …)`
+
+**Problema:** Dezenas de views chamam `LibMessageProcessando` antes de `DataTable().draw()` sem `LibMessageProcessandoHide()` ao concluir o Ajax/redraw (ex.: índices modernizados Perfis, CFOP, Clientes, Financeiro).
+
+**Solução:** Listener global DataTables (todas as grelhas do ERP que disparam eventos dt) fecha o overlay ao terminar xhr, erro ou draw. `waitingDialog.hide` usa contador de profundidade — múltiplos hide são seguros.
+
+**Atenção publish:** incrementar `VersionERP` / cache-bust de `start.js` no `_Layout` após deploy.
+
+---
+### [2026-05-19] — Padronização filtro LIKE %termo% normalizado em GetDados (LibStringFormat + controllers)
+**Tipo:** Correção / Refatoração
+**Arquivos tocados:**
+- `Lib/LibStringFormat.cs` — `NormalizarTermoBuscaTexto`, `NormalizarTermoBuscaCodigo`, `MontarPadraoLikeContem`, `TryMontarPadraoLikeContemTexto/Codigo`
+- `Areas/g/Controllers`: Cidades, Perfis, Usuarios, ContasCaixas, Vendedores, PagRecTipos, PagRecCondicoes, ContratosAviacao, UF, ProdutosNcm, Produtos, Clientes, Nfe
+- `Areas/gc/Controllers`: Cfop, CfopOperacoes, CfopParametros, FinanceiroParametroDifal, EstoqueControle, EstoqueLotes, FinanceiroLancamentos (2 trechos), ComexProdutos
+
+**Problema:** Vários `GetDados` com filtro inline usavam `Contains` sem normalização alinhada ao cadastro; comportamento inconsistente (ex.: BELO não encontrava BELO HORIZONTE).
+
+**Solução:** Helpers centralizados; `DbFunctions.Like` com `%termo%` e escape de curingas; texto via `FormatarTextoSimples`, códigos/PN/serial via maiúsculas sem acento.
+
+**Fora do escopo:** filtros só por id, datas, SQL genérico `g_filtros`, listas `Contains(id)` em coleções.
+
+---
+### [2026-05-19] — g/Cidades GetDados: filtro nome LIKE %termo% e inclusão id_cidade 1
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Controllers/CidadesController.cs`
+
+**Problema:** Pesquisa por «BELO» não retornava «BELO HORIZONTE»; base usava `id_cidade > 1` (excluía id 1) e filtro de nome sem normalização explícita tipo `LIKE '%…%'`.
+
+**Solução:** `id_cidade > 0`; termo normalizado com `FormatarTextoSimples`; filtro `DbFunctions.Like` com padrão `%termo%` e escape de curingas SQL.
+
+---
+### [2026-05-19] — g/Cidades Index: modal «Pesquisando cidades…» não fechava após pesquisa
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Views/Cidades/Index.cshtml`
+
+**Problema:** `jsAjaxPesquisarCidades` / `jsLimparFiltroCidades` chamavam `LibMessageProcessando` antes de `DataTable().draw(false)`, mas não havia `LibMessageProcessandoHide()` ao concluir o redraw (padrão já usado em `Produtos/Index` via `footerCallback`).
+
+**Solução:** `LibMessageProcessandoHide()` no `drawCallback`, no `xhr.dt` (após resposta Ajax) e nos `catch` de pesquisa/limpar.
+
+---
+### [2026-05-19] — Remoção módulo g/PortalVendedor (controller + view PortalFinanceiro)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- Removidos: `Areas/g/Controllers/PortalVendedorController.cs`, `Areas/g/Views/PortalVendedor/PortalFinanceiro.cshtml`
+- `GDI-ERP-Plataform.csproj` — retirados Compile/Content
+
+**Preservado:** roles `g_PortalVendedor_*` em `UsuariosController` (`ModalUsuarioTrocarSenha` / `AjaxUsuarioTrocarSenha` — logons vendedor `TokenAcesso` "V"); portal externo `crm` + `UserIdentity`; `NfeController`.
+
+**Evitado:** remover roles de `UsuariosController` — não são rota do portal, apenas autorização de troca de senha.
+
+**Atenção:** desativar no menu/BD eventual item `/g/PortalVendedor/PortalFinanceiro` em produção.
+
+---
+### [2026-05-19] — Remoção legado g/PortalCliente (view PortalFinanceiro + models)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- Removidos: `Areas/g/Views/PortalCliente/PortalFinanceiro.cshtml`, `Areas/g/Models/CstPortalClienteFinanceiro.cs`, `Areas/g/Models/CstViewPortalClienteFinanceiro.cs`
+- `GDI-ERP-Plataform.csproj` — retirados Compile/Content
+
+**Nota:** `Areas/g/Controllers/PortalClienteController.cs` **não existia** no repositório (já ausente ou nunca commitado).
+
+**Preservado (portal externo integrado):** `UserIdentity` (`AcessoPortal`, `CompletePortalClienteLogin` → `crm/Pedidos`), `Areas/crm/*`, role `gc_PortalCliente_PortalFinanceiro`, `Areas/g/Views/PortalVendedor` (vendedor interno).
+
+**Atenção:** Não confundir com portal público em **crm**; apenas o ecrã legado **g/PortalCliente/PortalFinanceiro** foi removido.
+
+---
+### [2026-05-19] — Remoção módulo g/Requisicoes (controller, views, referências Clientes e navbar)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- Removidos: `Areas/g/Controllers/RequisicoesController.cs`, `Areas/g/Views/Requisicoes/*` (Index, CreateEdit, ModalSolicitarBloqueioLogon)
+- `GDI-ERP-Plataform.csproj` — retirados Compile/Content
+- `Areas/g/Views/Clientes/Index.cshtml` — removida função `jsModalSolicitarBloqueioLogon` (modal em Requisicoes)
+- `Security/Contexto.cs` — `getNavbarItemsAlert` sem links para `/g/Requisicoes/Edit`
+
+**Preservado:** tabelas `g_requisicoes` / `g_requisicoes_tipos` no EF; `GetDadosRequisicoesPedidos` em **gc/Tarefas** (não é o módulo g).
+
+**Atenção:** Remover menu `/g/Requisicoes` no SQL/IIS; alertas de requisições abertas deixam de aparecer na navbar.
+
+---
+### [2026-05-19] — Remoção módulo g/FinanceiroLancamentos (controller, views, CstFinanceiroLancamentosIndex)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- Removidos: `Areas/g/Controllers/FinanceiroLancamentosController.cs`, `Areas/g/Models/CstFinanceiroLancamentosIndex.cs`, `Areas/g/Views/FinanceiroLancamentos/*` (6 views)
+- `GDI-ERP-Plataform.csproj` — retirados Compile/Content do módulo **g** (área **gc** `FinanceiroLancamentos` intacta)
+
+**Preservado:** `Areas/g/Models/CstFinanceiroLancamentos.cs` — usado por `FinanceiroController.AjaxSaveFinanceiroAvulso`.
+
+**Atenção:** Remover menu `/g/FinanceiroLancamentos` no SQL/IIS; lançamentos **gc** (`/gc/FinanceiroLancamentos`) não foram alterados.
+
+---
+### [2026-05-19] — Remoção módulo g/FinanceiroFaturamentos (controller, views, model)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- Removidos: `Areas/g/Controllers/FinanceiroFaturamentosController.cs`, `Areas/g/Models/CstFinanceiroFaturamentosEnviarNFe.cs`, `Areas/g/Views/FinanceiroFaturamentos/*` (5 views)
+- `GDI-ERP-Plataform.csproj` — retirados Compile/Content do módulo
+- `Areas/g/Views/Nfe/Index.cshtml` — dropdown Processos sem roles `g_FinanceiroFaturamentos_*`
+
+**Problema / Demanda:** Descontinuar tela MVC `g/FinanceiroFaturamentos` mantendo tabela `g_financeiro_faturamentos` para lançamentos.
+
+**O que foi feito:** Apagados controller, views e model; limpeza do `.csproj`; Nfe/Index com autorização só por roles `g_Nfe_*`.
+
+**Atenção:** Remover entrada de menu `/g/FinanceiroFaturamentos` no SQL/IIS se existir; envio NF-e em lote por faturamento deixa de existir na UI.
+
+---
+### [2026-05-19] — gc/EstoqueControle: Index modernizado (filtro inline, GetDados SQL)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/gc/Models/CstEstoqueControleIndex.cs` (novo)
+- `Areas/gc/Controllers/EstoqueControleController.cs`
+- `Areas/gc/Views/EstoqueControle/Index.cshtml`
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Lista de controles/aferições carregava todos os registros em memória (`ToList()` em `g_produtos_controle`, `g_produtos`, `g_produtos_status`), sem filtro inline nem grade vazia ao abrir; botão Editar na toolbar com handler incorreto na coluna edit.
+
+**O que foi feito:**
+- Model `CstEstoqueControleIndex` (Id + Serial); `Index()` restaura filtro `g_filtros` (`gc_EstoqueControle`, formato `id;serial`).
+- `GetDados`: `AsNoTracking`, filtro vazio → grade vazia; Pesquisar/Limpar (`yesFilterField=*`); paginação `Skip`/`Take` no SQL (máx. 100); lookups batch de produto/status só da página.
+- View: filtro inline, `deferLoading`, indicador no Limpar, coluna Editar in-line (`jsGcEstoqueControleEditRow`), toolbar só Novo; duplo clique em `td:not(.dt-no-row-select)`.
+
+**Decisões técnicas relevantes:**
+- Critérios de ativos mantidos: `id_produto > 0 && ativo == true`.
+- Ordenação server-side nas colunas Id. (1) e Serial (2).
+
+**O que foi evitado e por quê:**
+- `CreateEdit.cshtml` / `GetDadosMedicoes` — fora do escopo da listagem Index.
+
+**Impactos conhecidos:**
+- Comportamento alinhado a Cfop/Cidades; persistência de filtro por utilizador.
+
+**Atenção para próximas intervenções:**
+- Validar pesquisa por serial parcial e Limpar com volume grande em produção; compilar no VS antes do publish.
+
+---
+### [2026-05-19] — Index modernizado (lote cadastros g/gc): UF, PagRecTipos/Condicoes, ContasCaixas, Vendedores, ProdutosNcm, ContratosAviacao, Cfop
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Controllers/UFController.cs`, `PagRecTiposController.cs`, `PagRecCondicoesController.cs`, `ContasCaixasController.cs`, `VendedoresController.cs`, `ProdutosNcmController.cs`, `ContratosAviacaoController.cs`
+- `Areas/gc/Controllers/CfopController.cs`
+- Views Index correspondentes (filtro inline + `yesCustomField01/02` + `deferLoading`)
+
+**O que foi feito:** Padrão Cidades/Perfis em `Index`/`GetDados`: `IQueryable` + paginação, filtro `id;campo2` persistido, grid vazia sem critério, `*` para listar todos. `controllerName` onde faltava. Vendedores/ContratosAviacao: lookup revendas/clientes/tipos só da página.
+
+---
+
+### [2026-05-19] — Index modernizado: Usuarios, Cidades, CfopOperacoes, CfopParametros, FinanceiroParametroDifal
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Usuarios/Index.cshtml`, `Areas/g/Controllers/UsuariosController.cs`, `Areas/g/Models/CstUsuariosIndex.cs`
+- `Areas/g/Views/Cidades/Index.cshtml`, `Areas/g/Controllers/CidadesController.cs`, `Areas/g/Models/CstCidadesIndex.cs`
+- `Areas/g/Views/Cidades/ModalFiltroAvancadoView.cshtml` (removido)
+- `Areas/gc/Views/CfopOperacoes/Index.cshtml`, `Areas/gc/Controllers/CfopOperacoesController.cs`, `Areas/gc/Models/CstCfopOperacoesIndex.cs`
+- `Areas/gc/Views/CfopParametros/Index.cshtml`, `Areas/gc/Controllers/CfopParametrosController.cs`, `Areas/gc/Models/CstCfopParametrosIndex.cs`
+- `Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml`, `Areas/gc/Controllers/FinanceiroParametroDifalController.cs`, `Areas/gc/Models/CstFinanceiroParametroDifalIndex.cs`
+- `GDI-ERP-Plataform.csproj`
+
+**O que foi feito:**
+Padrão Perfis/Clientes: filtro inline (Id + texto), Pesquisar/Limpar, `deferLoading`, gate sem critério, persistência `id;texto` em `g_filtros`, `GetDados` com `IQueryable` + paginação SQL, coluna Editar in-line (modal nos CFOP), toolbar Editar removida; Cidades sem modal de filtro avançado.
+
+---
+### [2026-05-19] — Perfis Index: filtro inline Id/Nome; GetDados paginação SQL; Editar in-line
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Perfis/Index.cshtml`
+- `Areas/g/Controllers/PerfisController.cs` — `Index`, `GetDados`, helpers
+- `Areas/g/Models/CstPerfisIndex.cs` (novo)
+- `GDI-ERP-Plataform.csproj`
+
+**O que foi feito:**
+Filtro inline Id + Nome; Pesquisar/Limpar; `deferLoading` e gate sem critério; persistência `id;nome` em `g_filtros` (`g_Perfis`); `GetDados` com `IQueryable` + `Skip`/`Take` no SQL (sem `ToList` da tabela inteira); coluna Editar in-line; botão Editar da toolbar removido; correção HTML (tags inválidas `<motion>` substituídas por `<div>`).
+
+**Atenção para próximas intervenções:**
+Validar no browser: abrir Index vazio → Pesquisar → Limpar → editar na linha / duplo clique.
+
+---
+### [2026-05-19] — Clientes Index: coluna Editar in-line; removido botão Editar da toolbar
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Clientes/Index.cshtml`
+
+**O que foi feito:**
+Coluna 7 com botão `jsGClientesEditRow` (`dt-no-row-select`, roles `g_Clientes_*` / `Actionupdate`); toolbar Editar removida; duplo clique delega à mesma função; tooltips no `drawCallback`.
+
+---
+### [2026-05-19] — Clientes Index: filtro inline (Id, lookup Nome, CPF, CNPJ) padrão Produtos
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Clientes/Index.cshtml`
+- `Areas/g/Controllers/ClientesController.cs` — `Index`, `GetDados`, helpers
+- `Areas/g/Models/cstClientesIndex.cs` (novo)
+- `Areas/g/Views/Clientes/ModalFiltroAvancadoView.cshtml` (removido)
+- `GDI-ERP-Plataform.csproj`
+
+**O que foi feito:**
+Painel inline Id + `DropDownList` cliente (Financeiro), CPF, CNPJ; Pesquisar/Limpar; `deferLoading`; `yesCustomField01–04`; persistência `id;idLookup;;cpf;cnpj`; razão social só servidor; Filtro Avançado removido.
+
+---
+### [2026-05-19] — Modal Ficha Estoque: alinhamento do título em duas linhas
+**Tipo:** Correção (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Produtos/ModalViewFichaEstoqueProduto.cshtml`
+- `Areas/g/Controllers/ProdutosController.cs` — `ModalViewFichaEstoqueProduto`
+
+**Problema / Demanda:**
+Título com `<br/>` desalinhado (escada): `d-flex` no `h5` quebrava quebra de linha; `GetTabHtml` gerava indentação extra.
+
+**O que foi feito:**
+Ícone em `ViewBag.TitleIcon`; linhas em `TitleLinha1`/`TitleLinha2`; layout ícone + texto com `align-items-start`, `text-break`, `flex-grow-1` no `modal-title`.
+
+---
+### [2026-05-19] — Produtos Index: coluna in-line Ficha de Estoque (padrão IndexPedido)
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Produtos/Index.cshtml`
+
+**Problema / Demanda:**
+Ficha de estoque exigia seleção de linha + menu Relatórios; padrão desejado: botão por linha como `gc/Movimentos/IndexPedido`.
+
+**O que foi feito:**
+Coluna 8 com botão `warehouse` (`dt-no-row-select`), `jsGProdutosFichaEstoque(id)` carrega `ModalViewFichaEstoqueProduto`; menu Relatórios mantido e delega à mesma função; roles `g_Produtos_*` / `g_Produtos_Actionread`; tooltips no `drawCallback`; CSS `gdi-index-produtos-dt`. Sem alteração em controller/modal.
+
+**Decisões técnicas relevantes:**
+- Coluna só renderizada no cliente quando há role de leitura (Razor `podeVerFichaEstoque`).
+- `GetDados` inalterado — coluna de ação é `data: null` no DataTables.
+
+**O que foi evitado e por quê:**
+- Remoção do item em Relatórios → compatibilidade com fluxo anterior.
+- Alteração em `GetFichaEstoqueProduto` (ToList em memória) → fora do escopo UX.
+
+**Impactos conhecidos:**
+- Largura coluna Produto 59% → 56% quando coluna Ficha visível.
+
+**Atenção para próximas intervenções:**
+- Otimizar paginação SQL em `GetFichaEstoqueProduto` em tarefa separada.
+
+---
+### [2026-05-19] — Produtos Index fase 5: indicador visual de filtro ativo (Limpar)
+**Tipo:** Implementação (UX)
+**Arquivos tocados:**
+- `Areas/g/Views/Produtos/Index.cshtml`
+
+**O que foi feito:**
+`jsAtualizarIndicadorFiltroProdutos` no `xhr.dt` conforme `yesFilterOnOff` do servidor — botão Limpar passa a `btn-outline-warning` e título “Filtro ativo…” sem usar `btnFiltro` global. Encerra o lote de melhorias do índice de Produtos (fases 1–5).
+
+---
+### [2026-05-19] — Produtos Index fase 4: remoção modal filtro avançado legado
+**Tipo:** Refatoração / Limpeza
+**Arquivos tocados:**
+- `Areas/g/Controllers/ProdutosController.cs` — removido `ModalFiltroAvancadoView`; `GetDados` sem ramo `yesFilterAdvancedText`
+- `Areas/g/Views/Produtos/Index.cshtml` — hiddens/ajax legados removidos
+- `Areas/g/Views/Produtos/ModalFiltroAvancadoView.cshtml` — apagado
+- `GDI-ERP-Plataform.csproj`
+
+**O que foi feito:**
+Limpeza pós-migração para filtro inline; filtro persistido continua via `g_filtros` / parse 5 campos (aux/descrição legados na sessão). Build Release OK.
+
+---
+### [2026-05-19] — Produtos Index fase 3: persistência e restauração do filtro inline
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Controllers/ProdutosController.cs`
+- `Areas/g/Views/Produtos/Index.cshtml`
+
+**Problema / Demanda:**
+`yesFilterField='*'` em Pesquisar acionava `getFilterByUser` e **apagava** o filtro gravado; `filterDb` nunca era aplicado à query.
+
+**O que foi feito:**
+Pesquisar deixa de usar `*` (só **Limpar** usa `*` para limpar cache e listar todos). `setFilterByUser` grava critério `id;pn;;nome;` após pesquisa; `GetDados` reutiliza filtro da sessão se os campos vierem vazios; `Index` pré-preenche campos e dispara pesquisa se houver filtro salvo. Helpers `ObterFiltroPersistidoUsuario`, `TryParseFiltroProdutosSemicolon`, `AplicarFiltroProdutosNaQuery`. Compatível com filtro legado 5 campos (aux/descrição). Build Release OK.
+
+---
+### [2026-05-19] — Produtos Index fase 2: sem carga automática da grade no 1.º load
+**Tipo:** Correção / Performance
+**Arquivos tocados:**
+- `Areas/g/Views/Produtos/Index.cshtml`
+- `Areas/g/Controllers/ProdutosController.cs`
+
+**Problema / Demanda:**
+Após filtro inline, o DataTables ainda disparava `GetDados` ao abrir a página e carregava todos os produtos ativos.
+
+**O que foi feito:**
+`deferLoading: true` + mensagem em `sEmptyTable`; **Limpar** define `yesFilterField='*'` para listar todos. `GetDados`: retorno vazio se não houver critério inline/avançado nem `yesFilterField='*'`; teto `iDisplayLength` 100. Build Release OK.
+
+**Atenção:** Pesquisar exige ao menos um campo; Limpar lista todos os ativos paginados.
+
+---
+### [2026-05-19] — Produtos Index: filtro inline Id/PN/Nome (padrão IndexPedido)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Views/Produtos/Index.cshtml`
+- `Areas/g/Controllers/ProdutosController.cs`
+
+**Problema / Demanda:**
+Filtro só via modal “Filtro Avançado”; alinhar UX ao painel inline + Pesquisar de `gc/Movimentos/IndexPedido` com campos Id., PN e Nome.
+
+**O que foi feito:**
+Painel acima da grelha (`edit_id_produto`, `edit_codigo`, `edit_nome`), `jsAjaxPesquisarProdutos` / `jsLimparFiltroProdutos`, Ajax com `yesCustomField01–03`. `GetDados` aplica filtros em LINQ (`Contains` / id); PN normalizado (`RemoverEspacos`, prefixo `PN:`). Removido botão/modal da Index (action/view legado mantidos). Build Release OK.
+
+**O que foi evitado:**
+- Alterar `ModalFiltroAvancadoView.cshtml` / paginação existente; `filterDb`/`sql_filtro` (ainda não aplicado à query).
+
+**Atenção para próximas intervenções:**
+1.º load continua listando todos os ativos até Pesquisar; validar Enter e paginação com filtro ativo.
+
+---
+### [2026-05-19] — P2-05 FinanceiroFaturamentos GetDados: paginação SQL sem alterar filtro avançado
+**Tipo:** Correção / Performance
+**Arquivos tocados:**
+- `Areas/g/Controllers/FinanceiroFaturamentosController.cs`
+
+**Problema / Demanda:**
+`GetDados` carregava `g_financeiro_faturamentos` inteiro em memória (`ToList`) e aplicava `Skip/Take` no servidor; Admin sem filtro pior caso. Totalizador fazia `GROUP BY` em `g_financeiro` + `DataTable.Select` por linha.
+
+**O que foi feito:**
+Sem filtro: EF `AsNoTracking` + `Count` + `Skip/Take`. Filtro simples e avançado (5 campos): mesma montagem SQL (concat inalterada) + `COUNT` subquery + `OFFSET/FETCH`. Avançado inválido: `SELECT *` paginado em vez de `ToList` total. Totalizador só para IDs da página (`IN`). Helpers privados: `TryGetFaturamentosPageSemFiltro`, `TryBuildFaturamentosInnerSelect`, `BuildFaturamentosOrderBy`, `NormalizeDisplayLength` (máx. 100), `LoadQtdTitulosPorFaturamento`, `MapFaturamentosToAaData`. Build Release OK.
+
+**O que foi evitado e por quê:**
+- Parametrizar filtro avançado (injection) — fase posterior.
+- Alterar `Index.cshtml` ou contrato JSON DataTables.
+
+**Atenção para próximas intervenções:**
+Validar em SQL Profiler: sem `SELECT` sem limite no primeiro load Admin. Testar filtro simples e avançado 5 campos vs. comportamento anterior na 1ª página.
+
+---
+### [2026-05-19] — Financeiro Index: menu Processos — Transferir Conta Caixa
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Views/Financeiro/Index.cshtml`
+- `Scripts/gdi_check_specific_modals.ps1`
+
+**O que foi feito:**
+Item no dropdown Processos (`g_Financeiro_*` ou `g_Financeiro_GerarRemessaBoletosBancarios`), antes de Gerar Remessa; chama `modalTransferirContaCaixa()`.
+
+**Atenção:** Pesquisar com status Em Aberto antes de transferir (validação no servidor).
+
+---
+### [2026-05-19] — B3 Financeiro: view ModalTransferirContaCaixa e filtro em AjaxTransferirContaCaixa
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Views/Financeiro/ModalTransferirContaCaixa.cshtml` (novo)
+- `Areas/g/Controllers/FinanceiroController.cs` — `ModalTransferirContaCaixa`, `AjaxTransferirContaCaixa` + `LibDB.getFilterByUser`
+- `Areas/g/Views/Financeiro/Index.cshtml` — `Url.Action` PascalCase
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Lote B3 — action `modalTransferirContaCaixa` sem view; POST usava `SentencaSQLTemp` sempre vazio (transferência nunca executava).
+
+**O que foi feito:**
+View modal alinhada a `ModalProrrogarVencimentoTitulo` (conta caixa, vencimento, juros/multa); aviso se filtro da grade não foi gravado; leitura do SQL do filtro persistido (`g_Financeiro`) no POST; anti-forgery no Ajax. Build Release OK.
+
+**Atenção para próximas intervenções:**
+- Função JS `modalTransferirContaCaixa()` em `Index` ainda sem item de menu visível — expor no dropdown Processos se o fluxo for usado em produção. Filtro deve incluir `id_financeiro_status = 1` (Em Aberto).
+
+---
+### [2026-05-19] — PascalCase Lote B2d: cstTenant + Robos Sintegra (raiz do projeto)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Models/CstTenant.cs` (ex-`cstTenant`)
+- `Robos/SintegraWS/Models/CstRetornoSintegraWS.cs`, `CstRetornoReceitaCPF.cs`
+- `Controllers/UserIdentityController.cs`, `Areas/g/Controllers/ClientesController.cs`
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Fechar sub-lote B2d — últimos view models `cst*` fora de `Areas` (tenant multi-domínio e retornos Sintegra).
+
+**O que foi feito:**
+Rename classe + ficheiro; 8 ficheiros atualizados. **Zero** `public class cst*` restantes no repositório. Build Release OK.
+
+**Atenção para próximas intervenções:**
+- Smoke: login por subdomínio (`SetTenants`), portal cliente (`AcessoPortal`), cadastro cliente via robô Sintegra. Plano PascalCase `cst*`/`modal*` em Areas **concluído**.
+
+---
+### [2026-05-19] — PascalCase Lote B2c: models cst* em Areas/gc/Models (32 ficheiros)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Areas/gc/Models/Cst*.cs` (32 renomeados de `cst*`; 5 já tinham ficheiro `Cst*` — classes alinhadas)
+- Controllers/views em `Areas/gc` + referências cruzadas (Movimentos, Entradas, COMEX, relatórios, Gerencial)
+- `GDI-ERP-Plataform.csproj`
+- Caso especial: `cstNfeICMSTotal.cs` → `CstNfeIcmsTotal.cs` (classe `CstNfeIcmsTotal`)
+
+**Problema / Demanda:**
+Sub-lote B2c — padronizar view models `cst*` da área `gc` para PascalCase.
+
+**O que foi feito:**
+Substituição de tipos em ~149 ficheiros; rename de ficheiros (2 passos Windows); `.csproj` atualizado. Build Release OK.
+
+**Atenção para próximas intervenções:**
+- Smoke: entradas NF, importação COMEX, relatórios comerciais, painel gerencial, carta correção, invoice PDF. Próximo: **B2d** (`Models/cstTenant`, `Robos`, `Lib` raiz).
+
+---
+### [2026-05-19] — PascalCase Lote B2b: models cst* em Areas/g/Models (29 ficheiros)
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Areas/g/Models/Cst*.cs` (29 — ex-`cst*`, classe + ficheiro)
+- Controllers/views em `Areas/g`, `Areas/gc`, `Areas/crm` que referenciam `GdiPlataform.Areas.g.Models.*`
+- `Areas/g/Models/Lib/LibFinanceiro.cs`
+- `GDI-ERP-Plataform.csproj` (`Compile Include` → `Cst*`)
+
+**Problema / Demanda:**
+Sub-lote B2b — padronizar view models `cst*` da área `g` para PascalCase (`Cst*`).
+
+**O que foi feito:**
+Rename de ficheiro (2 passos Windows) + substituição de tipo em ~133 ficheiros (controllers, Razor, Lib). Build Release OK. Área `gc` models `cst*` **não** alterados (B2c).
+
+**Atenção para próximas intervenções:**
+- Smoke: Financeiro (Index, boletos, prorrogar), GED upload, NFe exportar PDF, portal `crm` boleto, filtros avançados `gc`/g. Próximo: **B2c** (`Areas/gc/Models`).
+
+---
+### [2026-05-19] — PascalCase Lote B2a: models cst* em Areas/crm e Areas/a
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Areas/crm/Models/CstDadosPedidoPortal.cs`, `CstListaPedidosPortal.cs` (ex-`cst*`)
+- `Areas/crm/Controllers/PedidosController.cs`, `Areas/crm/Views/Pedidos/Index.cshtml`
+- `Areas/a/Models/CstFiltroModel.cs` (classe `CstFiltroModel`), `Areas/a/Views/Filtros/ModalFiltroGenericoView.cshtml`
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Sub-lote B2a do plano PascalCase — alinhar ficheiro + classe dos view models `cst*` nas áreas `crm` e `a`.
+
+**O que foi feito:**
+Rename de classes e ficheiros `crm`; `a` já tinha ficheiro `CstFiltroModel.cs` — só a classe foi corrigida. Build Release OK.
+
+**Atenção para próximas intervenções:**
+- Smoke: portal cliente (`/crm/Pedidos/Index`), modal filtro genérico (`a/Filtros`). Próximo: **B2b** (`Areas/g/Models`, 28 ficheiros).
+
+---
+### [2026-05-19] — PascalCase Lote B1: últimas 3 views modal* em Areas/g
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Areas/g/Views/FinanceiroFaturamentos/ModalAtualizarFaturamentoGestorFranquia.cshtml` (renomeado)
+- `Areas/g/Views/Nfe/ModalCancelarNfe.cshtml`, `ModalExportarDadosNfePDF.cshtml` (renomeados)
+- `Areas/g/Controllers/NfeController.cs` — `return View("ModalCancelarNfe")`, `ModalExportarDadosNfePDF`
+- `GDI-ERP-Plataform.csproj`, `Scripts/gdi_remove_remaining_modal_icons.ps1`, `Scripts/gdi_check_specific_modals.ps1`
+
+**Problema / Demanda:**
+Concluir padronização PascalCase das views `modal*` em `Areas` (Lote B1 do plano).
+
+**O que foi feito:**
+Rename em dois passos (Windows); views Nfe com nome explícito no controller alinhado ao ficheiro; Faturamentos mantém `return View()` implícito (action já `ModalAtualizarFaturamentoGestorFranquia`). Build Release OK.
+
+**O que foi evitado e por quê:**
+- Lote B2 (`cst*` → `Cst*`) — alto impacto; próximo passo documentado (B2a: `crm` + `a`).
+
+**Atenção para próximas intervenções:**
+- Smoke: Faturamentos (sincronizar gestor franquia), Nfe (cancelar, exportar PDF). Zero ficheiros `modal*.cshtml` restantes em `Areas`.
+
+---
+### [2026-05-19] — Planeamento PascalCase Areas: inventário views modal* e models cst*
+**Tipo:** Análise
+**Arquivos tocados:**
+- `.cursor/context/pascalcase-areas-renomeacao-lotes.md` (novo)
+
+**Problema / Demanda:**
+Padronizar views `modal*` e models `cst*` em `Areas` (PascalCase); preparar lote com inventário e impacto.
+
+**O que foi feito:**
+Varredura em `Areas/**/Controllers|Models|Views`. Documento com 3 views `modal*` pendentes (Nfe×2, FinanceiroFaturamentos×1), 126 views `Modal*` já conformes, 52 models `cst*` a renomear + 6 `Cst*` híbridos; sub-lotes B1–B3, referências (`csproj`, controllers, Razor, Lib, UserIdentity) e checklist.
+
+**Atenção para próximas intervenções:**
+- Implementar **Lote B1** primeiro (baixo risco). Models `cst*` exigem rename de símbolo em massa (B2a→B2d).
+
+---
+### [2026-05-19] — Padronização PascalCase: view Usuarios ModalUsuarioTrocarSenha
+**Tipo:** Refatoração
+**Arquivos tocados:**
+- `Areas/g/Views/Usuarios/ModalUsuarioTrocarSenha.cshtml` (renomeado de `modalUsuarioTrocarSenha.cshtml`)
+- `Areas/g/Controllers/UsuariosController.cs`
+- `GDI-ERP-Plataform.csproj`
+- `Scripts/gdi_remove_remaining_modal_icons.ps1`
+
+**Problema / Demanda:**
+Views do módulo Usuários em `Areas` devem iniciar com maiúscula (PascalCase), alinhado à action `ModalUsuarioTrocarSenha`.
+
+**O que foi feito:**
+Renomeação da view; `return View("ModalUsuarioTrocarSenha")` explícito; correção `onclick="jsAjaxTrocarSenha()()"` → `jsAjaxTrocarSenha()`; atualização `.csproj` e script de inventário.
+
+**Decisões técnicas relevantes:**
+- `UsuariosController`, `Index.cshtml`, `CreateEdit.cshtml` já estavam corretos. Sem Models locais em `Areas/g/Models` para usuários (entidade `g_usuarios` em `Db`).
+- Models `cst*` em Areas mantidos (convenção histórica do projeto). Outras views `modal*` fora de Usuários (Nfe, FinanceiroFaturamentos) não alteradas neste lote.
+
+**Atenção para próximas intervenções:**
+- Em servidor Linux/IIS case-sensitive, publish deve incluir o novo nome de ficheiro.
+
+---
+### [2026-05-19] — P1-06 CSRF Fase 3B: excluir faturamento (g) e troca de senha (Usuarios)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Controllers/FinanceiroFaturamentosController.cs`
+- `Areas/g/Views/FinanceiroFaturamentos/Index.cshtml`
+- `Areas/g/Controllers/UsuariosController.cs`
+- `Areas/g/Views/Usuarios/modalUsuarioTrocarSenha.cshtml`
+
+**Problema / Demanda:**
+P1-06 — fechar lote financeiro sensível: `AjaxDeleteFaturamentoCompleto` (JSON na Index faturamentos) e `AjaxUsuarioTrocarSenha` (navbar, JSON) sem validação CSRF.
+
+**O que foi feito:**
+`[GdiValidateAntiForgeryToken]` nas duas actions; `GdiAjaxAntiForgeryHeaders` nas views; removido `@Html.AntiForgeryToken()` duplicado na modal de senha (mantido no `BeginForm`).
+
+**Decisões técnicas relevantes:**
+- POSTs `FinanceiroController` sem referência em views (relatórios, download boletos, transferir conta, avulso) e `AjaxRelComissaoRegra2Tabela` — **não** alterados (sem cliente mapeado; evitar quebra de integração oculta).
+
+**O que foi evitado e por quê:**
+- Filtro global; converter `AjaxFinanceiroCancelamento` (gc) de GET para POST.
+
+**Impactos conhecidos:**
+- Excluir faturamento e trocar senha passam a exigir token; token já na Index faturamentos e no form da modal.
+
+**Atenção para próximas intervenções:**
+- Testar exclusão de faturamento e troca de senha (interno, portal, vendedor). Pendentes documentados: views órfãs `g/Financeiro` (transferir conta sem `.cshtml` no repo), relatórios POST sem JS.
+
+---
+### [2026-05-19] — P1-06 CSRF Fase 3A.3: Ajax JSON gc/FinanceiroLancamentos (Index + modal movimentos)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/gc/Controllers/FinanceiroLancamentosController.cs`
+- `Areas/gc/Views/FinanceiroLancamentos/Index.cshtml`
+- `Areas/gc/Views/FinanceiroLancamentos/ModalViewFinanceiroMovimentos.cshtml`
+
+**Problema / Demanda:**
+P1-06 — POSTs JSON na lista gc de lançamentos financeiros (export Excel, posição conta caixa, robô Itaú, boleto PDF) sem validação CSRF apesar de token na Index/modal.
+
+**O que foi feito:**
+`[GdiValidateAntiForgeryToken]` em `AjaxExportarLancamentosExcel`, `AjaxPosicaoAtualContaCaixa`, `AjaxRoboItau`, `AjaxFinanceiroBoletoGCPDF`. Views com `headers: GdiAjaxAntiForgeryHeaders()` (Index) ou seletor do form da modal.
+
+**Decisões técnicas relevantes:**
+- Reutiliza atributo e helpers da 3A.2; sem filtro global.
+- `ModalGerarFinanceiroMovimentos` chama boleto via GET (fora do POST protegido). Ged/anexos (upload, download S3) — fase posterior.
+
+**O que foi evitado e por quê:**
+- Alterar `GedController` e DataTables `GetDados*` do financeiro gc.
+
+**Impactos conhecidos:**
+- Processos do menu Processos/Relatórios na Index gc passam a exigir token; token já renderizado na página.
+
+**Atenção para próximas intervenções:**
+- Testar export Excel, posição contas, robô Itaú e boleto PDF (Index e modal movimentos). Próximo: 3B `g/Financeiro` POSTs restantes (relatórios, transferir conta, avulso) e/ou Usuarios troca senha.
+
+---
+### [2026-05-19] — P1-06 CSRF Fase 3A.2: JSON/FormData financeiro + GdiValidateAntiForgeryToken
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Security/GdiValidateAntiForgeryTokenAttribute.cs` (novo)
+- `GDI-ERP-Plataform.csproj`
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` — `GdiGetAntiForgeryToken`, `GdiAjaxAntiForgeryHeaders`
+- `Areas/g/Controllers/FinanceiroController.cs`, `FinanceiroLancamentosController.cs`, `FinanceiroFaturamentosController.cs`
+- Views: `ModalGerarFaturamento`, `ModalFecharLancamentosAbertos`, `ModalFinalizarEdicaoTitulo`, `ModalIncluirLancamentos`, `Financeiro/Index`, `ModalImportarArquivoFaturamentoGestorFranquia`
+
+**Problema / Demanda:**
+P1-06 — POSTs com `application/json` ou `FormData` sem token no corpo; `[ValidateAntiForgeryToken]` padrão só lê `request.Form`.
+
+**O que foi feito:**
+Atributo `GdiValidateAntiForgeryToken` (form + cabeçalhos `RequestVerificationToken` / `__RequestVerificationToken` / `X-RequestVerificationToken`). Helpers em `start.js`. Dez actions financeiras protegidas; views Ajax JSON com `headers: GdiAjaxAntiForgeryHeaders(...)`. Importação faturamento: `FormData` a partir do formulário (inclui token oculto).
+
+**Decisões técnicas relevantes:**
+- 3A.1 mantém `[ValidateAntiForgeryToken]`; 3A.2 usa `[GdiValidateAntiForgeryToken]` apenas onde o cliente não envia `form.serialize()`.
+- `gc` FinanceiroLancamentos Index (export Excel, robô Itaú, etc.) fora do lote — 3A.3.
+
+**O que foi evitado e por quê:**
+- Filtro global / `ajaxSetup` — risco de quebrar DataTables e centenas de POSTs legados.
+- Substituir todos os `[ValidateAntiForgeryToken]` existentes no ERP.
+
+**Impactos conhecidos:**
+- Após publish, incrementar `VersionERP` se browsers cachearem `start.js` antigo sem os helpers.
+
+**Atenção para próximas intervenções:**
+- Testar executar faturamento, fechar/finalizar lançamentos, incluir lançamento, enviar boletos e-mail, importar arquivo gestor franquia. Próximo: 3A.3 `gc` Index + demais POSTs JSON financeiros.
+
+---
+### [2026-05-19] — P1-06 CSRF Fase 3A.1: ValidateAntiForgeryToken em Ajax financeiro (form.serialize)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Controllers/FinanceiroController.cs`
+- `Areas/g/Controllers/FinanceiroLancamentosController.cs`
+- `Areas/gc/Controllers/FinanceiroLancamentosController.cs`
+- `Areas/g/Controllers/FinanceiroFaturamentosController.cs`
+
+**Problema / Demanda:**
+P1-06 — dezenas de POSTs financeiros sem `[ValidateAntiForgeryToken]` apesar de modais já emitirem `@Html.AntiForgeryToken()` e enviarem o token via `form.serialize()`.
+
+**O que foi feito:**
+Fase 3A.1: atributo `[ValidateAntiForgeryToken]` em 24 actions Ajax de mutação financeira (títulos `g`, lançamentos `g`/`gc`, faturamentos) cujo cliente já envia `__RequestVerificationToken` no corpo do POST. Em `gc`, `AjaxCreateEditLancamento` e `AjaxLiquidarLancamento` passaram a `[HttpPost]` explícito. `ajaxSimularEnviarNFEmailCliente` / `ajaxProcessarEnviarNFEmailCliente` idem.
+
+**Decisões técnicas relevantes:**
+- Escopo restrito a POST com `form.serialize()` — sem alterar `start.js` nem Ajax JSON (`contentType: application/json`) nesta fase (3A.2).
+
+**O que foi evitado e por quê:**
+- `AjaxImportarArquivoFaturamentoGestorFranquia` (FormData sem token), DataTables `GetDados*`, `ajaxEnviarBoletosEmail`, export Excel — exigem envio de token no cliente (fases seguintes).
+
+**Impactos conhecidos:**
+- Pedidos forjados sem token passam a falhar com erro antiforgery (comportamento desejado). Fluxos que já tinham token na modal mantêm funcionamento.
+
+**Atenção para próximas intervenções:**
+- Testar manualmente: cancelar/baixar título, prorrogar vencimento, remessa boletos, simular faturamento (g), baixar/cancelar lançamento (gc), e-mail NF faturamento. Fase 3A.2: JSON + header/helper em `start.js` para `AjaxExecutarGerarFaturamento`, fechar lançamentos, etc.
+
+---
+### [2026-05-19] — P1-05: Roles "*" — Usuarios, Filtros por módulo e Dispose
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Controllers/UsuariosController.cs`
+- `Areas/a/Controllers/FiltrosController.cs`
+- `Areas/g/Controllers/CentrosCustosController.cs`
+- `Areas/g/Controllers/ClassificacaoFinanceiraController.cs`
+- `Areas/g/Controllers/NfeController.cs`
+- `Areas/g/Controllers/PortalVendedorController.cs`
+
+**Problema / Demanda:**
+P1-05 — `CustomAuthorize(Roles = "*")` em controllers sensíveis; portal -900 não deve aceder a gestão de utilizadores/filtros de outros módulos.
+
+**O que foi feito:**
+Removido `Roles = "*"` da classe `UsuariosController`; troca de senha com roles explícitas (incl. portal/vendedor). `FiltrosController`: base `SuperAdmin,Admin,*,Home` + `UserCanUseFiltro(id)` por prefixo de módulo. Removido `[CustomAuthorize]` dos métodos `Dispose`.
+
+**Decisões técnicas relevantes:**
+- Filtros legados (`gdc_*`, `gts_*`, `g_Revendas_Index`) só SuperAdmin/Admin (sem mapeamento de role).
+
+**O que foi evitado e por quê:**
+- Alterar `Contexto.cs` (remover `"*"` global) — impacto transversal; fora do escopo.
+
+**Atenção para próximas intervenções:**
+- Testar filtro avançado em Clientes/Produtos com perfil sem permissão ao módulo; troca de senha no navbar (interno e portal).
+
+---
+### [2026-05-19] — P1-04 XSS Fase A: encoding em Atendimentos (views, DataTables, logs)
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/g/Views/Atendimentos/Edit.cshtml`
+- `Areas/g/Views/Atendimentos/ModalCreateEditAtividade.cshtml`
+- `Areas/g/Controllers/AtendimentosController.cs`
+
+**Problema / Demanda:**
+P1-04 — `@Html.Raw` em `solicitacao`/`descricao` e dados do utilizador expostos em títulos, grelhas e logs.
+
+**O que foi feito:**
+Removido `Html.Raw` dos campos de texto; Razor encoda com `white-space: pre-wrap`. `ViewBag.MsgCategoria` sem Raw. Controller: `EncodeAtendimentoDisplay` / `EncodeForLogHtml` em `getDados`, `getDadosAtividades`, `getDadosAtendimentosLogs`, `ViewBag.Title`, gravação de logs e mensagens de retorno com atividades.
+
+**Decisões técnicas relevantes:**
+- Logs novos gravam HTML estrutural do servidor com valores encode; registos antigos no BD podem ainda conter HTML não encode.
+
+**O que foi evitado e por quê:**
+- Fases B–D (boletos, inventário global, NuGet sanitizador) — fora do escopo pedido.
+
+**Impactos conhecidos:**
+- Quebras de linha em descrição na tela via CSS; em logs via `<br/>` após encode.
+
+**Atenção para próximas intervenções:**
+- Testar atendimento com `<script>alert(1)</script>` na solicitação; Fase B para `EMensagemCaixa`.
+---
+### [2026-05-19] — P1-02 Web.config: customErrors On em Release + aviso dev no Web.config base
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Web.config`
+- `Web.Release.config`
+
+**Problema / Demanda:**
+Auditoria P1-02 — `debug="true"` e `customErrors mode="Off"` no Web.config versionado; endurecer produção e documentar que o ficheiro base é só para dev local.
+
+**O que foi feito:**
+`Web.Release.config`: `customErrors mode="On"` (antes `RemoteOnly`). `Web.config`: comentários explícitos de que debug/Off são dev e que produção depende de Publish Release + transformação.
+
+**Decisões técnicas relevantes:**
+- `mode="On"` evita yellow screen mesmo em pedidos locais no servidor IIS.
+
+**O que foi evitado e por quê:**
+- Alterar valores no Web.config base para RemoteOnly/debug false — preserva diagnóstico em F5/IIS Express.
+
+**Impactos conhecidos:**
+- Após próximo publish Release, validar `Web.config` no servidor sem `debug="true"` e com `customErrors mode="On"`.
+
+**Atenção para próximas intervenções:**
+- `MSBuild /t:TransformWebConfig /p:Configuration=Release` para validar transformação antes do deploy.
+---
+
 > As entradas mais recentes ficam sempre no TOPO desta seção.
 
 ---

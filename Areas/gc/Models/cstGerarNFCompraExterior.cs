@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstGerarNFCompraExterior
+    public class CstGerarNFCompraExterior
     {
         public int id_movimento { get; set; }
         public int id_nfe_status { get; set; }

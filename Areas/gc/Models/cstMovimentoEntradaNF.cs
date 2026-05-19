@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstMovimentoEntradaNF
+    public class CstMovimentoEntradaNF
     {
         public int id_movimento { get; set; }
         public string cliente_nome { get; set; }
@@ -15,11 +15,11 @@ namespace GdiPlataform.Areas.gc.Models
         public bool movimento_permitido { get; set; }
         public string msg_erro { get; set; }
         public string url_danfe { get; set; }
-        public List<cstMovimentoEntradaNFItem> allItens { get; set; }
-        public cstMovimentoEntradaNF()
+        public List<CstMovimentoEntradaNFItem> allItens { get; set; }
+        public CstMovimentoEntradaNF()
         {
             movimento_permitido = true;
-            allItens = new List<cstMovimentoEntradaNFItem>();
+            allItens = new List<CstMovimentoEntradaNFItem>();
         }
     }
 }

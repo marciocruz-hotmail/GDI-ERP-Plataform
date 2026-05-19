@@ -7,8 +7,6 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
                 <input type="hidden" id="yesFilterController" value="IndexGed" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
@@ -118,7 +116,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                 },
@@ -174,7 +172,7 @@
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [5] },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [6] },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [7] },
-                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" title="Download Arquivo Id: ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + data[1] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' }}
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" title="Download Arquivo Id: ' + row[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFile(' + row[1] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' }}
             ],
             select: {
                 style: 'multi',
@@ -219,6 +217,25 @@
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
+
+    function jsAjaxPesquisarGedArquivos()
+    {
+        try
+        {
+            if (emptyIfNull($('#edit_arquivo_tipo').val()).toString() != "0") {
+                LibMessageProcessando('Pesquisando Arquivos . . .');
+                document.getElementById("yesFilterField").value = "*";
+                $("#dataTableGedArquivos").DataTable().draw(false);
+            }
+            else {
+                LibMessageAlert("Atenção", "Selecione o Tipo!");
+            }
+        }
+        catch (e)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarGedArquivos] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
 
     function jsModalUploadFileGed()
     {

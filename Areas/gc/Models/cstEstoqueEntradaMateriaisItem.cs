@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstEstoqueEntradaMateriaisItem
+    public class CstEstoqueEntradaMateriaisItem
     {
         public int id_movimento { get; set; }
         public int id_movimento_item { get; set; }
@@ -19,7 +19,7 @@ namespace GdiPlataform.Areas.gc.Models
         public int quantidade_recebido { get; set; }
         public int quantidade_disponivel { get; set; }
         public int quantidade_quarentena { get; set; }
-        public cstEstoqueEntradaMateriaisItem()
+        public CstEstoqueEntradaMateriaisItem()
         {
             id_movimento = 0;
             id_movimento_item = 0;

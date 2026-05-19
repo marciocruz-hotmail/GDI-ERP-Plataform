@@ -58,7 +58,6 @@ namespace GdiPlataform.Models
         public int id_filial { get; set; }
         public string FilialNome { get; set; }
         public string FilialCnpj { get; set; }
-        public string UrlSair { get; set; }
 
         // Parametros Backoffice
         public g_parametros record_g_parametros = new g_parametros();

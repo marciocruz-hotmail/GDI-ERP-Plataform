@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstFinanceiroProrrogarVencimentoTitulos
+    public class CstFinanceiroProrrogarVencimentoTitulos
     {
         public int id_financeiro { get; set; }
         public bool ativo { get; set; }

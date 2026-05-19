@@ -75,16 +75,11 @@ namespace GdiPlataform.Areas.g.Controllers
             List<string[]> list = new List<string[]>();
             foreach (var c in displayedRecords)
             {
-                String _consulta = LibIcons.getIcon("fa-regular fa-thumbs-down", "", "cc0000", "");
-                String _pefin = LibIcons.getIcon("fa-regular fa-thumbs-down", "", "cc0000", "");
-
                 var recordGColigadas = allRecordsColigadas.Find(f => f.id_coligada == c.id_coligada);
 
                 list.Add(new[] {
                                     "", // Coluna de Seleção
                                     c.id_filial.ToString(),
-                                    _consulta,
-                                    _pefin,
                                     c.nome.EmptyIfNull().ToString(),
                                     (recordGColigadas != null ? recordGColigadas.razao_social.EmptyIfNull().ToString() : String.Empty)
                                 });
@@ -130,7 +125,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b";
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>";
             g_filiais newRecord = new g_filiais();
             PreencherLookupsCreateEdit();
             return View("CreateEdit", newRecord);
@@ -141,9 +136,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate")]
         public ActionResult Create(g_filiais record_g_filiais)
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b";
-            record_g_filiais.id_coligada = 1;
-            record_g_filiais.id_filial = 1;
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>";
             record_g_filiais.nome = LibStringFormat.RemoverAcentos(record_g_filiais.nome);
             record_g_filiais.nome = record_g_filiais.nome.Trim().ToUpper();
 
@@ -194,7 +187,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 return RedirectToAction("Index");
             }
             PreencherLookupsCreateEdit();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>" + LibStringFormat.GetTabHtml(1) + record_g_filiais.nome.EmptyIfNull().ToString() + " - " + record_g_filiais.nome.EmptyIfNull().ToString();
+            ViewBag.Title = MontarTituloCreateEditFilial(record_g_filiais);
             return View("CreateEdit", record_g_filiais);
         }
 
@@ -203,24 +196,30 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actionupdate")]
         public ActionResult Edit(g_filiais record_g_filiais)
         {
-            record_g_filiais.nome = record_g_filiais.nome.Trim().ToUpper();
+            g_filiais existente = db.g_filiais.Find(record_g_filiais.id_filial);
+            if (existente == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            string nomeNormalizado = LibStringFormat.RemoverAcentos(record_g_filiais.nome.EmptyIfNull().ToString()).Trim().ToUpper();
 
             if (ModelState.IsValid)
             {
-                IQueryable<g_filiais> listaGFiliais = db.g_filiais.Where(p => (p.nome == record_g_filiais.nome) && (p.id_filial != record_g_filiais.id_filial));
+                IQueryable<g_filiais> listaGFiliais = db.g_filiais.Where(p => (p.nome == nomeNormalizado) && (p.id_filial != existente.id_filial));
                 foreach (g_filiais validacao in listaGFiliais)
                 {
-                    // Validação Nome
-                    if (validacao.nome.ToString().ToUpper().Equals(record_g_filiais.nome.ToString().ToUpper()))
+                    if (validacao.nome.ToString().ToUpper().Equals(nomeNormalizado))
                     { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
                 }
             }
 
             if (ModelState.IsValid)
             {
-                record_g_filiais.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
-                record_g_filiais.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
-                db.Entry(record_g_filiais).State = EntityState.Modified;
+                existente.nome = nomeNormalizado;
+                existente.id_coligada = record_g_filiais.id_coligada;
+                existente.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                existente.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
                 try
                 {
                     db.SaveChanges();
@@ -236,9 +235,17 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
             }
 
+            record_g_filiais.nome = nomeNormalizado;
             PreencherLookupsCreateEdit();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>" + LibStringFormat.GetTabHtml(1) + record_g_filiais.nome.EmptyIfNull().ToString() + " - " + record_g_filiais.nome.EmptyIfNull().ToString();
+            ViewBag.Title = MontarTituloCreateEditFilial(record_g_filiais);
             return View("CreateEdit", record_g_filiais);
+        }
+
+        private static string MontarTituloCreateEditFilial(g_filiais record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_filial.ToString() + " - " + record.nome.EmptyIfNull().ToString();
         }
         #endregion
 

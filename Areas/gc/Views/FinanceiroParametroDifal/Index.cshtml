@@ -1,28 +1,48 @@
-﻿@model IEnumerable<GdiPlataform.Db.gc_parametros_difal>
+﻿@model GdiPlataform.Areas.gc.Models.CstFinanceiroParametroDifalIndex
 @using GdiPlataform.Security
-@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarDifal = CachePersister.userIdentity.Roles.Contains("gc_FinanceiroParametroDifal_*")
+        || CachePersister.userIdentity.Roles.Contains("gc_FinanceiroParametroDifal_Actionupdate");
+}
+<style>
+    .gdi-index-difal-dt .btnGDifalEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="FinanceiroParametroDifal" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="card-header m-0 p-1">
-                @if ((CachePersister.userIdentity.Roles.Contains("gc_FinanceiroParametroDifal_*")) || (CachePersister.userIdentity.Roles.Contains("gc_FinanceiroParametroDifal_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(oTableFinParamDifal, 'Id.', '@Url.Action("Edit","FinanceiroParametroDifal",new { Area = "gc" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
+            <div class="card-header m-0 p-1"></div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 mt-1 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.FinanceiroParametroDifalIndex_id, new { @class = "form-control", @id = "edit_id_parametro_difal", @placeholder = "Id.", @onkeypress = "keypressedDifal(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Sigla", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.FinanceiroParametroDifalIndex_sigla, new { @class = "form-control", @id = "edit_sigla", @placeholder = "Sigla do estado", @onkeypress = "keypressedDifal(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarDifal" title="Pesquisar parâmetros Difal" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarDifal()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroDifal" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroDifal()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1 gdi-index-difal-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcFinanceiroParametrosDifal">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGcFinanceiroParametrosDifal">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
@@ -35,6 +55,10 @@
                                     <th><i class="fa-solid fa-gas-pump"></i><i class="fa-solid fa-sack-dollar"></i></th>
                                     <th><i class="fa-solid fa-gas-pump"></i><i class="fa-solid fa-sack-xmark"></i></th>
                                     <th><i class="fa-solid fa-gas-pump"></i><i class="fa-solid fa-eraser"></i></th>
+                                    @if (podeEditarDifal)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar parâmetro Difal"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -55,73 +79,156 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroDifal('0');
+            gdiAplicarFoco('#edit_id_parametro_difal', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsDifalTemCriterioFiltro()) { jsAjaxPesquisarDifal(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
+
+    function keypressedDifal(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarDifal();
+        }
+    }
+
+    function jsDifalTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_parametro_difal').val()) || !isEmpty($('#edit_sigla').val());
+    }
+
+    function jsAtualizarIndicadorFiltroDifal(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroDifal',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todas as parâmetros Difal'
+        });
+    }
+
+    function jsAjaxPesquisarDifal()
+    {
+        try
+        {
+            if (!jsDifalTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Sigla).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando parâmetros Difal...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGcFinanceiroParametrosDifal").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarDifal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroDifal()
+    {
+        try
+        {
+            $('#edit_id_parametro_difal').val('');
+            $('#edit_sigla').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGcFinanceiroParametrosDifal").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroDifal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsCreateTable()
     {
         try
         {
-            if (oTableFinParamDifal == null)
-            {
-                $.fn.dataTable.ext.errMode = 'none';
-                oTableFinParamDifal = $('#dtGcFinanceiroParametrosDifal').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
-                processing: true,
-                bServerSide: true,
-                ajax: {
-                    url: '@Url.Action("GetDados", "FinanceiroParametroDifal", new { Area = "gc" })',
-                    type: 'POST',
-                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
-                    dataType: 'json',
-                    cache: false,
-                    data: function (d) {
-                        return {
-                            sEcho: d.draw,
-                            iDisplayStart: d.start,
-                            iDisplayLength: d.length,
-                            yesFilterField: $('#yesFilterField').val().toString(),
-                            yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                            yesFilterText: $('#yesFilterText').val().toString(),
-                            yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
-                        };
-                    },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            $.fn.dataTable.ext.errMode = 'none';
+            oTableFinParamDifal = $('#dtGcFinanceiroParametrosDifal').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroDifal(json.yesFilterOnOff);
+                }
+            }).DataTable({
+            deferLoading: true,
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDados","FinanceiroParametroDifal",new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_parametro_difal').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_sigla').val()).toString()
+                    };
                 },
-                responsive: true,
-                bFilter: false,
-                bLengthChange: false,
-                bProcessing: true,
-                pageLength: 30,
-                scrollX: false,
-                scrollCollapse: false,
-                fixedColumns: false,
-                bAutoWidth: false,
-                pagingType: 'full_numbers',
-                aoColumnDefs: [
-                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
-                    { "width": "8%", orderable: false, className: 'text-sm-center', targets: [2] },
-                    { "width": "26%", orderable: false, className: 'text-sm-center', targets: [3] },
-                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [4] },
-                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [5] },
-                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [6] },
-                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [7] },
-                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [8] },
-                    { "width": "9%", orderable: false, className: 'text-sm-center', targets: [9] }
-                ],
-                select: {
-                    style: 'multi',
-                    selector: 'td:not(.dt-no-row-select)',
-                    headerCheckbox: true
-                },
-                order: [[1, 'asc']],
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 30,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "8%", orderable: true, className: 'text-sm-center', targets: [1] },
+                { "width": "8%", orderable: true, className: 'text-sm-center', targets: [2] },
+                { "width": "18%", orderable: true, className: 'text-sm-center', targets: [3] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [7] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [8] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [9] }
+                @if (podeEditarDifal)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [10], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGDifalEditRow d-inline-flex align-items-center" onclick="jsGDifalEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGcFinanceiroParametrosDifal [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Sigla e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -149,11 +256,13 @@
                     sSortAscending: ': Ordenar colunas de forma ascendente',
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
-                });
-                $('#dtGcFinanceiroParametrosDifal tbody').on('dblclick', 'tr td', function () {
-                    var data = oTableFinParamDifal.row($(this).closest('tr')).data();
-                    JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "FinanceiroParametroDifal", new { Area = "gc" })');
-                });
+            });
+            @if (podeEditarDifal)
+            {
+                <text>$('#dtGcFinanceiroParametrosDifal tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
+                var data = oTableFinParamDifal.row($(this).closest('tr')).data();
+                if (data) { jsGDifalEditRow(data[1]); }
+            });</text>
             }
         }
         catch (err) {
@@ -161,37 +270,15 @@
         }
     };
 
-    function jsModalFiltroAvancado()
+    function jsGDifalEditRow(idParametroDifal)
     {
         try {
-            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#dtGcFinanceiroParametrosDifal").DataTable().draw(false);
-            }
-            else {
-                $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "Cidades", new { Area = "g" })?id=g_cidades_index', function () {
-                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                })
-            }
+            var id = parseInt(idParametroDifal, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "FinanceiroParametroDifal", new { Area = "gc" })');
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
-    function jsRunFiltroAvancado(FilterAdvancedText)
-    {
-        try {
-            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
-            $("#dtGcFinanceiroParametrosDifal").DataTable().draw(false);
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsGDifalEditRow] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 </script>
-
-

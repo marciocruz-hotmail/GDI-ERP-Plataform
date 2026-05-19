@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstFinanceiroBoletos
+    public class CstFinanceiroBoletos
     {
         public int idFinanceiro;
         public bool printPDF = false;
@@ -32,8 +32,8 @@ namespace GdiPlataform.Areas.g.Models
         public string ECedenteComplemento2 { get; set; }
 
         // Extrato
-        public List<cstFinanceiroBoletosLancamentos> allLancamentos { get; set; }
-        public List<cstFinanceiroBoletosLancamentos> allLancamentosNotaDebito { get; set; }
+        public List<CstFinanceiroBoletosLancamentos> allLancamentos { get; set; }
+        public List<CstFinanceiroBoletosLancamentos> allLancamentosNotaDebito { get; set; }
 
         // SubTotal
         public string EClienteMensagem { get; set; }
@@ -73,10 +73,10 @@ namespace GdiPlataform.Areas.g.Models
 
         public string EPixEMV { get; set; }
         public bool HasPix { get; set; }
-        public cstFinanceiroBoletos()
+        public CstFinanceiroBoletos()
         {
-            allLancamentos = new List<cstFinanceiroBoletosLancamentos>();
-            allLancamentosNotaDebito = new List<cstFinanceiroBoletosLancamentos>();
+            allLancamentos = new List<CstFinanceiroBoletosLancamentos>();
+            allLancamentosNotaDebito = new List<CstFinanceiroBoletosLancamentos>();
             HasPix = false;
         }
     }

@@ -1,4 +1,3 @@
-﻿@model GdiPlataform.Areas.g.Models.cstModalFiltroAvancado
 @using GdiPlataform.Security
 @functions {
     private static bool GcFinanceiroLancamentosHasRole(string role)
@@ -14,9 +13,6 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
                 <input type="hidden" id="yesFilterController" value="GcIndexFinanceiroLancamentos" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
@@ -233,9 +229,10 @@
             if (OTableGcFinanceiroLancamentosIndex == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                OTableGcFinanceiroLancamentosIndex = $('#DtGcFinanceiroLancamentosIndex').css("font-size", 14)
+                OTableGcFinanceiroLancamentosIndex = $('#DtGcFinanceiroLancamentosIndex')
+                    .css("font-size", 14)
                     .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                    .on('xhr.dt', function (e, settings, json, xhr) { jsUpdateDataView(json.yesDisplayField01, json.yesFilterOnOff); GdiDtNotifyJsonErrorMessage(json); })
+                    .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } jsUpdateDataView(json.yesDisplayField01, json.yesFilterOnOff); })
                     .DataTable({
                     "drawCallback": function (settings) {
                         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
@@ -530,7 +527,6 @@
         try
         {
             jsViewSaldoContaCaixa(yesDisplayField01);
-            btnFiltro(yesFilterOnOff);
         }
         catch (err)
         {
@@ -558,6 +554,7 @@
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("AjaxExportarLancamentosExcel", "FinanceiroLancamentos", new { area = "gc" })',
+                headers: GdiAjaxAntiForgeryHeaders(),
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(""),
                 dataType: "json",
@@ -589,51 +586,6 @@
         }
     };
 
-    function jsModalFiltroAvancado()
-    {
-        try
-        {
-            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0)
-            {
-                LibMessageProcessando("");
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
-            }
-            else
-            {
-                try
-                {
-                    LibMessageProcessando("");
-                    $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "FinanceiroLancamentos", new { Area = "gc" })?id=gc_FinanceiroLancamentos_Index', function () {
-                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                    })
-                }
-                catch (e)
-                {
-                    LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (e && e.message ? e.message.toString() : String(e)));
-                }
-            };
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
-    function jsRunFiltroAvancado(FilterAdvancedText)
-    {
-        try
-        {
-            LibMessageProcessando("");
-            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
-            $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
 
     function jsFinanceiroLancamentoBoleto(TableName, columnName)
     {
@@ -659,6 +611,7 @@
                     $.ajax({
                         type: "POST",
                         url: '@Url.Action("AjaxFinanceiroBoletoGCPDF", "FinanceiroLancamentos", new { area = "gc" })',
+                        headers: GdiAjaxAntiForgeryHeaders(),
                         contentType: "application/json; charset=utf-8",
                         data: JSON.stringify(dataForm),
                         dataType: "json",
@@ -713,6 +666,7 @@
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("AjaxPosicaoAtualContaCaixa", "FinanceiroLancamentos", new { area = "gc" })',
+                headers: GdiAjaxAntiForgeryHeaders(),
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(""),
                 dataType: "json",
@@ -751,6 +705,7 @@
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("AjaxRoboItau", "FinanceiroLancamentos", new { area = "gc" })',
+                headers: GdiAjaxAntiForgeryHeaders(),
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(""),
                 dataType: "json",

@@ -1,17 +1,20 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_contratos_aviacao>
+﻿@model GdiPlataform.Areas.g.Models.CstContratosAviacaoIndex
 @using GdiPlataform.Security
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarContrato = CachePersister.userIdentity.Roles.Contains("g_ContratosAviacao_*")
+        || CachePersister.userIdentity.Roles.Contains("g_ContratosAviacao_Actionupdate");
 }
+<style>
+    .gdi-index-contratos-dt .btnGContratosEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="ContratosAviacao" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -20,11 +23,6 @@
                 {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","ContratosAviacao",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
-                @if ((CachePersister.userIdentity.Roles.Contains("g_ContratosAviacao_*")) || (CachePersister.userIdentity.Roles.Contains("g_ContratosAviacao_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGContratos, 'Id.', '@Url.Action("Edit","ContratosAviacao",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
-                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()">Filtro Avançado</button>
                 @if ((CachePersister.userIdentity.Roles.Contains("g_ContratosAviacao_*")) || (CachePersister.userIdentity.Roles.Contains("g_ContratosAviacao_Actionrun")))
                 {
                     <div class="btn-group" role="group">
@@ -39,7 +37,22 @@
                     </div>
                 }
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1">
+                <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                    @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                    <div class="col-sm-2">@Html.TextBoxFor(m => m.ContratosAviacaoIndex_id, new { @class = "form-control", @id = "edit_id_contrato", @onkeypress = "keypressedContratos(event);" })</div>
+                </div>
+                <div class="form-group row text-sm-end m-0 pt-1">
+                    @Html.Label("Descrição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                    <div class="col-sm-5">@Html.TextBoxFor(m => m.ContratosAviacaoIndex_descricao, new { @class = "form-control", @id = "edit_descricao_contrato", @onkeypress = "keypressedContratos(event);" })</div>
+                    <div class="col-sm-3 text-sm-start">
+                        <button type="button" class="btn btn-secondary" onclick="jsAjaxPesquisarContratos()"><i class="fa-solid fa-search me-2"></i>Pesquisar</button>
+                        <button type="button" id="btnLimparFiltroContratos" class="btn btn-outline-secondary ms-1" onclick="jsLimparFiltroContratos()"><i class="fa-solid fa-magnifying-glass-minus me-2"></i>Limpar</button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-contratos-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
                         <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGContratos">
@@ -53,6 +66,10 @@
                                     <th>Tipo</th>
                                     <th>Dt. Ass.</th>
                                     <th><i class="fa-solid fa-cloud-download-alt" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Contrato"></i></th>
+                                    @if (podeEditarContrato)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar contrato"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -73,6 +90,7 @@
         {
             jsInitForm();
             jsCreateTable();
+            @if (ViewBag.RestoreFilterAutoSearch == true) { <text>if ($('#edit_id_contrato').val() || $('#edit_descricao_contrato').val()) { jsAjaxPesquisarContratos(); }</text> }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err)
@@ -81,12 +99,33 @@
         }
     });
 
+    function keypressedContratos(e) { if (e.keyCode==13) { e.preventDefault(); jsAjaxPesquisarContratos(); } }
+    function jsAjaxPesquisarContratos() { if (!$('#edit_id_contrato').val() && !$('#edit_descricao_contrato').val()) { LibMessageAlert('Atenção','Preencha Id. ou Descrição.'); return; } document.getElementById('yesFilterField').value=''; $('#dtGContratos').DataTable().draw(false); }
+    function jsLimparFiltroContratos() { $('#edit_id_contrato').val(''); $('#edit_descricao_contrato').val(''); document.getElementById('yesFilterField').value='*'; $('#dtGContratos').DataTable().draw(false); }
+    function jsAtualizarIndicadorFiltroContratos(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroContratos',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todos os contratos'
+        });
+    }
+    function jsGContratosEditRow(idContrato) {
+        var id = parseInt(idContrato, 10);
+        if (!id || id <= 0) return;
+        JsEditRecordDoubleClick(id, '@Url.Action("Edit", "ContratosAviacao", new { Area = "g" })');
+    }
+
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGContratos = $('#dtGContratos').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGContratos = $('#dtGContratos').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) { jsAtualizarIndicadorFiltroContratos(json.yesFilterOnOff); }
+            }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -101,9 +140,9 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
-                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_contrato').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_descricao_contrato').val()).toString(),
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -134,7 +173,16 @@
                 { "width": "37%", orderable: false, className: 'text-sm-center', targets: [4] },
                 { "width": "30%", orderable: false, className: 'text-sm-center', targets: [5] },
                 { "width": "10%", orderable: false, className: 'text-sm-center', targets: [6] },
-                { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Arquivo Id: ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFileContrato(' + data[1] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' } }
+                { "width": "5%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnDownloadFile" data-bs-toggle="tooltip" data-bs-placement="top" title="Download Arquivo Id: ' + row[1] + '" class="btn btn-outline-info btn-sm p-1 btnDownloadFile d-inline-flex align-items-center" onclick="jsDownloadFileContrato(' + row[1] + ');"><i class="fa-solid fa-cloud-download-alt"></i></button>' } }
+                @if (podeEditarContrato)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar contrato Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGContratosEditRow d-inline-flex align-items-center" onclick="jsGContratosEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -173,9 +221,9 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGContratos tbody').on('dblclick', 'tr td', function () {
+            $('#dtGContratos tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableGContratos.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "ContratosAviacao", new { Area = "g" })');
+                if (data) { jsGContratosEditRow(data[1]); }
             });
         }
         catch (err) {
@@ -183,37 +231,6 @@
         }
     };
 
-    function jsModalFiltroAvancado()
-    {
-        try {
-            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#dtGContratos").DataTable().draw(false);
-            }
-            else {
-                $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "ContratosAviacao", new { Area = "g" })?id=g_ContratosAviacao_index', function () {
-                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                })
-                }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
-    function jsRunFiltroAvancado(FilterAdvancedText)
-    {
-        try {
-            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
-            $("#dtGContratos").DataTable().draw(false);
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
 
     function jsAjaxDownloadContratoAviacaoPDF(TableName, columnName)
     {

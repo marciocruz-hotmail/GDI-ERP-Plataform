@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstModalRelatorio
+    public class CstModalRelatorio
     {
         public String Field_Text_01 { get; set; }
         public String Field_Text_02 { get; set; }
@@ -36,7 +36,7 @@ namespace GdiPlataform.Areas.gc.Models
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")] 
         public Nullable<System.DateTime> Field_Data_05 { get; set; }
 
-        public cstModalRelatorio()
+        public CstModalRelatorio()
         {
             Field_Text_01 = string.Empty;
             Field_Text_02 = string.Empty;

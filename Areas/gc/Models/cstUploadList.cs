@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstUploadList
+    public class CstUploadList
     {
         public String List1 { get; set; }
         public String List2 { get; set; }
@@ -13,7 +13,7 @@ namespace GdiPlataform.Areas.gc.Models
         public String List4 { get; set; }
         public String List5 { get; set; }
 
-        public cstUploadList()
+        public CstUploadList()
         {
             List1 = String.Empty;
             List2 = String.Empty;

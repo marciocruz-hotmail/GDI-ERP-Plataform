@@ -708,7 +708,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableContatos = $('#dataTables-Contatos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableContatos = $('#dataTables-Contatos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
                 },

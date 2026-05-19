@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstFinanceiroIndex
+    public class CstFinanceiroIndex
     {
         public int FinanceiroIndex_id_cliente { get; set; }
         public int FinanceiroIndex_id_financeiro_status { get; set; }

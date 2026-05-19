@@ -58,7 +58,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxImportarCnabBoletos(cstImportacoesBancarias record_cstImportacoesBancarias)
+        public ActionResult AjaxImportarCnabBoletos(CstImportacoesBancarias record_cstImportacoesBancarias)
         {
             int ponteiro = 0;
             int linhaNumero = 1;

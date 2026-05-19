@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -6,7 +6,7 @@ using GdiPlataform.Lib;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstModelComexItemImportacao
+    public class CstModelComexItemImportacao
     {
         public string String_NfNumero { get; set; }
         public string String_DiNumero { get; set; }
@@ -92,7 +92,7 @@ namespace GdiPlataform.Areas.gc.Models
         public bool AtualizarDescricao { get; set; }
         public bool IsGDI { get; set; }
         public bool IsSC { get; set; }
-        public cstModelComexItemImportacao()
+        public CstModelComexItemImportacao()
         {
             String_NfNumero = string.Empty;
             String_DiNumero = string.Empty;

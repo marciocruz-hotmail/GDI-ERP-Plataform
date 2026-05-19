@@ -49,13 +49,13 @@
                                 <div class="form-group row text-sm-end m-0 pt-1">
                                     @Html.Label("solicitacao", "Solicitação", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                     <div class="col-sm-8 col-form-label text-start" style="margin-top:5px;">
-                                        @Html.Raw(Model.solicitacao)
+                                        <span style="white-space: pre-wrap;">@Model.solicitacao</span>
                                     </div>
                                 </div>
                                 <div class="form-group row text-sm-end m-0 pt-1">
                                     @Html.Label("descrição", "Descrição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                     <div class="col-sm-8 col-form-label text-start" style="margin-top:5px;">
-                                        @Html.Raw(Model.descricao)
+                                        <span style="white-space: pre-wrap;">@Model.descricao</span>
                                     </div>
                                 </div>
                                 <div class="form-group row text-sm-end m-0 pt-1">

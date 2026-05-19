@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstRevendasTabelasDetalhesModel
+    public class CstRevendasTabelasDetalhesModel
     {
         public int? id_consulta_tabela_revenda { get; set; }
         public int id_consulta { get; set; }

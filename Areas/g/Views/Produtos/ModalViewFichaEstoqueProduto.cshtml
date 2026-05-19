@@ -4,8 +4,17 @@
 {
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header m-0 p-1">
-                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
+            <div class="modal-header m-0 p-1 align-items-start">
+                <h5 class="modal-title flex-grow-1 lh-sm mb-0 d-flex align-items-start gap-2">
+                    <span class="flex-shrink-0 pt-1">@Html.Raw(ViewBag.TitleIcon)</span>
+                    <span class="text-break">
+                        @Html.Raw(ViewBag.TitleLinha1)
+                        @if (ViewBag.TitleLinha2 != null && !string.IsNullOrWhiteSpace(ViewBag.TitleLinha2.ToString()))
+                        {
+                            <br />@Html.Raw(ViewBag.TitleLinha2)
+                        }
+                    </span>
+                </h5>
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
                 @Html.HiddenFor(model => model.id_produto)

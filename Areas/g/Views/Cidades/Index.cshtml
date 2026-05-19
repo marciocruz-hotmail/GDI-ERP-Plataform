@@ -1,15 +1,20 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_cidades>
+﻿@model GdiPlataform.Areas.g.Models.CstCidadesIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarCidade = CachePersister.userIdentity.Roles.Contains("g_Cidades_*")
+        || CachePersister.userIdentity.Roles.Contains("g_Cidades_Actionupdate");
+}
+<style>
+    .gdi-index-cidades-dt .btnGCidadesEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="Cidades" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -18,25 +23,46 @@
                 {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Cidades",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Cidades_*")) || (CachePersister.userIdentity.Roles.Contains("g_Cidades_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGCidades, 'Id.', '@Url.Action("Edit","Cidades",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
-                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()">Filtro Avançado</button>
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                    <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGCidades">
-                        <thead>
-                            <tr>
-                                <th>[x]</th>
-                                <th>@Html.DisplayNameFor(model => model.id_cidade)</th>
-                                <th>Ativo</th>
-                                <th>@Html.DisplayNameFor(model => model.nome)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.CidadesIndex_id_cidade, new { @class = "form-control", @id = "edit_id_cidade", @placeholder = "Id.", @onkeypress = "keypressedCidades(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.CidadesIndex_nome, new { @class = "form-control", @id = "edit_nome_cidade", @placeholder = "Nome da cidade", @onkeypress = "keypressedCidades(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarCidades" title="Pesquisar cidades" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarCidades()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroCidades" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroCidades()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-cidades-dt" style="max-width: 100%; overflow-x: auto;">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGCidades">
+                            <thead>
+                                <tr>
+                                    <th>[x]</th>
+                                    <th>Id.</th>
+                                    <th>Ativo</th>
+                                    <th>Nome</th>
+                                    @if (podeEditarCidade)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar cidade"></i></th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -52,20 +78,92 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroCidades('0');
+            gdiAplicarFoco('#edit_id_cidade', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsCidadesTemCriterioFiltro()) { jsAjaxPesquisarCidades(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function keypressedCidades(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarCidades();
+        }
+    }
+
+    function jsCidadesTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_cidade').val()) || !isEmpty($('#edit_nome_cidade').val());
+    }
+
+    function jsAtualizarIndicadorFiltroCidades(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroCidades',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todas as cidades'
+        });
+    }
+
+    function jsAjaxPesquisarCidades()
+    {
+        try
+        {
+            if (!jsCidadesTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Nome).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando cidades...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGCidades").DataTable().draw(false);
         }
         catch (err)
         {
-            LibMessageError("Atenção", "[jsLoadForm] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsAjaxPesquisarCidades] " + (err && err.message ? err.message.toString() : String(err)));
         }
-    });
+    }
+
+    function jsLimparFiltroCidades()
+    {
+        try
+        {
+            $('#edit_id_cidade').val('');
+            $('#edit_nome_cidade').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGCidades").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroCidades] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGCidades = $('#dtGCidades').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGCidades = $('#dtGCidades').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroCidades(json.yesFilterOnOff);
+                }
+                LibMessageProcessandoHide();
+            }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -80,9 +178,9 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
-                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_cidade').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_nome_cidade').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -99,9 +197,18 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "8%", orderable: true, className: 'text-sm-center', targets: [1] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "80%", orderable: true, targets: [3] }
+                { "width": "@(podeEditarCidade ? "72%" : "76%")", orderable: true, targets: [3] }
+                @if (podeEditarCidade)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [4], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar cidade Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGCidadesEditRow d-inline-flex align-items-center" onclick="jsGCidadesEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -109,10 +216,16 @@
                 headerCheckbox: true
             },
             order: [[1, 'asc']],
-
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGCidades [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                LibMessageProcessandoHide();
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Nome e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -141,47 +254,28 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGCidades tbody').on('dblclick', 'tr td', function () {
+            @if (podeEditarCidade)
+            {
+                <text>$('#dtGCidades tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableGCidades.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Cidades", new { Area = "g" })');
-            });
+                if (data) { jsGCidadesEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
 
-    function jsModalFiltroAvancado()
+    function jsGCidadesEditRow(idCidade)
     {
         try {
-            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#dtGCidades").DataTable().draw(false);
-            }
-            else {
-                $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "Cidades", new { Area = "g" })?id=g_cidades_index', function () {
-                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                })
-                }
+            var id = parseInt(idCidade, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Cidades", new { Area = "g" })');
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsGCidadesEditRow] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
-    function jsRunFiltroAvancado(FilterAdvancedText)
-    {
-        try {
-            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
-            $("#dtGCidades").DataTable().draw(false);
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
 </script>
-

@@ -37,7 +37,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioNotasFiscaisEmitidas
         public ActionResult ModalRelatorioLancamentosFinanceiros(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             view_cstModalRelatorio.Field_Int_01 = 0;
@@ -54,7 +54,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioLancamentosFinanceiros(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioLancamentosFinanceiros(CstModalRelatorio view_cstModalRelatorio)
         {
 
             bool Sucesso = false;

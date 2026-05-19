@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstMovimentoEntradaNFItem
+    public class CstMovimentoEntradaNFItem
     {
         public int id_movimento_item { get; set; }
         public Decimal sequencia { get; set; }

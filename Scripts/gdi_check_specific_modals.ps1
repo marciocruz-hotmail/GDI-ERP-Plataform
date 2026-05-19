@@ -1,7 +1,7 @@
 # Verifica ViewBag.Title para acoes especificas de modal nos controllers
 
 $checks = @(
-    @{ ctrl = "FinanceiroController.cs";          actions = @("ModalBoleto","ModalNotaDebito","ModalBaixarTitulos","ModalCancelarTitulos","ModalEditarTitulo","ModalProrrogarVencimentoTitulo","ModalGerarRemessaBoletosBancarios","ModalGerarFaturamento","ModalRelatorioContaCaixaSaldoDiario") },
+    @{ ctrl = "FinanceiroController.cs";          actions = @("ModalBoleto","ModalNotaDebito","ModalBaixarTitulos","ModalCancelarTitulos","ModalEditarTitulo","ModalProrrogarVencimentoTitulo","ModalTransferirContaCaixa","ModalGerarRemessaBoletosBancarios","ModalGerarFaturamento","ModalRelatorioContaCaixaSaldoDiario") },
     @{ ctrl = "ImportacoesBancariasController.cs"; actions = @("ModalImportarCnabBoletos") },
     @{ ctrl = "CidadesController.cs";             actions = @("ModalCadastrarNovaCidade") },
     @{ ctrl = "EstoqueController.cs";             actions = @("ModalConferenciaImportacaoItem","ModalTransferenciaGerencial","ModalRecebimentoComexLote","ModalRecebimentoComexObs") },
@@ -15,7 +15,7 @@ $checks = @(
     @{ ctrl = "FinanceiroLancamentosController.cs"; actions = @("ModalCreateEditLancamento","ModalBaixarLancamentos","ModalCancelarLancamentos","ModalGerarBoletoLancamentoAvulso","ModalGerarFinanceiroMovimentos","ModalFinanceiroViewAnexos","ModalUploadAnexoFinanceiro","ModalFecharLancamentosAbertos","ModalFinalizarEdicaoTitulo","ModalCancelarMovimentoFinanceiro") },
     @{ ctrl = "MovimentosEntradasController.cs";  actions = @("ModalNFEntradaCancelar","ModalNFEntradaGerarNF") },
     @{ ctrl = "MovimentosComprasController.cs";   actions = @("ModalInsertEditItemCompra","ModalCancelarPedido") },
-    @{ ctrl = "FinanceiroFaturamentosController.cs"; actions = @("modalAtualizarFaturamentoGestorFranquia","ModalImportarArquivoFaturamentoGestorFranquia","ModalEnviarEmailsClientes","ModalEnviarNFEmailCliente") }
+    @{ ctrl = "FinanceiroFaturamentosController.cs"; actions = @("ModalAtualizarFaturamentoGestorFranquia","ModalImportarArquivoFaturamentoGestorFranquia","ModalEnviarEmailsClientes","ModalEnviarNFEmailCliente") }
 )
 
 $root = "C:\Marcio\Projetos\GDI-ERP-Plataform\Areas"

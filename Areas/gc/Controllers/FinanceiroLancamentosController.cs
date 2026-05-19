@@ -54,10 +54,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db);
             ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
             LoadComboFiltroCst01();
-            cstModalFiltroAvancado ViewCstModalFiltroAvancado = new cstModalFiltroAvancado();
-            ViewCstModalFiltroAvancado.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
-            ViewCstModalFiltroAvancado.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
-            return View(ViewCstModalFiltroAvancado);
+            return View();
         }
 
         public void LoadComboFiltroCst01()
@@ -69,31 +66,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             comboFiltroCst01.Add(new SelectListItem { Value = "3", Text = "DIFAL" });
             ViewBag.comboFiltroCst01 = comboFiltroCst01;
         }
-
-        #region ModalFiltroAvancadoView
-        public ActionResult ModalFiltroAvancadoView(String id)
-        {
-            try
-            {
-                ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db);
-                ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
-                ViewBag.comboContasCaixa = LibDataSets.LoadComboGContasCaixas(db);
-                ViewBag.Title = "Lançamentos - Filtro Avançado";
-                cstModalFiltroAvancado ViewCstModalFiltroAvancado = new cstModalFiltroAvancado();
-                ViewCstModalFiltroAvancado.Field_Text_02 = "-1";
-                return View(ViewCstModalFiltroAvancado);
-            }
-            catch (Exception ex)
-            {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
-                msg += "<br/>" + "FinanceiroLancamentoController";
-                msg += "<br/>" + "ModalFiltroAvancadoView";
-                TempData["message"] = msg;
-                TempData.Keep("message");
-                return RedirectToAction("ModalError", "Error", new { area = "" });
-            }
-        }
-        #endregion
         public ActionResult GetDadosLancamentos(jQueryDataTableParamModel param)
         {
             if (param == null) param = new jQueryDataTableParamModel();
@@ -216,11 +188,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     lanc = lanc.Where(l => l.gerencial == false);
 
                 // Filtros texto
-                if (!string.IsNullOrWhiteSpace(filtroDescricao))
-                    lanc = lanc.Where(l => l.descricao.Contains(filtroDescricao));
+                if (LibStringFormat.TryMontarPadraoLikeContemTexto(filtroDescricao, out string padraoDescricao))
+                {
+                    lanc = lanc.Where(l => l.descricao != null && DbFunctions.Like(l.descricao, padraoDescricao));
+                }
 
-                if (!string.IsNullOrWhiteSpace(filtroNumeroDocumento))
-                    lanc = lanc.Where(l => l.numero_documento.Contains(filtroNumeroDocumento));
+                if (LibStringFormat.TryMontarPadraoLikeContemCodigo(filtroNumeroDocumento, out string padraoNumeroDoc))
+                {
+                    lanc = lanc.Where(l => l.numero_documento != null && DbFunctions.Like(l.numero_documento, padraoNumeroDoc));
+                }
 
                 if (!string.IsNullOrWhiteSpace(filtroIdLancamento))
                 {
@@ -971,6 +947,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxLiquidarLancamento(gc_financeiro_lancamentos view_gc_financeiro_lancamentos)
         {
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
@@ -980,6 +958,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             else if (view_gc_financeiro_lancamentos.valor_pago <= 0) { view_gc_financeiro_lancamentos.valor_pago = view_gc_financeiro_lancamentos.valor_total; }
             return AjaxCreateEditLancamento(view_gc_financeiro_lancamentos);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxCreateEditLancamento(gc_financeiro_lancamentos view_gc_financeiro_lancamentos)
         {
             bool sucesso = false;
@@ -1614,6 +1594,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxModalGerarFinanceiroMovimentos(gc_movimentos_financeiros view_record_gc_movimento_financeiro)
         {
             bool Sucesso = false;
@@ -2654,6 +2635,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxModalBaixarLancamentos(gc_financeiro_lancamentos view_gc_financeiro_lancamentos)
         {
             bool Sucesso = false;
@@ -2751,6 +2733,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxModalCancelarLancamentos(gc_financeiro_lancamentos view_gc_financeiro_lancamentos)
         {
             bool Sucesso = false;
@@ -2870,6 +2853,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         #region AjaxExportarLancamentosExcel
         [HttpPost]
+        [GdiValidateAntiForgeryToken]
         public ActionResult AjaxExportarLancamentosExcel(String parametros)
         {
             bool Sucesso = false;
@@ -2980,11 +2964,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     else if (!string.IsNullOrWhiteSpace(filtroHideGerencial)) lanc = lanc.Where(l => l.gerencial == false);
 
                 // Filtros texto
-                if (!string.IsNullOrWhiteSpace(filtroDescricao))
-                    lanc = lanc.Where(l => l.descricao.Contains(filtroDescricao));
+                if (LibStringFormat.TryMontarPadraoLikeContemTexto(filtroDescricao, out string padraoDescricao2))
+                {
+                    lanc = lanc.Where(l => l.descricao != null && DbFunctions.Like(l.descricao, padraoDescricao2));
+                }
 
-                if (!string.IsNullOrWhiteSpace(filtroNumeroDocumento))
-                    lanc = lanc.Where(l => l.numero_documento.Contains(filtroNumeroDocumento));
+                if (LibStringFormat.TryMontarPadraoLikeContemCodigo(filtroNumeroDocumento, out string padraoNumeroDoc2))
+                {
+                    lanc = lanc.Where(l => l.numero_documento != null && DbFunctions.Like(l.numero_documento, padraoNumeroDoc2));
+                }
 
                 if (!string.IsNullOrWhiteSpace(filtroIdLancamento))
                 {
@@ -3176,6 +3164,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxModalGerarBoletoLancamentoAvulso(gc_financeiro_lancamentos view_gc_financeiro_lancamentos)
         {
             int qtdInconsistencias = 0;
@@ -3407,6 +3396,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxModalCancelarMovimentoFinanceiro(gc_movimentos_financeiros view_gc_movimentos_financeiros)
         {
             bool sucesso = false;
@@ -3571,6 +3561,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxModalRelatorioContaCaixaSaldoDiario(g_contas_caixas view_g_contas_caixas)
         {
             bool Sucesso = false;
@@ -3581,8 +3572,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             String SaldoContaCaixaAtual = String.Empty;
             String SaldoContaCaixaDia = String.Empty;
             String IdProcessamentoGravado = "0";
-            List<cstRowExtratoContaCaixa> ListaExtratoContaCaixa = new List<cstRowExtratoContaCaixa>();
-            List<cstRowExtratoContaCaixa> ListaExtratoConsolidadoContaCaixa = new List<cstRowExtratoContaCaixa>();
+            List<CstRowExtratoContaCaixa> ListaExtratoContaCaixa = new List<CstRowExtratoContaCaixa>();
+            List<CstRowExtratoContaCaixa> ListaExtratoConsolidadoContaCaixa = new List<CstRowExtratoContaCaixa>();
             Decimal SaldoFinalContaCaixa = 0;
             Decimal SaldoFinalConsolidado = 0;
             Decimal SaldoDiarioContaCaixa = 0;
@@ -3627,7 +3618,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     foreach (DataRow RowExtrato in TableExtratoContaCaixa.AsEnumerable())
                     {
-                        cstRowExtratoContaCaixa RowExtratoContaCaixa = new cstRowExtratoContaCaixa();
+                        CstRowExtratoContaCaixa RowExtratoContaCaixa = new CstRowExtratoContaCaixa();
                         RowExtratoContaCaixa.id_conta_caixa = Convert.ToInt32(RowExtrato["id_conta_caixa"]);
                         RowExtratoContaCaixa.data_pagamento = Convert.ToDateTime(RowExtrato["data_pagamento"]);
                         RowExtratoContaCaixa.total_pago = Convert.ToDecimal(RowExtrato["total_pago"]);
@@ -3656,7 +3647,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     while (DataExtrato >= DataInicioExtrato)
                     {
                         sheetCatalogo.GetCell(IndexLinhaCC, IndexColunaCC + 1).SetCellValue(DataExtrato.ToString("dd/MM/yyyy"));
-                        cstRowExtratoContaCaixa RowExtratoContaCaixa = ListaExtratoContaCaixa.Where(c => c.id_conta_caixa == record_conta_caixa.id_conta_caixa && c.data_pagamento == DataExtrato).FirstOrDefault();
+                        CstRowExtratoContaCaixa RowExtratoContaCaixa = ListaExtratoContaCaixa.Where(c => c.id_conta_caixa == record_conta_caixa.id_conta_caixa && c.data_pagamento == DataExtrato).FirstOrDefault();
                         if (IndexLinhaCC == 5)
                         {
                             sheetCatalogo.GetCell(IndexLinhaCC, IndexColunaCC + 5).SetCellValue(Decimal.ToDouble(SaldoFinalContaCaixa));
@@ -3711,7 +3702,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Decimal DiarioPagoConsolidado = 0;
                         Decimal DiarioSaldoConsolidado = 0;
                         ListaExtratoConsolidadoContaCaixa = ListaExtratoContaCaixa.Where(c => c.data_pagamento == DataExtratoConsolidado).ToList();
-                        foreach (cstRowExtratoContaCaixa RowConsolidadoContaCaixa in ListaExtratoConsolidadoContaCaixa)
+                        foreach (CstRowExtratoContaCaixa RowConsolidadoContaCaixa in ListaExtratoConsolidadoContaCaixa)
                         {
                             g_contas_caixas ContaCaixaConsolidadora = ListaContasCaixas.Where(c => c.id_conta_caixa == RowConsolidadoContaCaixa.id_conta_caixa).FirstOrDefault();
 
@@ -3797,6 +3788,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         #region jsAjaxPosicaoAtualContaCaixa
         [HttpPost]
+        [GdiValidateAntiForgeryToken]
         public ActionResult AjaxPosicaoAtualContaCaixa(String parametros)
         {
             bool sucesso = false;
@@ -3884,6 +3876,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #endregion
 
         [HttpPost]
+        [GdiValidateAntiForgeryToken]
         public ActionResult AjaxRoboItau()
         {
             bool sucesso = false;
@@ -3963,7 +3956,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalUploadAnexoFinanceiro
         public ActionResult ModalUploadAnexoFinanceiro(int? IdLancamento)
         {
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             record_cstUploadGed.isLancamentoFinanceiro = true;
             gc_financeiro_lancamentos RecordLancamentoFinanceiro = db.gc_financeiro_lancamentos.Find(IdLancamento);
             record_cstUploadGed.id_gc_financeiro = RecordLancamentoFinanceiro.id_lancamento;
@@ -4049,6 +4042,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         #region AjaxFinanceiroBoletoGCPDF
         [HttpPost]
+        [GdiValidateAntiForgeryToken]
         public ActionResult AjaxFinanceiroBoletoGCPDF(gc_financeiro_lancamentos view_record_gc_financeiro_lancamentos)
         {
             bool Sucesso = false;
@@ -4093,7 +4087,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         g_contas_caixas RecordContaCaixaLancamento = db.g_contas_caixas.Find(RecordFinanceiroLancamento.id_conta_caixa);
                         g_contas_caixas RecordContaCaixaBancaria = db.g_contas_caixas.Find(RecordContaCaixaLancamento.id_conta_bancaria);
 
-                        cstFinanceiroBoletos record_cstFinanceiroBoletos = new cstFinanceiroBoletos();
+                        CstFinanceiroBoletos record_cstFinanceiroBoletos = new CstFinanceiroBoletos();
                         record_cstFinanceiroBoletos.idFinanceiro = view_record_gc_financeiro_lancamentos.id_lancamento;
 
                         // Cabeçalho

@@ -1,4 +1,4 @@
-﻿using GdiPlataform.Db;
+using GdiPlataform.Db;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstComexEntradaMateriaisItens
+    public class CstComexEntradaMateriaisItens
     {
         public int id_invoice_item { get; set; }
         public int quantidade { get; set; }
@@ -20,7 +20,7 @@ namespace GdiPlataform.Areas.gc.Models
         public bool recebido { get; set; }
         public gc_comex_importacoes_itens_lotes lista_lotes { get; set; }
 
-        public cstComexEntradaMateriaisItens()
+        public CstComexEntradaMateriaisItens()
         {
             id_invoice_item = 0;
             quantidade = 0;

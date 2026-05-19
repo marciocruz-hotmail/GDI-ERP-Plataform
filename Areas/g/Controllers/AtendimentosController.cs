@@ -9,6 +9,7 @@ using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Globalization;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 
 namespace GdiPlataform.Areas.g.Controllers
@@ -117,15 +118,15 @@ namespace GdiPlataform.Areas.g.Controllers
                 TimeSpan TempoCorrido = DataHoraAtual - c.datahora_cadastro;
                 String _TempoCorrido = TempoCorrido.Hours.ToString("00") + ":" + TempoCorrido.Minutes.ToString("00");
                 if (TempoCorrido.Days > 0) { _TempoCorrido = TempoCorrido.Days.ToString() + "d+ " + _TempoCorrido; };
-                if (ArrayAtendimentoCategoria != null) { _CategoriaSolicitacao = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-size: 75%;'>[ " + ArrayAtendimentoCategoria.nome.EmptyIfNull().ToString().Trim() + " ]</span>"; };
+                if (ArrayAtendimentoCategoria != null) { _CategoriaSolicitacao = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-size: 75%;'>[ " + EncodeAtendimentoDisplay(ArrayAtendimentoCategoria.nome.EmptyIfNull().ToString().Trim()) + " ]</span>"; };
 
                 list.Add(new[] {
                                     "", // Coluna de Seleção
                                     c.id_atendimento.ToString(),
                                     ((ArraySolicitante != null) ? LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(ArraySolicitante.nome.ToString())) : String.Empty),
-                                    c.solicitacao.EmptyIfNull().ToString()+_CategoriaSolicitacao,
-                                    ((ArrayDepartamento != null) ? ArrayDepartamento.nome.ToString() : String.Empty),
-                                    ((ArrayResponsavel != null) ? LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(ArrayResponsavel.nome.ToString())) : "Todos"),
+                                    EncodeAtendimentoDisplay(c.solicitacao.EmptyIfNull().ToString()) + _CategoriaSolicitacao,
+                                    ((ArrayDepartamento != null) ? EncodeAtendimentoDisplay(ArrayDepartamento.nome.ToString()) : String.Empty),
+                                    ((ArrayResponsavel != null) ? EncodeAtendimentoDisplay(LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(ArrayResponsavel.nome.ToString()))) : "Todos"),
                                     _StatusAtendimento,
                                     c.solicitacao_datahora.ToString("dd/MM/yy"),
                                     ((c.concluido == false) ? _TempoCorrido : String.Empty),
@@ -366,10 +367,10 @@ namespace GdiPlataform.Areas.g.Controllers
 
                             LogAtendimento = String.Empty;
                             LogAtendimento += "<b>##### NOVO ATENDIMENTO #####</b>";
-                            LogAtendimento += "<br/>Departamento: " + db.g_departamentos.Find(view_g_atendimentos.responsavel_id_departamento).nome.EmptyIfNull().ToString();
-                            LogAtendimento += "<br/>Categoria: " + db.g_atendimentos_categorias.Find(view_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString();
-                            LogAtendimento += "<br/>Solicitação: " + record_g_atendimentos.solicitacao.EmptyIfNull().ToString();
-                            LogAtendimento += "<br/>Descrição: " + record_g_atendimentos.descricao.EmptyIfNull().ToString();
+                            LogAtendimento += "<br/>Departamento: " + EncodeAtendimentoDisplay(db.g_departamentos.Find(view_g_atendimentos.responsavel_id_departamento).nome.EmptyIfNull().ToString());
+                            LogAtendimento += "<br/>Categoria: " + EncodeAtendimentoDisplay(db.g_atendimentos_categorias.Find(view_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString());
+                            LogAtendimento += "<br/>Solicitação: " + EncodeAtendimentoDisplay(record_g_atendimentos.solicitacao.EmptyIfNull().ToString());
+                            LogAtendimento += "<br/>Descrição: " + EncodeForLogHtml(record_g_atendimentos.descricao.EmptyIfNull().ToString());
 
                             List<Db.g_atendimentos_categorias_atividades> ListaAtividadesPadroes = db.g_atendimentos_categorias_atividades.Where(a => a.id_atendimento_categoria == record_g_atendimentos.id_atendimento_categoria && a.ativo == true).OrderBy(a => a.ordem).ToList();
                             if (ListaAtividadesPadroes.Count > 0)
@@ -394,8 +395,8 @@ namespace GdiPlataform.Areas.g.Controllers
                                     record_g_atendimentos_atividades.datahora_cadastro = DataHoraAtual;
                                     db.g_atendimentos_atividades.Add(record_g_atendimentos_atividades);
                                     QtdAtividadesAutomaticas += 1;
-                                    MsgRetorno += "<br/> -> " + RecordAtividade.atividade.EmptyIfNull().ToString();
-                                    LogAtendimento += "<br/> -> " + RecordAtividade.atividade.EmptyIfNull().ToString();
+                                    MsgRetorno += "<br/> -> " + EncodeAtendimentoDisplay(RecordAtividade.atividade.EmptyIfNull().ToString());
+                                    LogAtendimento += "<br/> -> " + EncodeAtendimentoDisplay(RecordAtividade.atividade.EmptyIfNull().ToString());
                                 }
                                 db.SaveChanges();
                             }
@@ -433,10 +434,10 @@ namespace GdiPlataform.Areas.g.Controllers
                             {
                                 g_usuarios RecordResponsavelAnterior = db.g_usuarios.Find(record_g_atendimentos.responsavel_id_usuario);
                                 g_usuarios RecordResponsavelAtual = db.g_usuarios.Find(view_g_atendimentos.responsavel_id_usuario);
-                                if (RecordResponsavelAnterior != null) { LogAtendimento += "<br/>Operador: " + RecordResponsavelAnterior.nome.EmptyIfNull().ToString(); } else { LogAtendimento += "Operador: Todos"; };
+                                if (RecordResponsavelAnterior != null) { LogAtendimento += "<br/>Operador: " + EncodeAtendimentoDisplay(RecordResponsavelAnterior.nome.EmptyIfNull().ToString()); } else { LogAtendimento += "Operador: Todos"; };
                                 if (RecordResponsavelAtual != null) 
                                 { 
-                                    LogAtendimento += " > " + RecordResponsavelAtual.nome.EmptyIfNull().ToString();
+                                    LogAtendimento += " > " + EncodeAtendimentoDisplay(RecordResponsavelAtual.nome.EmptyIfNull().ToString());
                                     view_g_atendimentos.responsavel_id_departamento = RecordResponsavelAtual.id_departamento;
                                     LogAtendimento += " (Atendimento transferido para outro operador)";
                                 } 
@@ -449,11 +450,11 @@ namespace GdiPlataform.Areas.g.Controllers
                             {
                                 g_departamentos RecordDepartamentoAnterior = db.g_departamentos.Find(record_g_atendimentos.responsavel_id_departamento);
                                 g_departamentos RecordDepartamentoAtual = db.g_departamentos.Find(view_g_atendimentos.responsavel_id_departamento);
-                                LogAtendimento += "<br/>Departamento: " + RecordDepartamentoAnterior.nome.EmptyIfNull().ToString() + " > " + RecordDepartamentoAtual.nome.EmptyIfNull().ToString();
+                                LogAtendimento += "<br/>Departamento: " + EncodeAtendimentoDisplay(RecordDepartamentoAnterior.nome.EmptyIfNull().ToString()) + " > " + EncodeAtendimentoDisplay(RecordDepartamentoAtual.nome.EmptyIfNull().ToString());
                             }
                             if (record_g_atendimentos.anotacoes.EmptyIfNull().ToString().Trim() != view_g_atendimentos.anotacoes.EmptyIfNull().ToString().Trim())
                             {
-                                LogAtendimento += "<br/>Anotações: " + record_g_atendimentos.anotacoes.EmptyIfNull().ToString() + " > " + view_g_atendimentos.anotacoes.EmptyIfNull().ToString();
+                                LogAtendimento += "<br/>Anotações: " + EncodeForLogHtml(record_g_atendimentos.anotacoes.EmptyIfNull().ToString()) + " > " + EncodeForLogHtml(view_g_atendimentos.anotacoes.EmptyIfNull().ToString());
                             }
                             record_g_atendimentos.concluido = view_g_atendimentos.concluido;
                             record_g_atendimentos.anotacoes = view_g_atendimentos.anotacoes;
@@ -517,7 +518,7 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult ModalUploadFileAtendimentos(int? IdAtendimento, string tag)
         {
             CachePersister.userIdentity.FormNameActive = tag;
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             {
                 record_cstUploadGed.isAtendimento = true;
                 record_cstUploadGed.id_atendimento = IdAtendimento.GetValueOrDefault();
@@ -587,7 +588,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 else
                 {
                     g_atendimentos record_g_atendimentos = db.g_atendimentos.Find(id);
-                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Atendimento</b>" + LibStringFormat.GetTabHtml(1) + record_g_atendimentos.id_atendimento.EmptyIfNull().ToString() + " - " + record_g_atendimentos.solicitacao.EmptyIfNull().ToString();
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Atendimento</b>" + LibStringFormat.GetTabHtml(1) + record_g_atendimentos.id_atendimento.EmptyIfNull().ToString() + " - " + EncodeAtendimentoDisplay(record_g_atendimentos.solicitacao.EmptyIfNull().ToString());
                     ViewBag.ComboGDepartamentos = LibDataSets.LoadComboGDepartamentos(db);
                     ViewBag.ComboGAtendimentosStatus = LibDataSets.LoadComboGAtendimentosStatus(db);
                     ViewBag.ComboUsuariosAtendimentoResponsavel = LibDataSets.LoadComboGUsuariosAtendimentoResponsavel(db);
@@ -598,8 +599,8 @@ namespace GdiPlataform.Areas.g.Controllers
                     ViewBag.ComboClientes = LibDataSets.LoadComboSomenteGClientes(db);
                     ViewBag.ComboClientes.Add(new SelectListItem { Value = "0", Text = "[ Selecione o Cliente ]" });
                     ViewBag.ComboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-                    ViewBag.MsgCategoria = db.g_atendimentos_categorias.Find(record_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString();
-                    ViewBag.MsgCategoria += " (Solicitante: " + db.g_usuarios.Find(record_g_atendimentos.solicitacao_id_usuario).nome.EmptyIfNull().ToString() + ")";
+                    ViewBag.MsgCategoria = EncodeAtendimentoDisplay(db.g_atendimentos_categorias.Find(record_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString());
+                    ViewBag.MsgCategoria += " (Solicitante: " + EncodeAtendimentoDisplay(db.g_usuarios.Find(record_g_atendimentos.solicitacao_id_usuario).nome.EmptyIfNull().ToString()) + ")";
                     return View("Edit", record_g_atendimentos);
                 }
             }
@@ -662,7 +663,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 list.Add(new[] {
                                     RecordAtividade.id_atendimento_atividade.EmptyIfNull().ToString(),
                                     IconeStatus,
-                                    RecordAtividade.solicitacao.EmptyIfNull().ToString(),
+                                    EncodeAtendimentoDisplay(RecordAtividade.solicitacao.EmptyIfNull().ToString()),
                                     DataSLA,
                                     DataFinalizacao,
                                     "",
@@ -702,7 +703,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     {
                         record_g_atendimentos_atividades = db.g_atendimentos_atividades.Find(IdAtendimentoAtividade);
                         record_g_atendimentos_atividades.privado = false;
-                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Atividade</b>" + LibStringFormat.GetTabHtml(1) + record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString();
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Atividade</b>" + LibStringFormat.GetTabHtml(1) + EncodeAtendimentoDisplay(record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString());
                     }
                     else
                     {
@@ -790,8 +791,8 @@ namespace GdiPlataform.Areas.g.Controllers
                             LibDB.dbQueryExec(SentencaSQL, db);
                             LogAtendimento += "<br/> Status: Aberto > Em Atendimento";
                         }
-                        LogAtendimento += "<br/>Solicitação: " + record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString();
-                        LogAtendimento += "<br/>Descrição: " + record_g_atendimentos_atividades.descricao.EmptyIfNull().ToString().Trim().Replace("\r\n", "<br/>");
+                        LogAtendimento += "<br/>Solicitação: " + EncodeAtendimentoDisplay(record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString());
+                        LogAtendimento += "<br/>Descrição: " + EncodeForLogHtml(record_g_atendimentos_atividades.descricao.EmptyIfNull().ToString());
                         db.SaveChanges();
                         if (record_g_atendimentos_atividades.concluido == true)
                         {
@@ -830,7 +831,7 @@ namespace GdiPlataform.Areas.g.Controllers
                         }
                         if (record_g_atendimentos_atividades.anotacoes.EmptyIfNull().ToString().Trim() != view_g_atendimentos_atividades.anotacoes.EmptyIfNull().ToString().Trim())
                         {
-                            LogAtendimento += "<br/>Anotações: " + record_g_atendimentos_atividades.anotacoes.EmptyIfNull().ToString().Trim() + " > " + view_g_atendimentos_atividades.anotacoes.EmptyIfNull().ToString().Trim();
+                            LogAtendimento += "<br/>Anotações: " + EncodeForLogHtml(record_g_atendimentos_atividades.anotacoes.EmptyIfNull().ToString()) + " > " + EncodeForLogHtml(view_g_atendimentos_atividades.anotacoes.EmptyIfNull().ToString());
                         }
 
                         if (LogAtendimento.EmptyIfNull().ToString().Length > 0)
@@ -844,12 +845,12 @@ namespace GdiPlataform.Areas.g.Controllers
                             if (record_g_atendimentos_atividades.concluido == true)
                             {
                                 MsgRetorno = "Atividade Nº <b>" + record_g_atendimentos_atividades.id_atendimento_atividade.EmptyIfNull().ToString() + "</b> FINALIZADA com sucesso!" + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg") + "<br/>";
-                                LogAtendimento = "<b>##### FINALIZAÇÃO DA ATIVIDADE #####</b>" + "<br/>Atividade: " + record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString() + LogAtendimento;
+                                LogAtendimento = "<b>##### FINALIZAÇÃO DA ATIVIDADE #####</b>" + "<br/>Atividade: " + EncodeAtendimentoDisplay(record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString()) + LogAtendimento;
                             }
                             else
                             {
                                 MsgRetorno = "Atividade Nº <b>" + record_g_atendimentos_atividades.id_atendimento_atividade.EmptyIfNull().ToString() + "</b> ATUALIZADA com sucesso!" + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg") + "<br/>";
-                                LogAtendimento = "<b>##### ATUALIZAÇÃO DA ATIVIDADE #####</b>" + "<br/>Atividade: " + record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString() + LogAtendimento;
+                                LogAtendimento = "<b>##### ATUALIZAÇÃO DA ATIVIDADE #####</b>" + "<br/>Atividade: " + EncodeAtendimentoDisplay(record_g_atendimentos_atividades.solicitacao.EmptyIfNull().ToString()) + LogAtendimento;
                             }
                             SaveAtendimentoLog(record_g_atendimentos_atividades.id_atendimento, record_g_atendimentos_atividades.responsavel_id_departamento.GetValueOrDefault(), LogAtendimento, true);
                             sucesso = true;
@@ -899,7 +900,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 String _DataUsuario = l.datahora_cadastro.ToString("dd/MM/yy HH:mm");
                 var ArrayUsuario = ListaUsuarios.Find(u => u.id_usuario == l.id_usuario_cadastro);
                 g_usuarios RecordUsuario = ListaUsuarios.Where(u => u.id_usuario == l.id_usuario_cadastro).FirstOrDefault();
-                if (ArrayUsuario != null) { _DataUsuario += "<br/>" + LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(ArrayUsuario.nome.ToString())); };
+                if (ArrayUsuario != null) { _DataUsuario += "<br/>" + EncodeAtendimentoDisplay(LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(ArrayUsuario.nome.ToString()))); };
                 String _Log = l.log.EmptyIfNull().ToString().Trim().Replace("\r\n", "<br/>");
                 list.Add(new[] {
                                     l.id_atendimento_log.EmptyIfNull().ToString(),
@@ -926,6 +927,27 @@ namespace GdiPlataform.Areas.g.Controllers
             }
         }
         #endregion
+
+        private static string EncodeAtendimentoDisplay(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return String.Empty;
+            }
+            return HttpUtility.HtmlEncode(value);
+        }
+
+        private static string EncodeForLogHtml(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return String.Empty;
+            }
+            return HttpUtility.HtmlEncode(value.Trim())
+                .Replace("\r\n", "<br/>")
+                .Replace("\n", "<br/>")
+                .Replace("\r", "<br/>");
+        }
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {

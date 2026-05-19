@@ -1,4 +1,4 @@
-﻿@model GdiPlataform.Areas.g.Models.cstFinanceiroIndex
+﻿@model GdiPlataform.Areas.g.Models.CstFinanceiroIndex
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 <div class="row">
@@ -7,8 +7,6 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
                 <input type="hidden" id="yesFilterController" value="Financeiro" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
@@ -64,6 +62,13 @@
                                 if (qtdMenusTitulos > 0)
                                 {<div class="dropdown-divider"></div> }
                                 <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalBaixarTitulos(otableFinanceiro, 'Id.')"><i class="fa-solid fa-stamp me-2" aria-hidden="true"></i>Baixar Título - (Cancelar Lançamentos)</a>
+                                qtdMenusTitulos = qtdMenusTitulos + 1;
+                            }
+                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_GerarRemessaBoletosBancarios")))
+                            {
+                                if (qtdMenusTitulos > 0)
+                                {<div class="dropdown-divider"></div> }
+                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="modalTransferirContaCaixa()" title="Transferir títulos filtrados (Em Aberto) para outra conta caixa com emissão de boleto"><i class="fa-solid fa-right-left me-2" aria-hidden="true"></i>Transferir Conta Caixa (filtro da grade)</a>
                                 qtdMenusTitulos = qtdMenusTitulos + 1;
                             }
                             @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_GerarRemessaBoletosBancarios")))
@@ -178,7 +183,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "footerCallback": function (row, data, start, end, display) {
                     var api = this.api(), data;
                     var intVal = function (i) {
@@ -285,7 +290,7 @@
     function modalTransferirContaCaixa()
     {
         try {
-            $("#mainModal").load('@Url.Action("modalTransferirContaCaixa", "Financeiro", new { Area = "g" })?id=1', function () {
+            $("#mainModal").load('@Url.Action("ModalTransferirContaCaixa", "Financeiro", new { Area = "g" })?id=1', function () {
                 var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
             })
         }
@@ -301,6 +306,7 @@
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("ajaxEnviarBoletosEmail", "Financeiro", new { Area = "g" })',
+                headers: GdiAjaxAntiForgeryHeaders(),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (result)

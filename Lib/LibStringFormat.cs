@@ -402,6 +402,46 @@ namespace GdiPlataform.Lib
             return SentencaSQL;
         }
 
+        /// <summary>Normaliza termo de busca inline (nome, descrição): alinhado ao cadastro (<see cref="FormatarTextoSimples"/>).</summary>
+        public static string NormalizarTermoBuscaTexto(string texto)
+        {
+            if (String.IsNullOrWhiteSpace(texto)) return String.Empty;
+            return FormatarTextoSimples(texto.Trim());
+        }
+
+        /// <summary>PN, NCM, serial, sigla, documento: trim, maiúsculas, sem acento (mantém pontuação).</summary>
+        public static string NormalizarTermoBuscaCodigo(string texto)
+        {
+            if (String.IsNullOrWhiteSpace(texto)) return String.Empty;
+            return RemoverAcentos(texto.Trim().ToUpper());
+        }
+
+        /// <summary>Padrão SQL LIKE '%termo%' com escape de curingas (% _ [).</summary>
+        public static string MontarPadraoLikeContem(string termo)
+        {
+            if (String.IsNullOrEmpty(termo)) return "%";
+            string escaped = termo.Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]");
+            return "%" + escaped + "%";
+        }
+
+        public static bool TryMontarPadraoLikeContemTexto(string termoBusca, out string padraoLike)
+        {
+            padraoLike = null;
+            string termo = NormalizarTermoBuscaTexto(termoBusca);
+            if (String.IsNullOrEmpty(termo)) return false;
+            padraoLike = MontarPadraoLikeContem(termo);
+            return true;
+        }
+
+        public static bool TryMontarPadraoLikeContemCodigo(string termoBusca, out string padraoLike)
+        {
+            padraoLike = null;
+            string termo = NormalizarTermoBuscaCodigo(termoBusca);
+            if (String.IsNullOrEmpty(termo)) return false;
+            padraoLike = MontarPadraoLikeContem(termo);
+            return true;
+        }
+
         public static String FormatarStringGenerico(String texto, int tamanho, bool AcrescentarADireita = false, String CaracterAcrescentar = "")
         {
             texto = texto.Trim();

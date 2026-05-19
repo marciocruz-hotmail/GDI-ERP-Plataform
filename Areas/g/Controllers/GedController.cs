@@ -192,7 +192,7 @@ namespace GdiPlataform.Areas.g.Controllers
             if (IdTipoPai == null) { IdTipoPai = 0; };
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
 
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             if (IdGed > 0)
             {
                 ged_arquivos record_ged_arquivos = db.ged_arquivos.Find(IdGed);
@@ -212,7 +212,7 @@ namespace GdiPlataform.Areas.g.Controllers
             return View("ModalUploadFileGed", record_cstUploadGed);
         }
 
-        public ActionResult AjaxUploadFileGed(cstUploadGed view_record_cstUploadGed)
+        public ActionResult AjaxUploadFileGed(CstUploadGed view_record_cstUploadGed)
         {
             bool Sucesso = false;
             String MsgRetorno = "";
@@ -236,7 +236,7 @@ namespace GdiPlataform.Areas.g.Controllers
             return Json(new { success = Sucesso, msg = MsgRetorno, tag = Tag }, JsonRequestBehavior.AllowGet);
         }
 
-        public ged_arquivos ServiceUploadFileGed(cstUploadGed record_cstUploadGed)
+        public ged_arquivos ServiceUploadFileGed(CstUploadGed record_cstUploadGed)
         {
             int QtdErros = 0;
             String MsgErro = "";
@@ -770,7 +770,7 @@ namespace GdiPlataform.Areas.g.Controllers
             if (IdTipoPai == null) { IdTipoPai = 0; };
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
 
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             if (IdGed > 0)
             {
                 ged_arquivos record_ged_arquivos = db.ged_arquivos.Find(IdGed);
@@ -790,7 +790,7 @@ namespace GdiPlataform.Areas.g.Controllers
             return View("ModalEditFileGed", record_cstUploadGed);
         }
 
-        public ActionResult AjaxEditFileGed(cstUploadGed record_cstUploadGed)
+        public ActionResult AjaxEditFileGed(CstUploadGed record_cstUploadGed)
         {
             int QtdErros = 0;
             bool Sucesso = false;

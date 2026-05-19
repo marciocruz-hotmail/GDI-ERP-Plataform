@@ -7,8 +7,6 @@
             <div class="card-title m-0 p-1">
                 <h5 style="margin: 5px; margin-top: 5px;">@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
                 <input type="hidden" id="yesFilterController" value="IndexFrete" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
@@ -128,7 +126,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGCIndexPedido = $('#dataTableGCIndexPedido').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGCIndexPedido = $('#dataTableGCIndexPedido').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                 },

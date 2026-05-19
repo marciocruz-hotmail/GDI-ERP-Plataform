@@ -70,14 +70,14 @@ namespace GdiPlataform.Areas.gc.Controllers
                             l.saldo_03_disponivel
                         };
 
-            if (!string.IsNullOrWhiteSpace(filtroCodigoLote))
+            if (LibStringFormat.TryMontarPadraoLikeContemCodigo(filtroCodigoLote, out string padraoLote))
             {
-                query = query.Where(l => l.codigo_lote.Contains(filtroCodigoLote));
+                query = query.Where(l => l.codigo_lote != null && System.Data.Entity.DbFunctions.Like(l.codigo_lote, padraoLote));
             }
 
-            if (!string.IsNullOrWhiteSpace(filtroSerialLote))
+            if (LibStringFormat.TryMontarPadraoLikeContemCodigo(filtroSerialLote, out string padraoSerial))
             {
-                query = query.Where(l => l.codigo_serial.Contains(filtroSerialLote));
+                query = query.Where(l => l.codigo_serial != null && System.Data.Entity.DbFunctions.Like(l.codigo_serial, padraoSerial));
             }
 
             if (int.TryParse(filtroProduto, out int idProduto) && idProduto > 0)
@@ -465,7 +465,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalUploadAnexoEstoqueLotes(int? IdEstoqueLote)
         {
             int IdArquivoTipo = 0;
-            var recordUpload = new GdiPlataform.Areas.g.Models.cstUploadGed
+            var recordUpload = new GdiPlataform.Areas.g.Models.CstUploadGed
             {
                 isEstoqueLote = true
             };

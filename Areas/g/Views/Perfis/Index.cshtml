@@ -1,11 +1,20 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_perfis>
+﻿@model GdiPlataform.Areas.g.Models.CstPerfisIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarPerfil = CachePersister.userIdentity.Roles.Contains("g_Perfis_*")
+        || CachePersister.userIdentity.Roles.Contains("g_Perfis_Actionupdate");
+}
+<style>
+    .gdi-index-perfis-dt .btnGPerfisEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="Perfis" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -14,24 +23,45 @@
                 {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Perfis",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Perfis_*")) || (CachePersister.userIdentity.Roles.Contains("g_Perfis_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGPerfis, 'Id.', '@Url.Action("Edit","Perfis",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
                 @if ((CachePersister.userIdentity.Roles.Contains("g_Perfis_*")) || (CachePersister.userIdentity.Roles.Contains("g_Perfis_Actiondelete")))
                 {<button type="button" name="btnRegistroExcluir" title="Excluir Registro" class="btn btn-outline-danger disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
                 else
                 { <button type="button" name="btnRegistroExcluir" title="Excluir Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button>}
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 mt-1 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.PerfisIndex_id_perfil, new { @class = "form-control", @id = "edit_id_perfil", @placeholder = "Id.", @onkeypress = "keypressed(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.PerfisIndex_nome, new { @class = "form-control", @id = "edit_nome", @placeholder = "Nome do perfil", @onkeypress = "keypressed(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar perfis" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarPerfis()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroPerfis" name="btnLimparFiltroPerfis" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroPerfis()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-perfis-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
                         <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGPerfis">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
-                                    <th>@Html.DisplayNameFor(model => model.id_perfil)</th>
-                                    <th>@Html.DisplayNameFor(model => model.nome)</th>
+                                    <th>Id.</th>
+                                    <th>Nome</th>
+                                    @if (podeEditarPerfil)
+                                    {
+                                        <th><i class="fa-regular fa-edit" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar perfil"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -52,6 +82,12 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroPerfis('0');
+            gdiAplicarFoco('#edit_id_perfil', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsPerfisTemCriterioFiltro()) { jsAjaxPesquisarPerfis(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -59,12 +95,76 @@
         }
     });
 
+    function keypressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarPerfis();
+        }
+    }
+
+    function jsPerfisTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_perfil').val()) || !isEmpty($('#edit_nome').val());
+    }
+
+    function jsAtualizarIndicadorFiltroPerfis(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroPerfis',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todos os perfis'
+        });
+    }
+
+    function jsAjaxPesquisarPerfis()
+    {
+        try
+        {
+            if (!jsPerfisTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Nome).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando perfis...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGPerfis").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarPerfis] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroPerfis()
+    {
+        try
+        {
+            $('#edit_id_perfil').val('');
+            $('#edit_nome').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGPerfis").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroPerfis] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGPerfis = $('#dtGPerfis').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otableGPerfis = $('#dtGPerfis').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroPerfis(json.yesFilterOnOff);
+                }
+            }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -78,6 +178,10 @@
                         sEcho: d.draw,
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_perfil').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_nome').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -95,7 +199,16 @@
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "88%", orderable: true, targets: [2] }
+                { "width": "@(podeEditarPerfil ? "84%" : "88%")", orderable: true, targets: [2] }
+                @if (podeEditarPerfil)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [3], data: null, defaultContent: "",
+                    render: function (data, type, row, meta) {
+                        return '<button type="button" name="btnGPerfisEditRow" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar perfil Id. ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGPerfisEditRow d-inline-flex align-items-center" onclick="jsGPerfisEditRow(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -103,10 +216,15 @@
                 headerCheckbox: true
             },
             order: [[1, 'asc']],
-
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGPerfis [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Nome e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -135,14 +253,28 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGPerfis tbody').on('dblclick', 'tr td', function () {
+            @if (podeEditarPerfil)
+            {
+                <text>$('#dtGPerfis tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableGPerfis.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Perfis", new { Area = "g" })');
-            });
+                if (data) { jsGPerfisEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-</script>
 
+    function jsGPerfisEditRow(idPerfil)
+    {
+        try {
+            var id = parseInt(idPerfil, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Perfis", new { Area = "g" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGPerfisEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>

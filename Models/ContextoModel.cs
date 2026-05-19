@@ -1,4 +1,4 @@
-﻿using GdiPlataform.Models;
+using GdiPlataform.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,8 +86,8 @@ namespace GdiPlataform.Domain
         public List<SelectListItem> gc_comboVendedores { get; set; }
 
         public List<SelectListItem> g_comboGClassificacaoFinanceira { get; set; }
-        public List<cstDatasetProdutosServicos> gc_dataSetProdutosServicos { get; set; }
-        public List<cstDatasetClientesContatos> gc_dataSetClientesContatos { get; set; }
+        public List<CstDatasetProdutosServicos> gc_dataSetProdutosServicos { get; set; }
+        public List<CstDatasetClientesContatos> gc_dataSetClientesContatos { get; set; }
         public List<g_clientes_destinatarios> gc_dataSetClientesDestinatarios { get; set; }
         public List<g_vendedores> gc_dataSetVendedores { get; set; }
         public List<gc_cfop> gc_dataSetCfop { get; set; }
@@ -162,9 +162,9 @@ namespace GdiPlataform.Domain
             g_comboGClassificacaoFinanceira = new List<SelectListItem>();
             gc_dataSetCfop = new List<gc_cfop>();
             gc_dataSetCfopOperacoes = new List<gc_cfop_operacoes>();
-            gc_dataSetClientesContatos = new List<cstDatasetClientesContatos>();
+            gc_dataSetClientesContatos = new List<CstDatasetClientesContatos>();
             gc_dataSetClientesDestinatarios = new List<g_clientes_destinatarios>();
-            gc_dataSetProdutosServicos = new List<cstDatasetProdutosServicos>();
+            gc_dataSetProdutosServicos = new List<CstDatasetProdutosServicos>();
             gc_dataSetVendedores = new List<g_vendedores>();
             gc_comboEstoqueEnderecoArea = new List<SelectListItem>();
             gc_comboEstoqueEnderecoSecao = new List<SelectListItem>();

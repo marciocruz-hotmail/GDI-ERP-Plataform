@@ -1,43 +1,68 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_uf>
+﻿@model GdiPlataform.Areas.g.Models.CstUfIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarUf = CachePersister.userIdentity.Roles.Contains("g_UF_*")
+        || CachePersister.userIdentity.Roles.Contains("g_UF_Actionupdate");
+}
+<style>
+    .gdi-index-uf-dt .btnGUfEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="UF" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
             <div class="card-header m-0 p-1">
                 @if ((CachePersister.userIdentity.Roles.Contains("g_UF_*")) || (CachePersister.userIdentity.Roles.Contains("g_UF_Actioncreate")))
-                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","UF",new { Area = "g" })')" disabled="true"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
+                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","UF",new { Area = "g" })')" disabled="disabled"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
-                @if ((CachePersister.userIdentity.Roles.Contains("g_UF_*")) || (CachePersister.userIdentity.Roles.Contains("g_UF_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGUF, 'Id.', '@Url.Action("Edit","UF",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
                 @if ((CachePersister.userIdentity.Roles.Contains("g_UF_*")) || (CachePersister.userIdentity.Roles.Contains("g_UF_Actiondelete")))
                 {<button type="button" name="btnRegistroExcluir" title="Excluir Registro" class="btn btn-outline-danger disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
                 else
                 { <button type="button" name="btnRegistroExcluir" title="Excluir Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button>}
-                <button type="button" id="btnFiltroDefault" name="btnFiltroDefault" title="Filtro" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroDefault()">Filtro</button>
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.UfIndex_id_uf, new { @class = "form-control", @id = "edit_id_uf", @placeholder = "Id.", @onkeypress = "keypressedUf(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Sigla", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.UfIndex_sigla, new { @class = "form-control", @id = "edit_sigla", @placeholder = "Sigla da UF", @onkeypress = "keypressedUf(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarUf" title="Pesquisar UFs" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarUf()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroUf" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroUf()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-uf-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGUF">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGUF">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
-                                    <th>@Html.Encode("Id.")</th>
-                                    <th>@Html.Encode("Sigla")</th>
-                                    <th>@Html.Encode("Nome")</th>
+                                    <th>Id.</th>
+                                    <th>Sigla</th>
+                                    <th>Nome</th>
+                                    @if (podeEditarUf)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar UF"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -52,25 +77,95 @@
 <script type="text/javascript">
     var otableGUF;
 
-	$(function ()
+    $(function ()
     {
         try
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroUf('0');
+            gdiAplicarFoco('#edit_id_uf', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsUfTemCriterioFiltro()) { jsAjaxPesquisarUf(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
+
+    function keypressedUf(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarUf();
+        }
+    }
+
+    function jsUfTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_uf').val()) || !isEmpty($('#edit_sigla').val());
+    }
+
+    function jsAtualizarIndicadorFiltroUf(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroUf',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todas as UFs'
+        });
+    }
+
+    function jsAjaxPesquisarUf()
+    {
+        try
+        {
+            if (!jsUfTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Sigla).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando UFs...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGUF").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarUf] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroUf()
+    {
+        try
+        {
+            $('#edit_id_uf').val('');
+            $('#edit_sigla').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGUF").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroUf] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGUF = $('#dtGUF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGUF = $('#dtGUF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroUf(json.yesFilterOnOff);
+                }
+            }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -85,9 +180,9 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
-                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_uf').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_sigla').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -104,9 +199,18 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "18%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "70%", orderable: false, className: 'text-sm-center', targets: [3] }
+                { "width": "8%", orderable: true, className: 'text-sm-center', targets: [1] },
+                { "width": "12%", orderable: true, className: 'text-sm-center', targets: [2] },
+                { "width": "@(podeEditarUf ? "72%" : "76%")", orderable: true, targets: [3] }
+                @if (podeEditarUf)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [4], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar UF Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGUfEditRow d-inline-flex align-items-center" onclick="jsGUfEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -114,10 +218,15 @@
                 headerCheckbox: true
             },
             order: [[1, 'asc']],
-
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGUF [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Sigla e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -146,49 +255,28 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGUF tbody').on('dblclick', 'tr td', function () {
+            @if (podeEditarUf)
+            {
+                <text>$('#dtGUF tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableGUF.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "UF", new { Area = "g" })');
-            });
+                if (data) { jsGUfEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
 
-    function jsModalFiltroDefault()
+    function jsGUfEditRow(idUf)
     {
         try {
-            if (document.getElementById("btnFiltroDefault").innerHTML.indexOf("Remover") > 0) {
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#dtGUF").DataTable().draw(false);
-            }
-            else {
-                $("#mainModal").load('@Url.Action("ModalFiltroGenericoView", "Filtros", new { Area = "a" })?id=g_UF_Index', function () {
-                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                })
-            }
+            var id = parseInt(idUf, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "UF", new { Area = "g" })');
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalFiltroDefault] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
-    function jsRunFiltroDefault(filterField, filterOperador, filterText)
-    {
-        try {
-            document.getElementById("yesFilterField").value = filterField;
-            document.getElementById("yesFilterOperador").value = filterOperador;
-            document.getElementById("yesFilterText").value = filterText;
-            document.getElementById("yesFilterAdvancedText").value = "";
-            $("#dtGUF").DataTable().draw(false);
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroDefault] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsGUfEditRow] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 </script>
-

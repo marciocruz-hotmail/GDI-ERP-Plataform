@@ -7,9 +7,6 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
                 @Html.HiddenFor(model => model.id_movimento)
@@ -91,9 +88,6 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
-                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
                         yesCustomField01: emptyIfNull($('#id_movimento').val()).toString(),
                         yesCustomField02: emptyIfNull($('#tag_string').val()).toString(),
                     };

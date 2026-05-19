@@ -1,4 +1,4 @@
-﻿using GdiPlataform.Areas.gc.Models;
+using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
 using GdiPlataform.Security;

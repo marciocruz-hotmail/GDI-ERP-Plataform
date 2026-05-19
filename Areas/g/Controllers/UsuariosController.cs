@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
@@ -16,12 +17,11 @@ using GdiPlataform.Lib;
 
 namespace GdiPlataform.Areas.g.Controllers
 {
-    // O CustomAuthorize desse controler é segmentado por Actions
-    // Todos podem trocar a senha
-    [CustomAuthorize(Roles = "*")]
+    // Autorização por action: CRUD exige g_Usuarios_*; troca de senha inclui portal/vendedor (sem role "*" na classe).
     public class UsuariosController : Controller
     {
         private GdiPlataformEntities db;
+        private readonly String controllerName = "g_Usuarios";
 
         public UsuariosController()
         {
@@ -35,59 +35,204 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Usuários";
-            return View();
+            var model = new CstUsuariosIndex
+            {
+                UsuariosIndex_id_usuario = String.Empty,
+                UsuariosIndex_nome = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, nomeRestore;
+            if (TryParseFiltroUsuariosSemicolon(filtroPersistido.sql_filtro, out idRestore, out nomeRestore))
+            {
+                model.UsuariosIndex_id_usuario = idRestore;
+                model.UsuariosIndex_nome = nomeRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(nomeRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Usuarios_*,g_Usuarios_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
-            const string filterOnOff = "0";
+            string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            var allRecords = new List<Db.g_usuarios>(); // Lista vazia - Inicialização
-            allRecords = db.g_usuarios.Where(p => p.id_perfil > 0).OrderByDescending(p => p.ativo).ThenBy(p => p.nome).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
-            {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
-                String _nomePerfil = string.Empty;
-                if (c.id_perfil > 0)
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    var pf = db.g_perfis.Find(c.id_perfil);
-                    if (pf != null) { _nomePerfil = pf.nome.ToString(); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                }
+                else
+                {
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
 
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_usuario.ToString(),
-                                    _ativo,
-                                    c.nome.EmptyIfNull().ToString(),
-                                    c.login.EmptyIfNull().ToString(),
-                                    c.email.EmptyIfNull().ToString(),
-                                    _nomePerfil.EmptyIfNull().ToString()
-                                });
-            }
+                var baseQuery = db.g_usuarios.AsNoTracking().Where(p => p.id_perfil > 0);
+                int totalRecords = baseQuery.Count();
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroUsuariosSemicolon(recordFiltro.sql_filtro, out idStr, out nomeStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_usuarios> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroUsuariosNaQuery(query, idStr, nomeStr);
+                    LibDB.setFilterByUser(MontarFiltroUsuariosPersistido(idStr, nomeStr), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoUsuariosNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(u => new { u.id_usuario, u.ativo, u.nome, u.login, u.email, u.id_perfil })
+                    .ToList();
+
+                var idsPerfil = page.Where(x => x.id_perfil > 0).Select(x => x.id_perfil).Distinct().ToList();
+                var dictPerfil = idsPerfil.Count == 0
+                    ? new Dictionary<int, string>()
+                    : db.g_perfis.AsNoTracking().Where(p => idsPerfil.Contains(p.id_perfil))
+                        .ToDictionary(p => p.id_perfil, p => p.nome ?? String.Empty);
+
+                var list = new List<string[]>();
+                foreach (var c in page)
+                {
+                    string _ativo = c.ativo == true
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
+                    string _nomePerfil = String.Empty;
+                    if (c.id_perfil > 0 && dictPerfil.TryGetValue(c.id_perfil, out string np))
+                    {
+                        _nomePerfil = np;
+                    }
+                    list.Add(new[]
+                    {
+                        "",
+                        c.id_usuario.ToString(),
+                        _ativo,
+                        c.nome.EmptyIfNull().ToString(),
+                        c.login.EmptyIfNull().ToString(),
+                        c.email.EmptyIfNull().ToString(),
+                        _nomePerfil
+                    });
+                }
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroUsuariosSemicolon(string raw, out string id, out string nome)
+        {
+            id = nome = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            nome = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(nome);
+        }
+
+        private static string MontarFiltroUsuariosPersistido(string id, string nome)
+        {
+            return (id ?? String.Empty) + ";" + (nome ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_usuarios> AplicarFiltroUsuariosNaQuery(IQueryable<Db.g_usuarios> query, string idStr, string nomeStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idUsuario))
+            {
+                query = query.Where(p => p.id_usuario == idUsuario);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
+            {
+                query = query.Where(p => p.nome != null && DbFunctions.Like(p.nome, padraoNome));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_usuarios> AplicarOrdenacaoUsuariosNaQuery(IQueryable<Db.g_usuarios> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                switch (param.iSortCol_0)
+                {
+                    case 1:
+                        return asc ? query.OrderByDescending(p => p.ativo).ThenBy(p => p.id_usuario)
+                            : query.OrderBy(p => p.ativo).ThenByDescending(p => p.id_usuario);
+                    case 3:
+                        return asc ? query.OrderByDescending(p => p.ativo).ThenBy(p => p.nome)
+                            : query.OrderByDescending(p => p.ativo).ThenByDescending(p => p.nome);
+                    case 4:
+                        return asc ? query.OrderByDescending(p => p.ativo).ThenBy(p => p.login)
+                            : query.OrderByDescending(p => p.ativo).ThenByDescending(p => p.login);
+                    case 5:
+                        return asc ? query.OrderByDescending(p => p.ativo).ThenBy(p => p.email)
+                            : query.OrderByDescending(p => p.ativo).ThenByDescending(p => p.email);
+                }
+            }
+            return query.OrderByDescending(p => p.ativo).ThenBy(p => p.nome);
         }
         #endregion
 
@@ -284,7 +429,7 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region ModalUsuarioTrocarSenha
-        [CustomAuthorize(Roles = "*")]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,*,Home,gc_PortalCliente_PortalFinanceiro,g_PortalVendedor_Default,g_PortalVendedor_*")]
         public ActionResult ModalUsuarioTrocarSenha(int? id)
         {
             String TokenAcesso = CachePersister.userIdentity.TokenAcesso;
@@ -310,11 +455,12 @@ namespace GdiPlataform.Areas.g.Controllers
                 ViewBag.Title = "Vendedor - Alterar Senha";
             }
 
-                return View();
+                return View("ModalUsuarioTrocarSenha");
         }
 
         [HttpPost]
-        [CustomAuthorize(Roles = "*")]
+        [GdiValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,*,Home,gc_PortalCliente_PortalFinanceiro,g_PortalVendedor_Default,g_PortalVendedor_*")]
         public ActionResult AjaxUsuarioTrocarSenha(g_usuarios record_g_usuarios)
         {
             bool sucesso = false;
@@ -380,7 +526,6 @@ namespace GdiPlataform.Areas.g.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
-        [CustomAuthorize(Roles = "*")]
         protected override void Dispose(bool disposing)
         {
             if (disposing)

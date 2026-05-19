@@ -10,9 +10,6 @@
                 <div class="card-title m-0 p-1">
                     <h5>@Html.Raw(ViewBag.Title)</h5>
                     <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                    <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                    <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                    <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
                     @Html.HiddenFor(model => model.id_inventario)
@@ -102,7 +99,7 @@ function jsCreateTable()
     try
     {
         $.fn.dataTable.ext.errMode = 'none';
-        otableGcInventarioItem = $('#dtGcInventarioItem').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff); }).DataTable({
+        otableGcInventarioItem = $('#dtGcInventarioItem').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; }).DataTable({
             "drawCallback": function (settings) {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
             },
@@ -124,9 +121,6 @@ function jsCreateTable()
                     iDisplayStart: d.start,
                     iDisplayLength: d.length,
                     yesFilterField: $('#yesFilterField').val().toString(),
-                    yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                    yesFilterText: $('#yesFilterText').val().toString(),
-                    yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
                     yesCustomField01: emptyIfNull($('#id_inventario').val()).toString(),
                     yesCustomField02: emptyIfNull($('#id_produto_servico_form').val()).toString(),
                     yesCustomField03: emptyIfNull($('#id_estoque_area_form').val()).toString(),
@@ -201,38 +195,6 @@ function jsCreateTable()
         LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
     }
 };
-
-function jsModalFiltroAvancado()
-{
-    try {
-        if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
-            document.getElementById("yesFilterField").value = "*";
-            document.getElementById("yesFilterOperador").value = "";
-            document.getElementById("yesFilterText").value = "";
-            document.getElementById("yesFilterAdvancedText").value = "";
-            $("#dtGcInventarioItem").DataTable().draw(false);
-        }
-        else {
-            $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "Cidades", new { Area = "g" })?id=g_cidades_index', function () {
-                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-            })
-            }
-    }
-    catch (err) {
-        LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-    }
-}
-
-function jsRunFiltroAvancado(FilterAdvancedText)
-{
-    try {
-        document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
-        $("#dtGcInventarioItem").DataTable().draw(false);
-    }
-    catch (err) {
-        LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-    }
-}
 
 function jsModalCreateEditInventarioItem(id)
 {

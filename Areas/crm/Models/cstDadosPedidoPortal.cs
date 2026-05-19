@@ -1,6 +1,6 @@
 namespace GdiPlataform.Areas.crm.Models
 {
-    public class cstDadosPedidoPortal
+    public class CstDadosPedidoPortal
     {
         public int PedidoQtdNotas { get; set; }
         public int PedidoQtdFinanceiro { get; set; }
@@ -68,7 +68,7 @@ namespace GdiPlataform.Areas.crm.Models
         public string Ged9Descricao { get; set; }
         public string Ged9Id { get; set; }
 
-        public cstDadosPedidoPortal()
+        public CstDadosPedidoPortal()
         {
             PedidoQtdNotas = 0;
             PedidoQtdFinanceiro = 0;

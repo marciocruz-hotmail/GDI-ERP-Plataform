@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
@@ -19,6 +20,7 @@ namespace GdiPlataform.Areas.g.Controllers
     public class PagRecCondicoesController : Controller
     {
         private GdiPlataformEntities db;
+        private readonly String controllerName = "g_PagRecCondicoes";
 
         public PagRecCondicoesController()
         {
@@ -33,84 +35,192 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Pag/Rec Condições";
-            return View();
+            var model = new CstPagRecCondicoesIndex
+            {
+                PagRecCondicoesIndex_id = String.Empty,
+                PagRecCondicoesIndex_descricao = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, descRestore;
+            if (TryParseFiltroPagRecCondicoesSemicolon(filtroPersistido.sql_filtro, out idRestore, out descRestore))
+            {
+                model.PagRecCondicoesIndex_id = idRestore;
+                model.PagRecCondicoesIndex_descricao = descRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(descRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecCondicoes,g_PagRecCondicoes_*,g_PagRecCondicoes_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
-            const string filterOnOff = "0";
+            string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            var allRecords = new List<Db.g_pagrec_condicoes>(); // Lista vazia - Inicialização
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Perfil Adm visualiza todos os registros independente de Coligada e Filial
-            allRecords = db.g_pagrec_condicoes.Where(p => p.id_pagrec_condicao > 0).OrderBy(p => p.descricao).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_pagrec_condicoes, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_pagrec_condicao) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? Convert.ToString(c.ativo) :
-                                     param.iSortCol_0 == 3 && param.iSortingCols > 0 ? c.descricao :
-                                     param.iSortCol_0 == 4 && param.iSortingCols > 0 ? Convert.ToString(c.pagamento) :
-                                     param.iSortCol_0 == 5 && param.iSortingCols > 0 ? Convert.ToString(c.recebimento) :
-                                     param.iSortCol_0 == 6 && param.iSortingCols > 0 ? Convert.ToString(c.qtd_dias) :
-                                     param.iSortCol_0 == 7 && param.iSortingCols > 0 ? Convert.ToString(c.qtd_parcelas) :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_pagrec_condicao); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.descricao); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_pagrec_condicao); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.descricao); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
-            {
+                var baseQuery = db.g_pagrec_condicoes.AsNoTracking().Where(p => p.id_pagrec_condicao > 0);
+                int totalRecords = baseQuery.Count();
 
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
-                String _pagamento = c.pagamento == true ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Habilitado para Pagamentos", "#008000", "fa-lg") : LibIcons.getIcon("fa-regular fa-thumbs-down", "Desabilitado para Pagamentos", "cc0000", "");
-                String _recebimento = c.recebimento == true ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Habilitado para Recebimentos", "#008000", "fa-lg") : LibIcons.getIcon("fa-regular fa-thumbs-down", "Desabilitado para Recebimentos", "cc0000", "");
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string descStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(descStr);
 
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_pagrec_condicao.ToString(),
-                                    _ativo,
-                                    c.descricao.ToString(),
-                                    _pagamento,
-                                    _recebimento,
-                                    c.qtd_dias.ToString(),
-                                    c.qtd_parcelas.ToString()
-                                });
-            }
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroPagRecCondicoesSemicolon(recordFiltro.sql_filtro, out idStr, out descStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(descStr);
+                }
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_pagrec_condicoes> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroPagRecCondicoesNaQuery(query, idStr, descStr);
+                    LibDB.setFilterByUser(MontarFiltroPagRecCondicoesPersistido(idStr, descStr), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoPagRecCondicoesNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(p => new { p.id_pagrec_condicao, p.ativo, p.descricao, p.pagamento, p.recebimento, p.qtd_dias, p.qtd_parcelas })
+                    .ToList();
+
+                var list = page.Select(p =>
+                {
+                    string _ativo = p.ativo == true
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
+                    string _pagamento = p.pagamento == true
+                        ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Habilitado para Pagamentos", "#008000", "fa-lg")
+                        : LibIcons.getIcon("fa-regular fa-thumbs-down", "Desabilitado para Pagamentos", "cc0000", "");
+                    string _recebimento = p.recebimento == true
+                        ? LibIcons.getIcon("fa-regular fa-thumbs-up", "Habilitado para Recebimentos", "#008000", "fa-lg")
+                        : LibIcons.getIcon("fa-regular fa-thumbs-down", "Desabilitado para Recebimentos", "cc0000", "");
+                    return new[]
+                    {
+                        "",
+                        p.id_pagrec_condicao.ToString(),
+                        _ativo,
+                        p.descricao ?? "",
+                        _pagamento,
+                        _recebimento,
+                        p.qtd_dias.ToString(),
+                        p.qtd_parcelas.ToString()
+                    };
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroPagRecCondicoesSemicolon(string raw, out string id, out string descricao)
+        {
+            id = descricao = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            descricao = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(descricao);
+        }
+
+        private static string MontarFiltroPagRecCondicoesPersistido(string id, string descricao)
+        {
+            return (id ?? String.Empty) + ";" + (descricao ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_pagrec_condicoes> AplicarFiltroPagRecCondicoesNaQuery(IQueryable<Db.g_pagrec_condicoes> query, string idStr, string descStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idCondicao))
+            {
+                query = query.Where(p => p.id_pagrec_condicao == idCondicao);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(descStr, out string padraoDesc))
+            {
+                query = query.Where(p => p.descricao != null && DbFunctions.Like(p.descricao, padraoDesc));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_pagrec_condicoes> AplicarOrdenacaoPagRecCondicoesNaQuery(IQueryable<Db.g_pagrec_condicoes> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 3)
+                {
+                    return asc ? query.OrderBy(p => p.descricao) : query.OrderByDescending(p => p.descricao);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(p => p.id_pagrec_condicao) : query.OrderByDescending(p => p.id_pagrec_condicao);
+                }
+            }
+            return query.OrderBy(p => p.id_pagrec_condicao);
         }
         #endregion
 

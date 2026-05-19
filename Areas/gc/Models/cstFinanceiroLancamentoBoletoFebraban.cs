@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstFinanceiroLancamentoBoletoFebraban
+    public class CstFinanceiroLancamentoBoletoFebraban
     {
         public int idFinanceiro;
         public bool printPDF = false;
@@ -67,7 +67,7 @@ namespace GdiPlataform.Areas.gc.Models
 
         public string EPixEMV { get; set; }
         public bool HasPix { get; set; }
-        public cstFinanceiroLancamentoBoletoFebraban()
+        public CstFinanceiroLancamentoBoletoFebraban()
         {
             HasPix = false;
         }

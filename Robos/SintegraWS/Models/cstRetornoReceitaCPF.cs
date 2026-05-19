@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Robos.SintegraWS.Models
 {
-    public class cstRetornoReceitaCPF
+    public class CstRetornoReceitaCPF
     {
         public string receita_code { get; set; }
         public string receita_status { get; set; }

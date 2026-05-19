@@ -181,9 +181,18 @@ namespace GdiPlataform.Areas.g.Controllers
                         string d1s = campos[6].Trim();
                         string d2s = campos[7].Trim();
                         if (!string.IsNullOrEmpty(sid) && sid != "0" && int.TryParse(sid, out int idNfe)) { q = q.Where(n => n.id_nfe == idNfe); }
-                        if (!string.IsNullOrEmpty(nome)) { q = q.Where(n => n.nome.Contains(nome)); }
-                        if (!string.IsNullOrEmpty(cnpj)) { q = q.Where(n => n.cnpj.Contains(cnpj)); }
-                        if (!string.IsNullOrEmpty(cpf)) { q = q.Where(n => n.cpf.Contains(cpf)); }
+                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(nome, out string padraoNome))
+                        {
+                            q = q.Where(n => n.nome != null && System.Data.Entity.DbFunctions.Like(n.nome, padraoNome));
+                        }
+                        if (LibStringFormat.TryMontarPadraoLikeContemCodigo(cnpj, out string padraoCnpj))
+                        {
+                            q = q.Where(n => n.cnpj != null && System.Data.Entity.DbFunctions.Like(n.cnpj, padraoCnpj));
+                        }
+                        if (LibStringFormat.TryMontarPadraoLikeContemCodigo(cpf, out string padraoCpf))
+                        {
+                            q = q.Where(n => n.cpf != null && System.Data.Entity.DbFunctions.Like(n.cpf, padraoCpf));
+                        }
                         if (!string.IsNullOrEmpty(tipo) && tipo != "0") { q = q.Where(n => n.tipo_r_c == tipo); }
                         if (!string.IsNullOrEmpty(idStatus) && idStatus != "0" && int.TryParse(idStatus, out int idSt)) { q = q.Where(n => n.id_nfe_status == idSt); }
                         DateTime d1, d2;
@@ -331,31 +340,6 @@ namespace GdiPlataform.Areas.g.Controllers
 
         #endregion
 
-        #region ModalFiltroAvancadoView
-
-        public ActionResult ModalFiltroAvancadoView(string id)
-        {
-            ViewBag.Title = "NFe — Filtro avançado";
-            var comboStatus = new List<SelectListItem> { new SelectListItem { Value = "0", Text = "[ Status ]" } };
-            foreach (g_nfe_status s in db.g_nfe_status.OrderBy(x => x.descricao))
-            {
-                comboStatus.Add(new SelectListItem { Value = s.id_nfe_status.ToString(), Text = s.descricao.EmptyIfNull().ToString() });
-            }
-            ViewBag.combo1FiltroAvancado = comboStatus;
-
-            var comboTipo = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "0", Text = "[ Tipo ]" },
-                new SelectListItem { Value = "R", Text = "R" },
-                new SelectListItem { Value = "C", Text = "C" }
-            };
-            ViewBag.combo1FiltroAvancadoTipo = comboTipo;
-
-            return View("ModalFiltroAvancadoView", new cstModalFiltroAvancado());
-        }
-
-        #endregion
-
         #region Modais (retorno de partial views existentes)
 
         public ActionResult ModalNfeEnviarPorEmailUnitario(int? id)
@@ -369,7 +353,7 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult ModalExportarDadosNfePDF(int? id)
         {
             ViewBag.Title = "Exportar dados NF-e (PDF)";
-            return View("modalExportarDadosNfePDF", new cstExportacaoDadosNFEModel());
+            return View("ModalExportarDadosNfePDF", new CstExportacaoDadosNFEModel());
         }
 
         public ActionResult ModalGerarNfe(int? id)
@@ -401,7 +385,7 @@ namespace GdiPlataform.Areas.g.Controllers
             g_nfe m = id > 0 ? db.g_nfe.Find(id) : new g_nfe();
             if (m == null) { m = new g_nfe(); }
             ViewBag.Title = "Cancelar NF-e";
-            return View("modalCancelarNfe", m);
+            return View("ModalCancelarNfe", m);
         }
 
         public ActionResult ModalSincronizarLotesNfe(int? id)
@@ -1020,7 +1004,6 @@ namespace GdiPlataform.Areas.g.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
-        [CustomAuthorize(Roles = "*")]
         protected override void Dispose(bool disposing)
         {
             if (disposing && db != null) { db.Dispose(); }

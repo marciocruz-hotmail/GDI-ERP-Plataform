@@ -7,8 +7,6 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
                 <input type="hidden" id="yesFilterController" value="IndexPedido" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
@@ -185,10 +183,7 @@
                 .css("font-size", 16)
                 .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
                 .on('xhr.dt', function (e, settings, json, xhr) {
-                    if (GdiDtNotifyJsonErrorMessage(json)) { }
-                    else if (json && json.yesFilterOnOff !== undefined) {
-                        btnFiltro(json.yesFilterOnOff);
-                    }
+                    if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 })
                 .DataTable({
                 "drawCallback": function (settings) {
@@ -304,29 +299,6 @@
             LibMessageError("Atenção", "[jsCreateOtableGCIndexPedido] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
-    function ajaxFiltroAvancado()
-    {
-        try {
-            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#dataTableGCIndexPedido").DataTable().draw(false);
-            }
-            else
-            {
-                LibMessageProcessando("");
-                $("#mainModal").load('@Url.Action("modalFiltroAvancadoView", "Cidades", new { Area = "g" })?id=g_cidades_index', function () {
-                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                })
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[ajaxFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
 
     function jsGCIndexPedidoEditRow(id)
     {

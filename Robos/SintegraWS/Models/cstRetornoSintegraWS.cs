@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Robos.SintegraWS.Models
 {
-    public class cstRetornoSintegraWS
+    public class CstRetornoSintegraWS
     {
         public string sintegra_code { get; set; }
         public string sintegra_status { get; set; }

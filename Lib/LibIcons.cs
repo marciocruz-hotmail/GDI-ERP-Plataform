@@ -15,6 +15,7 @@ namespace GdiPlataform.Lib
             else if (color.EmptyIfNull().ToString().Trim().ToLowerInvariant() == "green") { color = "#008000"; }
             else if (color.EmptyIfNull().ToString().Trim().ToLowerInvariant() == "red") { color = "#cc0000"; }
             else if (color.EmptyIfNull().ToString().Trim().ToLowerInvariant() == "orange") { color = "#ce7e00"; }
+            else if (color.EmptyIfNull().ToString().Trim().ToLowerInvariant() == "blue") { color = "#0dcaf0"; };
 
             if (icon.Trim().Length > 0) { icone = icone.Replace("[icon]", icon); }
             else { icone = icone.Replace("[icon]", ""); }

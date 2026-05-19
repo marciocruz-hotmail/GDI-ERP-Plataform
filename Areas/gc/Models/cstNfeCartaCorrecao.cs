@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstNfeCartaCorrecao
+    public class CstNfeCartaCorrecao
     {
         public bool CartaCorrecaoLiberada { get; set; }
         public int id_movimento_nf { get; set; }

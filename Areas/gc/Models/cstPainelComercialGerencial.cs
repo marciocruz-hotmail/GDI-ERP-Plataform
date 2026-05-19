@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstPainelComercialGerencial
+    public class CstPainelComercialGerencial
     {
         public string QtdPedidosAprovados { get; set; }
         public string QtdPedidosSeparados { get; set; }
@@ -75,7 +75,7 @@ namespace GdiPlataform.Areas.gc.Models
 
 
 
-        public cstPainelComercialGerencial()
+        public CstPainelComercialGerencial()
         {
             QtdPedidosAprovados = "0";
             QtdPedidosSeparados = "0";

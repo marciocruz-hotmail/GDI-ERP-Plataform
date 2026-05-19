@@ -98,7 +98,7 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             PreencherLookupsIndex();
-            cstFinanceiroIndex record_cstFinanceiroIndex = new cstFinanceiroIndex
+            CstFinanceiroIndex record_cstFinanceiroIndex = new CstFinanceiroIndex
             {
                 FinanceiroIndex_id_cliente = 0,
                 FinanceiroIndex_data1 = LibDateTime.getPrimeiroDiaMesAtual(),
@@ -169,13 +169,16 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region Transferir Conta Caixa
-        public ActionResult modalTransferirContaCaixa(String id)
+        public ActionResult ModalTransferirContaCaixa(String id)
         {
             preencherComboTransferirContaCaixa();
             ViewBag.Title = "Transferir Financeiro - Conta Caixa";
-            cstFinanceiroTransferirContaCaixa newRecord = new cstFinanceiroTransferirContaCaixa();
+            jQueryDataTableParamModel param = new jQueryDataTableParamModel();
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, true, db);
+            ViewBag.filterAtivo = record_g_filtro != null && record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
+            CstFinanceiroTransferirContaCaixa newRecord = new CstFinanceiroTransferirContaCaixa();
             newRecord.data_vencimento = LibDateTime.getDataHoraBrasilia();
-            return View(newRecord);
+            return View("ModalTransferirContaCaixa", newRecord);
         }
 
         public void preencherComboTransferirContaCaixa()
@@ -190,12 +193,20 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
-        public ActionResult ajaxTransferirContaCaixa(cstFinanceiroTransferirContaCaixa record_cstFinanceiroTransferirContaCaixa)
+        [ValidateAntiForgeryToken]
+        public ActionResult AjaxTransferirContaCaixa(CstFinanceiroTransferirContaCaixa record_cstFinanceiroTransferirContaCaixa)
         {
             bool sucesso = false;
             String msgRetorno = String.Empty;
             String SentencaSQLTemp = string.Empty;
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
+
+            jQueryDataTableParamModel param = new jQueryDataTableParamModel();
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, true, db);
+            if (record_g_filtro != null)
+            {
+                SentencaSQLTemp = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim();
+            }
 
             if (SentencaSQLTemp.Equals(String.Empty))
             {
@@ -402,7 +413,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxSaveFinanceiroAvulso(cstFinanceiroLancamentos record_cstFinanceiroLancamentos)
+        public ActionResult AjaxSaveFinanceiroAvulso(CstFinanceiroLancamentos record_cstFinanceiroLancamentos)
         {
             bool sucesso = false;
             String msgRetorno = "";
@@ -789,6 +800,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxGerarRemessaBoletosBancarios(g_contas_caixas view_record_g_contas_caixas)
         {
             bool sucesso = true;
@@ -1643,6 +1655,7 @@ namespace GdiPlataform.Areas.g.Controllers
 
         #region Boletos Bancários - Envio por Email
         [HttpPost]
+        [GdiValidateAntiForgeryToken]
         public ActionResult ajaxEnviarBoletosEmail()
         {
             bool sucesso = true;
@@ -1734,7 +1747,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                   where _f.id_financeiro == id_financeiro
                                   select new { tableFinanceiro = _f, tableClientes = _c, tableContasCaixas = _cc }).ToList();
 
-                cstFinanceiroBoletos record_cstFinanceiroBoletos = new cstFinanceiroBoletos();
+                CstFinanceiroBoletos record_cstFinanceiroBoletos = new CstFinanceiroBoletos();
 
                 if (allRecords.Count > 0)
                 {
@@ -1794,6 +1807,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxCancelarTitulos(g_financeiro modal_g_financeiro)
         {
             return null;
@@ -1810,6 +1824,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxBaixarTitulos(g_financeiro modal_g_financeiro)
         {
             bool sucesso = false;
@@ -1871,7 +1886,7 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult ModalProrrogarVencimentoTitulo(String idFinanceiro)
         {
             ViewBag.Title = "Prorrogar Vencimento Título";
-            cstFinanceiroProrrogarVencimentoTitulos record_cstFinanceiroProrrogarVencimentoTitulos = new cstFinanceiroProrrogarVencimentoTitulos
+            CstFinanceiroProrrogarVencimentoTitulos record_cstFinanceiroProrrogarVencimentoTitulos = new CstFinanceiroProrrogarVencimentoTitulos
             {
                 data_vencimento = DateTime.Now,
                 id_financeiro = int.Parse(idFinanceiro)
@@ -1881,7 +1896,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
 
         [HttpPost]
-        public ActionResult AjaxSimularProrrogarVencimentoTitulos(cstFinanceiroProrrogarVencimentoTitulos record_cstFinanceiroProrrogarVencimentoTitulos)
+        [ValidateAntiForgeryToken]
+        public ActionResult AjaxSimularProrrogarVencimentoTitulos(CstFinanceiroProrrogarVencimentoTitulos record_cstFinanceiroProrrogarVencimentoTitulos)
         {
             bool sucesso = false;
             String msgRetorno = String.Empty;
@@ -1957,7 +1973,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
 
         [HttpPost]
-        public ActionResult AjaxProrrogarVencimentoTitulo(cstFinanceiroProrrogarVencimentoTitulos record_cstFinanceiroProrrogarVencimentoTitulos)
+        [ValidateAntiForgeryToken]
+        public ActionResult AjaxProrrogarVencimentoTitulo(CstFinanceiroProrrogarVencimentoTitulos record_cstFinanceiroProrrogarVencimentoTitulos)
         {
             bool sucesso = false;
             String msgRetorno = String.Empty;
@@ -2051,6 +2068,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult AjaxEditarTitulo(g_financeiro modal_g_financeiro)
         {
             bool sucesso = false;

@@ -8,9 +8,6 @@
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <h5>@Html.Raw(ViewBag.TituloAuxiliar)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
                 @Html.HiddenFor(model => model.id_movimento)
@@ -86,7 +83,7 @@
             $.fn.dataTable.ext.errMode = 'none';
             TableRecebimentoImportacao = $('#dtGcRecebimentoImportacao')
                 .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff); })
+                .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; })
                 .DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
@@ -109,9 +106,6 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
-                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
                         yesCustomField01: emptyIfNull($('#id_movimento').val()).toString(),
                         yesCustomField02: emptyIfNull($('#tag_string').val()).toString(),
                     };

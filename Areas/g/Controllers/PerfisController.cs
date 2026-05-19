@@ -20,6 +20,7 @@ namespace GdiPlataform.Areas.g.Controllers
     public class PerfisController : Controller
     {
         private GdiPlataformEntities db;
+        private readonly String controllerName = "g_Perfis";
 
         public PerfisController()
         {
@@ -33,70 +34,175 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Perfis";
-            return View();
+            var model = new CstPerfisIndex
+            {
+                PerfisIndex_id_perfil = String.Empty,
+                PerfisIndex_nome = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, nomeRestore;
+            if (TryParseFiltroPerfisSemicolon(filtroPersistido.sql_filtro, out idRestore, out nomeRestore))
+            {
+                model.PerfisIndex_id_perfil = idRestore;
+                model.PerfisIndex_nome = nomeRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(nomeRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Perfis_*,g_Perfis_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
-            const string filterOnOff = "0";
+            string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            var allRecords = new List<Db.g_perfis>(); // Lista vazia - Inicialização
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Perfil Adm visualiza todos os registros independente de Coligada e Filial
-            allRecords = db.g_perfis.Where(p => p.id_perfil > 1).OrderBy(p => p.nome).ToList();
-
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_perfis, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_perfil) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.nome :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_perfil); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.nome); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_perfil); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.nome); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
-            {
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_perfil.ToString(),
-                                    c.nome.ToString()
-                                });
-            }
+                var baseQuery = db.g_perfis.AsNoTracking().Where(p => p.id_perfil > 1);
+                int totalRecords = baseQuery.Count();
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroPerfisSemicolon(recordFiltro.sql_filtro, out idStr, out nomeStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_perfis> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroPerfisNaQuery(query, idStr, nomeStr);
+                    LibDB.setFilterByUser(MontarFiltroPerfisPersistido(idStr, nomeStr), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoPerfisNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(p => new { p.id_perfil, p.nome })
+                    .ToList();
+
+                var list = page.Select(p => new[]
+                {
+                    "",
+                    p.id_perfil.ToString(),
+                    p.nome ?? ""
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroPerfisSemicolon(string raw, out string id, out string nome)
+        {
+            id = nome = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            nome = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(nome);
+        }
+
+        private static string MontarFiltroPerfisPersistido(string id, string nome)
+        {
+            return (id ?? String.Empty) + ";" + (nome ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_perfis> AplicarFiltroPerfisNaQuery(IQueryable<Db.g_perfis> query, string idStr, string nomeStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idPerfil))
+            {
+                query = query.Where(p => p.id_perfil == idPerfil);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
+            {
+                query = query.Where(p => p.nome != null && DbFunctions.Like(p.nome, padraoNome));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_perfis> AplicarOrdenacaoPerfisNaQuery(IQueryable<Db.g_perfis> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 2)
+                {
+                    return asc ? query.OrderBy(p => p.nome) : query.OrderByDescending(p => p.nome);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(p => p.id_perfil) : query.OrderByDescending(p => p.id_perfil);
+                }
+            }
+            return query.OrderBy(p => p.id_perfil);
         }
         #endregion
 
@@ -105,14 +211,14 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Create()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Perfil</b";
-            cstViewPerfisAcessosModel record_YesPerfisAcessosModel = new cstViewPerfisAcessosModel();
+            CstViewPerfisAcessosModel record_YesPerfisAcessosModel = new CstViewPerfisAcessosModel();
             return View("CreateEdit", record_YesPerfisAcessosModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Perfis_*,g_Perfis_Actioncreate")]
-        public ActionResult Create(cstViewPerfisAcessosModel record_YesPerfisAcessosModel)
+        public ActionResult Create(CstViewPerfisAcessosModel record_YesPerfisAcessosModel)
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Perfil</b";
             record_YesPerfisAcessosModel.g_perfis.id_coligada = 1;
@@ -169,7 +275,7 @@ namespace GdiPlataform.Areas.g.Controllers
             }
 
             // Novo Modelo
-            cstViewPerfisAcessosModel record_YesPerfisAcessosModel = new cstViewPerfisAcessosModel();
+            CstViewPerfisAcessosModel record_YesPerfisAcessosModel = new CstViewPerfisAcessosModel();
             record_YesPerfisAcessosModel.g_perfis = record_g_perfis;
 
              // Perfis Acessos
@@ -194,16 +300,16 @@ namespace GdiPlataform.Areas.g.Controllers
             "and a_sistemas.ativo = 1 " +
             "and a_sistemas_modulos.ativo = 1 " +
             "order by a_sistemas_controllers.id_sistema, a_sistemas_grupos.nome, a_sistemas_controllers.title_perfil ";
-            var allCustomAcessosN1 = db.Database.SqlQuery<cstPerfisAcessos>(sqlTempAcessos).ToList();
-            //var allCustomAcessosN2 = db.Database.SqlQuery<cstPerfisAcessos>(sqlTempAcessos).ToList();
+            var allCustomAcessosN1 = db.Database.SqlQuery<CstPerfisAcessos>(sqlTempAcessos).ToList();
+            //var allCustomAcessosN2 = db.Database.SqlQuery<CstPerfisAcessos>(sqlTempAcessos).ToList();
 
-            foreach (cstPerfisAcessos ItemN1 in allCustomAcessosN1)
+            foreach (CstPerfisAcessos ItemN1 in allCustomAcessosN1)
             {
                 if (ItemN1.id_sistema_controller_pai == 0)
                 {
                     record_YesPerfisAcessosModel.allCstPerfisAcessos.Add(ItemN1);
                     var allCustomAcessosN2 = allCustomAcessosN1.Where(n => n.id_sistema_controller_pai == ItemN1.id_sistema_controller).ToList();
-                    foreach (cstPerfisAcessos ItemN2 in allCustomAcessosN2)
+                    foreach (CstPerfisAcessos ItemN2 in allCustomAcessosN2)
                     {
                         ItemN2.title_perfil = "-&nbsp;-&nbsp;-&nbsp;-&nbsp;-&nbsp;&nbsp;" + ItemN2.title_perfil;
                         record_YesPerfisAcessosModel.allCstPerfisAcessos.Add(ItemN2);
@@ -223,7 +329,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Perfis_*,g_Perfis_Actionupdate")]
-        public ActionResult Edit(cstViewPerfisAcessosModel record_YesPerfisAcessosModel)
+        public ActionResult Edit(CstViewPerfisAcessosModel record_YesPerfisAcessosModel)
         {
             if (ModelState.IsValid)
             {
@@ -249,7 +355,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     if ((CachePersister.userIdentity.Administrador == true) || (CachePersister.userIdentity.IdPerfil > 0)) // (somente os administradores tem esse acesso)
                     {
                         db.g_perfis_acessos.RemoveRange(db.g_perfis_acessos.Where(x => x.id_perfil == RecordGPerfis.id_perfil));
-                        foreach (cstPerfisAcessos itemcstPerfisAcessos in record_YesPerfisAcessosModel.allCstPerfisAcessos)
+                        foreach (CstPerfisAcessos itemcstPerfisAcessos in record_YesPerfisAcessosModel.allCstPerfisAcessos)
                         {
                             if (itemcstPerfisAcessos.id_sistema_controller == 130) 
                             {

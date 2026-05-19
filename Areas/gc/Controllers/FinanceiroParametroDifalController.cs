@@ -6,6 +6,7 @@ using System.Data.Entity.Validation;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
@@ -30,112 +31,194 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Parâmetros Difal";
-            return View();
+            var model = new CstFinanceiroParametroDifalIndex
+            {
+                FinanceiroParametroDifalIndex_id = String.Empty,
+                FinanceiroParametroDifalIndex_sigla = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, siglaRestore;
+            if (TryParseFiltroDifalSemicolon(filtroPersistido.sql_filtro, out idRestore, out siglaRestore))
+            {
+                model.FinanceiroParametroDifalIndex_id = idRestore;
+                model.FinanceiroParametroDifalIndex_sigla = siglaRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(siglaRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_FinanceiroParametroDifal_*,gc_FinanceiroParametroDifal_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
+            string filterOnOff = "0";
             if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-            var allRecords = new List<Db.gc_parametros_difal>();
-            List<string[]> list = new List<string[]>();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Verificação se há algum filtro ativo
-            if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
-
-            if ((filterDb == false) && (filterAdvanced == false))
-            {
-                // Não há filtro
-                //allRecords = db.g_cidades.Where(c => c.ativo == true).ToList();
-                allRecords = db.gc_parametros_difal.ToList();
-            }
-            if (filterDb)
-            {
-                SentencaSQL = string.Empty;
-                if (record_g_filtro.advanced == true)
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim();
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    SentencaSQL = "select * from gc_parametros_difal where id_parametro_difal > 1 and " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim();
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
 
-                allRecords = db.gc_parametros_difal.SqlQuery(SentencaSQL).ToList();
-            }
+                var baseQuery = db.gc_parametros_difal.AsNoTracking().Where(c => c.id_parametro_difal > 1);
+                int totalRecords = baseQuery.Count();
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.gc_parametros_difal, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_parametro_difal) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.sigla :
-                                     "");
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string siglaStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(siglaStr);
 
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                if (!hasInline && !listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_parametro_difal); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.sigla); }
+                    TryParseFiltroDifalSemicolon(recordFiltro.sql_filtro, out idStr, out siglaStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(siglaStr);
                 }
-                else
+
+                if (!listarTodosExplicito && !hasInline)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_parametro_difal); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.sigla); }
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
                 }
-            }
 
-            foreach (var c in displayedRecords)
-            {
-                String _DifalGeralCalcular = c.difal_geral_calcular == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Calcular - Sim", "green", "") : "";
-                String _DifalGeralZerar = c.difal_geral_zerar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Zerar - Sim", "green", "") : "";
-                String _DifalGeralNaoinformar = c.difal_geral_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Não Informar - Sim", "green", "") : "";
-                String _DifalCombCalcular = c.difal_comb_calcular == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Calcular - Sim", "green", "") : "";
-                String _DifalCombZerar = c.difal_comb_zerar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Zerar - Sim", "green", "") : "";
-                String _DifalCombNaoinformar = c.difal_comb_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Não Informar - Sim", "green", "") : "";
+                IQueryable<Db.gc_parametros_difal> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroDifalNaQuery(query, idStr, siglaStr);
+                    LibDB.setFilterByUser(MontarFiltroDifalPersistido(idStr, siglaStr), controllerName, true, db);
+                }
 
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_parametro_difal.EmptyIfNull().ToString(),
-                                    c.sigla.EmptyIfNull().ToString(),
-                                    c.estado.EmptyIfNull().ToString(),
-                                    _DifalGeralCalcular, _DifalGeralZerar, _DifalGeralNaoinformar,
-                                    _DifalCombCalcular, _DifalCombZerar, _DifalCombNaoinformar
-                }); 
-            }
-            String filterOnOff = "0";
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 30 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                query = AplicarOrdenacaoDifalNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .ToList();
+
+                var list = new List<string[]>();
+                foreach (var c in page)
+                {
+                    string _DifalGeralCalcular = c.difal_geral_calcular == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Calcular - Sim", "green", "") : "";
+                    string _DifalGeralZerar = c.difal_geral_zerar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Zerar - Sim", "green", "") : "";
+                    string _DifalGeralNaoinformar = c.difal_geral_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Geral Não Informar - Sim", "green", "") : "";
+                    string _DifalCombCalcular = c.difal_comb_calcular == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Calcular - Sim", "green", "") : "";
+                    string _DifalCombZerar = c.difal_comb_zerar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Zerar - Sim", "green", "") : "";
+                    string _DifalCombNaoinformar = c.difal_comb_naoinformar == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Difal Combustível Não Informar - Sim", "green", "") : "";
+                    list.Add(new[]
+                    {
+                        "",
+                        c.id_parametro_difal.EmptyIfNull().ToString(),
+                        c.sigla.EmptyIfNull().ToString(),
+                        c.estado.EmptyIfNull().ToString(),
+                        _DifalGeralCalcular, _DifalGeralZerar, _DifalGeralNaoinformar,
+                        _DifalCombCalcular, _DifalCombZerar, _DifalCombNaoinformar
+                    });
+                }
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
-                return JsonDataTableException(e, param);
+                return JsonDataTableException(e, param, filterOnOff);
             }
         }
 
-        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroDifalSemicolon(string raw, out string id, out string sigla)
+        {
+            id = sigla = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            sigla = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(sigla);
+        }
+
+        private static string MontarFiltroDifalPersistido(string id, string sigla)
+        {
+            return (id ?? String.Empty) + ";" + (sigla ?? String.Empty);
+        }
+
+        private static IQueryable<Db.gc_parametros_difal> AplicarFiltroDifalNaQuery(IQueryable<Db.gc_parametros_difal> query, string idStr, string siglaStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idParametro))
+            {
+                query = query.Where(c => c.id_parametro_difal == idParametro);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemCodigo(siglaStr, out string padraoSigla))
+            {
+                query = query.Where(c => c.sigla != null && DbFunctions.Like(c.sigla, padraoSigla));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.gc_parametros_difal> AplicarOrdenacaoDifalNaQuery(IQueryable<Db.gc_parametros_difal> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 2)
+                {
+                    return asc ? query.OrderBy(c => c.sigla) : query.OrderByDescending(c => c.sigla);
+                }
+                if (param.iSortCol_0 == 3)
+                {
+                    return asc ? query.OrderBy(c => c.estado) : query.OrderByDescending(c => c.estado);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(c => c.id_parametro_difal) : query.OrderByDescending(c => c.id_parametro_difal);
+                }
+            }
+            return query.OrderBy(c => c.id_parametro_difal);
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
             string errorMessage = LibExceptions.getExceptionShortMessage(e);
             return Json(new
@@ -143,7 +226,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 errorMessage = errorMessage,
                 severity = "error",
                 stackTrace = e.ToString(),
-                yesFilterOnOff = "0",
+                yesFilterOnOff = yesFilterOnOff ?? "0",
                 sEcho = param != null ? param.sEcho : null,
                 iTotalRecords = 0,
                 iTotalDisplayRecords = 0,

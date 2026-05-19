@@ -6,6 +6,7 @@ using System.Data.Entity.Validation;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.GDI;
@@ -18,6 +19,7 @@ namespace GdiPlataform.Areas.gc.Controllers
     public class EstoqueControleController : Controller
     {
         private GdiPlataformEntities db;
+        private readonly string controllerName = "gc_EstoqueControle";
 
         public EstoqueControleController()
         {
@@ -31,76 +33,210 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Produtos - Controles e Aferições";
-            return View();
+            var model = new CstEstoqueControleIndex
+            {
+                EstoqueControleIndex_id = String.Empty,
+                EstoqueControleIndex_serial = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, serialRestore;
+            if (TryParseFiltroEstoqueControleSemicolon(filtroPersistido.sql_filtro, out idRestore, out serialRestore))
+            {
+                model.EstoqueControleIndex_id = idRestore;
+                model.EstoqueControleIndex_serial = serialRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(serialRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueControle,gc_EstoqueControle_*,gc_EstoqueControle_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
+            string filterOnOff = "0";
             if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            var allRecords = new List<Db.g_produtos_controle>();
-            var allRecordsProdutos = db.g_produtos.Select(p => new { p.id_produto, p.descricao }).ToList();
-            var allRecordsProdutosStatus = db.g_produtos_status.Select(s => new { s.id_produto_status, s.descricao }).ToList();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Perfil Adm visualiza todos os registros independente de Coligada e Filial
-            allRecords = db.g_produtos_controle.Where(p => p.id_produto > 0 && p.ativo == true).OrderBy(p => p.id_produto).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_produtos_controle, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_produto) :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_produto); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_produto); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
-            {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_produto_controle.ToString(),
-                                    c.serial.EmptyIfNull().ToString(),
-                                    allRecordsProdutos.Find(p => p.id_produto == c.id_produto)?.descricao.EmptyIfNull().ToString() ?? "",
-                                    allRecordsProdutosStatus.Find(s => s.id_produto_status == c.id_produto_status)?.descricao.EmptyIfNull().ToString() ?? "",
-                                    c.lote.EmptyIfNull().ToString(),
-                                    c.data_validade.EmptyIfNull().ToString(),
-                                    "" // Botão Editar
-                                }); ;
-            }
+                var baseQuery = db.g_produtos_controle.AsNoTracking()
+                    .Where(p => p.id_produto > 0 && p.ativo == true);
+                int totalRecords = baseQuery.Count();
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = "0",
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string serialStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(serialStr);
+
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroEstoqueControleSemicolon(recordFiltro.sql_filtro, out idStr, out serialStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(serialStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_produtos_controle> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroEstoqueControleNaQuery(query, idStr, serialStr);
+                    LibDB.setFilterByUser(MontarFiltroEstoqueControlePersistido(idStr, serialStr), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoEstoqueControleNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(c => new
+                    {
+                        c.id_produto_controle,
+                        c.serial,
+                        c.id_produto,
+                        c.id_produto_status,
+                        c.lote,
+                        c.data_validade
+                    })
+                    .ToList();
+
+                var produtoIds = page.Where(c => c.id_produto > 0).Select(c => c.id_produto).Distinct().ToList();
+                var statusIds = page.Where(c => c.id_produto_status > 0).Select(c => c.id_produto_status).Distinct().ToList();
+                var produtosPorId = produtoIds.Count == 0
+                    ? new Dictionary<int, string>()
+                    : db.g_produtos.AsNoTracking()
+                        .Where(p => produtoIds.Contains(p.id_produto))
+                        .Select(p => new { p.id_produto, p.descricao })
+                        .ToList()
+                        .ToDictionary(p => p.id_produto, p => p.descricao ?? String.Empty);
+                var statusPorId = statusIds.Count == 0
+                    ? new Dictionary<int, string>()
+                    : db.g_produtos_status.AsNoTracking()
+                        .Where(s => statusIds.Contains(s.id_produto_status))
+                        .Select(s => new { s.id_produto_status, s.descricao })
+                        .ToList()
+                        .ToDictionary(s => s.id_produto_status, s => s.descricao ?? String.Empty);
+
+                var list = page.Select(c => new[]
+                {
+                    "",
+                    c.id_produto_controle.ToString(),
+                    c.serial.EmptyIfNull().ToString(),
+                    produtosPorId.TryGetValue(c.id_produto, out string nomeProduto) ? nomeProduto : String.Empty,
+                    statusPorId.TryGetValue(c.id_produto_status, out string nomeStatus) ? nomeStatus : String.Empty,
+                    c.lote.EmptyIfNull().ToString(),
+                    c.data_validade.EmptyIfNull().ToString()
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
-                return JsonDataTableException(e, param);
+                return JsonDataTableException(e, param, filterOnOff);
             }
         }
 
-        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroEstoqueControleSemicolon(string raw, out string id, out string serial)
+        {
+            id = serial = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            serial = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(serial);
+        }
+
+        private static string MontarFiltroEstoqueControlePersistido(string id, string serial)
+        {
+            return (id ?? String.Empty) + ";" + (serial ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_produtos_controle> AplicarFiltroEstoqueControleNaQuery(
+            IQueryable<Db.g_produtos_controle> query, string idStr, string serialStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idControle))
+            {
+                query = query.Where(c => c.id_produto_controle == idControle);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemCodigo(serialStr, out string padraoSerial))
+            {
+                query = query.Where(c => c.serial != null && DbFunctions.Like(c.serial, padraoSerial));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_produtos_controle> AplicarOrdenacaoEstoqueControleNaQuery(
+            IQueryable<Db.g_produtos_controle> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 2)
+                {
+                    return asc ? query.OrderBy(c => c.serial) : query.OrderByDescending(c => c.serial);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(c => c.id_produto_controle) : query.OrderByDescending(c => c.id_produto_controle);
+                }
+            }
+            return query.OrderBy(c => c.id_produto_controle);
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
             string errorMessage = LibExceptions.getExceptionShortMessage(e);
             return Json(new
@@ -108,7 +244,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 errorMessage = errorMessage,
                 severity = "error",
                 stackTrace = e.ToString(),
-                yesFilterOnOff = "0",
+                yesFilterOnOff = yesFilterOnOff ?? "0",
                 sEcho = param != null ? param.sEcho : null,
                 iTotalRecords = 0,
                 iTotalDisplayRecords = 0,

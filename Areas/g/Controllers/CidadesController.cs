@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
@@ -32,130 +33,183 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Cidades";
-            return View();
+            var model = new CstCidadesIndex
+            {
+                CidadesIndex_id_cidade = String.Empty,
+                CidadesIndex_nome = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, nomeRestore;
+            if (TryParseFiltroCidadesSemicolon(filtroPersistido.sql_filtro, out idRestore, out nomeRestore))
+            {
+                model.CidadesIndex_id_cidade = idRestore;
+                model.CidadesIndex_nome = nomeRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(nomeRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Cidades_*,g_Cidades_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
             string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-            var allRecords = new List<Db.g_cidades>();
-            List<string[]> list = new List<string[]>();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Verificação se há algum filtro ativo
-            if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
-
-            if ((filterDb == false) && (filterAdvanced == false))
-            {
-                // Não há filtro
-                //allRecords = db.g_cidades.Where(c => c.ativo == true).ToList();
-                allRecords = db.g_cidades.ToList();
-            }
-            if (filterDb)
-            {
-                SentencaSQL = string.Empty;
-                if (record_g_filtro.advanced == true) 
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim();
-                }
-                else 
-                {
-                    SentencaSQL = "select * from g_cidades where id_cidade > 1 and " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim();
-                }
-                
-                allRecords = db.g_cidades.SqlQuery(SentencaSQL).ToList();
-            }
-            else if (filterAdvanced)
-            {
-                // Filtro Avançado
-                String[] listaCampos = null;
-                SentencaSQL = string.Empty;
-                try { listaCampos = param.yesFilterAdvancedText.EmptyIfNull().ToString().Split(';'); } catch (Exception) { listaCampos = new string[1] { "" }; };
-
-                if (listaCampos.Count() == 2)
-                {
-                    SentencaSQL = " select c.* from g_cidades c where id_cidade > 1 and c.id_cidade is not null";
-                    if ((!listaCampos[0].ToString().Trim().Equals(String.Empty)) && (!listaCampos[0].ToString().Trim().Equals("0")))
-                    {
-                        SentencaSQL += " and c.id_cidade = " + listaCampos[0].ToString().Trim();
-                    }
-                    if (!listaCampos[1].ToString().Trim().Equals(String.Empty))
-                    {
-                        SentencaSQL += " and c.nome like '%" + listaCampos[1].ToString().Trim() + "%'";
-                    }
-                    LibDB.setFilterByUser(SentencaSQL, controllerName, true, db);
-                    allRecords = db.g_cidades.SqlQuery(SentencaSQL.ToString()).ToList();
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    //allRecords = db.g_cidades.Where(c => c.ativo == true).ToList();
-                    allRecords = db.g_cidades.ToList();
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_cidades, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_cidade) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.nome :
-                                     "");
+                // id 1 pode ser cidade real (ex.: Belo Horizonte); excluir apenas id inválido 0
+                var baseQuery = db.g_cidades.AsNoTracking().Where(c => c.id_cidade > 0);
+                int totalRecords = baseQuery.Count();
 
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
 
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                if (!hasInline && !listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_cidade); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.nome); }
+                    TryParseFiltroCidadesSemicolon(recordFiltro.sql_filtro, out idStr, out nomeStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
                 }
-                else
+
+                if (!listarTodosExplicito && !hasInline)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_cidade); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.nome); }
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
                 }
-            }
 
-            foreach (var c in displayedRecords)
-            {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
+                IQueryable<Db.g_cidades> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroCidadesNaQuery(query, idStr, nomeStr);
+                    LibDB.setFilterByUser(MontarFiltroCidadesPersistido(idStr, LibStringFormat.NormalizarTermoBuscaTexto(nomeStr)), controllerName, true, db);
+                }
 
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_cidade.ToString(),
-                                    _ativo,
-                                    c.nome.ToString()
-                                });
-            }
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+                query = AplicarOrdenacaoCidadesNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(c => new { c.id_cidade, c.ativo, c.nome })
+                    .ToList();
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                var list = page.Select(c =>
+                {
+                    string _ativo = c.ativo == true
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
+                    return new[]
+                    {
+                        "",
+                        c.id_cidade.ToString(),
+                        _ativo,
+                        c.nome ?? ""
+                    };
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroCidadesSemicolon(string raw, out string id, out string nome)
+        {
+            id = nome = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            nome = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(nome);
+        }
+
+        private static string MontarFiltroCidadesPersistido(string id, string nome)
+        {
+            return (id ?? String.Empty) + ";" + (nome ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_cidades> AplicarFiltroCidadesNaQuery(IQueryable<Db.g_cidades> query, string idStr, string nomeStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idCidade))
+            {
+                query = query.Where(c => c.id_cidade == idCidade);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoLike))
+            {
+                query = query.Where(c => c.nome != null && DbFunctions.Like(c.nome, padraoLike));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_cidades> AplicarOrdenacaoCidadesNaQuery(IQueryable<Db.g_cidades> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 3)
+                {
+                    return asc ? query.OrderBy(c => c.nome) : query.OrderByDescending(c => c.nome);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(c => c.id_cidade) : query.OrderByDescending(c => c.id_cidade);
+                }
+            }
+            return query.OrderBy(c => c.id_cidade);
         }
         #endregion
 
@@ -325,14 +379,6 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
-        }
-        #endregion
-
-        #region ModalFiltroAvancadoView
-        public ActionResult ModalFiltroAvancadoView(String id)
-        {
-            ViewBag.Title = "Cidades - Filtro Avançado";
-            return View();
         }
         #endregion
 

@@ -38,8 +38,57 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Clientes/Fornecedores";
-            if (CachePersister.userIdentity.IdPerfil == -800) { ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Clientes (Acesso Vendedor)"; };
-            return View();
+            if (CachePersister.userIdentity.IdPerfil == -800) { ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Clientes (Acesso Vendedor)"; }
+            PreencherLookupsClientesIndex();
+            var model = new CstClientesIndex
+            {
+                ClientesIndex_id_cliente = String.Empty,
+                ClientesIndex_id_cliente_lookup = 0,
+                ClientesIndex_cpf = String.Empty,
+                ClientesIndex_cnpj = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, idLookupRestore, razaoRestore, cpfRestore, cnpjRestore;
+            if (TryParseFiltroClientesSemicolon(filtroPersistido.sql_filtro, out idRestore, out idLookupRestore, out razaoRestore, out cpfRestore, out cnpjRestore))
+            {
+                model.ClientesIndex_id_cliente = idRestore;
+                int idLookup;
+                if (int.TryParse(idLookupRestore, out idLookup)) { model.ClientesIndex_id_cliente_lookup = idLookup; }
+                model.ClientesIndex_cpf = cpfRestore;
+                model.ClientesIndex_cnpj = cnpjRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore)
+                    || model.ClientesIndex_id_cliente_lookup > 0
+                    || !String.IsNullOrEmpty(cpfRestore)
+                    || !String.IsNullOrEmpty(cnpjRestore);
+            }
+            return View(model);
+        }
+
+        private void PreencherLookupsClientesIndex()
+        {
+            var comboClientes = new List<SelectListItem>();
+            try
+            {
+                IQueryable<g_clientes> listaDbClientes = db.g_clientes.Where(p => p.ativo == true);
+                if (CachePersister.userIdentity.IdPerfil == -800)
+                {
+                    int idVendedor = CachePersister.userIdentity.IdVendedor;
+                    listaDbClientes = listaDbClientes.Where(p => p.id_vendedor == idVendedor);
+                }
+                listaDbClientes = listaDbClientes.OrderBy(p => p.nome);
+                comboClientes.Add(new SelectListItem { Value = "0", Text = "[ SELECIONE O CLIENTE ]" });
+                foreach (g_clientes item in listaDbClientes)
+                {
+                    comboClientes.Add(new SelectListItem
+                    {
+                        Value = item.id_cliente.ToString(),
+                        Text = item.id_cliente.ToString("0000") + " - " + item.nome.EmptyIfNull().ToString()
+                    });
+                }
+            }
+            finally { }
+            ViewBag.comboClientes = comboClientes;
         }
 
         #region PreencherLookupsCreateEdit
@@ -179,20 +228,12 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
-        #region ModalFiltroAvancadoView
-        public ActionResult ModalFiltroAvancadoView(String id)
-        {
-            ViewBag.Title = "Clientes - Filtro Avançado";
-            return View();
-        }
-        #endregion
-
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Clientes_*,g_Clientes_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
             bool filterDb = false;
-            bool filterAdvanced = false;
+            bool filterInline = false;
             string errorMessage = "";
             string filterOnOff = "0";
 
@@ -218,9 +259,61 @@ namespace GdiPlataform.Areas.g.Controllers
 
             try
             {
-                var recordFiltro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-                if (!string.IsNullOrWhiteSpace(recordFiltro.sql_filtro)) filterDb = true;
-                else if (!string.IsNullOrWhiteSpace(param.yesFilterAdvancedText)) filterAdvanced = true;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
+
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
+                {
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                }
+                else
+                {
+                    recordFiltro = ObterFiltroPersistidoUsuario();
+                }
+
+                if (!string.IsNullOrWhiteSpace(recordFiltro.sql_filtro)
+                    && !TryParseFiltroClientesSemicolon(recordFiltro.sql_filtro, out _, out _, out _, out _, out _))
+                {
+                    filterDb = true;
+                }
+
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string idLookupStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                string cpfStr = NormalizarDocumentoFiltro(param.yesCustomField03.EmptyIfNull().ToString());
+                string cnpjStr = NormalizarDocumentoFiltro(param.yesCustomField04.EmptyIfNull().ToString());
+                string razaoLegado = String.Empty;
+
+                bool hasInline = TemCriterioFiltroClientesInline(idStr, idLookupStr, cpfStr, cnpjStr);
+
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    string idRestore, idLookupRestore, razaoRestore, cpfRestore, cnpjRestore;
+                    if (TryParseFiltroClientesSemicolon(recordFiltro.sql_filtro, out idRestore, out idLookupRestore, out razaoRestore, out cpfRestore, out cnpjRestore))
+                    {
+                        idStr = idRestore;
+                        idLookupStr = idLookupRestore;
+                        cpfStr = cpfRestore;
+                        cnpjStr = cnpjRestore;
+                        razaoLegado = razaoRestore;
+                        hasInline = TemCriterioFiltroClientesInline(idStr, idLookupStr, cpfStr, cnpjStr)
+                            || !String.IsNullOrWhiteSpace(razaoLegado);
+                    }
+                }
+
+                if (!listarTodosExplicito && !hasInline && !filterDb)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = 0,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
 
                 // ---------- Filtro complementar por perfil ----------
                 int? idVendedor = null;
@@ -243,8 +336,9 @@ namespace GdiPlataform.Areas.g.Controllers
                     idFilial = 1;
                 }
 
-                int start = param.iDisplayStart;
+                int start = Math.Max(0, param.iDisplayStart);
                 int length = (param.iDisplayLength <= 0 ? 20 : param.iDisplayLength);
+                if (length > 100) { length = 100; }
 
                 // ---------- Base WHERE (perfil + filtros) ----------
                 var whereParts = new List<string> { "c.id_cliente > 0" };
@@ -285,42 +379,13 @@ namespace GdiPlataform.Areas.g.Controllers
                     // vai duplicar nomes no comando. Ideal é que frag não use parâmetros, só literais/valores.
                     whereParts.Add("(" + frag + ")");
                 }
-                else if (filterAdvanced)
+                else if (hasInline)
                 {
-                    var campos = (param.yesFilterAdvancedText ?? "").Split(';');
-                    if (campos.Length == 5)
+                    filterInline = true;
+                    AplicarFiltroClientesInline(whereParts, args, idStr, idLookupStr, cpfStr, cnpjStr, razaoLegado);
+                    if (!listarTodosExplicito)
                     {
-                        string id = campos[0]?.Trim();
-                        string nome = campos[1]?.Trim();
-                        string razao = campos[2]?.Trim();
-                        string cpf = campos[3]?.Trim();
-                        string cnpj = campos[4]?.Trim();
-
-                        if (!string.IsNullOrWhiteSpace(id) && id != "0" && int.TryParse(id, out int idCli))
-                        {
-                            whereParts.Add("c.id_cliente = @idCliente");
-                            args["@idCliente"] = idCli;
-                        }
-                        if (!string.IsNullOrWhiteSpace(nome))
-                        {
-                            whereParts.Add("c.nome LIKE @nome");
-                            args["@nome"] = "%" + nome + "%";
-                        }
-                        if (!string.IsNullOrWhiteSpace(razao))
-                        {
-                            whereParts.Add("c.razao_social LIKE @razao");
-                            args["@razao"] = "%" + razao + "%";
-                        }
-                        if (!string.IsNullOrWhiteSpace(cpf))
-                        {
-                            whereParts.Add("c.cpf = @cpf");
-                            args["@cpf"] = cpf;
-                        }
-                        if (!string.IsNullOrWhiteSpace(cnpj))
-                        {
-                            whereParts.Add("c.cnpj = @cnpj");
-                            args["@cnpj"] = cnpj;
-                        }
+                        LibDB.setFilterByUser(MontarFiltroClientesPersistido(idStr, idLookupStr, cpfStr, cnpjStr), controllerName, true, db);
                     }
                 }
 
@@ -435,7 +500,7 @@ namespace GdiPlataform.Areas.g.Controllers
             });
                 }
 
-                if (filterDb || filterAdvanced) filterOnOff = "1";
+                if (filterDb || filterInline) filterOnOff = "1";
 
                 return Json(new
                 {
@@ -451,6 +516,104 @@ namespace GdiPlataform.Areas.g.Controllers
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
+            }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroClientesSemicolon(string raw, out string id, out string idLookup, out string razao, out string cpf, out string cnpj)
+        {
+            id = idLookup = razao = cpf = cnpj = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 5) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            idLookup = campos[1].EmptyIfNull().ToString().Trim();
+            razao = campos[2].EmptyIfNull().ToString().Trim();
+            cpf = campos[3].EmptyIfNull().ToString().Trim();
+            cnpj = campos[4].EmptyIfNull().ToString().Trim();
+            return !(String.IsNullOrEmpty(id) && String.IsNullOrEmpty(idLookup) && String.IsNullOrEmpty(razao)
+                && String.IsNullOrEmpty(cpf) && String.IsNullOrEmpty(cnpj));
+        }
+
+        private static string MontarFiltroClientesPersistido(string id, string idLookup, string cpf, string cnpj)
+        {
+            return (id ?? String.Empty) + ";" + (idLookup ?? String.Empty) + ";;" + (cpf ?? String.Empty) + ";" + (cnpj ?? String.Empty);
+        }
+
+        private static bool TemCriterioFiltroClientesInline(string idStr, string idLookupStr, string cpfStr, string cnpjStr)
+        {
+            return !String.IsNullOrWhiteSpace(idStr)
+                || (!String.IsNullOrWhiteSpace(idLookupStr) && idLookupStr != "0")
+                || !String.IsNullOrWhiteSpace(cpfStr)
+                || !String.IsNullOrWhiteSpace(cnpjStr);
+        }
+
+        private static string NormalizarDocumentoFiltro(string valor)
+        {
+            if (String.IsNullOrWhiteSpace(valor)) return String.Empty;
+            return new string(valor.Where(char.IsDigit).ToArray());
+        }
+
+        private static void AplicarFiltroClientesInline(
+            List<string> whereParts,
+            Dictionary<string, object> args,
+            string idStr,
+            string idLookupStr,
+            string cpfStr,
+            string cnpjStr,
+            string razaoLegado)
+        {
+            if (!String.IsNullOrWhiteSpace(idStr) && idStr != "0" && int.TryParse(idStr, out int idCli))
+            {
+                whereParts.Add("c.id_cliente = @idCliente");
+                args["@idCliente"] = idCli;
+            }
+            if (!String.IsNullOrWhiteSpace(idLookupStr) && idLookupStr != "0" && int.TryParse(idLookupStr, out int idLookup))
+            {
+                whereParts.Add("c.id_cliente = @idClienteLookup");
+                args["@idClienteLookup"] = idLookup;
+            }
+            else if (!String.IsNullOrWhiteSpace(idLookupStr))
+            {
+                int digitos;
+                if (int.TryParse(idLookupStr, out digitos) && digitos > 0)
+                {
+                    whereParts.Add("c.id_cliente = @idClienteLookup");
+                    args["@idClienteLookup"] = digitos;
+                }
+                else if (LibStringFormat.TryMontarPadraoLikeContemTexto(idLookupStr, out string padraoNome))
+                {
+                    whereParts.Add("c.nome LIKE @nome");
+                    args["@nome"] = padraoNome;
+                }
+            }
+            if (!String.IsNullOrWhiteSpace(razaoLegado)
+                && LibStringFormat.TryMontarPadraoLikeContemTexto(razaoLegado, out string padraoRazao))
+            {
+                whereParts.Add("c.razao_social LIKE @razao");
+                args["@razao"] = padraoRazao;
+            }
+            if (!String.IsNullOrWhiteSpace(cpfStr))
+            {
+                whereParts.Add("c.cpf = @cpf");
+                args["@cpf"] = cpfStr;
+            }
+            if (!String.IsNullOrWhiteSpace(cnpjStr))
+            {
+                whereParts.Add("c.cnpj = @cnpj");
+                args["@cnpj"] = cnpjStr;
             }
         }
         #endregion
@@ -1744,7 +1907,7 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Atualizar Limite de Crédito</b>";
             ViewBag.idCliente = idCliente;
             g_clientes record_g_clientes = db.g_clientes.Find(idCliente.GetValueOrDefault());
-            cstClienteLimiteCredito RecordLimiteCredito = new cstClienteLimiteCredito();
+            CstClienteLimiteCredito RecordLimiteCredito = new CstClienteLimiteCredito();
             RecordLimiteCredito.id_cliente = record_g_clientes.id_cliente;
             RecordLimiteCredito.limite_credito_atual = record_g_clientes.gc_limite_credito;
             RecordLimiteCredito.consulta_cadastral_data = LibDateTime.getDataHoraBrasilia();
@@ -1752,7 +1915,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalAtualizarLimiteCredito(cstClienteLimiteCredito RecordLimiteCredito)
+        public ActionResult AjaxModalAtualizarLimiteCredito(CstClienteLimiteCredito RecordLimiteCredito)
         {
             bool cadastrado = false;
             int QtdErros = 0;
@@ -1936,7 +2099,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                 String RetornoSintegraWS = String.Empty;
                                 RoboSintegraWS _RoboSintegraWS = new RoboSintegraWS();
                                 RetornoSintegraWS = _RoboSintegraWS.GetDadosSintegraCNPJ(Documento);
-                                cstRetornoSintegraWS _cstRetornoSintegraWS = new cstRetornoSintegraWS();
+                                CstRetornoSintegraWS _cstRetornoSintegraWS = new CstRetornoSintegraWS();
                                 var data = (JObject)JsonConvert.DeserializeObject(RetornoSintegraWS);
                                 try { _cstRetornoSintegraWS.sintegra_code = data["code"].Value<string>(); } catch (Exception) { };
                                 try { _cstRetornoSintegraWS.sintegra_status = data["status"].Value<string>(); } catch (Exception) { };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -6,7 +6,7 @@ using GdiPlataform.Lib;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstModelSalesOrderSC
+    public class CstModelSalesOrderSC
     {
         public string String_Item { get; set; }
         public int Int_Item { get; set; }
@@ -29,7 +29,7 @@ namespace GdiPlataform.Areas.gc.Models
         public string String_TotalPrice { get; set; }
         public decimal Decimal_TotalPrice { get; set; }
 
-        public cstModelSalesOrderSC()
+        public CstModelSalesOrderSC()
         {
             String_PN = string.Empty;
             String_PN_Auxiliar = string.Empty;

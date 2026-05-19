@@ -5,7 +5,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstPerfisAcessos
+    public class CstPerfisAcessos
     {
         public int id_sistema_controller { get; set; }
         public string grupo { get; set; }

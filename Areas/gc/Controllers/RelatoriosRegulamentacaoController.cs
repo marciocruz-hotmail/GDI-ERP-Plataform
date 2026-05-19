@@ -38,7 +38,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioANP
         public ActionResult ModalRelatorioANP(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - ANP";
@@ -46,7 +46,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioANP(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioANP(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -438,7 +438,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioIBAMA
         public ActionResult ModalRelatorioIBAMA(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - IBAMA";
@@ -446,7 +446,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioIBAMA(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioIBAMA(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -591,7 +591,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioPF
         public ActionResult ModalRelatorioPF(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - PF";
@@ -599,7 +599,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioPF(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioPF(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -751,7 +751,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioJoguelimpo
         public ActionResult ModalRelatorioJogueLimpo(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - Jogue Limpo";
@@ -759,7 +759,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioJogueLimpo(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioJogueLimpo(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;

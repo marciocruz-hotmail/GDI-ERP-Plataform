@@ -1,11 +1,20 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_contas_caixas>
+﻿@model GdiPlataform.Areas.g.Models.CstContasCaixasIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarContasCaixas = CachePersister.userIdentity.Roles.Contains("g_ContasCaixas_*")
+        || CachePersister.userIdentity.Roles.Contains("g_ContasCaixas_Actionupdate");
+}
+<style>
+    .gdi-index-contascaixas-dt .btnGContasCaixasEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="ContasCaixas" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -14,28 +23,50 @@
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","ContasCaixas",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
-                @if ((CachePersister.userIdentity.Roles.Contains("g_ContasCaixas_*")) || (CachePersister.userIdentity.Roles.Contains("g_ContasCaixas_Actionupdate")))
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableContasCaixas, 'Id.', '@Url.Action("Edit","ContasCaixas",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
                 @if ((CachePersister.userIdentity.Roles.Contains("g_ContasCaixas_*")) || (CachePersister.userIdentity.Roles.Contains("g_ContasCaixas_Actiondelete")))
                 { <button type="button" name="btnRegistroExcluir" title="Excluir Registro" class="btn btn-outline-danger disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
                 else
                 { <button type="button" name="btnRegistroExcluir" title="Excluir Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
+
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.ContasCaixasIndex_id, new { @class = "form-control", @id = "edit_id_conta_caixa", @placeholder = "Id.", @onkeypress = "keypressedContasCaixas(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.ContasCaixasIndex_nome, new { @class = "form-control", @id = "edit_nome_conta_caixa", @placeholder = "Nome da conta", @onkeypress = "keypressedContasCaixas(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarContasCaixas" title="Pesquisar contas caixa" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarContasCaixas()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroContasCaixas" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroContasCaixas()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-contascaixas-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGContasCaixas">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGContasCaixas">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
-                                    <th>@Html.DisplayNameFor(model => model.id_conta_caixa)</th>
-                                    <th>@Html.DisplayNameFor(model => model.nome)</th>
-                                    <th>@Html.DisplayNameFor(model => model.banco)</th>
-                                    <th>@Html.DisplayNameFor(model => model.agencia)</th>
-                                    <th>@Html.DisplayNameFor(model => model.conta)</th>
+                                    <th>Id.</th>
+                                    <th>Nome</th>
+                                    <th>Banco</th>
+                                    <th>Agência</th>
+                                    <th>Conta</th>
                                     <th>Emissão Boleto</th>
+                                    @if (podeEditarContasCaixas)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar conta caixa"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -48,27 +79,97 @@
 </div>
 
 <script type="text/javascript">
-    var otableContasCaixas;
+    var otableGContasCaixas;
 
-	$(function ()
+    $(function ()
     {
         try
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroContasCaixas('0');
+            gdiAplicarFoco('#edit_id_conta_caixa', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsContasCaixasTemCriterioFiltro()) { jsAjaxPesquisarContasCaixas(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
+
+    function keypressedContasCaixas(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarContasCaixas();
+        }
+    }
+
+    function jsContasCaixasTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_conta_caixa').val()) || !isEmpty($('#edit_nome_conta_caixa').val());
+    }
+
+    function jsAtualizarIndicadorFiltroContasCaixas(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroContasCaixas',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todas as contas caixa'
+        });
+    }
+
+    function jsAjaxPesquisarContasCaixas()
+    {
+        try
+        {
+            if (!jsContasCaixasTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Nome).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando contas caixa...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGContasCaixas").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarContasCaixas] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroContasCaixas()
+    {
+        try
+        {
+            $('#edit_id_conta_caixa').val('');
+            $('#edit_nome_conta_caixa').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGContasCaixas").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroContasCaixas] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableContasCaixas = $('#dtGContasCaixas').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otableGContasCaixas = $('#dtGContasCaixas').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroContasCaixas(json.yesFilterOnOff);
+                }
+            }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -82,6 +183,10 @@
                         sEcho: d.draw,
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_conta_caixa').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_nome_conta_caixa').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -98,12 +203,21 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "40%", orderable: true, targets: [2] },
+                { "width": "6%", orderable: true, className: 'text-sm-center', targets: [1] },
+                { "width": "34%", orderable: true, targets: [2] },
                 { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
                 { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
                 { "width": "10%", orderable: false, className: 'text-sm-center', targets: [5] },
-                { "width": "18%", orderable: false, className: 'text-sm-center', targets: [6] }
+                { "width": "16%", orderable: false, className: 'text-sm-center', targets: [6] }
+                @if (podeEditarContasCaixas)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar conta caixa Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGContasCaixasEditRow d-inline-flex align-items-center" onclick="jsGContasCaixasEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -111,10 +225,15 @@
                 headerCheckbox: true
             },
             order: [[1, 'asc']],
-
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGContasCaixas [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Nome e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -143,16 +262,28 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGContasCaixas tbody').on('dblclick', 'tr td', function () {
-                var data = otableContasCaixas.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "ContasCaixas", new { Area = "g" })');
-            });
+            @if (podeEditarContasCaixas)
+            {
+                <text>$('#dtGContasCaixas tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
+                var data = otableGContasCaixas.row($(this).closest('tr')).data();
+                if (data) { jsGContasCaixasEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
 
-
+    function jsGContasCaixasEditRow(idPagRecCondicao)
+    {
+        try {
+            var id = parseInt(idPagRecCondicao, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "ContasCaixas", new { Area = "g" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGContasCaixasEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 </script>
-

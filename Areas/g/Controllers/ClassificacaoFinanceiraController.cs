@@ -425,7 +425,6 @@ namespace GdiPlataform.Areas.g.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
-        [CustomAuthorize(Roles = "*")]
         protected override void Dispose(bool disposing)
         {
             if (disposing)

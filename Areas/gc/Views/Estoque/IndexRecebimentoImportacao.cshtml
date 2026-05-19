@@ -7,9 +7,6 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -82,7 +79,7 @@
                 $.fn.dataTable.ext.errMode = 'none';
                 oTableIndexRecebimentoImportacao = $('#dtGcMovimentosIndexRecebimentoImportacao')
                     .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                    .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff); }).DataTable({
+                    .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; }).DataTable({
                     "drawCallback": function (settings) {
                         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                     },
@@ -100,9 +97,6 @@
                             iDisplayStart: d.start,
                             iDisplayLength: d.length,
                             yesFilterField: $('#yesFilterField').val().toString(),
-                            yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                            yesFilterText: $('#yesFilterText').val().toString(),
-                            yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
                         };
                     },
                     error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -121,7 +115,7 @@
                     { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                     { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
                     { "width": "12%", orderable: false, className: 'text-sm-center', targets: [2] },
-                    { "width": "40%", orderable: false, className: 'text-sm-start', targets: [3] },
+                    { "width": "46%", orderable: false, className: 'text-sm-start', targets: [3] },
                     { "width": "5%", orderable: false, className: 'text-sm-center', targets: [4] },
                     { "width": "5%", orderable: false, className: 'text-sm-center', targets: [5] },
                     { "width": "5%", orderable: false, className: 'text-sm-center', targets: [6] },

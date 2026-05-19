@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstNfeEmitente
+    public class CstNfeEmitente
     {
         public string CNPJ { get; set; }
         public string xNome { get; set; }
@@ -18,7 +18,7 @@ namespace GdiPlataform.Areas.gc.Models
         public string UF { get; set; }
         public string CEP { get; set; }
         public string fone { get; set; }
-        public cstNfeEmitente()
+        public CstNfeEmitente()
         {
             CNPJ = string.Empty;
             xNome = string.Empty;

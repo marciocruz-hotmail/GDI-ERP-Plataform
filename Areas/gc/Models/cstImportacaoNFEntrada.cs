@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstImportacaoNFEntrada
+    public class CstImportacaoNFEntrada
     {
         [Display(Name = "Tipo Movimento")]
         public int id_movimento_tipo { get; set; }

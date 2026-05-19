@@ -25,11 +25,11 @@ $removeList = @(
     "ModalProrrogarVencimentoTitulo.cshtml",
     "ModalGerarRemessaBoletosBancarios.cshtml",
     "ModalNfeEnviarPorEmailUnitario.cshtml",
-    "modalExportarDadosNfePDF.cshtml",
+    "ModalExportarDadosNfePDF.cshtml",
     "ModalGerarNfe.cshtml",
     "ModalAtualizarStatusNfe.cshtml",
     "ModalEnviarCancelamentoNfe.cshtml",
-    "modalCancelarNfe.cshtml",
+    "ModalCancelarNfe.cshtml",
     "ModalSincronizarLotesNfe.cshtml",
     "ModalImportarNfeLote.cshtml",
     "ModalImportarCnabBoletos.cshtml",
@@ -52,7 +52,7 @@ $removeList = @(
     "ModalCancelarInvoice.cshtml",
     "ModalNFEntradaCancelar.cshtml",
     "ModalNFEntradaGerarNF.cshtml",
-    "modalAtualizarFaturamentoGestorFranquia.cshtml",
+    "ModalAtualizarFaturamentoGestorFranquia.cshtml",
     "ModalImportarArquivoFaturamentoGestorFranquia.cshtml",
     "ModalEnviarEmailsClientes.cshtml",
     "ModalEnviarNFEmailCliente.cshtml",
@@ -60,7 +60,7 @@ $removeList = @(
     "ModalDesativarProdutoComex.cshtml",
     "ModalFinalizarInventario.cshtml",
     "ModalSolicitarBloqueioLogon.cshtml",
-    "modalUsuarioTrocarSenha.cshtml"
+    "ModalUsuarioTrocarSenha.cshtml"
 )
 
 # ModalCancelarLancamentos aparece em DUAS areas (g e gc) — processar por path

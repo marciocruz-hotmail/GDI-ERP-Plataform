@@ -32,150 +32,227 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Gestão de Contratos com Clientes";
-            return View();
+            var model = new CstContratosAviacaoIndex
+            {
+                ContratosAviacaoIndex_id = String.Empty,
+                ContratosAviacaoIndex_descricao = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, descRestore;
+            if (TryParseFiltroContratosAviacaoSemicolon(filtroPersistido.sql_filtro, out idRestore, out descRestore))
+            {
+                model.ContratosAviacaoIndex_id = idRestore;
+                model.ContratosAviacaoIndex_descricao = descRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(descRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContratosAviacao_*,g_ContratosAviacao_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
             string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-            List<g_contratos_aviacao_tipos> allContratosTipos = db.g_contratos_aviacao_tipos.Where(c => c.id_contrato_tipo > 0).ToList();
-            var allRecordsClientes = db.g_clientes.Select(c => new { c.id_cliente, c.nome }).ToList();
-            var allRecords = new List<Db.g_contratos_aviacao>();
-            List<string[]> list = new List<string[]>();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Verificação se há algum filtro ativo
-            if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
-
-            if ((filterDb == false) && (filterAdvanced == false))
-            {
-                allRecords = db.g_contratos_aviacao.Where(c => c.ativo == true).OrderByDescending(c => c.id_contrato).ToList();
-            }
-            if (filterDb)
-            {
-                SentencaSQL = string.Empty;
-                if (record_g_filtro.advanced == true)
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim();
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    SentencaSQL = "select * from g_contratos_aviacao where id_contrato > 1 and " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim() + " order by id_contrato desc";
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
 
-                allRecords = db.g_contratos_aviacao.SqlQuery(SentencaSQL).ToList();
-            }
-            else if (filterAdvanced)
-            {
-                // Filtro Avançado
-                String[] listaCampos = null;
-                SentencaSQL = string.Empty;
-                try { listaCampos = param.yesFilterAdvancedText.EmptyIfNull().ToString().Split(';'); } catch (Exception) { listaCampos = new string[1] { "" }; };
+                var baseQuery = db.g_contratos_aviacao.AsNoTracking().Where(c => c.id_contrato > 0);
+                int totalRecords = baseQuery.Count();
 
-                if (listaCampos.Count() == 5)
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string descStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(descStr);
+
+                if (!hasInline && !listarTodosExplicito)
                 {
-                    SentencaSQL = " select c.* from g_contratos_aviacao c where id_contrato > 0 and c.ativo = 1";
-                    if ((!listaCampos[0].ToString().Trim().Equals(String.Empty)) && (!listaCampos[0].ToString().Trim().Equals("0")))
+                    TryParseFiltroContratosAviacaoSemicolon(recordFiltro.sql_filtro, out idStr, out descStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(descStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
                     {
-                        SentencaSQL += " and ( c.id_contrato = '" + listaCampos[0].ToString().Trim() + "' )";
-                    }
-                    if ((!listaCampos[1].ToString().Trim().Equals(String.Empty)) && (!listaCampos[1].ToString().Trim().Equals("0")) && (!listaCampos[1].ToString().Trim().Equals("-1")))
-                    {
-                        SentencaSQL += " and ( c.id_cliente = '" + listaCampos[1].ToString().Trim() + "' )";
-                    }
-                    if (!listaCampos[2].ToString().Trim().Equals(String.Empty))
-                    {
-                        SentencaSQL += " and ( c.descricao like '%" + listaCampos[2].ToString().Trim() + "%' )";
-                    }
-                    if ((!listaCampos[3].ToString().Trim().Equals(String.Empty)) && (!listaCampos[4].ToString().Trim().Equals(String.Empty)))
-                    {
-                        SentencaSQL += " and ( c.data_assinatura between '" + DateTime.Parse(listaCampos[3].ToString().Trim()).ToString("yyyy-MM-dd") + " 00:00:00" + "' and '" + DateTime.Parse(listaCampos[4].ToString().Trim()).ToString("yyyy-MM-dd") + " 23:59:59') ";
-                    }
-                    SentencaSQL += " order by c.id_contrato desc";
-                    LibDB.setFilterByUser(SentencaSQL, controllerName, true, db);
-                    allRecords = db.g_contratos_aviacao.SqlQuery(SentencaSQL.ToString()).ToList();
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
                 }
-                else
-                {
-                    allRecords = db.g_contratos_aviacao.Where(c => c.ativo == true).OrderByDescending(c => c.id_contrato).ToList();
-                }
-            }
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_contratos_aviacao, string> orderingFunction = (c => param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_contrato) : "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(c => c.id_contrato);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+                IQueryable<Db.g_contratos_aviacao> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroContratosAviacaoNaQuery(query, idStr, descStr);
+                    LibDB.setFilterByUser(MontarFiltroContratosAviacaoPersistido(idStr, descStr), controllerName, true, db);
+                }
 
-            foreach (var c in displayedRecords)
-            {
-                String ContratoVigente = String.Empty;
-                String ContratoAnexo = String.Empty;
-                String TipoContrato = String.Empty;
-                String NomeCliente = String.Empty;
-                String DataAssinatura = String.Empty;
-                String DescricaoContrato = c.descricao.EmptyIfNull().ToString().ToLowerInvariant();
-                if (DescricaoContrato.Length > 40) { DescricaoContrato = DescricaoContrato.Substring(0, 40) + "..."; };
-                if (c.ativo == true)
-                {
-                    ContratoVigente = LibIcons.getIcon("fa-solid fa-clipboard-check", "Contrato Vigente", "#008000", "fa-lg");
-                    DataAssinatura = c.data_assinatura.GetValueOrDefault().ToString("dd/MM/yy");
-                }
-                else
-                {
-                    ContratoVigente = LibIcons.getIcon("fa-solid fa-clipboard-check", "Contrato Inativo", "", "fa-lg");
-                    DataAssinatura = "00/00/0000";
-                }
-                if (c.anexo == true) { ContratoAnexo = LibIcons.getIcon("fa-solid fa-file-pdf", "Contrato Anexo", "#008000", "fa-lg"); } else { ContratoAnexo = LibIcons.getIcon("fa-solid fa-file-pdf", "Contrato NÃO anexado", "#CACFD2", "fa-sm"); }
-                if (c.id_contrato_tipo > 0)
-                {
-                    var tipoCtr = allContratosTipos.FirstOrDefault(c1 => c1.id_contrato_tipo == c.id_contrato_tipo);
-                    TipoContrato = tipoCtr != null ? tipoCtr.descricao.EmptyIfNull().ToString() : String.Empty;
-                }
-                if (c.id_cliente > 0)
-                {
-                    var cli = allRecordsClientes.FirstOrDefault(c2 => c2.id_cliente == c.id_cliente);
-                    NomeCliente = cli != null ? cli.nome.ToString() : String.Empty;
-                }
-                list.Add(new[] {
-                    "", // Coluna de Seleção
-                    c.id_contrato.ToString(),
-                    ContratoVigente,
-                    ContratoAnexo,
-                    NomeCliente,
-                    TipoContrato,
-                    DataAssinatura,
-                    "" // Botão Download
-                }); ;
-            }
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+                query = AplicarOrdenacaoContratosAviacaoNaQuery(query, param);
+                var page = query.Skip(start).Take(length).ToList();
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                var clienteIds = page.Where(c => c.id_cliente > 0).Select(c => c.id_cliente).Distinct().ToList();
+                var tipoIds = page.Where(c => c.id_contrato_tipo > 0).Select(c => c.id_contrato_tipo).Distinct().ToList();
+                var clientesPorId = clienteIds.Count == 0
+                    ? new Dictionary<int, string>()
+                    : db.g_clientes.AsNoTracking()
+                        .Where(cl => clienteIds.Contains(cl.id_cliente))
+                        .Select(cl => new { cl.id_cliente, cl.nome })
+                        .ToList()
+                        .ToDictionary(cl => cl.id_cliente, cl => cl.nome ?? String.Empty);
+                var tiposPorId = tipoIds.Count == 0
+                    ? new Dictionary<int, string>()
+                    : db.g_contratos_aviacao_tipos.AsNoTracking()
+                        .Where(t => tipoIds.Contains(t.id_contrato_tipo))
+                        .Select(t => new { t.id_contrato_tipo, t.descricao })
+                        .ToList()
+                        .ToDictionary(t => t.id_contrato_tipo, t => t.descricao ?? String.Empty);
+
+                var list = page.Select(c => MontarLinhaContratoAviacao(c, clientesPorId, tiposPorId)).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private static string[] MontarLinhaContratoAviacao(
+            Db.g_contratos_aviacao c,
+            Dictionary<int, string> clientesPorId,
+            Dictionary<int, string> tiposPorId)
+        {
+            string contratoVigente;
+            string dataAssinatura;
+            if (c.ativo == true)
+            {
+                contratoVigente = LibIcons.getIcon("fa-solid fa-clipboard-check", "Contrato Vigente", "#008000", "fa-lg");
+                dataAssinatura = c.data_assinatura.GetValueOrDefault().ToString("dd/MM/yy");
+            }
+            else
+            {
+                contratoVigente = LibIcons.getIcon("fa-solid fa-clipboard-check", "Contrato Inativo", "", "fa-lg");
+                dataAssinatura = "00/00/0000";
+            }
+            string contratoAnexo = c.anexo == true
+                ? LibIcons.getIcon("fa-solid fa-file-pdf", "Contrato Anexo", "#008000", "fa-lg")
+                : LibIcons.getIcon("fa-solid fa-file-pdf", "Contrato NÃO anexado", "#CACFD2", "fa-sm");
+            string tipoContrato = String.Empty;
+            if (c.id_contrato_tipo > 0)
+            {
+                string descTipo;
+                if (tiposPorId.TryGetValue(c.id_contrato_tipo, out descTipo))
+                {
+                    tipoContrato = descTipo;
+                }
+            }
+            string nomeCliente = String.Empty;
+            if (c.id_cliente > 0)
+            {
+                string nomeCli;
+                if (clientesPorId.TryGetValue(c.id_cliente, out nomeCli))
+                {
+                    nomeCliente = nomeCli;
+                }
+            }
+            return new[]
+            {
+                "",
+                c.id_contrato.ToString(),
+                contratoVigente,
+                contratoAnexo,
+                nomeCliente,
+                tipoContrato,
+                dataAssinatura,
+                ""
+            };
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroContratosAviacaoSemicolon(string raw, out string id, out string descricao)
+        {
+            id = descricao = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            descricao = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(descricao);
+        }
+
+        private static string MontarFiltroContratosAviacaoPersistido(string id, string descricao)
+        {
+            return (id ?? String.Empty) + ";" + (descricao ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_contratos_aviacao> AplicarFiltroContratosAviacaoNaQuery(IQueryable<Db.g_contratos_aviacao> query, string idStr, string descStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idContrato))
+            {
+                query = query.Where(c => c.id_contrato == idContrato);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(descStr, out string padraoDesc))
+            {
+                query = query.Where(c => c.descricao != null && DbFunctions.Like(c.descricao, padraoDesc));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_contratos_aviacao> AplicarOrdenacaoContratosAviacaoNaQuery(IQueryable<Db.g_contratos_aviacao> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0 && param.iSortCol_0 == 1)
+            {
+                return asc ? query.OrderBy(c => c.id_contrato) : query.OrderByDescending(c => c.id_contrato);
+            }
+            return query.OrderByDescending(c => c.id_contrato);
         }
         #endregion 
 
@@ -450,22 +527,9 @@ namespace GdiPlataform.Areas.g.Controllers
             return Json(new { success = sucesso, msg = msgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
 
-        #region ModalFiltroAvancadoView
-        public ActionResult ModalFiltroAvancadoView(String id)
-        {
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
-            ViewBag.Title = "Contratos - Filtro Avançado";
-            cstModalFiltroAvancado ViewCstModalFiltroAvancado = new cstModalFiltroAvancado();
-            ViewCstModalFiltroAvancado.Field_Text_02 = "-1";
-            return View(ViewCstModalFiltroAvancado);
-        }
-        #endregion
-
-
         public ActionResult ModalUploadContratoAssinado(int? IdContrato)
         {
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             if (IdContrato > 0)
             {
                 g_contratos_aviacao record_g_contratos_aviacao = db.g_contratos_aviacao.Find(IdContrato);

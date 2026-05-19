@@ -1,41 +1,27 @@
 ﻿@model IEnumerable<GdiPlataform.Db.g_produtos>
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarProduto = CachePersister.userIdentity.Roles.Contains("g_Produtos_*")
+        || CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionupdate");
+    bool podeVerFichaEstoque = CachePersister.userIdentity.Roles.Contains("g_Produtos_*")
+        || CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionread");
+}
+<style>
+    .gdi-index-produtos-dt .btnGProdutosFichaEstoque { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
+                <input type="hidden" id="yesFilterController" value="Produtos" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
             <div class="card-header m-0 p-1">
 
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Produtos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionupdate")))
-                {
-                    <button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGProdutos, 'Id.', '@Url.Action("Edit","Produtos",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>
-                }
-                else
-                {
-                    <button type="button" name="btnRegistroVisualizar" title="Visualizar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGProdutos, 'Id.', '@Url.Action("Edit","Produtos",new { Area = "g" })/')"><i class="fa-regular fa-clipboard me-2" aria-hidden="true"></i>Visualizar</button>
-                }
-                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()">Filtro Avançado</button>
-
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Produtos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionread")))
-                {
-                    <div class="btn-group" role="group">
-                        <button id="btnGroupDrop2" type="button" class="btn btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Relatórios">
-                            <i class="fa-solid fa-print me-2" aria-hidden="true"></i>Relatórios
-                        </button>
-                        <div class="dropdown-menu" role="menu" aria-labelledby="btnGroupDrop2">
-                            <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalViewFichaEstoqueProduto(otableGProdutos, 'Id.')"><i class="fa-solid fa-warehouse me-2" aria-hidden="true"></i>Produtos - Ficha Estoque</a>
-                        </div>
-                    </div>
-                }
                 @if ((CachePersister.userIdentity.Roles.Contains("g_Produtos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionrun")))
                 {
                     int qtdMenus = 0;
@@ -54,7 +40,33 @@
                     </div>
                 }
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" id="edit_id_produto" placeholder="Id." value="@(ViewBag.RestoreFilterId ?? "")" onkeypress="keypressed(event);" />
+                        </div>
+                        @Html.Label("PN", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" id="edit_codigo" placeholder="PN" value="@(ViewBag.RestoreFilterPn ?? "")" onkeypress="keypressed(event);" />
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control" id="edit_nome" placeholder="Nome do produto" value="@(ViewBag.RestoreFilterNome ?? "")" onkeypress="keypressed(event);" />
+                        </div>
+                        <div class="col-sm-2 text-sm-start">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar produtos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarProdutos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroProdutos" name="btnLimparFiltroProdutos" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroProdutos()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                        <div class="col-sm-2 text-sm-start">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-produtos-dt" style="max-width: 100%; overflow-x: auto; ">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
                         <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGProdutos">
@@ -66,8 +78,16 @@
                                     <th>@Html.Encode("PN")</th>
                                     <th>@Html.Encode("Produto")</th>
                                     <th>@Html.DisplayName("Fob (US$)")</th>
-                                    <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque BH"></i><br />BH</th>
-                                    <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque SP"></i><br />SP</th>
+                                    <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque BH"></i><br/>BH</th>
+                                    <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque SP"></i><br/>SP</th>
+                                    @if (podeVerFichaEstoque)
+                                    {
+                                        <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Ficha de estoque do produto"></i><br/>Ficha</th>
+                                    }
+                                    @if (podeEditarProduto)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar produto"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -88,6 +108,12 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroProdutos('0');
+            gdiAplicarFoco('#edit_id_produto', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsProdutosTemCriterioFiltro()) { jsAjaxPesquisarProdutos(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -95,12 +121,82 @@
         }
     });
 
+    function keypressed(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarProdutos();
+        }
+    }
+
+    function jsProdutosTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_produto').val())
+            || !isEmpty($('#edit_codigo').val())
+            || !isEmpty($('#edit_nome').val());
+    }
+
+    function jsAtualizarIndicadorFiltroProdutos(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroProdutos',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todos os produtos'
+        });
+    }
+
+    function jsAjaxPesquisarProdutos()
+    {
+        try
+        {
+            if (!jsProdutosTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id., PN ou Nome).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando produtos...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGProdutos").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarProdutos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroProdutos()
+    {
+        try
+        {
+            $('#edit_id_produto').val('');
+            $('#edit_codigo').val('');
+            $('#edit_nome').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGProdutos").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroProdutos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGProdutos = $('#dtGProdutos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); btnFiltro(json.yesFilterOnOff) }).DataTable({
+            otableGProdutos = $('#dtGProdutos')
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('xhr.dt', function (e, settings, json, xhr) {
+                    if (GdiDtNotifyJsonErrorMessage(json)) { }
+                    else if (json && json.yesFilterOnOff !== undefined) {
+                        jsAtualizarIndicadorFiltroProdutos(json.yesFilterOnOff);
+                    }
+                })
+                .DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -115,9 +211,10 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
-                        yesFilterAdvancedText: $('#yesFilterAdvancedText').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_produto').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_codigo').val()).toString(),
+                        yesCustomField03: emptyIfNull($('#edit_nome').val()).toString(),
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -135,12 +232,30 @@
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
                 { "width": "10%", orderable: false, className: 'text-sm-start', targets: [3] },
-                { "width": "59%", orderable: false, className: 'text-sm-start', targets: [4] },
-                { "width": "8%", orderable: false, className: 'text-sm-end', targets: [5] },
+                { "width": "54%", orderable: false, className: 'text-sm-start', targets: [4] },
+                { "width": "5%", orderable: false, className: 'text-sm-end', targets: [5] },
                 { "width": "5%", orderable: false, className: 'text-sm-end', targets: [6] },
                 { "width": "5%", orderable: false, className: 'text-sm-end', targets: [7] }
+                @if (podeVerFichaEstoque)
+                {
+                <text>,
+                { "width": "5%", orderable: false, className: 'text-sm-end dt-no-row-select', targets: [8], data: null, defaultContent: "",
+                    render: function (data, type, row, meta) {
+                        return '<button type="button" name="btnGProdutosFichaEstoque" data-bs-toggle="tooltip" data-bs-placement="top" title="Ficha de estoque — Id. ' + row[1] + '" class="btn btn-outline-info btn-sm p-1 btnGProdutosFichaEstoque d-inline-flex align-items-center" onclick="jsGProdutosFichaEstoque(' + row[1] + ');"><i class="fa-solid fa-warehouse"></i></button>';
+                    }
+                }</text>
+                }
+                @if (podeEditarProduto)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [@(podeVerFichaEstoque ? 9 : 8)], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar produto Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 d-inline-flex align-items-center" onclick="jsGProdutosEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -148,10 +263,20 @@
                 headerCheckbox: true
             },
             order: [[1, 'desc']],
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGProdutos [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
+            footerCallback: function (row, data, start, end, display) {
+                LibMessageProcessandoHide();
+                gdiAplicarFoco('#edit_id_produto', true);
+            },
 
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id., PN ou Nome e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -180,57 +305,18 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGProdutos tbody').on('dblclick', 'tr td', function () {
+            @if (podeEditarProduto)
+            {
+                <text>$('#dtGProdutos tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableGProdutos.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Produtos", new { Area = "g" })');
-            });
+                if (data) { jsGProdutosEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
-    function jsRunFiltroAvancado(FilterAdvancedText)
-    {
-        try
-        {
-            document.getElementById("yesFilterAdvancedText").value = FilterAdvancedText;
-            $("#dtGProdutos").DataTable().draw(false);
-        }
-			catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
-    function jsModalFiltroAvancado()
-    {
-        try
-        {
-            if (document.getElementById("btnFiltroAvancado").innerHTML.indexOf("Remover") > 0) {
-                document.getElementById("yesFilterField").value = "*";
-                document.getElementById("yesFilterOperador").value = "";
-                document.getElementById("yesFilterText").value = "";
-                document.getElementById("yesFilterAdvancedText").value = "";
-                $("#dtGProdutos").DataTable().draw(false);
-            }
-            else
-            {
-                try
-                {
-                    $("#mainModal").load('@Url.Action("ModalFiltroAvancadoView", "Produtos", new { Area = "g" })?id=g_Produtos_Index', function () {
-                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                    })
-                }
-                catch (e)
-                {
-                    LibMessageError("Atenção", "Erro [" + (e != null ? String(e) : "") + "]");
-                }
-            };
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsModalFiltroAvancado] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
 
     function jsModalAtualizarCadastroProdutos()
     {
@@ -272,6 +358,36 @@
     }
 
 
+    function jsGProdutosEditRow(idProduto)
+    {
+        try {
+            var id = parseInt(idProduto, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Produtos", new { Area = "g" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGProdutosEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsGProdutosFichaEstoque(idProduto)
+    {
+        try {
+            var id = parseInt(idProduto, 10);
+            if (!id || id <= 0) {
+                LibMessageAlert("Atenção", "Identificador do produto inválido.");
+                return;
+            }
+            $("#mainModal").load('@Url.Action("ModalViewFichaEstoqueProduto", "Produtos", new { Area = "g" })?id=' + id, function () {
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGProdutosFichaEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsModalViewFichaEstoqueProduto(TableName, columnName)
     {
         try {
@@ -280,27 +396,20 @@
             {
                 LibMessageAlert("Atenção", "Selecione o registro!");
             }
+            else if (selectedIds.indexOf(',') == -1)
+            {
+                jsGProdutosFichaEstoque(selectedIds);
+            }
             else
             {
-                if (selectedIds.indexOf(',') == -1)
-                {
-                    $("#mainModal").load('@Url.Action("ModalViewFichaEstoqueProduto", "Produtos", new { Area = "g" })?id=' + selectedIds, function () {
-                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                    })
-                }
-                else
-                {
-                    LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
-                }
+                LibMessageAlert("Atenção", "Para executar esse processo, selecione apenas 1(um) registro!");
             }
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalFichaEstoqueProduto] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsModalViewFichaEstoqueProduto] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 
 
 </script>
-
-
 

@@ -7,7 +7,7 @@ using GdiPlataform.Db;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstUploadGed
+    public class CstUploadGed
     {
         public int id_arquivo { get; set; }
         public int versao { get; set; }
@@ -39,7 +39,7 @@ namespace GdiPlataform.Areas.g.Models
         [Display(Name = "Dt. Referência")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public Nullable<System.DateTime> data_referencia { get; set; }
-        public cstUploadGed()
+        public CstUploadGed()
         {
             id_arquivo = 0;
             versao = 1;

@@ -883,7 +883,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             gc_movimentos record_pedido_gc_movimento = new Db.gc_movimentos();
             gc_movimentos record_old_gc_movimento = new Db.gc_movimentos();
             gc_cfop_operacoes RecordCfopOperacoes = null;
-            cstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = null;
+            CstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = null;
             if (view_record_gc_movimentos.id_movimento > 0) { idMovimentoTemp = view_record_gc_movimentos.id_movimento; };
             List<gc_movimentos_itens> ListaItensPedido = new List<gc_movimentos_itens>();
             List<g_produtos> ListaProdutosPedido = new List<g_produtos>();
@@ -2230,7 +2230,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 LibFilesDisk.DeleteFilesInDirectory(dirExportacaoPDF); // Apagar todos os arquivos que estiveremno diretório do usuario
                 int id_movimento = id.GetValueOrDefault();
                 gc_movimentos record_gc_movimento = db.gc_movimentos.Find(id);
-                cstInvoice record_cstInvoice = new cstInvoice();
+                CstInvoice record_cstInvoice = new CstInvoice();
                 if (record_gc_movimento != null)
                 {
                     var listMovimento = (from _m in db.gc_movimentos
@@ -2402,7 +2402,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     foreach (var item in listItens)
                     {
                         indexItem += 1;
-                        cstInvoiceItem record_cstInvoiceItem = new cstInvoiceItem();
+                        CstInvoiceItem record_cstInvoiceItem = new CstInvoiceItem();
 
                         // Numero da Página
                         record_cstInvoiceItem.pagina = PaginaAtual;
@@ -2500,9 +2500,9 @@ namespace GdiPlataform.Areas.gc.Controllers
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = idProcessamentoGravado, url = FileNamePDFReport }, JsonRequestBehavior.AllowGet);
         }
 
-        public cstPosicaoFinanceiraCliente GetPosicaoFinanceiraCliente(int IdCliente)
+        public CstPosicaoFinanceiraCliente GetPosicaoFinanceiraCliente(int IdCliente)
         {
-            cstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = new cstPosicaoFinanceiraCliente();
+            CstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = new CstPosicaoFinanceiraCliente();
             try
             {
                 DateTime DataAtual = LibDateTime.getDataHoraBrasilia();
@@ -2548,8 +2548,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             String PrecoVenda = "0";
             try
             {
-                List<cstDatasetProdutosServicos> ListaProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
-                cstDatasetProdutosServicos record_cstDatasetProdutosServicos = ListaProdutosServicos.Where(l => l.id_produto_servico == view_g_produtos.id_produto).FirstOrDefault();
+                List<CstDatasetProdutosServicos> ListaProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
+                CstDatasetProdutosServicos record_cstDatasetProdutosServicos = ListaProdutosServicos.Where(l => l.id_produto_servico == view_g_produtos.id_produto).FirstOrDefault();
                 if (record_cstDatasetProdutosServicos != null)
                 {
                     PrecoVenda = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", record_cstDatasetProdutosServicos.preco_venda).Replace("R$ ", "").Replace("R$", "").Replace("$", "").Replace(".", "");
@@ -2581,8 +2581,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             try
             {
-                List<cstDatasetProdutosServicos> ListaProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
-                cstDatasetProdutosServicos RecordProduto = ListaProdutosServicos.Where(p => p.id_produto_servico == view_gc_movimentos_itens.id_produto).FirstOrDefault();
+                List<CstDatasetProdutosServicos> ListaProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
+                CstDatasetProdutosServicos RecordProduto = ListaProdutosServicos.Where(p => p.id_produto_servico == view_gc_movimentos_itens.id_produto).FirstOrDefault();
                 gc_movimentos RecordMovimento = db.gc_movimentos.Find(view_gc_movimentos_itens.id_movimento);
                 if (RecordProduto != null)
                 {
@@ -3258,7 +3258,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }
 
                     // Posição Financeira do Cliente
-                    cstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = GetPosicaoFinanceiraCliente(PedidoVenda.id_cliente);
+                    CstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = GetPosicaoFinanceiraCliente(PedidoVenda.id_cliente);
                     if (PedidoVenda.valor_total_bruto > PosicaoFinanceiraCliente.LimiteCreditoRestante)
                     {
                         if (PedidoVenda.id_pagrec_condicao >= 3) // Pedido à Crédito
@@ -3462,7 +3462,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 if (qtdInconsistencias == 0)
                 {
-                    cstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = GetPosicaoFinanceiraCliente(view_record_gc_movimento.id_cliente);
+                    CstPosicaoFinanceiraCliente PosicaoFinanceiraCliente = GetPosicaoFinanceiraCliente(view_record_gc_movimento.id_cliente);
                     if ((view_record_gc_movimento.valor_total_bruto > PosicaoFinanceiraCliente.LimiteCreditoRestante) && (view_record_gc_movimento.id_pagrec_condicao >= 3))
                     {
                         qtdInconsistencias += 1;
@@ -5345,7 +5345,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             String TitleModal = string.Empty;
             TitleModal = LibIcons.getIcon("fa-solid fa-eraser", "", "#008000", "fa-sm") + LibStringFormat.GetEspacesHtml(3) + "Carta de Correção";
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            cstNfeCartaCorrecao RecordCstNfeCartaCorrecao = new cstNfeCartaCorrecao();
+            CstNfeCartaCorrecao RecordCstNfeCartaCorrecao = new CstNfeCartaCorrecao();
             gc_movimentos record_gc_movimento = db.gc_movimentos.Find(id);
             if (record_gc_movimento != null)
             {
@@ -5384,7 +5384,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalPedidoCartaCorrecao(cstNfeCartaCorrecao view_record_cstNfeCartaCorrecao)
+        public ActionResult AjaxModalPedidoCartaCorrecao(CstNfeCartaCorrecao view_record_cstNfeCartaCorrecao)
         {
             bool Sucesso = false;
             int qtdInconsistencias = 0;
@@ -6201,7 +6201,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region Pedidos - Consultar Pedidos
         public ActionResult ModalConsultaPedidos()
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual().AddMonths(-6);
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             view_cstModalRelatorio.Field_Int_01 = -1;
@@ -6379,7 +6379,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalImportarExcelSC(int? idMovimento)
         {
             DeleteItemTemporario();
-            cstUploadFiles record_cstUploadFiles = new cstUploadFiles();
+            CstUploadFiles record_cstUploadFiles = new CstUploadFiles();
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-file-excel", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importar Excel - Southern Cross";
             var comboMovimentosTipos = new List<SelectListItem>();
             comboMovimentosTipos.Add(new SelectListItem { Value = "12", Text = "1.2 - Cotação - Fornecedor" });
@@ -6390,7 +6390,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalImportarExcelSC(cstUploadFiles record_cstUploadFiles)
+        public ActionResult AjaxModalImportarExcelSC(CstUploadFiles record_cstUploadFiles)
         {
             bool Processado = false;
             bool ProdutoComexAtualizado = false;
@@ -6449,7 +6449,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     int IndexTotalPrice = -1;
                     bool LeituraAtiva = false;
                     DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-                    List<cstModelSalesOrderSC> ListaItensSO = new List<cstModelSalesOrderSC>();
+                    List<CstModelSalesOrderSC> ListaItensSO = new List<CstModelSalesOrderSC>();
                     List<gc_movimentos_itens> ListaItensPedido = new List<gc_movimentos_itens>();
                     List<String> ListaColunas = new List<String>();
 
@@ -6497,7 +6497,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                                 if (LeituraAtiva == true)
                                 {
-                                    cstModelSalesOrderSC ItemSO = new cstModelSalesOrderSC();
+                                    CstModelSalesOrderSC ItemSO = new CstModelSalesOrderSC();
                                     if (IndexItem >= 0) { ItemSO.String_Item = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexItem).Value); }
                                     if (IndexDescription >= 0) { ItemSO.String_Description = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexDescription).Value); }
                                     if (IndexOrdered >= 0) { ItemSO.String_Ordered = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexOrdered).Value); }
@@ -6718,14 +6718,14 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalImportarTxtSC(int? idMovimento)
         {
             DeleteItemTemporario();
-            cstUploadList record_cstUploadList = new cstUploadList();
+            CstUploadList record_cstUploadList = new CstUploadList();
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-file-excel", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importar Lista Itens";
             ViewBag.idMovimento = (CachePersister.userIdentity.IdUsuario * -1).ToString(); // O Id, será o negativo do id do usuário;
             return View("ModalImportarTxtSC", record_cstUploadList);
         }
 
         [HttpPost]
-        public ActionResult AjaxModalImportarTxtSC(cstUploadList record_cstUploadList)
+        public ActionResult AjaxModalImportarTxtSC(CstUploadList record_cstUploadList)
         {
             bool Processado = false;
             bool ErroImpeditivo = false;
@@ -6758,7 +6758,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     String ListaProdutosNaoVinculados = string.Empty;
                     String _ItemTemp = string.Empty;
                     String _FobTemp = string.Empty;
-                    List<cstModelSalesOrderSC> ListaItensSO = new List<cstModelSalesOrderSC>();
+                    List<CstModelSalesOrderSC> ListaItensSO = new List<CstModelSalesOrderSC>();
                     List<gc_movimentos_itens> ListaItensPedido = new List<gc_movimentos_itens>();
                     List<String> ListaColunas = new List<String>();
                     String[] ListaItens = null;
@@ -6778,7 +6778,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
                         for (int index = 0; index < ListaItens.Count(); index++)
                         {
-                            cstModelSalesOrderSC ItemSO = new cstModelSalesOrderSC();
+                            CstModelSalesOrderSC ItemSO = new CstModelSalesOrderSC();
                             ItemSO.String_Qty = "1";
 
                             _ItemTemp = string.Empty;
@@ -7432,7 +7432,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region Pedido - Anexos - Modal UploadFile
         public ActionResult ModalUploadFilePedidos(int? IdMovimento)
         {
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             {
                 record_cstUploadGed.isCotacaoPedido = true;
                 record_cstUploadGed.id_gc_movimento = IdMovimento.GetValueOrDefault();
@@ -8661,7 +8661,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     LibFilesDisk.DeleteFilesInDirectory(DirTempFiles); // Apagar todos os arquivos que estiveremno diretório do usuario
                     gc_movimentos_nf record_gc_movimentos_nf = db.gc_movimentos_nf.Find(view_record_gc_movimento_nf.id_movimento_nf);
                     gc_movimentos record_gc_movimento = db.gc_movimentos.Find(record_gc_movimentos_nf.id_movimento);
-                    cstReportHTML record_cstReportHTML = new cstReportHTML();
+                    CstReportHTML record_cstReportHTML = new CstReportHTML();
                     if (record_gc_movimento != null)
                     {
                         var ListDados = (from _nf in db.gc_movimentos_nf
@@ -8947,7 +8947,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
                         foreach (var dsRowFinanceiro in AllFinanceiroLancamentos)
                         {
-                            cstFinanceiroBoletos record_cstFinanceiroBoletos = new cstFinanceiroBoletos();
+                            CstFinanceiroBoletos record_cstFinanceiroBoletos = new CstFinanceiroBoletos();
                             record_cstFinanceiroBoletos.idFinanceiro = IdLancamento;
                             int idContaCaixa = 0;
                             int.TryParse(dsRowFinanceiro["id_conta_caixa"].EmptyIfNull().ToString(), out idContaCaixa);

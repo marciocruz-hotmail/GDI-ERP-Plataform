@@ -272,19 +272,35 @@ function jsYesIsInt(n) {
     return Number(n) === n && n % 1 === 0;
 }
 
-function btnFiltro(yesFilterOnOff) {
-    try { document.getElementById("btnFiltroDefault").innerHTML = document.getElementById("btnFiltroDefault").innerHTML.replace("Remover Filtro", "Sync...").replace("Filtro", "Sync...").replace("fa-solid fa-filter", "fa-solid fa-sync").replace("fa-solid fa-magnifying-glass-minus", "fa-solid fa-sync"); } catch (e) { };
-    try { document.getElementById("btnFiltroAvancado").innerHTML = document.getElementById("btnFiltroAvancado").innerHTML.replace("Remover Filtro", "Sync...").replace("Filtro Avançado", "Sync...").replace("fa-solid fa-filter", "fa-solid fa-sync").replace("fa-solid fa-magnifying-glass-minus", "fa-solid fa-sync"); } catch (e) { };
-
-    if (yesFilterOnOff == "0") {
-        try { document.getElementById("btnFiltroDefault").innerHTML = document.getElementById("btnFiltroDefault").innerHTML.replace("Sync...", "Filtro").replace("fa-solid fa-sync", "fa-solid fa-filter"); } catch (e) { };
-        try { document.getElementById("btnFiltroAvancado").innerHTML = document.getElementById("btnFiltroAvancado").innerHTML.replace("Sync...", "Filtro Avançado").replace("fa-solid fa-sync", "fa-solid fa-filter"); } catch (e) { };
+/**
+ * Indicador visual de filtro ativo em botões de limpar/filtro (DataTables yesFilterOnOff).
+ * @param {string|number} yesFilterOnOff - "0"|"1" do JSON do servidor
+ * @param {object} [opcoes]
+ * @param {string} [opcoes.btnId] - id de um botão
+ * @param {string[]} [opcoes.btnIds] - ids adicionais (ex.: filtro avançado)
+ * @param {string} [opcoes.tituloInativo]
+ * @param {string} [opcoes.tituloAtivo]
+ */
+function GdiAtualizarIndicadorFiltro(yesFilterOnOff, opcoes) {
+    try {
+        opcoes = opcoes || {};
+        var ids = [];
+        if (opcoes.btnId) { ids.push(opcoes.btnId); }
+        if (opcoes.btnIds && opcoes.btnIds.length) {
+            for (var j = 0; j < opcoes.btnIds.length; j++) { ids.push(opcoes.btnIds[j]); }
+        }
+        var ativo = (yesFilterOnOff === 1 || yesFilterOnOff === '1');
+        for (var i = 0; i < ids.length; i++) {
+            var btn = document.getElementById(ids[i]);
+            if (!btn) { continue; }
+            btn.classList.remove('btn-outline-secondary', 'btn-outline-warning');
+            btn.classList.add(ativo ? 'btn-outline-warning' : 'btn-outline-secondary');
+            if (opcoes.tituloAtivo && opcoes.tituloInativo) {
+                btn.title = ativo ? opcoes.tituloAtivo : opcoes.tituloInativo;
+            }
+        }
     }
-    else {
-        try { document.getElementById("btnFiltroDefault").innerHTML = document.getElementById("btnFiltroDefault").innerHTML.replace("Sync...", "Remover Filtro").replace("fa-solid fa-sync", "fa-solid fa-magnifying-glass-minus"); } catch (e) { };
-        try { document.getElementById("btnFiltroAvancado").innerHTML = document.getElementById("btnFiltroAvancado").innerHTML.replace("Sync...", "Remover Filtro").replace("fa-solid fa-sync", "fa-solid fa-magnifying-glass-minus"); } catch (e) { };
-    }
-    LibMessageHideAll();
+    catch (e) { }
 }
 
 function getValidationSummary(message) {
@@ -556,6 +572,23 @@ function LibMessageProcessandoHide() {
         alert("[LibMessageProcessandoHide] " + err.message.toString());
     }
 }
+
+/**
+ * DataTables (global): fecha LibMessageProcessando após xhr/draw da grelha.
+ * Cobre LibMessageProcessando + DataTable().draw() sem hide local em cada view.
+ * waitingDialog.hide é idempotente (contador de profundidade); GdiDtNotifyLoadFailure também chama hide em error.dt.
+ */
+(function gdiDataTablesProcessandoAutoHide() {
+    function gdiDtTryHideProcessando() {
+        if (typeof LibMessageProcessandoHide !== 'function') return;
+        try { LibMessageProcessandoHide(); } catch (e) { }
+    }
+    if (typeof jQuery === 'undefined') return;
+    jQuery(function () {
+        if (!jQuery.fn.dataTable) return;
+        jQuery(document).on('xhr.dt error.dt draw.dt', gdiDtTryHideProcessando);
+    });
+}());
 
 /** Navegação MVC a partir do menu lateral: overlay "processando" antes do full load (mesmo padrão que JsNewRecord). Só .app-sidebar; ignora novo separador / modificadores / download / target extra. */
 (function gdiSidebarNavProcessando() {
@@ -1270,6 +1303,46 @@ function gdiFocusElement(el, withSelect) {
     } catch (e) {
         console.error('[gdiFocusElement] ' + e.message);
     }
+}
+
+/* ============================================================
+   CSRF — token antiforgery em Ajax JSON / FormData (P1-06)
+   Usar com [GdiValidateAntiForgeryToken] no servidor.
+   ============================================================ */
+function GdiGetAntiForgeryToken(container) {
+    try {
+        var root = null;
+        if (container) {
+            if (typeof container === 'string') {
+                root = document.querySelector(container);
+            } else if (typeof jQuery !== 'undefined' && container instanceof jQuery && container.length) {
+                root = container[0];
+            } else if (container.nodeType === 1) {
+                root = container;
+            }
+        }
+        var el = root && root.querySelector
+            ? root.querySelector('input[name="__RequestVerificationToken"]')
+            : null;
+        if (!el) {
+            el = document.querySelector('input[name="__RequestVerificationToken"]');
+        }
+        return el && el.value ? el.value : '';
+    } catch (e) {
+        console.error('[GdiGetAntiForgeryToken] ' + e.message);
+        return '';
+    }
+}
+
+function GdiAjaxAntiForgeryHeaders(container) {
+    var token = GdiGetAntiForgeryToken(container);
+    if (!token) {
+        return {};
+    }
+    return {
+        'RequestVerificationToken': token,
+        '__RequestVerificationToken': token
+    };
 }
 
 /* ============================================================

@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstInvoiceItem
+    public class CstInvoiceItem
     {
         public string indexItem { get; set; }
         public int pagina { get; set; }

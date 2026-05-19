@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstClienteLimiteCredito
+    public class CstClienteLimiteCredito
     {
         public int id_cliente { get; set; }
         public bool consulta_cadastral_realizada { get; set; }
@@ -20,7 +20,7 @@ namespace GdiPlataform.Areas.g.Models
         public string justificativa { get; set; }
         public string aprovado_por { get; set; }
 
-        public cstClienteLimiteCredito()
+        public CstClienteLimiteCredito()
         {
             consulta_cadastral_realizada = false;
             consulta_cadastral_restricoes = false;

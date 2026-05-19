@@ -255,33 +255,7 @@ namespace GdiPlataform.Domain
 
         public IEnumerable<NavbarItemAlert> getNavbarItemsAlert()
         {
-            var listAlerts = new List<NavbarItemAlert>();
-            UserIdentity g_usuarioContexto = CachePersister.userIdentity;
-            try
-            {
-                var queryRequisicoes = (from _r in ContextDb.g_requisicoes
-                                        join _t in ContextDb.g_requisicoes_tipos on _r.id_requisicao_tipo equals _t.id_requisicao_tipo
-                                        where (_r.concluido == false && (_r.id_perfil_responsavel == g_usuarioContexto.IdPerfil || _r.id_usuario_responsavel == g_usuarioContexto.IdUsuario))
-                                        select new { requisicoes = _r, requisicoesTipos = _t }).ToList();
-                //select _r;
-
-                foreach (var itemRequisicao in queryRequisicoes)
-                {
-                    listAlerts.Add(new NavbarItemAlert
-                    {
-                        Id = itemRequisicao.requisicoes.id_requisicao,
-                        iconClass = "fa-solid fa-ticket-alt",
-                        reference = itemRequisicao.requisicoes.datahora_requisicao.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
-                        message = "Req: " + itemRequisicao.requisicoes.id_requisicao.ToString() + " - " + itemRequisicao.requisicoesTipos.nome.ToString(),
-                        href = "/g/Requisicoes/Edit/" + itemRequisicao.requisicoes.id_requisicao.ToString()
-                    });
-                }
-            }
-            catch (Exception)
-            {
-
-            }
-            return listAlerts.ToList();
+            return new List<NavbarItemAlert>();
         }
 
         public IEnumerable<NavbarItemAtividade> getNavbarItemsAtividade()

@@ -1,4 +1,4 @@
-﻿@model GdiPlataform.Areas.crm.Models.cstListaPedidosPortal
+﻿@model GdiPlataform.Areas.crm.Models.CstListaPedidosPortal
 @using GdiPlataform.Security
 @{
     ViewBag.PortalClienteBrowserTitle = true;
@@ -9,9 +9,6 @@
             <div class="card-title m-0 px-3 py-2 bg-body-secondary border-bottom">
                 <h5 class="mb-0">@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
-                <input type="hidden" id="yesFilterAdvancedText" value="" name="yesFilterAdvancedText" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>

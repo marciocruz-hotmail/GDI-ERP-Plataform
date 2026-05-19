@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstUploadFiles
+    public class CstUploadFiles
     {
         public int IdMovimento { get; set; }
         public int IdMovimentoTipo { get; set; }
@@ -14,7 +14,7 @@ namespace GdiPlataform.Areas.gc.Models
         public HttpPostedFileBase FilesourceTXT { get; set; }
         public HttpPostedFileBase FilesourceXLXS { get; set; }
 
-        public cstUploadFiles()
+        public CstUploadFiles()
         {
             IdMovimento = 0;
             IdMovimentoTipo = 0;

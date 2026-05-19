@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -6,7 +6,7 @@ using GdiPlataform.Lib;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstModelComexItemInvoice
+    public class CstModelComexItemInvoice
     {
         public int IndexRowSheet { get; set; }
         public string String_Item { get; set; }
@@ -38,7 +38,7 @@ namespace GdiPlataform.Areas.gc.Models
         public bool ItemValido { get; set; }
         public int ItemIndex { get; set; }
 
-        public cstModelComexItemInvoice()
+        public CstModelComexItemInvoice()
         {
             IndexRowSheet = 0;
             String_Item = string.Empty;

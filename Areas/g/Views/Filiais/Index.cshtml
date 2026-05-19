@@ -1,14 +1,19 @@
 ﻿@model IEnumerable<GdiPlataform.Db.g_filiais>
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarFilial = CachePersister.userIdentity.Roles.Contains("g_Filiais_*")
+        || CachePersister.userIdentity.Roles.Contains("g_Filiais_Actionupdate");
+}
+<style>
+    .gdi-index-filiais-dt .btnGFiliaisEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -17,29 +22,21 @@
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Filiais",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
-                
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Filiais_*")) || (CachePersister.userIdentity.Roles.Contains("g_Filiais_Actionupdate")))
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableFiliais, 'Id.', '@Url.Action("Edit","Filiais",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Filiais_*")) || (CachePersister.userIdentity.Roles.Contains("g_Filiais_Actiondelete")))
-                { <button type="button" name="btnRegistroExcluir" title="Excluir Registro" class="btn btn-outline-danger disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
-                else
-                { <button type="button" name="btnRegistroExcluir" title="Excluir Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1 gdi-index-filiais-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGFiliais">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGFiliais">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
                                     <th>@Html.DisplayNameFor(model => model.id_filial)</th>
-                                    <th>Tem Consulta ?</th>
-                                    <th>Tem Pefin ?</th>
                                     <th>@Html.DisplayNameFor(model => model.nome)</th>
                                     <th>@Html.DisplayNameFor(model => model.id_coligada)</th>
+                                    @if (podeEditarFilial)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar filial"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -54,7 +51,7 @@
 <script type="text/javascript">
     var otableFiliais;
 
-	$(function ()
+    $(function ()
     {
         try
         {
@@ -63,7 +60,7 @@
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
 
@@ -72,7 +69,9 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableFiliais = $('#dtGFiliais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otableFiliais = $('#dtGFiliais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+            }).DataTable({
             processing: true,
             bServerSide: true,
             ajax: {
@@ -87,8 +86,6 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesFilterOperador: $('#yesFilterOperador').val().toString(),
-                        yesFilterText: $('#yesFilterText').val().toString(),
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -105,11 +102,18 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "15%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "15%", orderable: false, className: 'text-sm-center', targets: [3] },
-                { "width": "25%", orderable: false, className: 'text-sm-center', targets: [4] },
-                { "width": "36%", orderable: false, className: 'text-sm-center', targets: [5] }
+                { "width": "8%", orderable: true, className: 'text-sm-center', targets: [1] },
+                { "width": "@(podeEditarFilial ? "46%" : "50%")", orderable: true, className: 'text-sm-start', targets: [2] },
+                { "width": "30%", orderable: false, className: 'text-sm-start', targets: [3] }
+                @if (podeEditarFilial)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [4], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar filial Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGFiliaisEditRow d-inline-flex align-items-center" onclick="jsGFiliaisEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -117,7 +121,12 @@
                 headerCheckbox: true
             },
             order: [[1, 'asc']],
-
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGFiliais [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
                     sEmptyTable: 'Nenhum registro encontrado',
@@ -149,15 +158,28 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGFiliais tbody').on('dblclick', 'tr td', function () {
+            @if (podeEditarFilial)
+            {
+                <text>$('#dtGFiliais tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableFiliais.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Filiais", new { Area = "g" })');
-            });
+                if (data) { jsGFiliaisEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
 
+    function jsGFiliaisEditRow(idFilial)
+    {
+        try {
+            var id = parseInt(idFilial, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Filiais", new { Area = "g" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGFiliaisEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 </script>
-

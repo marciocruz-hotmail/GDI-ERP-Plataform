@@ -1,11 +1,20 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_usuarios>
+﻿@model GdiPlataform.Areas.g.Models.CstUsuariosIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarUsuario = CachePersister.userIdentity.Roles.Contains("g_Usuarios_*")
+        || CachePersister.userIdentity.Roles.Contains("g_Usuarios_Actionupdate");
+}
+<style>
+    .gdi-index-usuarios-dt .btnGUsuariosEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="Usuarios" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -14,33 +23,51 @@
                 {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Usuarios",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
-                @if ((CachePersister.userIdentity.Roles.Contains("g_Usuarios_*")) || (CachePersister.userIdentity.Roles.Contains("g_Usuarios_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGUsuarios, 'Id.', '@Url.Action("Edit","Usuarios",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
                 @if ((CachePersister.userIdentity.Roles.Contains("g_Usuarios_*")) || (CachePersister.userIdentity.Roles.Contains("g_Usuarios_Actiondelete")))
                 {<button type="button" name="btnRegistroExcluir" title="Excluir Registro" class="btn btn-outline-danger disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button> }
                 else
                 { <button type="button" name="btnRegistroExcluir" title="Excluir Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button>}
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
                 <div class="form-horizontal m-0 p-0">
-                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGUsuarios">
-                            <thead>
-                                <tr>
-                                    <th>[x]</th>
-                                    <th>@Html.DisplayNameFor(model => model.id_usuario)</th>
-                                    <th>@Html.DisplayNameFor(model => model.ativo)</th>
-                                    <th>@Html.DisplayNameFor(model => model.nome)</th>
-                                    <th>@Html.DisplayNameFor(model => model.login)</th>
-                                    <th>@Html.DisplayNameFor(model => model.email)</th>
-                                    <th>@Html.DisplayNameFor(model => model.id_perfil)</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.UsuariosIndex_id_usuario, new { @class = "form-control", @id = "edit_id_usuario", @placeholder = "Id.", @onkeypress = "keypressedUsuarios(event);" })
+                        </div>
                     </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.UsuariosIndex_nome, new { @class = "form-control", @id = "edit_nome", @placeholder = "Nome do usuário", @onkeypress = "keypressedUsuarios(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarUsuarios" title="Pesquisar usuários" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarUsuarios()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroUsuarios" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroUsuarios()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-usuarios-dt" style="max-width: 100%; overflow-x: auto;">
+                <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGUsuarios">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>Id.</th>
+                                <th>Ativo</th>
+                                <th>Nome</th>
+                                <th>Login</th>
+                                <th>E-mail</th>
+                                <th>Perfil</th>
+                                @if (podeEditarUsuario)
+                                {
+                                    <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar usuário"></i></th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -50,104 +77,161 @@
 <script type="text/javascript">
     var otableGUsuarios;
 
-	$(function ()
-    {
-        try
-        {
+    $(function () {
+        try {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroUsuarios('0');
+            gdiAplicarFoco('#edit_id_usuario', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsUsuariosTemCriterioFiltro()) { jsAjaxPesquisarUsuarios(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
 
-    function jsCreateTable()
+    function keypressedUsuarios(e) {
+        if (e.keyCode == 13) { e.preventDefault(); jsAjaxPesquisarUsuarios(); }
+    }
+
+    function jsUsuariosTemCriterioFiltro() {
+        return !isEmpty($('#edit_id_usuario').val()) || !isEmpty($('#edit_nome').val());
+    }
+
+    function jsAtualizarIndicadorFiltroUsuarios(yesFilterOnOff)
     {
-        try
-        {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroUsuarios',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todos os usuários'
+        });
+    }
+
+    function jsAjaxPesquisarUsuarios() {
+        try {
+            if (!jsUsuariosTemCriterioFiltro()) {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Nome).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando usuários...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGUsuarios").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsAjaxPesquisarUsuarios] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroUsuarios() {
+        try {
+            $('#edit_id_usuario').val('');
+            $('#edit_nome').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGUsuarios").DataTable().draw(false);
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsLimparFiltroUsuarios] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsCreateTable() {
+        try {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGUsuarios = $('#dtGUsuarios').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
-            processing: true,
-            bServerSide: true,
-            ajax: {
-                url: '@Url.Action("GetDados","Usuarios", new { area = "g" })',
-                type: 'POST',
-                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
-                dataType: 'json',
-                cache: false,
-                data: function (d) {
-                    return {
-                        sEcho: d.draw,
-                        iDisplayStart: d.start,
-                        iDisplayLength: d.length,
-                    };
+            otableGUsuarios = $('#dtGUsuarios').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) { jsAtualizarIndicadorFiltroUsuarios(json.yesFilterOnOff); }
+            }).DataTable({
+                deferLoading: true,
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDados","Usuarios",new { Area = "g" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesFilterController: $('#yesFilterController').val().toString(),
+                            yesCustomField01: emptyIfNull($('#edit_id_usuario').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#edit_nome').val()).toString()
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
-            },
-            responsive: true,
-            bFilter: false,
-            bLengthChange: false,
-            bProcessing: true,
-            pageLength: 20,
-            scrollX: false,
-            scrollCollapse: false,
-            fixedColumns: false,
-            bAutoWidth: false,
-            pagingType: 'full_numbers',
-            aoColumnDefs: [
-                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "5%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "15%", orderable: false, className: 'text-sm-start', targets: [3] },
-                { "width": "15%", orderable: false, className: 'text-sm-start', targets: [4] },
-                { "width": "41%", orderable: false, className: 'text-sm-start', targets: [5] },
-                { "width": "15%", orderable: false, className: 'text-sm-start', targets: [6] }
-            ],
-            select: {
-                style: 'multi',
-                selector: 'td:not(.dt-no-row-select)',
-                headerCheckbox: true
-            },
-                language:
-                {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                pageLength: 20,
+                scrollX: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { width: "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { width: "5%", orderable: true, className: 'text-sm-center', targets: [1] },
+                    { width: "5%", orderable: false, className: 'text-sm-center', targets: [2] },
+                    { width: "14%", orderable: true, className: 'text-sm-start', targets: [3] },
+                    { width: "14%", orderable: true, className: 'text-sm-start', targets: [4] },
+                    { width: "22%", orderable: true, className: 'text-sm-start', targets: [5] },
+                    { width: "@(podeEditarUsuario ? "12%" : "16%")", orderable: false, className: 'text-sm-start', targets: [6] }
+                    @if (podeEditarUsuario)
+                    {
+                    <text>,
+                    { width: "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "",
+                        render: function (data, type, row) {
+                            return '<button type="button" title="Editar usuário Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGUsuariosEditRow d-inline-flex align-items-center" onclick="jsGUsuariosEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                        }
+                    }</text>
+                    }
+                ],
+                select: { style: 'multi', selector: 'td:not(.dt-no-row-select)', headerCheckbox: true },
+                order: [[3, 'asc']],
+                drawCallback: function (settings) {
+                    document.querySelectorAll('#dtGUsuarios [data-bs-toggle="tooltip"]').forEach(function (el) {
+                        bootstrap.Tooltip.getOrCreateInstance(el);
+                    });
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                },
+                language: {
+                    sEmptyTable: 'Informe Id. ou Nome e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
-                    sInfoPostFix: '',
-                    sInfoThousands: '.',
-                    sLengthMenu: '_MENU_ registros por página',
                     sZeroRecords: 'Nenhum registro encontrado',
-                    sSearch: 'Pesquisar',
-                    oPaginate:
-                    {
-                        sNext: '>',
-                        sPrevious: '<',
-                        sFirst: '<<',
-                        sLast: '>>'
-                    },
-                    select: {
-                        rows: {
-                            0: "",
-                            1: " [ %d registro selecionado ] ",
-                            _: " [ %d registros selecionados ] "
-                        }
-                    }
-                },
-                oAria: {
-                    sSortAscending: ': Ordenar colunas de forma ascendente',
-                    sSortDescending: ': Ordenar colunas de forma descendente'
+                    oPaginate: { sNext: '>', sPrevious: '<', sFirst: '<<', sLast: '>>' },
+                    select: { rows: { 0: "", 1: " [ %d registro selecionado ] ", _: " [ %d registros selecionados ] " } }
                 }
             });
-            $('#dtGUsuarios tbody').on('dblclick', 'tr td', function () {
-                var data = otableGUsuarios.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Usuarios",new { Area = "g" })');
-            });
+            @if (podeEditarUsuario)
+            {
+                <text>$('#dtGUsuarios tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
+                    var data = otableGUsuarios.row($(this).closest('tr')).data();
+                    if (data) { jsGUsuariosEditRow(data[1]); }
+                });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
-    };
+    }
+
+    function jsGUsuariosEditRow(idUsuario) {
+        try {
+            var id = parseInt(idUsuario, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Usuarios", new { Area = "g" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGUsuariosEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 </script>

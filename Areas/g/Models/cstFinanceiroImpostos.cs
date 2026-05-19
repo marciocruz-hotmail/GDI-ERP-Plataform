@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.g.Models
 {
-    public class cstFinanceiroImpostos
+    public class CstFinanceiroImpostos
     {
         public decimal iss_percentual { get; set; }
         public decimal iss_display { get; set; }
@@ -28,7 +28,7 @@ namespace GdiPlataform.Areas.g.Models
         public decimal inss_percentual { get; set; }
         public decimal inss_display { get; set; }
         public decimal inss_valor { get; set; }
-        public cstFinanceiroImpostos()
+        public CstFinanceiroImpostos()
         {
             iss_percentual = 0;
             iss_display = 0;

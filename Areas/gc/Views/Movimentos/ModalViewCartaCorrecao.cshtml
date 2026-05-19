@@ -12,8 +12,6 @@
     @Html.Raw((String)ViewBag.Title)</h4>
                     @Html.HiddenFor(model => model.id_movimento)
                     <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                    <input type="hidden" id="yesFilterOperador" value="" name="yesFilterOperador" />
-                    <input type="hidden" id="yesFilterText" value="" name="yesFilterText" />
                     <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)

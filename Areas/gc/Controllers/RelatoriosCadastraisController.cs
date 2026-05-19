@@ -38,7 +38,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioClientesFornecedores
         public ActionResult ModalRelatorioClientesFornecedores(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - Clientes/Fornecedores";
@@ -50,7 +50,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioClientesFornecedores(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioClientesFornecedores(CstModalRelatorio view_cstModalRelatorio)
         {
 
             bool Sucesso = false;

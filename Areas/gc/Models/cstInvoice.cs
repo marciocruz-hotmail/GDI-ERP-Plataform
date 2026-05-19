@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstInvoice
+    public class CstInvoice
     {
         public string invoice_tipo { get; set; }
         public int invoice_qtd_paginas { get; set; }
@@ -47,10 +47,10 @@ namespace GdiPlataform.Areas.gc.Models
         public string invoice_shipping_value { get; set; }
 
 
-        public List<cstInvoiceItem> AllItens { get; set; }
-        public cstInvoice()
+        public List<CstInvoiceItem> AllItens { get; set; }
+        public CstInvoice()
         {
-            AllItens = new List<cstInvoiceItem>();
+            AllItens = new List<CstInvoiceItem>();
         }
     }
 }

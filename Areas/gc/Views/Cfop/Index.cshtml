@@ -1,11 +1,20 @@
-﻿@model IEnumerable<GdiPlataform.Db.gc_cfop>
+﻿@model GdiPlataform.Areas.gc.Models.CstCfopIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarCfop = CachePersister.userIdentity.Roles.Contains("gc_Cfop_*")
+        || CachePersister.userIdentity.Roles.Contains("gc_Cfop_Actionupdate");
+}
+<style>
+    .gdi-index-cfop-dt .btnGCfopEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="Cfop" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -14,24 +23,45 @@
                 {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Cfop",new { Area = "gc" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
-                @if ((CachePersister.userIdentity.Roles.Contains("gc_Cfop_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Cfop_Actionupdate")))
-                {<button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGcCfop, 'Id.', '@Url.Action("Edit","Cfop",new { Area = "gc" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button>}
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.CfopIndex_id, new { @class = "form-control", @id = "edit_id_cfop", @placeholder = "Id.", @onkeypress = "keypressedCfop(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Descrição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.CfopIndex_descricao, new { @class = "form-control", @id = "edit_descricao_cfop", @placeholder = "Descrição", @onkeypress = "keypressedCfop(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarCfop" title="Pesquisar CFOP" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarCfop()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroCfop" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroCfop()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-cfop-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcCfop">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGcCfop">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
-                                    <th>@Html.Encode("Id.")</th>
-                                    <th>@Html.DisplayName("Ativo")</th>
-                                    <th>@Html.DisplayName("Número")</th>
-                                    <th>@Html.DisplayName("Descrição")</th>
-                                    <th>@Html.DisplayName("Conta Contabil")</th>
-                                    <th>@Html.DisplayName("Código Contábil")</th>
+                                    <th>Id.</th>
+                                    <th>Ativo</th>
+                                    <th>Número</th>
+                                    <th>Descrição</th>
+                                    <th>Conta Contabil</th>
+                                    <th>Código Contábil</th>
+                                    @if (podeEditarCfop)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar CFOP"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -52,70 +82,153 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroCfop('0');
+            gdiAplicarFoco('#edit_id_cfop', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsCfopTemCriterioFiltro()) { jsAjaxPesquisarCfop(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
-
     });
+
+    function keypressedCfop(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarCfop();
+        }
+    }
+
+    function jsCfopTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_cfop').val()) || !isEmpty($('#edit_descricao_cfop').val());
+    }
+
+    function jsAtualizarIndicadorFiltroCfop(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroCfop',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todos os CFOP'
+        });
+    }
+
+    function jsAjaxPesquisarCfop()
+    {
+        try
+        {
+            if (!jsCfopTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Descrição).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando CFOP...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGcCfop").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarCfop] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroCfop()
+    {
+        try
+        {
+            $('#edit_id_cfop').val('');
+            $('#edit_descricao_cfop').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGcCfop").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroCfop] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsCreateTable()
     {
         try
         {
-            if (otableGcCfop == null)
-            {
-                $.fn.dataTable.ext.errMode = 'none';
-                otableGcCfop = $('#dtGcCfop')
-                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                    .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); })
-                    .DataTable({
-                processing: true,
-                bServerSide: true,
-                ajax: {
-                    url: '@Url.Action("GetDados","Cfop",new { Area = "gc" })',
-                    type: 'POST',
-                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
-                    dataType: 'json',
-                    cache: false,
-                    data: function (d) {
-                        return {
-                            sEcho: d.draw,
-                            iDisplayStart: d.start,
-                            iDisplayLength: d.length,
-                        };
-                    },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            $.fn.dataTable.ext.errMode = 'none';
+            otableGcCfop = $('#dtGcCfop').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroCfop(json.yesFilterOnOff);
+                }
+            }).DataTable({
+            deferLoading: true,
+            processing: true,
+            bServerSide: true,
+            ajax: {
+                url: '@Url.Action("GetDados","Cfop",new { Area = "gc" })',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                dataType: 'json',
+                cache: false,
+                data: function (d) {
+                    return {
+                        sEcho: d.draw,
+                        iDisplayStart: d.start,
+                        iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_cfop').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_descricao_cfop').val()).toString()
+                    };
                 },
-                responsive: true,
-                bFilter: false,
-                bLengthChange: false,
-                bProcessing: true,
-                pageLength: 20,
-                scrollX: false,
-                scrollCollapse: false,
-                fixedColumns: false,
-                bAutoWidth: false,
-                pagingType: 'full_numbers',
-                aoColumnDefs: [
-                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
-                    { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
-                    { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
-                    { "width": "58%", orderable: false, className: 'text-sm-start', targets: [4] },
-                    { "width": "10%", orderable: false, className: 'text-sm-end', targets: [5] },
-                    { "width": "10%", orderable: false, className: 'text-sm-end', targets: [6] }
-                ],
-                select: {
-                    style: 'multi',
-                    selector: 'td:not(.dt-no-row-select)',
-                    headerCheckbox: true
-                },
-                order: [[1, 'asc']],
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+            },
+            responsive: true,
+            bFilter: false,
+            bLengthChange: false,
+            bProcessing: true,
+            pageLength: 20,
+            scrollX: false,
+            scrollCollapse: false,
+            fixedColumns: false,
+            bAutoWidth: false,
+            pagingType: 'full_numbers',
+            aoColumnDefs: [
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                { "width": "6%", orderable: true, className: 'text-sm-center', targets: [1] },
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "58%", orderable: false, className: 'text-sm-start', targets: [4] },
+                { "width": "10%", orderable: false, className: 'text-sm-end', targets: [5] },
+                { "width": "10%", orderable: false, className: 'text-sm-end', targets: [6] }
+                @if (podeEditarCfop)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar CFOP Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGCfopEditRow d-inline-flex align-items-center" onclick="jsGCfopEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:not(.dt-no-row-select)',
+                headerCheckbox: true
+            },
+            order: [[1, 'asc']],
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGcCfop [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Descrição e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -143,16 +256,29 @@
                     sSortAscending: ': Ordenar colunas de forma ascendente',
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
-                });
-                $('#dtGcCfop tbody').on('dblclick', 'tr td', function () {
-                    var data = otableGcCfop.row($(this).closest('tr')).data();
-                    JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "Cfop", new { Area = "gc" })');
-                });
+            });
+            @if (podeEditarCfop)
+            {
+                <text>$('#dtGcCfop tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
+                var data = otableGcCfop.row($(this).closest('tr')).data();
+                if (data) { jsGCfopEditRow(data[1]); }
+            });</text>
             }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-</script>
 
+    function jsGCfopEditRow(idPagRecTipo)
+    {
+        try {
+            var id = parseInt(idPagRecTipo, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Cfop", new { Area = "gc" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGCfopEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>

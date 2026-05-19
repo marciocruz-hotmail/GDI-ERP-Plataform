@@ -1,0 +1,127 @@
+@model GdiPlataform.Areas.g.Models.CstFinanceiroTransferirContaCaixa
+@{ Layout = null; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formModalTransferirContaCaixa_gFinanceiro" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    @if (ViewBag.filterAtivo != true)
+                    {
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label("Atenção: realize a pesquisa (filtro) antes de executar a transferência!", htmlAttributes: new { @class = "col-sm-12 col-form-label", @style = "margin-top:5px;color:red" })
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.LabelFor(model => model.id_conta_caixa, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-8 text-sm-start">
+                                @Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContaCaixa as List<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.LabelFor(model => model.data_vencimento, htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-4">
+                                <div class="input-group date" id="ig_g_fin_modal_transferir_venc">
+                                    @Html.EditorFor(model => model.data_vencimento, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                    <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label(" ", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-9 text-sm-start">
+                                <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                    @Html.CheckBoxFor(model => model.calcular_multa, new { @class = "form-check-input switch-success", role = "switch" })
+                                    <span class="form-check-label ms-1 mb-0">@Html.DisplayNameFor(model => model.calcular_multa)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row text-sm-end m-0 pt-1">
+                            @Html.Label(" ", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                            <div class="col-sm-9 text-sm-start">
+                                <div class="form-check form-switch d-inline-flex align-items-center flex-nowrap">
+                                    @Html.CheckBoxFor(model => model.calcular_juros, new { @class = "form-check-input switch-success", role = "switch" })
+                                    <span class="form-check-label ms-1 mb-0">@Html.DisplayNameFor(model => model.calcular_juros)</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (ViewBag.filterAtivo == true)
+                {
+                    <button type="button" name="btnConfirmar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendFormTransferirContaCaixa()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        try {
+            jsDatepicker('#ig_g_fin_modal_transferir_venc');
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary() == null) ? "" : @Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsSendFormTransferirContaCaixa() {
+        try {
+            LibMessageProcessando("Transferindo títulos para conta caixa . . .");
+            var form = $('#formModalTransferirContaCaixa_gFinanceiro');
+            $.ajax({
+                cache: false,
+                async: true,
+                type: "POST",
+                url: '@Url.Action("AjaxTransferirContaCaixa", "Financeiro", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result) {
+                    LibMessageProcessandoHide();
+                    if (result.success == true) {
+                        LibMessageDialog({
+                            title: "Confirmação",
+                            closeButton: false,
+                            message: result.msg,
+                            centerVertical: true,
+                            onEscape: false,
+                            backdrop: true,
+                            buttons: {
+                                confirmar: {
+                                    label: 'OK',
+                                    callback: function () {
+                                        $("#dtGFinanceiro").DataTable().draw(false);
+                                        document.querySelectorAll('.modal').forEach(function (m) { var i = bootstrap.Modal.getInstance(m); if (i) i.hide(); });
+                                        LibMessageHideAll();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        GdiAjaxNotifyInconsistencias(result.msg);
+                    }
+                },
+                error: function (result) {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(result.toString());
+                }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsSendFormTransferirContaCaixa] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+</script>

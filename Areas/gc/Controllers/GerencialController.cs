@@ -74,7 +74,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             String sentencaSqlDiario = string.Empty;
             String sentencaSqlMes = string.Empty;
             String StatusPedido = string.Empty;
-            cstPainelComercialGerencial ViewcstPainelComercialGerencial = new cstPainelComercialGerencial();
+            CstPainelComercialGerencial ViewcstPainelComercialGerencial = new CstPainelComercialGerencial();
 
 
             //********** PEDIDOS EM PROCESSAMENTO **********//

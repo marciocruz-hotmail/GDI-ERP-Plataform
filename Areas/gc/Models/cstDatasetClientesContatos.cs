@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstDatasetClientesContatos
+    public class CstDatasetClientesContatos
     {
         public int id_cliente_contato { get; set; }
         public int id_cliente { get; set; }

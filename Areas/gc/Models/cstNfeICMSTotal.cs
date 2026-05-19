@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstNfeIcmsTotal
+    public class CstNfeIcmsTotal
     {
         public decimal vBC { get; set; }
         public decimal vICMS { get; set; }
@@ -28,7 +28,7 @@ namespace GdiPlataform.Areas.gc.Models
         public decimal vNF { get; set; }
         public decimal vTotTrib { get; set; }
 
-        public cstNfeIcmsTotal()
+        public CstNfeIcmsTotal()
         {
             vBC = 0;
             vICMS = 0;

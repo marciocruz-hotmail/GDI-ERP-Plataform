@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
@@ -33,98 +34,180 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de UFs";
-            return View();
+            var model = new CstUfIndex
+            {
+                UfIndex_id_uf = String.Empty,
+                UfIndex_sigla = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, siglaRestore;
+            if (TryParseFiltroUfSemicolon(filtroPersistido.sql_filtro, out idRestore, out siglaRestore))
+            {
+                model.UfIndex_id_uf = idRestore;
+                model.UfIndex_sigla = siglaRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(siglaRestore);
+            }
+            return View(model);
         }
 
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_UF_*,g_UF_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
             string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-            var allRecords = new List<Db.g_uf>();
-            List<string[]> list = new List<string[]>();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Verificação se há algum filtro ativo
-            if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
-
-            if ((filterDb == false) && (filterAdvanced == false))
-            {
-                // Não há filtro
-                allRecords = db.g_uf.ToList();
-            }
-            if (filterDb)
-            {
-                SentencaSQL = string.Empty;
-                if (record_g_filtro.advanced == true) { SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
-                else { SentencaSQL = "select * from g_uf where " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); };
-                allRecords = db.g_uf.SqlQuery(SentencaSQL).ToList();
-            }
-            else if (filterAdvanced)
-            {
-                // Filtro Avançado - Não implementado
-                allRecords = db.g_uf.ToList();
-            }
-
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_uf, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_uf) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.sigla :
-                                     "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_uf); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.sigla); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_uf); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.sigla); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            foreach (var c in displayedRecords)
-            {
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_uf.ToString(),
-                                    c.sigla.ToString(),
-                                    c.nome.ToString()
-                                });
-            }
+                var baseQuery = db.g_uf.AsNoTracking().Where(u => u.id_uf > 0);
+                int totalRecords = baseQuery.Count();
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string siglaStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(siglaStr);
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroUfSemicolon(recordFiltro.sql_filtro, out idStr, out siglaStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(siglaStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_uf> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroUfNaQuery(query, idStr, siglaStr);
+                    LibDB.setFilterByUser(MontarFiltroUfPersistido(idStr, siglaStr), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoUfNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(u => new { u.id_uf, u.sigla, u.nome })
+                    .ToList();
+
+                var list = page.Select(u => new[]
+                {
+                    "",
+                    u.id_uf.ToString(),
+                    u.sigla ?? "",
+                    u.nome ?? ""
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroUfSemicolon(string raw, out string id, out string sigla)
+        {
+            id = sigla = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            sigla = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(sigla);
+        }
+
+        private static string MontarFiltroUfPersistido(string id, string sigla)
+        {
+            return (id ?? String.Empty) + ";" + (sigla ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_uf> AplicarFiltroUfNaQuery(IQueryable<Db.g_uf> query, string idStr, string siglaStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idUf))
+            {
+                query = query.Where(u => u.id_uf == idUf);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemCodigo(siglaStr, out string padraoSigla))
+            {
+                query = query.Where(u => u.sigla != null && DbFunctions.Like(u.sigla, padraoSigla));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_uf> AplicarOrdenacaoUfNaQuery(IQueryable<Db.g_uf> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 3)
+                {
+                    return asc ? query.OrderBy(u => u.nome) : query.OrderByDescending(u => u.nome);
+                }
+                if (param.iSortCol_0 == 2)
+                {
+                    return asc ? query.OrderBy(u => u.sigla) : query.OrderByDescending(u => u.sigla);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(u => u.id_uf) : query.OrderByDescending(u => u.id_uf);
+                }
+            }
+            return query.OrderBy(u => u.id_uf);
         }
         #endregion
 

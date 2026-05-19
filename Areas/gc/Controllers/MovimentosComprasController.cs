@@ -452,7 +452,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalImportarExcelSC(int? idMovimento)
         {
             DeleteItemTemporario();
-            cstUploadFiles record_cstUploadFiles = new cstUploadFiles();
+            CstUploadFiles record_cstUploadFiles = new CstUploadFiles();
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-file-excel", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importar Excel - Southern Cross";
             var comboMovimentosTipos = new List<SelectListItem>();
             comboMovimentosTipos.Add(new SelectListItem { Value = "12", Text = "1.2 - Cotação - Fornecedor" });
@@ -463,7 +463,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalImportarExcelSC(cstUploadFiles record_cstUploadFiles)
+        public ActionResult AjaxModalImportarExcelSC(CstUploadFiles record_cstUploadFiles)
         {
             bool Processado = false;
             bool ErroProcessamento = false;
@@ -519,7 +519,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     int IndexUnitPrice = -1;
                     int IndexTotalPrice = -1;
                     bool LeituraAtiva = false;
-                    List<cstModelSalesOrderSC> ListaItensSO = new List<cstModelSalesOrderSC>();
+                    List<CstModelSalesOrderSC> ListaItensSO = new List<CstModelSalesOrderSC>();
                     List<gc_movimentos_itens> ListaItensMovimentoCompra = new List<gc_movimentos_itens>();
                     List<String> ListaColunas = new List<String>();
                     DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
@@ -568,7 +568,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                                 if (LeituraAtiva == true)
                                 {
-                                    cstModelSalesOrderSC ItemSO = new cstModelSalesOrderSC();
+                                    CstModelSalesOrderSC ItemSO = new CstModelSalesOrderSC();
                                     if (IndexItem >= 0) { ItemSO.String_Item = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexItem).Value); }
                                     if (IndexDescription >= 0) { ItemSO.String_Description = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexDescription).Value); }
                                     if (IndexOrdered >= 0) { ItemSO.String_Ordered = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexOrdered).Value); }
@@ -722,7 +722,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #endregion
 
         #region CadastrarProdutoNCM
-        public g_produtos CadastrarNovoProduto(cstModelSalesOrderSC ItemSO)
+        public g_produtos CadastrarNovoProduto(CstModelSalesOrderSC ItemSO)
         {
             g_produtos record_g_produto = new g_produtos();
             record_g_produto.id_produto_substituto = 0;

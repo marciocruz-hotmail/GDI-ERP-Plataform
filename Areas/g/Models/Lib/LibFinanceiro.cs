@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,9 +9,9 @@ namespace GdiPlataform.Areas.g.Lib
 {
     public static class LibFinanceiro
     {
-        public static cstFinanceiroImpostos CalcularImpostos(g_clientes record_g_clientes, decimal valor)
+        public static CstFinanceiroImpostos CalcularImpostos(g_clientes record_g_clientes, decimal valor)
         {
-            cstFinanceiroImpostos recordFinanceiroImpostos = new cstFinanceiroImpostos();
+            CstFinanceiroImpostos recordFinanceiroImpostos = new CstFinanceiroImpostos();
 
             // ISS
             if (record_g_clientes.iss_percentual > 0)

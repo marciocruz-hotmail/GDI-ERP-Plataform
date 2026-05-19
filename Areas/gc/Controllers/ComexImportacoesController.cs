@@ -672,7 +672,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             List<gc_comex_produtos> ListaComexProdutos = new List<gc_comex_produtos>();
             List<g_produtos_ncm> ListaProdutosNCM = new List<g_produtos_ncm>();
             List<g_unidade_medida> ListaUnidadesMedidas = new List<g_unidade_medida>();
-            List<cstModelComexItemImportacao> ListaPlanilhaItens = new List<cstModelComexItemImportacao>();
+            List<CstModelComexItemImportacao> ListaPlanilhaItens = new List<CstModelComexItemImportacao>();
             var fileExt = System.IO.Path.GetExtension(filesource.FileName.ToLower()).Substring(1);
             gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(CachePersister.userIdentity.IdGcComexImportacaoAtiva);
 
@@ -818,7 +818,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         {
                             if (WorkSheet.Row(1).Cell(1).Value.IsBlank == false)
                             {
-                                cstModelComexItemImportacao ItemImportacao = new cstModelComexItemImportacao();
+                                CstModelComexItemImportacao ItemImportacao = new CstModelComexItemImportacao();
                                 ItemImportacao.String_NfNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(1).Cell(IndexNfNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                 ItemImportacao.String_DiNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(1).Cell(IndexDiNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                 ItemImportacao.String_DiData = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(1).Cell(IndexDiData).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
@@ -909,7 +909,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             {
                                 if (WorkSheet.Row(IndexRow).Cell(1).Value.IsBlank == false)
                                 {
-                                    cstModelComexItemImportacao ItemImportacao = new cstModelComexItemImportacao();
+                                    CstModelComexItemImportacao ItemImportacao = new CstModelComexItemImportacao();
                                     ItemImportacao.String_NfNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexNfNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                     ItemImportacao.String_DiNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexDiNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                     ItemImportacao.String_LiNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexLiNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
@@ -1017,7 +1017,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     if (ErroProcessamento == false)
                     {
                         //////////   VERIFICAR CADASTRO DE NCM E UNIDADE DE MEDIDAS   //////////
-                        foreach (cstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
+                        foreach (CstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
                         {
                             // Validar NCMs
                             if (ItemImportacao.String_NcmCodigo.EmptyIfNull().ToString().Trim().Length > 0)
@@ -1126,7 +1126,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             PNAuxiliar = LibStringFormat.GDIFormatarCodigoAuxiliarProduto(PNOficial);
                             PNCuringaOH = PNAuxiliar.Replace("0", "O");
                             PNCuringaZERO = PNAuxiliar.Replace("O", "0");
-                            cstModelComexItemImportacao ItemPlanilha = ListaPlanilhaItens.Where(i => i.String_PN == RowItemInvoices.pn).FirstOrDefault();
+                            CstModelComexItemImportacao ItemPlanilha = ListaPlanilhaItens.Where(i => i.String_PN == RowItemInvoices.pn).FirstOrDefault();
                             try { if (ItemPlanilha == null) { ItemPlanilha = ListaPlanilhaItens.Where(p => p.String_PN_Auxiliar == PNAuxiliar || p.String_PN_Variacao1 == PNCuringaOH || p.String_PN_Variacao2 == PNCuringaZERO).FirstOrDefault(); }; } catch (Exception) { }; // Buscar pelo PN Auxiliar
                             if (ItemPlanilha == null)
                             {
@@ -1136,7 +1136,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         }
 
                         // Validar todos os itens da planilha nas invoices
-                        foreach (cstModelComexItemImportacao ItemPlanilhaItens in ListaPlanilhaItens)
+                        foreach (CstModelComexItemImportacao ItemPlanilhaItens in ListaPlanilhaItens)
                         {
                             CstInvoiceItemValidacao RowItemInvoice = ListaItensInvoices.Where(i => i.pn == ItemPlanilhaItens.String_PN).FirstOrDefault();
                             if (RowItemInvoice != null)
@@ -1156,7 +1156,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         TotalizadorFrete = 0;
                         TotalizadorPesoLiquido = 0;
                         TotalizadorPesoBruto = 0;
-                        foreach (cstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
+                        foreach (CstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
                         {
                             TotalizadorFobReais += ItemImportacao.Decimal_ValorFob;
                             TotalizadorFrete += ItemImportacao.Decimal_ValorFrete;
@@ -1207,7 +1207,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                             // NF Despachante Número
                             String NfDespachanteNumero = String.Empty;
-                            foreach (cstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
+                            foreach (CstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
                             {
                                 if (ItemImportacao.String_NfNumero.EmptyIfNull().ToString().Trim().Length > 0)
                                 {
@@ -1227,7 +1227,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
 
-                            foreach (cstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
+                            foreach (CstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
                             {
                                 gc_comex_produtos ProdutoComex = null;
                                 g_produtos ProdutoGDI = null;
@@ -1596,7 +1596,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     }
                                 }
                                 // Realizar o upload do XML para o GED
-                                cstUploadGed record_cstUploadGedXML = new cstUploadGed();
+                                CstUploadGed record_cstUploadGedXML = new CstUploadGed();
                                 record_cstUploadGedXML.id_arquivo = 0;
                                 record_cstUploadGedXML.id_arquivo_tipo = 13; // Comex - Importações
                                 record_cstUploadGedXML.filesource = filesource;
@@ -1737,7 +1737,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             List<g_produtos_ncm> ListaProdutosNCM = new List<g_produtos_ncm>();
             List<g_unidade_medida> ListaUnidadesMedidas = new List<g_unidade_medida>();
             List<gc_comex_produtos> ListaComexProdutos = new List<gc_comex_produtos>();
-            List<cstModelComexItemImportacao> ListaPlanilhaItens = new List<cstModelComexItemImportacao>();
+            List<CstModelComexItemImportacao> ListaPlanilhaItens = new List<CstModelComexItemImportacao>();
             var fileExt = System.IO.Path.GetExtension(filesource.FileName.ToLower()).Substring(1);
             gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(CachePersister.userIdentity.IdGcComexImportacaoAtiva);
 
@@ -1837,7 +1837,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         {
                             if (WorkSheet.Row(1).Cell(1).Value.IsBlank == false)
                             {
-                                cstModelComexItemImportacao ItemImportacao = new cstModelComexItemImportacao();
+                                CstModelComexItemImportacao ItemImportacao = new CstModelComexItemImportacao();
                                 ItemImportacao.String_NfNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(1).Cell(IndexNfNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                 ItemImportacao.String_DiNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(1).Cell(IndexDiNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                 ItemImportacao.String_DiData = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(1).Cell(IndexDiData).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
@@ -1928,7 +1928,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             {
                                 if (WorkSheet.Row(IndexRow).Cell(1).Value.IsBlank == false)
                                 {
-                                    cstModelComexItemImportacao ItemImportacao = new cstModelComexItemImportacao();
+                                    CstModelComexItemImportacao ItemImportacao = new CstModelComexItemImportacao();
                                     ItemImportacao.String_NfNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexNfNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                     ItemImportacao.String_DiNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexDiNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
                                     ItemImportacao.String_LiNumero = LibExcelReader.GetStringCellXlsx(WorkSheet.Row(IndexRow).Cell(IndexLiNumero).Value).EmptyIfNull().ToString().Trim().ToUpperInvariant();
@@ -2010,7 +2010,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         TotalizadorFrete = 0;
                         TotalizadorPesoLiquido = 0;
                         TotalizadorPesoBruto = 0;
-                        foreach (cstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
+                        foreach (CstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
                         {
                             TotalizadorFobReais += ItemImportacao.Decimal_ValorFob;
                             TotalizadorFrete += ItemImportacao.Decimal_ValorFrete;
@@ -2025,7 +2025,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         List<gc_comex_importacoes_itens> ListaIntesItensImportacaoAtualizar = new List<gc_comex_importacoes_itens>();
 
                         // CADASTRO DE PRODUTOS - 8
-                        foreach (cstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
+                        foreach (CstModelComexItemImportacao ItemImportacao in ListaPlanilhaItens)
                         {
                             QtdItensProcessados += 1;
 
@@ -2444,7 +2444,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalUploadFileComexDocs
         public ActionResult ModalUploadFileComexDocs(int? IdGed)
         {
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             if (IdGed > 0)
             {
                 ged_arquivos record_ged_arquivos = db.ged_arquivos.Find(IdGed);
@@ -2468,7 +2468,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalUploadFileComexInvoicesPDF
         public ActionResult ModalUploadFileComexInvoicesPDF(int? IdGed)
         {
-            cstUploadGed record_cstUploadGed = new cstUploadGed();
+            CstUploadGed record_cstUploadGed = new CstUploadGed();
             if (IdGed > 0)
             {
                 /*ged_arquivos record_ged_arquivos = db.ged_arquivos.Find(IdGed);

@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace GdiPlataform.Areas.crm.Models
 {
-    public class cstListaPedidosPortal
+    public class CstListaPedidosPortal
     {
-        public List<cstDadosPedidoPortal> ListaPedidos { get; set; }
+        public List<CstDadosPedidoPortal> ListaPedidos { get; set; }
 
-        public cstListaPedidosPortal()
+        public CstListaPedidosPortal()
         {
-            ListaPedidos = new List<cstDadosPedidoPortal>();
+            ListaPedidos = new List<CstDadosPedidoPortal>();
         }
     }
 }

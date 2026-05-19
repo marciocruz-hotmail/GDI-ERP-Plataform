@@ -1,39 +1,68 @@
-﻿@model IEnumerable<GdiPlataform.Db.g_pagrec_condicoes>
+@model GdiPlataform.Areas.g.Models.CstPagRecCondicoesIndex
 @using GdiPlataform.Security
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool podeEditarPagRecCondicoes = CachePersister.userIdentity.Roles.Contains("g_PagRecCondicoes_*")
+        || CachePersister.userIdentity.Roles.Contains("g_PagRecCondicoes_Actionupdate");
+}
+<style>
+    .gdi-index-pagreccondicoes-dt .btnGPagRecCondicoesEditRow { gap: 0.125rem; }
+</style>
 <div class="row">
     <div class="col-lg-12 m-0 p-0">
         <div class="card m-0 p-0">
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="PagRecCondicoes" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
             <div class="card-header m-0 p-1">
                 @if ((CachePersister.userIdentity.Roles.Contains("g_PagRecCondicoes_*")) || (CachePersister.userIdentity.Roles.Contains("g_PagRecCondicoes_Actioncreate")))
-                { <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2"onclick="JsNewRecord('@Url.Action("Create","PagRecCondicoes",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
+                { <button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","PagRecCondicoes",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
-                @if ((CachePersister.userIdentity.Roles.Contains("g_PagRecCondicoes_*")) || (CachePersister.userIdentity.Roles.Contains("g_PagRecCondicoes_Actionupdate")))
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGPagRecCondicoes, 'Id.', '@Url.Action("Edit","PagRecCondicoes",new { Area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                else
-
-                { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.PagRecCondicoesIndex_id, new { @class = "form-control", @id = "edit_id_pagrec_condicao", @placeholder = "Id.", @onkeypress = "keypressedPagRecCondicoes(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Descrição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.PagRecCondicoesIndex_descricao, new { @class = "form-control", @id = "edit_descricao_pagrec_condicao", @placeholder = "Descrição", @onkeypress = "keypressedPagRecCondicoes(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarPagRecCondicoes" title="Pesquisar condições" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarPagRecCondicoes()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroPagRecCondicoes" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroPagRecCondicoes()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-body m-0 p-1 gdi-index-pagreccondicoes-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGPagRecCondicoes">
+                        <table class="table table-sm table-hover gdi-dt-zebra align-middle w-100 display compact" style="width:100%" id="dtGPagRecCondicoes">
                             <thead>
                                 <tr>
                                     <th>[x]</th>
-                                    <th>@Html.Encode("Id.")</th>
-                                    <th>@Html.DisplayName("Ativo")</th>
-                                    <th>@Html.DisplayName("Descrição")</th>
-                                    <th>@Html.DisplayName("Pagamento")</th>
-                                    <th>@Html.DisplayName("Recebimento")</th>
-                                    <th>@Html.DisplayName("Qtd. Dias")</th>
-                                    <th>@Html.DisplayName("Qtd. Parcela")</th>
+                                    <th>Id.</th>
+                                    <th>Ativo</th>
+                                    <th>Descrição</th>
+                                    <th>Pagamento</th>
+                                    <th>Recebimento</th>
+                                    <th>Qtd. Dias</th>
+                                    <th>Qtd. Parcela</th>
+                                    @if (podeEditarPagRecCondicoes)
+                                    {
+                                        <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar condição"></i></th>
+                                    }
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -42,31 +71,101 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
 </div>
 
 <script type="text/javascript">
-    var otableGPagRecCondicoesGPagRecCondicoes;
+    var otableGPagRecCondicoes;
 
-	$(function ()
+    $(function ()
     {
         try
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroPagRecCondicoes('0');
+            gdiAplicarFoco('#edit_id_pagrec_condicao', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsPagRecCondicoesTemCriterioFiltro()) { jsAjaxPesquisarPagRecCondicoes(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
+
+    function keypressedPagRecCondicoes(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarPagRecCondicoes();
+        }
+    }
+
+    function jsPagRecCondicoesTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_pagrec_condicao').val()) || !isEmpty($('#edit_descricao_pagrec_condicao').val());
+    }
+
+    function jsAtualizarIndicadorFiltroPagRecCondicoes(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroPagRecCondicoes',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todas as condições'
+        });
+    }
+
+    function jsAjaxPesquisarPagRecCondicoes()
+    {
+        try
+        {
+            if (!jsPagRecCondicoesTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Descrição).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando condições...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGPagRecCondicoes").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsAjaxPesquisarPagRecCondicoes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroPagRecCondicoes()
+    {
+        try
+        {
+            $('#edit_id_pagrec_condicao').val('');
+            $('#edit_descricao_pagrec_condicao').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGPagRecCondicoes").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", "[jsLimparFiltroPagRecCondicoes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGPagRecCondicoesGPagRecCondicoes = $('#dtGPagRecCondicoes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otableGPagRecCondicoes = $('#dtGPagRecCondicoes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroPagRecCondicoes(json.yesFilterOnOff);
+                }
+            }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -80,6 +179,10 @@
                         sEcho: d.draw,
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
+                        yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_pagrec_condicao').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_descricao_pagrec_condicao').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -96,13 +199,22 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "40%", orderable: false, className: 'text-sm-center', targets: [3] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [5] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [6] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [7] }
+                { "width": "6%", orderable: true, className: 'text-sm-center', targets: [1] },
+                { "width": "6%", orderable: false, className: 'text-sm-center', targets: [2] },
+                { "width": "30%", orderable: true, targets: [3] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [4] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [5] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [6] },
+                { "width": "9%", orderable: false, className: 'text-sm-center', targets: [7] }
+                @if (podeEditarPagRecCondicoes)
+                {
+                <text>,
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [8], data: null, defaultContent: "",
+                    render: function (data, type, row) {
+                        return '<button type="button" title="Editar condição Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGPagRecCondicoesEditRow d-inline-flex align-items-center" onclick="jsGPagRecCondicoesEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                    }
+                }</text>
+                }
             ],
             select: {
                 style: 'multi',
@@ -110,10 +222,15 @@
                 headerCheckbox: true
             },
             order: [[1, 'asc']],
-
+            drawCallback: function (settings) {
+                document.querySelectorAll('#dtGPagRecCondicoes [data-bs-toggle="tooltip"]').forEach(function (el) {
+                    bootstrap.Tooltip.getOrCreateInstance(el);
+                });
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+            },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Descrição e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -142,14 +259,28 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dtGPagRecCondicoes tbody').on('dblclick', 'tr td', function () {
-                var data = otableGPagRecCondicoesGPagRecCondicoes.row($(this).closest('tr')).data();
-                JsEditRecordDoubleClick(data[1],'@Url.Action("Edit", "PagRecCondicoes", new { Area = "g" })');
-            });
+            @if (podeEditarPagRecCondicoes)
+            {
+                <text>$('#dtGPagRecCondicoes tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
+                var data = otableGPagRecCondicoes.row($(this).closest('tr')).data();
+                if (data) { jsGPagRecCondicoesEditRow(data[1]); }
+            });</text>
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-</script>
 
+    function jsGPagRecCondicoesEditRow(idPagRecCondicao)
+    {
+        try {
+            var id = parseInt(idPagRecCondicao, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "PagRecCondicoes", new { Area = "g" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGPagRecCondicoesEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>

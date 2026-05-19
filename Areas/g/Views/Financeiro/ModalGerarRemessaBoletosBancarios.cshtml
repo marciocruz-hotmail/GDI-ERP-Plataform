@@ -103,21 +103,6 @@
         }
     };
 
-    function jsRunFiltroAvancadoModal()
-    {
-        try
-        {
-            var msgButton = document.getElementById("btnFiltroAvancado").innerHTML.replace("Filtro Avançado", "Remover Filtro").replace("fa-solid fa-filter", "fa-solid fa-magnifying-glass-minus");
-            document.getElementById("btnFiltroAvancado").innerHTML = msgButton;
-            document.getElementById("btnFiltroAvancado").title = "Remover Filtro";
-            executarFiltroAvancado($('#editIdClienteFornecedor').val().toString() + ";" + emptyIfNull($('#editData1').data('date')).toString() + ";" + emptyIfNull($('#editData2').data('date')).toString());
-            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsRunFiltroAvancadoModal] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
 
 </script>
 

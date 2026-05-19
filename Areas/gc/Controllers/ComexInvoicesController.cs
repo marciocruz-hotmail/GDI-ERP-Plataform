@@ -377,8 +377,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     var FileNameInvoice = Path.Combine(DirTempFiles, LibDateTime.getDataHoraBrasilia().ToString("yyyyMMddhhmmss") + "_Planilha-Invoices_" + fileNameOrigem);
                     filesource.SaveAs(FileNameInvoice);
 
-                    List<cstModelComexItemInvoice> PreListaItens = new List<cstModelComexItemInvoice>();
-                    List<cstModelComexItemInvoice> ListaItens = new List<cstModelComexItemInvoice>();
+                    List<CstModelComexItemInvoice> PreListaItens = new List<CstModelComexItemInvoice>();
+                    List<CstModelComexItemInvoice> ListaItens = new List<CstModelComexItemInvoice>();
 
                     //Get the path of specified file
                     FileStream FileTemplate = new FileStream(FileNameInvoice, FileMode.Open, FileAccess.Read);
@@ -410,7 +410,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         {
                             if (sheet.GetRow(1) != null)
                             {
-                                cstModelComexItemInvoice ItemInvoice = new cstModelComexItemInvoice();
+                                CstModelComexItemInvoice ItemInvoice = new CstModelComexItemInvoice();
                                 ItemInvoice.String_Item = LibStringFormat.RemoverEspacos(LibExcelReader.GetStringCellXls(sheet.GetRow(1).GetCell(IndexItem).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                                 ItemInvoice.String_Qty = LibStringFormat.RemoverEspacos(LibExcelReader.GetStringCellXls(sheet.GetRow(1).GetCell(IndexQty).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                                 ItemInvoice.String_Un = LibStringFormat.RemoverEspacos(LibExcelReader.GetStringCellXls(sheet.GetRow(1).GetCell(IndexUn).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
@@ -443,7 +443,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     {
                                         if (sheet.GetRow(IndexRow) != null)
                                         {
-                                            cstModelComexItemInvoice PreItemInvoice = new cstModelComexItemInvoice();
+                                            CstModelComexItemInvoice PreItemInvoice = new CstModelComexItemInvoice();
                                             PreItemInvoice.IndexRowSheet = IndexRowSheet;
                                             PreItemInvoice.String_Item = LibStringFormat.RemoverEspacos(LibExcelReader.GetNumericCellXls(sheet.GetRow(IndexRow).GetCell(IndexItem).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                                             PreItemInvoice.String_Qty = LibStringFormat.RemoverEspacos(LibExcelReader.GetNumericCellXls(sheet.GetRow(IndexRow).GetCell(IndexQty).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
@@ -496,7 +496,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                             }
                                             else // Complemento de linha (Número Serial)
                                             {
-                                                cstModelComexItemInvoice UltimoPreItem = PreListaItens[PreListaItens.Count - 1];
+                                                CstModelComexItemInvoice UltimoPreItem = PreListaItens[PreListaItens.Count - 1];
                                                 if (PreItemInvoice.String_PN.Trim().Length > 0) 
                                                 {
                                                     String ItemSerialNumber = PreItemInvoice.String_PN.Replace("SN:", "").Replace("SN :", "").Replace(" ", "").Replace(",", "").Replace(";", "") + ",";
@@ -524,7 +524,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
                     IndexItem = 1;
-                    foreach (cstModelComexItemInvoice Item in PreListaItens)
+                    foreach (CstModelComexItemInvoice Item in PreListaItens)
                     {
                         if (Item.String_Note == "AKIT")
                         {
@@ -554,8 +554,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                         // Processar os itens
                         List<gc_comex_invoices_itens> ListaItensNovaInvoice = new List<gc_comex_invoices_itens>();
-                        List<cstModelComexItemInvoice> ListaFinal = ListaItens.Where(l => l.ItemIndex >= 0).OrderBy(l => l.IndexRowSheet).ToList();
-                        foreach (cstModelComexItemInvoice ItemImportacao in ListaFinal)
+                        List<CstModelComexItemInvoice> ListaFinal = ListaItens.Where(l => l.ItemIndex >= 0).OrderBy(l => l.IndexRowSheet).ToList();
+                        foreach (CstModelComexItemInvoice ItemImportacao in ListaFinal)
                         {
                             gc_comex_invoices_itens novo_item_invoice = new Db.gc_comex_invoices_itens();
                             if (ItemImportacao.ItemValido == true) // NOVO ITEM INVOICE - new gc_comex_invoices_itens
@@ -796,7 +796,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             }
                         }
                         // Realizar o upload do XML para o GED
-                        cstUploadGed record_cstUploadGedXML = new cstUploadGed();
+                        CstUploadGed record_cstUploadGedXML = new CstUploadGed();
                         record_cstUploadGedXML.id_arquivo = 0;
                         record_cstUploadGedXML.id_arquivo_tipo = 13; // Comex - Importações
                         record_cstUploadGedXML.filesource = filesource;
@@ -916,8 +916,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     var FileNameInvoice = Path.Combine(DirTempFiles, LibDateTime.getDataHoraBrasilia().ToString("yyyyMMddhhmmss") + "_Planilha-Invoices_" + fileNameOrigem);
                     filesource.SaveAs(FileNameInvoice);
 
-                    List<cstModelComexItemInvoice> PreListaItens = new List<cstModelComexItemInvoice>();
-                    List<cstModelComexItemInvoice> ListaItens = new List<cstModelComexItemInvoice>();
+                    List<CstModelComexItemInvoice> PreListaItens = new List<CstModelComexItemInvoice>();
+                    List<CstModelComexItemInvoice> ListaItens = new List<CstModelComexItemInvoice>();
 
                     //Get the path of specified file
                     FileStream FileTemplate = new FileStream(FileNameInvoice, FileMode.Open, FileAccess.Read);
@@ -950,7 +950,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         {
                             if (sheet.GetRow(1) != null)
                             {
-                                cstModelComexItemInvoice ItemInvoice = new cstModelComexItemInvoice();
+                                CstModelComexItemInvoice ItemInvoice = new CstModelComexItemInvoice();
                                 ItemInvoice.String_Item = LibStringFormat.RemoverEspacos(LibExcelReader.GetStringCellXls(sheet.GetRow(1).GetCell(IndexItem).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                                 ItemInvoice.String_Qty = LibStringFormat.RemoverEspacos(LibExcelReader.GetStringCellXls(sheet.GetRow(1).GetCell(IndexQty).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                                 ItemInvoice.String_Un = LibStringFormat.RemoverEspacos(LibExcelReader.GetStringCellXls(sheet.GetRow(1).GetCell(IndexUn).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
@@ -982,7 +982,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     {
                                         if (sheet.GetRow(IndexRow) != null)
                                         {
-                                            cstModelComexItemInvoice PreItemInvoice = new cstModelComexItemInvoice();
+                                            CstModelComexItemInvoice PreItemInvoice = new CstModelComexItemInvoice();
                                             PreItemInvoice.IndexRowSheet = IndexRowSheet;
                                             PreItemInvoice.String_Item = LibStringFormat.RemoverEspacos(LibExcelReader.GetNumericCellXls(sheet.GetRow(IndexRow).GetCell(IndexItem).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                                             PreItemInvoice.String_Qty = LibStringFormat.RemoverEspacos(LibExcelReader.GetNumericCellXls(sheet.GetRow(IndexRow).GetCell(IndexQty).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
@@ -1036,7 +1036,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                             }
                                             else // Complemento de linha (Número Serial)
                                             {
-                                                cstModelComexItemInvoice UltimoPreItem = PreListaItens[PreListaItens.Count - 1];
+                                                CstModelComexItemInvoice UltimoPreItem = PreListaItens[PreListaItens.Count - 1];
                                                 if (PreItemInvoice.String_PN.Trim().Length > 0)
                                                 {
                                                     String ItemSerialNumber = PreItemInvoice.String_PN.Replace("SN:", "").Replace("SN :", "").Replace(" ", "").Replace(",", "").Replace(";", "") + ",";
@@ -1064,7 +1064,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
                     IndexItem = 1;
-                    foreach (cstModelComexItemInvoice Item in PreListaItens)
+                    foreach (CstModelComexItemInvoice Item in PreListaItens)
                     {
                         if (Item.String_Note == "AKIT")
                         {
@@ -1099,9 +1099,9 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                         int QtdItensProcessados = 0;
                         int QtdItensAtualizados = 0;
-                        List<cstModelComexItemInvoice> ListaFinal = ListaItens.Where(l => l.ItemIndex >= 0).OrderBy(l => l.IndexRowSheet).ToList();
+                        List<CstModelComexItemInvoice> ListaFinal = ListaItens.Where(l => l.ItemIndex >= 0).OrderBy(l => l.IndexRowSheet).ToList();
                         String ListaIdsAtualizados = string.Empty;
-                        foreach (cstModelComexItemInvoice ItemImportacao in ListaFinal)
+                        foreach (CstModelComexItemInvoice ItemImportacao in ListaFinal)
                         {
                             QtdItensProcessados += 1;
                             if (ItemImportacao.ItemValido == true) // NOVO ITEM INVOICE - new gc_comex_invoices_itens
@@ -1252,8 +1252,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     var FileNameInvoice = Path.Combine(DirTempFiles, LibDateTime.getDataHoraBrasilia().ToString("yyyyMMddhhmmss") + "_Planilha-Fob_" + fileNameOrigem);
                     filesource.SaveAs(FileNameInvoice);
 
-                    List<cstModelComexItemInvoice> PreListaItens = new List<cstModelComexItemInvoice>();
-                    List<cstModelComexItemInvoice> ListaItens = new List<cstModelComexItemInvoice>();
+                    List<CstModelComexItemInvoice> PreListaItens = new List<CstModelComexItemInvoice>();
+                    List<CstModelComexItemInvoice> ListaItens = new List<CstModelComexItemInvoice>();
 
                     //Get the path of specified file
                     FileStream FileTemplate = new FileStream(FileNameInvoice, FileMode.Open, FileAccess.Read);
@@ -1265,7 +1265,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
                         if (sheet.GetRow(IndexRow) != null)
                         {
-                            cstModelComexItemInvoice PreItemInvoice = new cstModelComexItemInvoice();
+                            CstModelComexItemInvoice PreItemInvoice = new CstModelComexItemInvoice();
                             PreItemInvoice.String_PN = LibStringFormat.GDIFormatarCodigoProduto(LibExcelReader.GetStringCellXls(sheet.GetRow(IndexRow).GetCell(IndexPN).EmptyIfNull().ToString().Trim().ToUpperInvariant()));
                             PreItemInvoice.String_PN_Auxiliar = LibStringFormat.GDIFormatarCodigoAuxiliarProduto(PreItemInvoice.String_PN);
                             PreItemInvoice.String_PN_Variacao1 = PreItemInvoice.String_PN_Auxiliar.Replace("0", "O");

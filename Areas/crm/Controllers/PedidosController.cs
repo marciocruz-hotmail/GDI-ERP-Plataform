@@ -1,4 +1,4 @@
-﻿using GdiPlataform.Areas.crm.Models;
+using GdiPlataform.Areas.crm.Models;
 using GdiPlataform.Areas.g.Lib;
 using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Db;
@@ -49,11 +49,11 @@ namespace GdiPlataform.Areas.crm.Controllers
                 new System.Data.SqlClient.SqlParameter("@dataLimite", dataLimite)
             ).ToList();
 
-            cstListaPedidosPortal ListaPedidosPortal = new cstListaPedidosPortal();
+            CstListaPedidosPortal ListaPedidosPortal = new CstListaPedidosPortal();
             foreach (gc_movimentos RecordMovimento in ListaPedidosCliente)
             {
                 // Notas Fiscais
-                cstDadosPedidoPortal DadosPedidoPortal = new cstDadosPedidoPortal();
+                CstDadosPedidoPortal DadosPedidoPortal = new CstDadosPedidoPortal();
 
 
                 int IndexNfe = 0;
@@ -313,7 +313,7 @@ namespace GdiPlataform.Areas.crm.Controllers
                         foreach (var dsRowFinanceiro in AllFinanceiroLancamentos)
                         {
                             gc_financeiro_lancamentos RecordFinanceiroLancamento = db.gc_financeiro_lancamentos.Find(Convert.ToInt32(view_record_gc_financeiro_lancamentos.id_lancamento.EmptyIfNull().ToString()));
-                            cstFinanceiroBoletos record_cstFinanceiroBoletos = new cstFinanceiroBoletos();
+                            CstFinanceiroBoletos record_cstFinanceiroBoletos = new CstFinanceiroBoletos();
                             record_cstFinanceiroBoletos.idFinanceiro = view_record_gc_financeiro_lancamentos.id_lancamento;
                             int idContaCaixa = 0;
                             int.TryParse(dsRowFinanceiro["id_conta_caixa"].EmptyIfNull().ToString(), out idContaCaixa);

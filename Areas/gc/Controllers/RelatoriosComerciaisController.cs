@@ -40,7 +40,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioNotasFiscaisEmitidas
         public ActionResult ModalRelatorioNotasFiscaisEmitidas(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - Notas Fiscais Emitidas";
@@ -48,7 +48,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioNotasFiscaisEmitidas(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioNotasFiscaisEmitidas(CstModalRelatorio view_cstModalRelatorio)
         {
 
             bool Sucesso = false;
@@ -200,7 +200,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioItensComercializados
         public ActionResult ModalRelatorioItensComercializados(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - Itens Comercializados";
@@ -208,7 +208,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioItensComercializados(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioItensComercializados(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -353,7 +353,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioNotasFiscaisContabilidade
         public ActionResult ModalRelatorioNotasFiscaisContabilidade(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesPassado();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesPassado();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Arquivo Excel - Relatório Contabilidade";
@@ -361,7 +361,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxRelatorioNotasFiscaisContabilidade(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxRelatorioNotasFiscaisContabilidade(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -515,7 +515,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioNotasFiscaisMensais
         public ActionResult ModalRelatorioNotasFiscaisMensais(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesPassado();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesPassado();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Arquivo Excel - Notas Fiscais Mensais (Todas)";
@@ -523,7 +523,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioNotasFiscaisMensais(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioNotasFiscaisMensais(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -674,7 +674,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 DataInicio = DataInicio.AddMonths(-1);
                 DataFim = DataFim.AddMonths(-1);
             }
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = DataInicio;
             view_cstModalRelatorio.Field_Data_02 = DataFim;
 
@@ -714,7 +714,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioVendedoresPedidos(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioVendedoresPedidos(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -751,15 +751,15 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             try
             {
-                List<cstModelRelatorioComissaoVendedores> ListaTotalizadores = new List<cstModelRelatorioComissaoVendedores>();
-                cstModelRelatorioComissaoVendedores Totalizador1 = new cstModelRelatorioComissaoVendedores(1);
-                cstModelRelatorioComissaoVendedores Totalizador2 = new cstModelRelatorioComissaoVendedores(2);
-                cstModelRelatorioComissaoVendedores Totalizador3 = new cstModelRelatorioComissaoVendedores(3);
-                cstModelRelatorioComissaoVendedores Totalizador4 = new cstModelRelatorioComissaoVendedores(4);
-                cstModelRelatorioComissaoVendedores Totalizador5 = new cstModelRelatorioComissaoVendedores(5);
-                cstModelRelatorioComissaoVendedores Totalizador6 = new cstModelRelatorioComissaoVendedores(6);
-                cstModelRelatorioComissaoVendedores Totalizador7 = new cstModelRelatorioComissaoVendedores(7);
-                cstModelRelatorioComissaoVendedores Totalizador8 = new cstModelRelatorioComissaoVendedores(8);
+                List<CstModelRelatorioComissaoVendedores> ListaTotalizadores = new List<CstModelRelatorioComissaoVendedores>();
+                CstModelRelatorioComissaoVendedores Totalizador1 = new CstModelRelatorioComissaoVendedores(1);
+                CstModelRelatorioComissaoVendedores Totalizador2 = new CstModelRelatorioComissaoVendedores(2);
+                CstModelRelatorioComissaoVendedores Totalizador3 = new CstModelRelatorioComissaoVendedores(3);
+                CstModelRelatorioComissaoVendedores Totalizador4 = new CstModelRelatorioComissaoVendedores(4);
+                CstModelRelatorioComissaoVendedores Totalizador5 = new CstModelRelatorioComissaoVendedores(5);
+                CstModelRelatorioComissaoVendedores Totalizador6 = new CstModelRelatorioComissaoVendedores(6);
+                CstModelRelatorioComissaoVendedores Totalizador7 = new CstModelRelatorioComissaoVendedores(7);
+                CstModelRelatorioComissaoVendedores Totalizador8 = new CstModelRelatorioComissaoVendedores(8);
                 ListaTotalizadores.Add(Totalizador1);
                 ListaTotalizadores.Add(Totalizador2);
                 ListaTotalizadores.Add(Totalizador3);
@@ -911,7 +911,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 DataInicio = DataInicio.AddMonths(-1);
                 DataFim = DataInicio.AddMonths(1).AddDays(-1);
             }
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = DataInicio;
             view_cstModalRelatorio.Field_Data_02 = DataFim;
             var ComboVendedores = new List<SelectListItem>();
@@ -950,7 +950,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioVendedoresComissoes(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioVendedoresComissoes(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             bool CalculaComissao = false;
@@ -1229,7 +1229,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioVendedoresComissoesProjetado(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioVendedoresComissoesProjetado(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             bool CalculaComissao = false;
@@ -1574,7 +1574,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioVendedoresCarteira
         public ActionResult ModalRelatorioVendedoresCarteira(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             var ComboVendedores = new List<SelectListItem>();
             List<g_vendedores> AllVendedores = new List<g_vendedores>();
 
@@ -1611,7 +1611,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioVendedoresCarteira(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioVendedoresCarteira(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             int IndexLinha = 0;
@@ -1822,7 +1822,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalRelatorioVendedoresAtrasados(int? id)
         {
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             var ComboVendedores = new List<SelectListItem>();
             List<g_vendedores> AllVendedores = new List<g_vendedores>();
 
@@ -1859,7 +1859,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioVendedoresAtrasados(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioVendedoresAtrasados(CstModalRelatorio view_cstModalRelatorio)
         {
             bool Sucesso = false;
             bool CalculaComissao = false;
@@ -2107,7 +2107,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalRelatorioTransportadorasFretes
         public ActionResult ModalRelatorioTransportadorasFretes(int? id)
         {
-            cstModalRelatorio view_cstModalRelatorio = new cstModalRelatorio();
+            CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual();
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório - Transportadoras/Fretes";
@@ -2116,7 +2116,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
 
         [HttpPost]
-        public ActionResult AjaxModalRelatorioTransportadorasFretes(cstModalRelatorio view_cstModalRelatorio)
+        public ActionResult AjaxModalRelatorioTransportadorasFretes(CstModalRelatorio view_cstModalRelatorio)
         {
 
             bool Sucesso = false;

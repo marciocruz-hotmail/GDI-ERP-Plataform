@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace GdiPlataform.Areas.gc.Models
 {
-    public class cstDadosFaturamentoNF
+    public class CstDadosFaturamentoNF
     {
         public bool FaturamentoLiberado { get; set; }
         public bool CancelamentoLiberado { get; set; }
@@ -29,7 +29,7 @@ namespace GdiPlataform.Areas.gc.Models
         public decimal frete_pesol { get; set; }
         public decimal frete_pesob { get; set; }
         public string informacoes_adicionais { get; set; }
-        public cstDadosFaturamentoNF()
+        public CstDadosFaturamentoNF()
         {
             FaturamentoLiberado = false;
             CancelamentoLiberado = false;

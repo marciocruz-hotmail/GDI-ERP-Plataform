@@ -192,17 +192,25 @@ namespace GdiPlataform.Areas.gc.Controllers
                         if (!string.IsNullOrWhiteSpace(f0) && int.TryParse(f0, out int idComex))
                             query = query.Where(p => p.id_comex_produto == idComex);
 
-                        if (!string.IsNullOrWhiteSpace(f1))
-                            query = query.Where(p => p.pn.Contains(f1));
+                        if (LibStringFormat.TryMontarPadraoLikeContemCodigo(f1, out string padraoPn))
+                        {
+                            query = query.Where(p => p.pn != null && DbFunctions.Like(p.pn, padraoPn));
+                        }
 
-                        if (!string.IsNullOrWhiteSpace(f2))
-                            query = query.Where(p => p.description.Contains(f2));
+                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(f2, out string padraoDesc))
+                        {
+                            query = query.Where(p => p.description != null && DbFunctions.Like(p.description, padraoDesc));
+                        }
 
-                        if (!string.IsNullOrWhiteSpace(f3))
-                            query = query.Where(p => p.traducao.Contains(f3));
+                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(f3, out string padraoTrad))
+                        {
+                            query = query.Where(p => p.traducao != null && DbFunctions.Like(p.traducao, padraoTrad));
+                        }
 
-                        if (!string.IsNullOrWhiteSpace(f4))
-                            query = query.Where(p => p.manufacturer.Contains(f4));
+                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(f4, out string padraoFab))
+                        {
+                            query = query.Where(p => p.manufacturer != null && DbFunctions.Like(p.manufacturer, padraoFab));
+                        }
 
                         // Se você precisa continuar persistindo o SQL no mesmo formato do seu sistema:
                         // (mantive a construção original, mas só para gravar no filtro)
@@ -493,14 +501,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                 iTotalDisplayRecords = 0,
                 aaData = new List<string[]>()
             }, JsonRequestBehavior.AllowGet);
-        }
-        #endregion
-
-        #region ModalFiltroAvancadoView
-        public ActionResult ModalFiltroAvancadoView(String id)
-        {
-            ViewBag.Title = "Produtos Comex - Filtro Avançado";
-            return View();
         }
         #endregion
 

@@ -37,7 +37,21 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Vendedores";
-            return View();
+            var model = new CstVendedoresIndex
+            {
+                VendedoresIndex_id = String.Empty,
+                VendedoresIndex_nome = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, nomeRestore;
+            if (TryParseFiltroVendedoresSemicolon(filtroPersistido.sql_filtro, out idRestore, out nomeRestore))
+            {
+                model.VendedoresIndex_id = idRestore;
+                model.VendedoresIndex_nome = nomeRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(nomeRestore);
+            }
+            return View(model);
         }
 
         #region PreencherLookupsCreateEdit
@@ -71,123 +85,189 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
             string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-            var allRecords = new List<Db.g_vendedores>();
-            List<string[]> list = new List<string[]>();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Verificação se há algum filtro ativo
-            if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
-
-            if ((filterDb == false) && (filterAdvanced == false))
-            {
-                // Não há filtro
-                if (CachePersister.userIdentity.IdPerfil == 1) // Perfil Adm visualiza todos os registros independente de Coligada e Filial
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    allRecords = db.g_vendedores.Select(p => p).ToList();
-                }
-                else // Demais Perfis visualizam os registros de sua coligada e sua filial
-                {
-                    allRecords = db.g_vendedores.Where(p => p.id_vendedor > 0).ToList();
-                }
-            }
-            if (filterDb)
-            {
-                SentencaSQL = string.Empty;
-                if (record_g_filtro.advanced == true) { SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
-                else { SentencaSQL = "select * from g_vendedores where " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); };
-                allRecords = db.g_vendedores.SqlQuery(SentencaSQL).ToList();
-            }
-            else if (filterAdvanced)
-            {
-                // Filtro Avançado - Não implementado
-                allRecords = db.g_vendedores.ToList();
-            }
-
-
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_vendedores, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_vendedor) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.nome :
-                                     param.iSortCol_0 == 3 && param.iSortingCols > 0 ? c.email :
-                                     param.iSortCol_0 == 4 && param.iSortingCols > 0 ? Convert.ToString(c.ativo) :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_vendedor); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.nome); }
-                    else if (param.iSortCol_0 == 3) { displayedRecords = displayedRecords.OrderBy(c => c.email); }
-                    else if (param.iSortCol_0 == 4) { displayedRecords = displayedRecords.OrderBy(c => c.ativo); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_vendedor); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.nome); }
-                    else if (param.iSortCol_0 == 3) { displayedRecords = displayedRecords.OrderByDescending(c => c.email); }
-                    else if (param.iSortCol_0 == 4) { displayedRecords = displayedRecords.OrderByDescending(c => c.ativo); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
+                var baseQuery = db.g_vendedores.AsNoTracking().Where(v => v.id_vendedor > 0);
+                int totalRecords = baseQuery.Count();
 
-            var allRevendas = db.g_revendas.ToList();
-            g_revendas record_g_revendas = new g_revendas();
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
 
-            foreach (var c in displayedRecords)
-            {
-                String _ativo = c.ativo == true ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "") : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
-                String NomeRevenda = String.Empty;
-                if ((c.id_revenda.EmptyIfNull().ToString().Equals(String.Empty)) || (c.id_revenda.EmptyIfNull().ToString() == "0"))
+                if (!hasInline && !listarTodosExplicito)
                 {
-                    NomeRevenda = "";
+                    TryParseFiltroVendedoresSemicolon(recordFiltro.sql_filtro, out idStr, out nomeStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
                 }
-                else
+
+                if (!listarTodosExplicito && !hasInline)
                 {
-
-                    record_g_revendas = allRevendas.Find(e => e.id_revenda == c.id_revenda);
-                    if (record_g_revendas != null) { NomeRevenda = record_g_revendas.nome.EmptyIfNull().ToString(); }
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
                 }
 
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_vendedor.ToString(),
-                                    _ativo,
-                                    c.nome.EmptyIfNull().ToString(),
-                                    NomeRevenda,
-                                    c.email.EmptyIfNull().ToString()
-                                });
-            }
+                IQueryable<Db.g_vendedores> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroVendedoresNaQuery(query, idStr, nomeStr);
+                    LibDB.setFilterByUser(MontarFiltroVendedoresPersistido(idStr, nomeStr), controllerName, true, db);
+                }
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                query = AplicarOrdenacaoVendedoresNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(v => new { v.id_vendedor, v.ativo, v.nome, v.id_revenda, v.email })
+                    .ToList();
+
+                var revendaIds = page
+                    .Where(v => v.id_revenda.HasValue && v.id_revenda.Value > 0)
+                    .Select(v => v.id_revenda.Value)
+                    .Distinct()
+                    .ToList();
+                var revendasPorId = revendaIds.Count == 0
+                    ? new Dictionary<int, string>()
+                    : db.g_revendas.AsNoTracking()
+                        .Where(r => revendaIds.Contains(r.id_revenda))
+                        .Select(r => new { r.id_revenda, r.nome })
+                        .ToList()
+                        .ToDictionary(r => r.id_revenda, r => r.nome ?? String.Empty);
+
+                var list = page.Select(v =>
+                {
+                    string _ativo = v.ativo == true
+                        ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
+                        : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
+                    string nomeRevenda = String.Empty;
+                    if (v.id_revenda.HasValue && v.id_revenda.Value > 0)
+                    {
+                        string nome;
+                        if (revendasPorId.TryGetValue(v.id_revenda.Value, out nome))
+                        {
+                            nomeRevenda = nome;
+                        }
+                    }
+                    return new[]
+                    {
+                        "",
+                        v.id_vendedor.ToString(),
+                        _ativo,
+                        v.nome ?? "",
+                        nomeRevenda,
+                        v.email ?? ""
+                    };
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroVendedoresSemicolon(string raw, out string id, out string nome)
+        {
+            id = nome = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            nome = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(nome);
+        }
+
+        private static string MontarFiltroVendedoresPersistido(string id, string nome)
+        {
+            return (id ?? String.Empty) + ";" + (nome ?? String.Empty);
+        }
+
+        private static IQueryable<Db.g_vendedores> AplicarFiltroVendedoresNaQuery(IQueryable<Db.g_vendedores> query, string idStr, string nomeStr)
+        {
+            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idVendedor))
+            {
+                query = query.Where(v => v.id_vendedor == idVendedor);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
+            {
+                query = query.Where(v => v.nome != null && DbFunctions.Like(v.nome, padraoNome));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_vendedores> AplicarOrdenacaoVendedoresNaQuery(IQueryable<Db.g_vendedores> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 3)
+                {
+                    return asc ? query.OrderBy(v => v.nome) : query.OrderByDescending(v => v.nome);
+                }
+                if (param.iSortCol_0 == 5)
+                {
+                    return asc ? query.OrderBy(v => v.email) : query.OrderByDescending(v => v.email);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(v => v.id_vendedor) : query.OrderByDescending(v => v.id_vendedor);
+                }
+            }
+            return query.OrderBy(v => v.id_vendedor);
         }
         #endregion
 
@@ -196,7 +276,7 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Create()
         {
             PreencherLookupsCreateEdit();
-            cstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new cstViewVendedoresTabelasModel();
+            CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new CstViewVendedoresTabelasModel();
             record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.ativo = true;
             record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.id_revenda = 0;
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Vendedor</b";
@@ -206,7 +286,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actioncreate")]
-        public ActionResult Create(cstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel)
+        public ActionResult Create(CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel)
         {
             PreencherLookupsCreateEdit();
             record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.id_coligada = 1;
@@ -250,7 +330,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            cstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new cstViewVendedoresTabelasModel();
+            CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new CstViewVendedoresTabelasModel();
 
             g_vendedores record_g_vendedores = new g_vendedores();
 
@@ -282,7 +362,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                         " order by gdc_consultas.id_consulta ";
 
 
-                    var allRecords = db.Database.SqlQuery<cstVendedoresTabelasDetalhesModel>(sqlTemp).ToList();
+                    var allRecords = db.Database.SqlQuery<CstVendedoresTabelasDetalhesModel>(sqlTemp).ToList();
                     for (int i = 0; i < allRecords.Count; i++)
                     {
                         if (allRecords[i].id_consulta_tabela_vendedor == null)
@@ -314,7 +394,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                             " where gdc_consultas.ativo = 1 and gdc_consultas.extrato_tabelas = 1 " +
                                             " order by gdc_consultas.id_consulta ";
 
-                    var allRecords = db.Database.SqlQuery<cstVendedoresTabelasDetalhesModel>(sqlTemp).ToList();
+                    var allRecords = db.Database.SqlQuery<CstVendedoresTabelasDetalhesModel>(sqlTemp).ToList();
                     for (int i = 0; i < allRecords.Count; i++)
                     {
                         if (allRecords[i].id_consulta_tabela_vendedor == null)
@@ -340,7 +420,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actionupdate")]
-        public ActionResult Edit(cstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel)
+        public ActionResult Edit(CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel)
         {
             PreencherLookupsCreateEdit();
             if (ModelState.IsValid)
