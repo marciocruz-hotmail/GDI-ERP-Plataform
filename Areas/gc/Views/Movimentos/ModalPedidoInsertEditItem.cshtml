@@ -24,13 +24,11 @@
 
                 @if (ViewBag.ActionDuplicate == "1")
                 {
-                    <h5 class="modal-title d-flex align-items-center gap-2">
-    @Html.Raw("<b>Duplicar Item</b>")</h5>
+                    <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw("<b>Duplicar Item</b>")</h5>
                 }
                 else
                 {
-                    <h5 class="modal-title d-flex align-items-center gap-2">
-    @Html.Raw(ViewBag.Title)</h5>
+                    <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
                 }
                 @Html.HiddenFor(model => model.id_movimento)
                 @Html.HiddenFor(model => model.id_movimento_item)

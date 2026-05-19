@@ -5,8 +5,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
-                <h5 class="modal-title d-flex align-items-center gap-2">
-    @Html.Raw(ViewBag.Title)</h5>
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
                 @Html.HiddenFor(model => model.id_arquivo)
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)

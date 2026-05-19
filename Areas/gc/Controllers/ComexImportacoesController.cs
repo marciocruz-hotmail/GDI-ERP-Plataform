@@ -511,7 +511,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalCancelarImportacaoComex
         public ActionResult ModalCancelarImportacaoComex(String idImportacao)
         {
-            ViewBag.Title = "Cancelar Importação";
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Importação</b>";
             gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(int.Parse(idImportacao));
             CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_comex_importacoes);
             record_gc_comex_importacoes.exclusao_motivo = "";
@@ -2354,7 +2354,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalExcluirItensImportacao
         public ActionResult ModalExcluirItensImportacao()
         {
-            ViewBag.Title = "Excluir Itens Importação";
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Excluir Itens Importação</b>";
             gc_comex_importacoes_files_xls record_gc_comex_importacoes_files_xls = new Db.gc_comex_importacoes_files_xls();
             record_gc_comex_importacoes_files_xls.exclusao_motivo = "";
             return View(record_gc_comex_importacoes_files_xls);
@@ -2547,7 +2547,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalFechamentoCustosImportacao(String idImportacao)
         {
             gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(int.Parse(idImportacao));
-            ViewBag.Title = "Fechamento Custos da Importação Nº " + record_gc_comex_importacoes.numero.EmptyIfNull().ToString();
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-circle-info", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Fechamento Custos da Importação Nº " + record_gc_comex_importacoes.numero.EmptyIfNull().ToString();
             return View(record_gc_comex_importacoes);
         }
 

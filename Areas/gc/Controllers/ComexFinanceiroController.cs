@@ -488,7 +488,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalCancelarComexFinanceiro(String id)
         {
             String MsgAdvertencia = String.Empty;
-            ViewBag.Title = "Cancelar Pagamento Comex";
+            ViewBag.Title = ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Pagamento Comex</b>";
             gc_comex_financeiro record_gc_comex_financeiro = db.gc_comex_financeiro.Find(int.Parse(id));
             if (record_gc_comex_financeiro.tipo_pag_rec == 2)
             {

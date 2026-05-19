@@ -23,7 +23,7 @@
                 {
                     <button type="button" name="btnRegistroVisualizar" title="Visualizar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGProdutos, 'Id.', '@Url.Action("Edit","Produtos",new { Area = "g" })/')"><i class="fa-regular fa-clipboard me-2" aria-hidden="true"></i>Visualizar</button>
                 }
-                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Filtro Avançado</button>
+                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()">Filtro Avançado</button>
 
                 @if ((CachePersister.userIdentity.Roles.Contains("g_Produtos_*")) || (CachePersister.userIdentity.Roles.Contains("g_Produtos_Actionread")))
                 {

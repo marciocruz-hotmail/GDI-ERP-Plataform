@@ -19,8 +19,8 @@
                 { <button type="button" name="btnRegistroEditar" title="Editar Registro" class="btn btn-outline-warning d-inline-flex align-items-center gap-2" onclick="JsEditRecord(otableGNfe, 'Id.', '@Url.Action("Edit", "Nfe", new { area = "g" })/')"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
                 else
                 { <button type="button" name="btnRegistroEditar" title="Editar Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-edit me-2" aria-hidden="true"></i>Editar</button> }
-                <button type="button" id="btnFiltroDefault" name="btnFiltroDefault" title="Filtro" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroDefault()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Filtro</button>
-                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()"><i class="fa-solid fa-filter me-2" aria-hidden="true"></i>Filtro Avançado</button>
+                <button type="button" id="btnFiltroDefault" name="btnFiltroDefault" title="Filtro" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroDefault()">Filtro</button>
+                <button type="button" id="btnFiltroAvancado" name="btnFiltroAvancado" title="Filtro Avançado" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalFiltroAvancado()">Filtro Avançado</button>
 
                 @if ((CachePersister.userIdentity.Roles.Contains("g_Nfe_*")) || (CachePersister.userIdentity.Roles.Contains("g_Nfe_Actionupdate")))
                 {
