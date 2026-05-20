@@ -1027,6 +1027,65 @@ namespace GdiPlataform.Lib
             return Resultado;
         }
 
+        /// <summary>
+        /// Normaliza lista de e-mails separados por ; , ou quebra de linha: trim, minúsculas, remove duplicados.
+        /// </summary>
+        public static string NormalizarListaEmailsSeparadosPorPontoVirgula(string listaEmails, bool validarCadaEmail, out List<string> emailsInvalidos)
+        {
+            emailsInvalidos = new List<string>();
+            if (listaEmails.EmptyIfNull().ToString().Trim().Length == 0) { return string.Empty; }
+
+            char[] separadores = { ';', ',', '\n', '\r' };
+            String[] tokens = listaEmails.Split(separadores, StringSplitOptions.RemoveEmptyEntries);
+            HashSet<string> vistos = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<string> resultado = new List<string>();
+
+            foreach (string token in tokens)
+            {
+                String email = token.EmptyIfNull().ToString().Trim().ToLowerInvariant();
+                if (email.Length <= 3) { continue; }
+                if (vistos.Contains(email)) { continue; }
+
+                if (validarCadaEmail && LibStringValidate.ValidarEmail(email) == false)
+                {
+                    emailsInvalidos.Add(email);
+                    continue;
+                }
+
+                vistos.Add(email);
+                resultado.Add(email);
+            }
+
+            return string.Join(";", resultado);
+        }
+
+        /// <summary>
+        /// Une duas listas de e-mails (;) e devolve lista normalizada sem duplicados.
+        /// </summary>
+        public static string UnificarListasEmails(string listaEmails1, string listaEmails2, bool validarCadaEmail, out List<string> emailsInvalidos)
+        {
+            String merged = listaEmails1.EmptyIfNull().ToString().Trim();
+            String lista2 = listaEmails2.EmptyIfNull().ToString().Trim();
+            if (lista2.Length > 0)
+            {
+                if (merged.Length > 0) { merged += ";"; }
+                merged += lista2;
+            }
+            return NormalizarListaEmailsSeparadosPorPontoVirgula(merged, validarCadaEmail, out emailsInvalidos);
+        }
+
+        /// <summary>
+        /// Formato Z-API / WhatsApp Brasil: apenas dígitos com DDI 55 (DDD + número 10 ou 11 dígitos).
+        /// </summary>
+        public static string NormalizarTelefoneWhatsAppBrasil(string telefone)
+        {
+            String digits = SomenteNumeros(telefone.EmptyIfNull().ToString().Trim());
+            if (digits.Length == 0) { return digits; }
+            if (digits.StartsWith("55", StringComparison.Ordinal) && digits.Length >= 12) { return digits; }
+            if (digits.Length == 10 || digits.Length == 11) { return "55" + digits; }
+            return digits;
+        }
+
 
         #endregion
     }

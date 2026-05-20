@@ -4,7 +4,7 @@
 > **Histórico integral (187 entradas, ~2900 linhas):** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`  
 > **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md`
 
-**Última atualização:** 2026-05-20 (pedido item sequência)
+**Última atualização:** 2026-05-20 (notificar cliente email/WhatsApp)
 
 ---
 
@@ -62,6 +62,14 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-20 — Notificar Cliente (pedido faturado)
+
+- `ModalNotificacaoCliente` / `AjaxModalNotificacaoCliente`: deduplicação e validação de e-mails (`LibStringFormat.NormalizarListaEmails*`), telefone só dígitos + DDI 55 no WhatsApp, `id_contato` ao criar contato novo, título seguro se pedido inexistente, merge `email_notificacao` sem repetir no GET.
+
+### 2026-05-20 — Backup projeto (scripts PowerShell)
+
+- `Scripts/2026_05_20_gdi_backup_projeto_*.ps1` — ZIP por omissao `yyyy-MM-dd_HHmmss-GDI-ERP-Plataform.zip`; `-SemZip` / `-ManterPasta`.
 
 ### 2026-05-20 — Comercial pedidos
 

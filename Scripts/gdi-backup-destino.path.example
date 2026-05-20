@@ -1,0 +1,3 @@
+# Pasta ABSOLUTA base onde gravar ZIPs (subpastas enxuto\ e offline\ criadas automaticamente).
+# Renomear para: gdi-backup-destino.path (opcional; omissao: C:\Marcio\Backups\GDI-ERP-Plataform)
+C:\Marcio\Backups\GDI-ERP-Plataform

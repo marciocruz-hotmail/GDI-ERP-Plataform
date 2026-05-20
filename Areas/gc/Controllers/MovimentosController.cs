@@ -7409,21 +7409,21 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
 
                 g_clientes RecordCliente = db.g_clientes.Find(RecordMovimento.id_cliente);
+                List<string> emailsInvalidosExibicao;
+                String emailsExibicao = LibStringFormat.NormalizarListaEmailsSeparadosPorPontoVirgula(RecordMovimento.notifica_contatos_emails.EmptyIfNull().ToString(), false, out emailsInvalidosExibicao);
                 if (RecordCliente != null)
                 {
-                    if (RecordCliente.email_notificacao.EmptyIfNull().ToString().Trim().Length > 0)
-                    {
-                        if (RecordMovimento.notifica_contatos_emails.EmptyIfNull().ToString().Trim().Length > 0) { RecordMovimento.notifica_contatos_emails += ";"; };
-                        RecordMovimento.notifica_contatos_emails += RecordCliente.email_notificacao.EmptyIfNull().ToString().Trim();
-                    }
+                    emailsExibicao = LibStringFormat.UnificarListasEmails(emailsExibicao, RecordCliente.email_notificacao.EmptyIfNull().ToString(), false, out emailsInvalidosExibicao);
                 }
+                RecordMovimento.notifica_contatos_emails = emailsExibicao;
             }
             else
             {
                 MsgBloqueio = "Movimento [" + id.ToString() + "] não localizado no ERP";
             }
-            ViewBag.Title = LibIcons.getIcon("fa-regular fa-paper-plane", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>" + "Notificar Cliente - Pedido Nº " + RecordMovimento.id_movimento.ToString() + "</b>";
-            PreencherLookupsClientesContatos(RecordMovimento.id_cliente);
+            String tituloPedido = (RecordMovimento != null) ? RecordMovimento.id_movimento.ToString() : id.GetValueOrDefault().ToString();
+            ViewBag.Title = LibIcons.getIcon("fa-regular fa-paper-plane", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>" + "Notificar Cliente - Pedido Nº " + tituloPedido + "</b>";
+            if (RecordMovimento != null) { PreencherLookupsClientesContatos(RecordMovimento.id_cliente); }
             ViewBag.MsgBloqueio = MsgBloqueio;
             return View("ModalNotificacaoCliente", RecordMovimento);
         }
@@ -7473,13 +7473,25 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }
                 }
 
+                List<string> emailsNotificacaoInvalidos;
+                String emailsNotificacaoNormalizados = LibStringFormat.NormalizarListaEmailsSeparadosPorPontoVirgula(view_record_gc_movimento.notifica_contatos_emails.EmptyIfNull().ToString(), true, out emailsNotificacaoInvalidos);
+                if (emailsNotificacaoInvalidos.Count > 0)
+                {
+                    qtdInconsistencias += 1;
+                    MsgRetorno += "Campo [Emails Notificações] contém e-mail(s) inválido(s): " + string.Join(", ", emailsNotificacaoInvalidos) + "<br/>";
+                }
+
                 if (qtdInconsistencias == 0)
                 {
+                    String telefoneContatoNormalizado = LibStringFormat.SomenteNumeros(view_record_gc_movimento.contato_telefone.EmptyIfNull().ToString().Trim());
+                    view_record_gc_movimento.contato_telefone = telefoneContatoNormalizado;
+                    view_record_gc_movimento.contato_email = view_record_gc_movimento.contato_email.EmptyIfNull().ToString().Trim().ToLowerInvariant();
+                    view_record_gc_movimento.notifica_contatos_emails = emailsNotificacaoNormalizados;
 
                     // Dados do Contato
-                    RecordMovimento.notifica_contatos_emails = view_record_gc_movimento.notifica_contatos_emails;
+                    RecordMovimento.notifica_contatos_emails = emailsNotificacaoNormalizados;
                     RecordMovimento.contato_nome = view_record_gc_movimento.contato_nome;
-                    RecordMovimento.contato_telefone = view_record_gc_movimento.contato_telefone;
+                    RecordMovimento.contato_telefone = telefoneContatoNormalizado;
                     RecordMovimento.contato_email = view_record_gc_movimento.contato_email;
 
                     if (view_record_gc_movimento.id_contato > 0) // Usuário Selecionou o Contato
@@ -7519,6 +7531,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                         RecordContatoNovo.datahora_cadastro = DataHoraAtual;
                         RecordContatoNovo.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
                         db.Entry(RecordContatoNovo).State = EntityState.Added;
+                        db.SaveChanges();
+                        RecordMovimento.id_contato = RecordContatoNovo.id_contato;
 
                         // Audit Novo Contato
                         String TipoContato = String.Empty;
@@ -7557,8 +7571,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                     g_templates RecordTemplate = db.g_templates.Where(t => t.localizador == "GcMovimentoPedidoFaturadoCliente").FirstOrDefault();
                     if (RecordTemplate != null) { BodyEmail = RecordTemplate.template.EmptyIfNull().ToString(); }
                     else { MsgRetorno += "Template de email não localizado!" + "<br/>"; qtdInconsistencias += 1; };
-                    if (RecordCliente.cpf.EmptyIfNull().ToString().Length > 0) { ClienteDocumento = LibStringFormat.SomenteNumeros(RecordCliente.cpf.EmptyIfNull().ToString()); }
-                    else if (RecordCliente.cnpj.EmptyIfNull().ToString().Length > 0) { ClienteDocumento = LibStringFormat.SomenteNumeros(RecordCliente.cnpj.EmptyIfNull().ToString()); }
+                    if (RecordCliente != null)
+                    {
+                        if (RecordCliente.cpf.EmptyIfNull().ToString().Length > 0) { ClienteDocumento = LibStringFormat.SomenteNumeros(RecordCliente.cpf.EmptyIfNull().ToString()); }
+                        else if (RecordCliente.cnpj.EmptyIfNull().ToString().Length > 0) { ClienteDocumento = LibStringFormat.SomenteNumeros(RecordCliente.cnpj.EmptyIfNull().ToString()); }
+                    }
 
                     BodyEmail = BodyEmail.Replace("[NumeroPedido]", PedidoNumero);
                     BodyEmail = BodyEmail.Replace("[CodigoCliente]", ClienteCodigo);
@@ -7568,22 +7585,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     LinkPortalDireto = "https://portalflightx.com/UserIdentity/AcessoPortal?codigocliente=" + ClienteCodigo + "&documentocliente=" + ClienteDocumento;
                     BodyEmail = BodyEmail.Replace("[LinkPortalDireto]", LinkPortalDireto);
 
-                    RecordMovimento.notifica_contatos_emails = view_record_gc_movimento.notifica_contatos_emails;
-                    RecordMovimento.contato_nome = view_record_gc_movimento.contato_nome;
-                    RecordMovimento.contato_telefone = view_record_gc_movimento.contato_telefone;
-                    RecordMovimento.contato_email = view_record_gc_movimento.contato_email;
-
-                    EmailsNotificar += RecordMovimento.notifica_contatos_emails.EmptyIfNull().ToString().Trim().ToLowerInvariant();
-
-                    if (RecordMovimento.contato_email.EmptyIfNull().ToString().Trim().Length > 0)
-                    {
-                        RecordMovimento.contato_email = RecordMovimento.contato_email.ToLowerInvariant();
-                        if (EmailsNotificar.EmptyIfNull().ToString().Trim().IndexOf(RecordMovimento.contato_email.EmptyIfNull().ToString().Trim()) < 0)
-                        {
-                            if (EmailsNotificar.EmptyIfNull().ToString().Trim().Length > 0) { EmailsNotificar += ";"; };
-                            EmailsNotificar += RecordMovimento.contato_email.EmptyIfNull().ToString().Trim();
-                        }
-                    }
+                    List<string> emailsDestinoInvalidos;
+                    EmailsNotificar = LibStringFormat.UnificarListasEmails(RecordMovimento.notifica_contatos_emails.EmptyIfNull().ToString(), RecordMovimento.contato_email.EmptyIfNull().ToString(), false, out emailsDestinoInvalidos);
 
                     if (RecordMovimento.id_vendedor > 0)
                     {
@@ -7592,8 +7595,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         {
                             if (RecordVendedor.email.EmptyIfNull().ToString().Trim().Length > 0)
                             {
-                                if (EmailsNotificar.EmptyIfNull().ToString().Trim().Length > 0) { EmailsNotificar += ";"; };
-                                EmailsNotificar += RecordVendedor.email.EmptyIfNull().ToString().Trim();
+                                EmailsNotificar = LibStringFormat.UnificarListasEmails(EmailsNotificar, RecordVendedor.email.EmptyIfNull().ToString().Trim(), false, out emailsDestinoInvalidos);
                             }
                         }
                     }
@@ -7626,7 +7628,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         // Notificação WhatsApp
                         if (RecordMovimento.contato_telefone.EmptyIfNull().ToString().Trim().Length > 0)
                         {
-                            String NotificacaoCelular = RecordMovimento.contato_telefone.EmptyIfNull().ToString().Trim();
+                            String NotificacaoCelular = LibStringFormat.NormalizarTelefoneWhatsAppBrasil(RecordMovimento.contato_telefone.EmptyIfNull().ToString().Trim());
                             String NotificacaoMensagem = "Prezado(a) " + RecordMovimento.contato_nome.ToUpperInvariant() + ", seu pedido nº " + PedidoNumero + " foi faturado com sucesso!" + "\r\n\r\n" + "Clique no link dessa mensagem e acesse a Nota Fiscal e Boletos" + "\r\n\r\n";
                             String NotificacaoTitle = "✈️ GDI Aviação - Faturamento do Pedido";
                             try

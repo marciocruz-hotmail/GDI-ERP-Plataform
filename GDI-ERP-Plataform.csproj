@@ -1779,6 +1779,12 @@
     <None Include="Scripts\2026_05_20_gdi_inventory_utf8_bom.py" />
     <None Include="Scripts\2026_05_20_gdi_utf8_no_bom_area_a.py" />
     <None Include="Scripts\2026_05_20_gdi_utf8_no_bom_areas.py" />
+    <None Include="Scripts\2026_05_20_gdi_backup_projeto_common.ps1" />
+    <None Include="Scripts\2026_05_20_gdi_backup_projeto_enxuto.ps1" />
+    <None Include="Scripts\2026_05_20_gdi_backup_projeto_offline.ps1" />
+    <None Include="Scripts\gdi-backup-repositorio.path.example" />
+    <None Include="Scripts\gdi-backup-destino.path.example" />
+    <None Include="Scripts\gdi-backup-LEIA-ME.txt" />
     <None Include="Scripts\2026_05_20_gdi_inventory_datatables_g_area.py" />
     <None Include="Scripts\2026_05_20_gdi_replace_alert_libmessage.py" />
     <None Include="Scripts\2026_05_20_gdi_dedupe_libmessage_if_else.py" />

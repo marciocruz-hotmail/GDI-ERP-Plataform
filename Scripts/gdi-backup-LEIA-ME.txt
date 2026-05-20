@@ -1,0 +1,26 @@
+BACKUP GDI-ERP-Plataform - scripts portateis
+==========================================
+
+Copie para a pasta externa (ex.: C:\Tools\GDI-Backup\):
+
+  - 2026_05_20_gdi_backup_projeto_common.ps1   (obrigatorio)
+  - 2026_05_20_gdi_backup_projeto_enxuto.ps1
+  - 2026_05_20_gdi_backup_projeto_offline.ps1
+  - gdi-backup-repositorio.path              (criar a partir do .example)
+  - gdi-backup-destino.path                  (opcional, a partir do .example)
+
+gdi-backup-repositorio.path - uma linha com caminho ABSOLUTO do repo:
+  C:\Marcio\Projetos\GDI-ERP-Plataform
+
+Executar (de qualquer pasta):
+
+  & "C:\Tools\GDI-Backup\2026_05_20_gdi_backup_projeto_enxuto.ps1"
+  & "C:\Tools\GDI-Backup\2026_05_20_gdi_backup_projeto_offline.ps1"
+
+Ou com caminhos explicitos:
+
+  & "...\enxuto.ps1" -RepoRoot "C:\Marcio\Projetos\GDI-ERP-Plataform" -Destino "D:\Backups\GDI-ERP\enxuto"
+
+ZIP gerado:
+  yyyy-MM-dd_HHmm-GDI-ERP-Plataform_enxuto.zip
+  yyyy-MM-dd_HHmm-GDI-ERP-Plataform_completo.zip
