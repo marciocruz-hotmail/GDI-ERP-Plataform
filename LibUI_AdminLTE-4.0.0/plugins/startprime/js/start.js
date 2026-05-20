@@ -900,6 +900,11 @@ function jsInitForm() {
         });
         /* Largura do container de tabelas: 100% (o legado 100 * .width sem () gerava NaN e ativava width:5000px no CSS). Mesmo alvo que .table-responsive.scroll-body-horizontal nas views. */
         $('.scroll-body-horizontal').css({ width: '100%', maxWidth: '100%', boxSizing: 'border-box' });
+        $('.gdi-form-table-scroll, .scroll-body-horizontal').each(function () {
+            if (this.querySelector && this.querySelector('table:not(.display):not(.dataTable)')) {
+                this.scrollLeft = 0;
+            }
+        });
 
         // ---- FOCO NO PRIMEIRO EDITÁVEL VISÍVEL (páginas sem data-autofocus) ----
         if (!document.querySelector('[data-autofocus]')) {

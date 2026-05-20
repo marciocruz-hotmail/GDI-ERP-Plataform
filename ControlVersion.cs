@@ -9,11 +9,11 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.00 - 20/05/2026";
+            return "2026.51.01 - 20/05/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.00";
+            return "2026.51.01";
         }
     }
 }

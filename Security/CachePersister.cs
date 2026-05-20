@@ -6,6 +6,7 @@ using System.Web;
 using GdiPlataform.Domain;
 using System.Runtime.Caching;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 
 namespace GdiPlataform.Security
 {
@@ -251,6 +252,14 @@ namespace GdiPlataform.Security
                 catch (Exception ex)
                 {
                     Trace.TraceWarning("[CachePersister] logout: erro ao ler TokenId: {0}", ex.Message);
+                }
+                try
+                {
+                    LookupCacheRegistry.InvalidateSession(tokenId);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning("[CachePersister] logout: LookupCacheRegistry.InvalidateSession {0}: {1}", tokenId, ex.Message);
                 }
                 try
                 {

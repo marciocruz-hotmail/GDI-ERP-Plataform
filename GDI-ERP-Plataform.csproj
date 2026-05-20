@@ -421,6 +421,7 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\LookupDependencyConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\a\aAreaRegistration.cs" />
@@ -1141,6 +1142,13 @@
     <Compile Include="Lib\LibCache.cs" />
     <Compile Include="Lib\LibCnabBancario.cs" />
     <Compile Include="Lib\LibDataSets.cs" />
+    <Compile Include="Lib\Lookups\ILookupQueryService.cs" />
+    <Compile Include="Lib\Lookups\LookupCacheKeys.cs" />
+    <Compile Include="Lib\Lookups\LookupQueryService.cs" />
+    <Compile Include="Lib\Lookups\LookupQueryServiceAccessor.cs" />
+    <Compile Include="Lib\Lookups\LookupQueryServiceCache.cs" />
+    <Compile Include="Lib\Lookups\LookupCacheRegistry.cs" />
+    <Compile Include="Lib\Lookups\LookupCacheInvalidator.cs" />
     <Compile Include="Lib\LibDateTime.cs" />
     <Compile Include="Lib\LibDB.cs" />
     <Compile Include="Lib\LibDBGestaoComercial.cs" />

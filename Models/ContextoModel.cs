@@ -20,6 +20,7 @@ namespace GdiPlataform.Domain
         public List<NavbarItemAtividade> allNavbarItemAtividade { get; set; }
         public UserIdentity userIdentity { get; set; }
 
+        // Listas abaixo: shells legados (Fase 3). Lookups migrados vivem em MemoryCache (Lib/Lookups); nao preencher slots para combos do servico.
         // Informações Módulo Comercial
         public List<SelectListItem> a_comboRowsColors { get; set; }
         public List<SelectListItem> g_comboContratosTipos { get; set; }

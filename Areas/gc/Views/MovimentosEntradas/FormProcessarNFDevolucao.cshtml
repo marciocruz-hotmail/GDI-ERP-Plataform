@@ -4,7 +4,7 @@
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "GcMovimentosFormProcessarNFDevolucao" }))
 {
     <div class="row">
-        <div class="col-lg-12 m-0 p-0">
+        <div class="col-lg-12 m-0 p-0 min-w-0">
             <div class="card m-0 p-0">
                 <div class="card-title m-0 p-1">
                     <h5>@Html.Raw(ViewBag.Title)</h5>
@@ -12,9 +12,9 @@
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
                 </div>
-                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                <div class="card-body m-0 p-1 min-w-0">
                     <div class="form-horizontal m-0 p-0">
-                        <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                        <div class="table-responsive gdi-form-table-scroll">
                             @if (Model.movimento_permitido == false)
                             {
                                 <div class="alert alert-danger" role="alert">
@@ -23,35 +23,33 @@
                             }
                             else
                             {
-                                <table class="table table-striped table-bordered compact">
+                                <table class="table table-striped table-bordered table-sm gdi-form-table-fixed mb-0">
                                     <thead>
                                         <tr>
-                                            <th style="width: 5%" class="text-center">Qtd</th>
-                                            <th style="width: 50%" class="text-start">Produto ERP</th>
-                                            <th style="width: 35%" class="text-center">Produto EXTERNO</th>
-                                            <th style="width: 10%" class="text-end">R$ Total</th>
+                                            <th class="gdi-col-qtd text-center">Qtd</th>
+                                            <th class="gdi-col-produto text-center">Produto ERP</th>
+                                            <th class="gdi-col-produto text-start">Produto EXTERNO</th>
+                                            <th class="gdi-col-qtd text-end">R$ Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @for (int i = 0; i < Model.allItens.Count; i++)
                                         {
+                                            var produtoExterno = string.Format("{0} - {1}",
+                                                (Model.allItens[i].produto_externo_codigo ?? string.Empty).ToString().Trim(),
+                                                (Model.allItens[i].produto_externo_nome ?? string.Empty).ToString().Trim()).Trim(' ', '-');
                                             <tr>
                                                 @Html.HiddenFor(model => model.allItens[i].id_movimento_item)
                                                 @Html.HiddenFor(model => model.allItens[i].produto_externo_codigo)
                                                 @Html.HiddenFor(model => model.allItens[i].produto_externo_nome)
-                                                <td style="text-align:center;">@Html.LabelFor(model => model.allItens[i].quantidade_geral, Model.allItens[i].quantidade_geral.ToString(), htmlAttributes: new { @class = "col-form-label" })</td>
-                                                <td style="text-align:center;">@Html.DropDownListFor(model => model.allItens[i].id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = "form-control" })</td>
-                                                <td style="text-align:left;">@Html.LabelFor(model => model.allItens[i].nome_produto, Model.allItens[i].produto_externo_codigo.ToString() + " - " + Model.allItens[i].produto_externo_nome.ToString(), htmlAttributes: new { @class = "col-form-label" })</td>
-                                                <td style="text-align:right;">@Html.LabelFor(model => model.allItens[i].valor_total_formatado, Model.allItens[i].valor_total_formatado.ToString().ToString(), htmlAttributes: new { @class = "col-form-label" })</td>
+                                                <td class="gdi-col-qtd text-center">@Model.allItens[i].quantidade_geral</td>
+                                                <td class="text-center">@Html.DropDownListFor(model => model.allItens[i].id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = "form-control" })</td>
+                                                <td class="gdi-col-produto text-start">@(string.IsNullOrWhiteSpace(produtoExterno) ? "—" : produtoExterno)</td>
+                                                <td class="gdi-col-qtd text-end">@Model.allItens[i].valor_total_formatado</td>
                                             </tr>
                                         }
                                     </tbody>
                                 </table>
-                                <br/>
-                                <br/>
-                                <br/>
-                                <br/>
-                                <br/>
                             }
                         </div>
                     </div>
@@ -79,7 +77,6 @@
         </div>
     </div>
 }
-
 <script type="text/javascript">
 
     $(function ()
@@ -94,10 +91,20 @@
         }
     });
 
+    function jsPDFNotaFiscal()
+    {
+        try {
+            window.open('@Model.url_danfe', '_blank');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsPDFNotaFiscal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsSendForm()
     {
         try {
-            LibMessageProcessando("");
+            LibMessageProcessando("Processando . . .")
             var form = $('#GcMovimentosFormProcessarNFDevolucao');
             windowLoading(true, 2);
             $.ajax({
@@ -123,10 +130,10 @@
                                 confirmar:
                                 {
                                     label: 'OK',
-                                    callback: function ()
-                                    {
-                                        LibMessageProcessando("");
-                                        window.location = '@Url.Action("Index", "MovimentosEntradas", new { Area = "gc" })';
+                                    callback: function () {
+                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                                        LibMessageProcessando("Processando . . .")
+                                        $(window.document.location).attr('href', '@Url.Action("Index","MovimentosEntradas",new { Area = "gc" })');
                                         LibMessageHideAll();
                                     }
                                 }
@@ -149,26 +156,4 @@
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
-
-    function jsPDFNotaFiscal()
-    {
-        try
-        {
-            if ('@Model.url_danfe' != "")
-            {
-                window.open('@Model.url_danfe', '_blank').focus();
-            }
-            else {
-                GdiAjaxNotifyInconsistencias("Danfe NÃO localizada!");
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsPDFNotaFiscal] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    };
-
-
-
 </script>
-

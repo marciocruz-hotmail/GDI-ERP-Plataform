@@ -22,6 +22,23 @@ Helpers em `LibDataSets.cs`: `EnsureContextoModel()`, `CloneSelectList()`.
 
 `LoadComboGcClientesContatosPedido` ja nao usava cache global (sem alteracao).
 
+## Fase 2 — servico de lookups (2026-05-20)
+
+- `ILookupQueryService` + `LookupQueryService` em `Lib/Lookups/` (24 metodos de maior uso + parametricos Fase 1).
+- Cache por chave `lookup:{token}:{nome}:{params}:v:{versaoTabela}` em `MemoryCache` (+ sync slots legados `ContextoModel`).
+- `LookupDependencyConfig.Register()` em `Global.asax.cs`; `LibDataSets` delega via `LookupQueryServiceAccessor`.
+- Testes: `Tests/GDI-ERP-Plataform.Lookups.Tests` (exe) — chaves parametricas + isolamento MemoryCache.
+
+Metodos ainda **nao** migrados ao servico: restantes ~43 `Load*` em `LibDataSets` (Fase 4 strangler).
+
+## Fase 3 — ContextoModel sem duplicar combos migrados (2026-05-20)
+
+- Lookups do servico: **apenas** `MemoryCache` (sem gravar em `contextoModel.gc_combo*` / `gc_dataSet*`).
+- `LookupCacheRegistry` + `LookupCacheInvalidator`: ao `LibDB.IsTableUpdate == true`, remove chaves `lookup:*` da sessão para a tabela SQL.
+- `CachePersister.logout`: `LookupCacheRegistry.InvalidateSession(tokenId)`.
+- Leitura direta corrigida: `MovimentosController` usa `GetDatasetGVendedores(db)` em vez de `contextoModel.gc_dataSetVendedores`.
+- Propriedades de combo em `ContextoModel` mantidas como shells vazios (legado para `Load*` nao migrados).
+
 ## Resumo
 
 | Metrica | Valor |

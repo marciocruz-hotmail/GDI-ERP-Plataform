@@ -10,6 +10,83 @@
 # - Não apague entradas antigas; elas são memória do projeto
 
 ---
+### [2026-05-20] — Tabelas MVC: scroll-body-horizontal (max-content) — inventário e correção em lote
+**Tipo:** Correção | Análise
+**Arquivos tocados:**
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css` — `max-content` só em `table.display` / DataTables; regras para tabelas MVC
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` — `scrollLeft = 0` em wrappers com tabela de formulário
+- `Areas/gc/Views/MovimentosEntradas/FormProcessarNFCompraNacional.cshtml`, `FormProcessarNFDevolucao.cshtml`
+- `Areas/gc/Views/ComexProdutos/FormProcessarProdutosPreNovos.cshtml`, `FormProcessarProdutosPreAtualizar.cshtml`
+- `Scripts/gdi_inventory_scroll_body_form_tables.py` (novo)
+- (já na sessão anterior) `FormProcessarNFImportacao.cshtml`
+
+**Problema / Demanda:**
+Mesmo defeito de layout (primeira coluna cortada) em outras views com `scroll-body-horizontal` + tabela MVC sem classe `display`.
+
+**O que foi feito:**
+Inventário: ~60 views usam `scroll-body-horizontal` com DataTables (`table.display`) — mantidas. **4** views de formulário MVC corrigidas para `gdi-form-table-scroll` / `gdi-form-table-fixed`. CSS global: `width: max-content` deixa de aplicar a `> table` genérico; só DataTables. `jsInitForm` reposiciona scroll em formulários.
+
+**O que foi evitado:**
+Alterar dezenas de `Index.cshtml` DataTables (comportamento de scroll horizontal largo é intencional).
+
+**Atenção:**
+Incrementar `VersionERP` após publish (`start.css` + `start.js`). `Perfis/CreateEdit` tem tabelas MVC sem `scroll-body-horizontal` (width 100% inline) — fora do padrão problemático.
+
+---
+### [2026-05-20] — FormProcessarNFImportacao: tabela dentro do card (Seq./Produto visíveis)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/gc/Views/MovimentosEntradas/FormProcessarNFImportacao.cshtml`
+- `LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css` — classes `.gdi-form-table-scroll` / `.gdi-form-table-fixed`
+
+**Problema / Demanda:**
+Na tela **Processar NF Importação**, a grelha estourava à esquerda: cabeçalho **Seq.** invisível, nomes de produto cortados (`...ERONAUTICO...`) e linhas sem texto aparente.
+
+**O que foi feito:**
+Removido `scroll-body-horizontal` (regra `width: max-content` em `start.css`). Wrapper `gdi-form-table-scroll` + tabela `table-layout: fixed` com colunas estreitas para CD; Seq./Produto/Qtd em texto (não `LabelFor`); `min-w-0` no card; `scrollLeft = 0` no init. Produto vazio exibe **—**; campos de post mantidos via `HiddenFor`.
+
+**Decisões técnicas relevantes:**
+- CSS reutilizável em `start.css` para outras tabelas de formulário MVC (não DataTables).
+- Não alterado `FormProcessarProdutosPreNovos` (mesmo padrão antigo; fora do escopo).
+
+**Atenção para próximas intervenções:**
+Após publish, incrementar `VersionERP` ou hard-refresh para carregar `start.css`. Validar manualmente com muitos itens e nomes longos.
+
+---
+### [2026-05-20] — LibDataSets Fase 3: lookups só em MemoryCache + invalidação por tabela
+**Tipo:** Implementação | Refatoração
+**Arquivos tocados:**
+- `Lib/Lookups/LookupCacheRegistry.cs`, `LookupCacheInvalidator.cs` (novos)
+- `Lib/Lookups/LookupQueryServiceCache.cs`, `LookupQueryService.cs` — sem sync em ContextoModel
+- `Lib/LibDB.cs` — invalidação lookup ao detectar tabela atualizada
+- `Security/CachePersister.cs` — limpa lookups no logout
+- `Areas/gc/Controllers/MovimentosController.cs` — dataset vendedores via serviço
+- `Models/ContextoModel.cs` — nota shells legados
+- `Tests/.../LookupCacheInvalidationTests.cs`, `Properties/AssemblyInfo.cs` (InternalsVisibleTo)
+
+**O que foi feito:**
+Fase 3: combos/datasets migrados deixam de duplicar listas em `contextoModel`; cache exclusivo com registo por tabela; `IsTableUpdate` remove entradas `lookup:{token}:...` associadas (ex. `g_clientes`).
+
+**Atenção:**
+`Load*` não migrados em `LibDataSets` ainda usam slots `contextoModel`. Fase 4 deve migrar ou mover para o serviço.
+
+---
+### [2026-05-20] — LibDataSets Fase 2: ILookupQueryService + cache por chave + fachada
+**Tipo:** Implementação | Refatoração
+**Arquivos tocados:**
+- `Lib/Lookups/` — `ILookupQueryService`, `LookupQueryService`, `LookupCacheKeys`, `LookupQueryServiceCache`, `LookupQueryServiceAccessor`
+- `App_Start/LookupDependencyConfig.cs`, `Global.asax.cs`
+- `Lib/LibDataSets.cs` — 24 metodos delegam ao servico (top uso + parametricos)
+- `Tests/GDI-ERP-Plataform.Lookups.Tests/` — testes chave/cache parametrico
+- `GDI-ERP-Plataform.csproj`
+
+**O que foi feito:**
+Extraido servico testavel com cache MemoryCache `lookup:{token}:{nome}:{params}:v:{versao}`; mantidos slots `ContextoModel` para compatibilidade; controllers inalterados (`LibDataSets.Load*`).
+
+**Validacao:**
+Build Debug OK; `GDI-ERP-Plataform.Lookups.Tests.exe` passou. Manual: pedidos (contatos/destinatarios), inventario endereco, GED tipos.
+
+---
 ### [2026-05-20] — LibDataSets: documento diagnostico completo e plano (Fases 0–5)
 **Tipo:** Análise | Documentação
 **Arquivos tocados:**

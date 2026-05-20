@@ -630,13 +630,76 @@ td.BoletoSubTotal {
     max-width: 100%;
 }
 
-/* Fora de .gdi-dt-scroll-host: a tabela pode crescer com as colunas; o scroll fica no wrapper */
-.scroll-body-horizontal > table,
+/* DataTables: tabela pode crescer com as colunas; scroll no wrapper (não aplicar a tabelas MVC sem .display). */
 .scroll-body-horizontal .dataTables_wrapper table,
-.scroll-body-horizontal table.dataTable {
+.scroll-body-horizontal table.dataTable,
+.scroll-body-horizontal table.display {
     width: max-content;
     min-width: 100%;
     box-sizing: border-box;
+}
+
+/* Tabelas de formulário MVC — wrapper e layout fixo (evita coluna esquerda cortada por max-content). */
+.gdi-form-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+}
+
+.gdi-form-table-scroll > table.gdi-form-table-fixed,
+.gdi-form-table-scroll > table:not(.display):not(.dataTable),
+.scroll-body-horizontal > table:not(.display):not(.dataTable) {
+    width: 100%;
+    table-layout: fixed;
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+.gdi-form-table-fixed th,
+.gdi-form-table-fixed td,
+.scroll-body-horizontal > table:not(.display):not(.dataTable) th,
+.scroll-body-horizontal > table:not(.display):not(.dataTable) td {
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.gdi-form-table-fixed .gdi-col-seq,
+.gdi-form-table-fixed .gdi-col-qtd,
+.gdi-form-table-fixed .gdi-col-cd {
+    white-space: nowrap;
+}
+
+.gdi-form-table-fixed .gdi-col-seq {
+    width: 3.25rem;
+    text-align: center;
+}
+
+.gdi-form-table-fixed .gdi-col-qtd {
+    width: 4.25rem;
+    text-align: center;
+}
+
+.gdi-form-table-fixed .gdi-col-cd {
+    width: 5rem;
+    text-align: center;
+}
+
+.gdi-form-table-fixed .gdi-col-produto {
+    white-space: normal;
+    text-align: left;
+}
+
+.gdi-form-table-fixed .form-control,
+.scroll-body-horizontal table:not(.display):not(.dataTable) .form-control {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.25rem 0.35rem;
+    font-size: 0.875rem;
 }
 
 /* Contém DataTable dentro de card/col sem estourar o viewport (flex + gutters BS5) */

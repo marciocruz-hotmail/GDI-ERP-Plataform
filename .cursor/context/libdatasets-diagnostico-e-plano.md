@@ -36,7 +36,9 @@
 |------|--------|
 | **Fase 0** — Inventário | Concluída → [lookups-libdatasets.md](./lookups-libdatasets.md) |
 | **Fase 1** — Cache paramétrico + null-safety parcial | Concluída → 9 métodos em `LibDataSets.cs` |
-| **Fases 2–5** | Planejadas, não implementadas |
+| **Fase 2** — `ILookupQueryService` + fachada `LibDataSets` | Concluída (2026-05-20) — ver `Lib/Lookups/` |
+| **Fase 3** — MemoryCache sem duplicar `ContextoModel`; invalidação por tabela | Concluída (2026-05-20) |
+| **Fases 4–5** | Planejadas |
 
 ---
 

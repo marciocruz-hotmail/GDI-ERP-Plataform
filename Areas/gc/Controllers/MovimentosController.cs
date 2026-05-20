@@ -7,6 +7,7 @@ using GdiPlataform.Areas.gc.Services;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 using GdiPlataform.Robos;
 using GdiPlataform.Robos.Aws;
 using GdiPlataform.Robos.CotacaoDolar;
@@ -912,9 +913,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                         qtdInconsistencias += 1;
                         int IdVendedor = view_record_gc_movimentos.id_vendedor;
                         MsgInconsistencia += " - Vendedor informado não associado ao cliente " + RecordCliente.nome.EmptyIfNull().ToString() + "<br/>[Vendedores associados: ";
-                        MsgInconsistencia += CachePersister.contextoModel.gc_dataSetVendedores.Where(v => v.id_vendedor == RecordCliente.id_vendedor).FirstOrDefault().nome.EmptyIfNull().ToString();
-                        if ((RecordCliente.id_vendedor2 > 0) && (RecordCliente.id_vendedor2 != RecordCliente.id_vendedor)) { MsgInconsistencia += ", " + CachePersister.contextoModel.gc_dataSetVendedores.Where(v => v.id_vendedor == RecordCliente.id_vendedor2).FirstOrDefault().nome.EmptyIfNull().ToString(); };
-                        if ((RecordCliente.id_vendedor3 > 0) && (RecordCliente.id_vendedor3 != RecordCliente.id_vendedor)) { MsgInconsistencia += ", " + CachePersister.contextoModel.gc_dataSetVendedores.Where(v => v.id_vendedor == RecordCliente.id_vendedor3).FirstOrDefault().nome.EmptyIfNull().ToString(); };
+                        var dataSetVendedores = LookupQueryServiceAccessor.Current.GetDatasetGVendedores(db);
+                        MsgInconsistencia += dataSetVendedores.Where(v => v.id_vendedor == RecordCliente.id_vendedor).FirstOrDefault().nome.EmptyIfNull().ToString();
+                        if ((RecordCliente.id_vendedor2 > 0) && (RecordCliente.id_vendedor2 != RecordCliente.id_vendedor)) { MsgInconsistencia += ", " + dataSetVendedores.Where(v => v.id_vendedor == RecordCliente.id_vendedor2).FirstOrDefault().nome.EmptyIfNull().ToString(); };
+                        if ((RecordCliente.id_vendedor3 > 0) && (RecordCliente.id_vendedor3 != RecordCliente.id_vendedor)) { MsgInconsistencia += ", " + dataSetVendedores.Where(v => v.id_vendedor == RecordCliente.id_vendedor3).FirstOrDefault().nome.EmptyIfNull().ToString(); };
                         MsgInconsistencia += "]!<br/>"; ;
                     }
                 }

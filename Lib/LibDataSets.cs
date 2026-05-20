@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Db;
 using GdiPlataform.Domain;
+using GdiPlataform.Lib.Lookups;
 using GdiPlataform.Security;
 
 namespace GdiPlataform.Lib
@@ -35,71 +36,13 @@ namespace GdiPlataform.Lib
         }
 
         public static List<SelectListItem> LoadComboGcClientesDestinatarios(GdiPlataformEntities db, int IdCliente)
-        {
-            EnsureContextoModel();
-            var comboDestinatarios = new List<SelectListItem>();
-            try
-            {
-                comboDestinatarios.Add(new SelectListItem { Value = "0", Text = "[ O PRÓPRIO CLIENTE ]" });
-                var listaDestinatarios = db.g_clientes_destinatarios
-                    .Where(c => c.id_cliente == IdCliente && c.ativo == true)
-                    .OrderBy(c => c.nome);
-                foreach (g_clientes_destinatarios Record in listaDestinatarios)
-                {
-                    comboDestinatarios.Add(new SelectListItem { Value = Record.id_cliente_destinatario.ToString(), Text = Record.nome.ToString() });
-                }
-            }
-            finally { }
-            return CloneSelectList(comboDestinatarios);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcClientesDestinatarios(db, IdCliente);
 
         public static List<g_clientes_destinatarios> LoadDatasetGcClientesDestinatarios(int IdCliente, GdiPlataformEntities db)
-        {
-            EnsureContextoModel();
-            var lista = new List<g_clientes_destinatarios>
-            {
-                new g_clientes_destinatarios
-                {
-                    id_cliente_destinatario = 0,
-                    nome = "O PRÓPRIO CLIENTE"
-                }
-            };
-            try
-            {
-                var listaDbClientesDestinatarios = db.g_clientes_destinatarios
-                    .Where(p => p.ativo == true && p.id_cliente == IdCliente)
-                    .ToList();
-                lista.AddRange(listaDbClientesDestinatarios);
-            }
-            finally { }
-            return lista;
-        }
+            => LookupQueryServiceAccessor.Current.GetDatasetGcClientesDestinatarios(IdCliente, db);
 
         public static List<SelectListItem> LoadComboGcTransportadora(GdiPlataformEntities db)
-        {
-            if ((CachePersister.contextoModel.gc_comboGcTransportadora.Count == 0) || (LibDB.IsTableUpdate("g_clientes", "LoadComboGcTransportadora", db) == true))
-            {
-                var comboTransportadora = new List<SelectListItem>();
-                comboTransportadora.Add(new SelectListItem { Value = "0", Text = "[ CLIENTE RETIRA ]" });
-                try
-                {
-                    IQueryable<g_clientes> listaTransportadora = null;
-                    listaTransportadora = db.g_clientes.Select(c => c).Where(c => c.param_gc_transportadora == true).OrderBy(c => c.nome);
-                    foreach (g_clientes Record in listaTransportadora)
-                    {
-                        comboTransportadora.Add(new SelectListItem { Value = Record.id_cliente.ToString(), Text = Record.nome.ToString() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboGcTransportadora = comboTransportadora;
-            }
-            else
-            {
-                List<SelectListItem> ListaTransportadora = CachePersister.contextoModel.gc_comboGcTransportadora;
-                CachePersister.contextoModel.gc_comboGcTransportadora = ListaTransportadora;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboGcTransportadora));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcTransportadora(db);
 
         public static List<SelectListItem> LoadComboGcIcmsUfIsento(GdiPlataformEntities db)
         {
@@ -163,46 +106,10 @@ namespace GdiPlataform.Lib
 
 
         public static List<SelectListItem> LoadComboGcCfop(GdiPlataformEntities db)
-        {
-            if ((CachePersister.contextoModel.gc_comboGcCfop.Count == 0) || (LibDB.IsTableUpdate("gc_cfop", "LoadComboGcCfop", db) == true))
-            {
-                var comboCFOP = new List<SelectListItem>();
-                try
-                {
-                    IQueryable<gc_cfop> listaCFOP = null;
-                    listaCFOP = db.gc_cfop.Where(p => p.ativo == true).OrderBy(p => p.numero);
-                    foreach (gc_cfop ItemCfop in listaCFOP)
-                    {
-                        String descricaoCFOP = ItemCfop.numero.ToString() + "  -  " + ItemCfop.descricao.ToString().Trim();
-                        comboCFOP.Add(new SelectListItem { Value = ItemCfop.id_cfop.ToString(), Text = descricaoCFOP });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboGcCfop = comboCFOP;
-            }
-            else
-            {
-                List<SelectListItem> listaComboCFOP = CachePersister.contextoModel.gc_comboGcCfop;
-                CachePersister.contextoModel.gc_comboGcCfop = listaComboCFOP;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboGcCfop));
-        }
-        public static List<SelectListItem> LoadComboGcCfopOperacoesFaturamentoPedido(GdiPlataformEntities db, int IdCfopOperacao)
-        {
-            EnsureContextoModel();
-            var ComboCfopOperacoes = new List<SelectListItem>();
-            try
-            {
-                gc_cfop_operacoes RecordCfopOperacoes = db.gc_cfop_operacoes.Find(IdCfopOperacao);
-                if (RecordCfopOperacoes != null) { ComboCfopOperacoes.Add(new SelectListItem { Value = RecordCfopOperacoes.id_cfop_operacao.EmptyIfNull().ToString(), Text = RecordCfopOperacoes.descricao_erp.EmptyIfNull().ToString() }); };
+            => LookupQueryServiceAccessor.Current.GetComboGcCfop(db);
 
-                gc_cfop_operacoes RecordCfopOperacaoVinculada = db.gc_cfop_operacoes.Where(o => o.id_operacao_predecessora == IdCfopOperacao).FirstOrDefault();
-                if (RecordCfopOperacaoVinculada != null) { ComboCfopOperacoes.Add(new SelectListItem { Value = RecordCfopOperacaoVinculada.id_cfop_operacao.EmptyIfNull().ToString(), Text = RecordCfopOperacaoVinculada.descricao_erp.EmptyIfNull().ToString() }); };
-            }
-            catch (Exception){}
-            finally { }
-            return CloneSelectList(ComboCfopOperacoes);
-        }
+        public static List<SelectListItem> LoadComboGcCfopOperacoesFaturamentoPedido(GdiPlataformEntities db, int IdCfopOperacao)
+            => LookupQueryServiceAccessor.Current.GetComboGcCfopOperacoesFaturamentoPedido(db, IdCfopOperacao);
 
         public static List<SelectListItem> LoadComboGcCfopOperacoesTelaPedido(GdiPlataformEntities db)
         {
@@ -269,76 +176,13 @@ namespace GdiPlataform.Lib
         }
 
         public static List<SelectListItem> LoadComboGcFreteResponsavel(GdiPlataformEntities db)
-        {
-            if ((CachePersister.contextoModel.gc_comboFreteResponsavel.Count == 0) || (LibDB.IsTableUpdate("gc_frete_responsavel", "LoadComboGcFreteResponsavel", db) == true))
-            {
-                var comboFreteResponsavel = new List<SelectListItem>();
-                try
-                {
-                    IQueryable<gc_frete_responsavel> listaFreteResponsavel = null;
-                    listaFreteResponsavel = db.gc_frete_responsavel.Select(p => p).Where(p => p.ativo == true).OrderBy(p => p.descricao);
-                    foreach (gc_frete_responsavel Record in listaFreteResponsavel)
-                    {
-                        comboFreteResponsavel.Add(new SelectListItem { Value = Record.id_frete_responsavel.ToString(), Text = Record.descricao.ToString() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboFreteResponsavel = comboFreteResponsavel;
-            }
-            else
-            {
-                List<SelectListItem> ListaFreteResponsavel = CachePersister.contextoModel.gc_comboFreteResponsavel;
-                CachePersister.contextoModel.gc_comboFreteResponsavel = ListaFreteResponsavel;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboFreteResponsavel));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcFreteResponsavel(db);
+
         public static List<SelectListItem> LoadComboGcEntregasPrazos(GdiPlataformEntities db)
-        {
-            // Entregas Prazos
-            if ((CachePersister.contextoModel.gc_comboEntregasPrazos.Count == 0) || (LibDB.IsTableUpdate("gc_entregas_prazos", "LoadComboGcEntregasPrazos", db) == true))
-            {
-                var comboEntregasPrazos = new List<SelectListItem>();
-                try
-                {
-                    IQueryable<gc_entregas_prazos> listaDbEntregasPrazos = db.gc_entregas_prazos.Select(p => p).OrderBy(p => p.id_entrega_prazo);
-                    foreach (gc_entregas_prazos Record in listaDbEntregasPrazos)
-                    {
-                        comboEntregasPrazos.Add(new SelectListItem { Value = Record.id_entrega_prazo.ToString(), Text = Record.sigla.ToString() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboEntregasPrazos = comboEntregasPrazos;
-            }
-            else
-            {
-                List<SelectListItem> ListaEntregasPrazos = CachePersister.contextoModel.gc_comboEntregasPrazos;
-                CachePersister.contextoModel.gc_comboEntregasPrazos = ListaEntregasPrazos;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboEntregasPrazos));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcEntregasPrazos(db);
+
         public static List<SelectListItem> LoadComboGProdutoCondicao(GdiPlataformEntities db)
-        {
-            if ((CachePersister.contextoModel.gc_comboProdutosCondicoes.Count == 0) || (LibDB.IsTableUpdate("g_produtos_condicoes", "LoadComboGProdutoCondicao", db) == true))
-            {
-                var comboProdutosCondicoes = new List<SelectListItem>();
-                try
-                {
-                    IQueryable<g_produtos_condicoes> listaDbProdutosCondicoes = db.g_produtos_condicoes.Select(p => p).OrderBy(p => p.id_produto_condicao);
-                    foreach (g_produtos_condicoes Record in listaDbProdutosCondicoes)
-                    {
-                        comboProdutosCondicoes.Add(new SelectListItem { Value = Record.id_produto_condicao.ToString(), Text = Record.sigla.ToString().Trim() + " - " + Record.descricao.ToString().Trim() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboProdutosCondicoes = comboProdutosCondicoes;
-            }
-            else
-            {
-                List<SelectListItem> ListaProdutosCondicoes = CachePersister.contextoModel.gc_comboProdutosCondicoes;
-                CachePersister.contextoModel.gc_comboProdutosCondicoes = ListaProdutosCondicoes;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboProdutosCondicoes));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGProdutoCondicao(db);
 
         public static List<SelectListItem> LoadComboGProdutosNCM(GdiPlataformEntities db)
         {
@@ -412,70 +256,13 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboMoedas));
         }
         public static List<SelectListItem> LoadComboGVendedores(GdiPlataformEntities db)
-        {
-            // Vendedores
-            if ((CachePersister.contextoModel.gc_comboVendedores.Count == 0) || (LibDB.IsTableUpdate("g_vendedores", "LoadComboGVendedores", db) == true))
-            {
-                var comboVendedores = new List<SelectListItem>();
-                try
-                {
-                    IQueryable<g_vendedores> listaDbVendedores = db.g_vendedores.Select(p => p).Where(p => p.ativo == true).OrderBy(p => p.nome);
-                    comboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ Selecionar ]" });
-                    foreach (g_vendedores item3 in listaDbVendedores)
-                    {
-                        comboVendedores.Add(new SelectListItem { Value = item3.id_vendedor.ToString(), Text = item3.nome.ToString() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboVendedores = comboVendedores;
-            }
-            else
-            {
-                List<SelectListItem> ListaVendedores = CachePersister.contextoModel.gc_comboVendedores;
-                CachePersister.contextoModel.gc_comboVendedores = ListaVendedores;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboVendedores));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGVendedores(db);
+
         public static List<g_vendedores> LoadDatasetGVendedores(GdiPlataformEntities db)
-        {
-            // Vendedores
-            if ((CachePersister.contextoModel.gc_dataSetVendedores.Count == 0) || (LibDB.IsTableUpdate("g_vendedores", "LoadDatasetGVendedores", db) == true))
-            {
-                var dataSetVendedores = new List<g_vendedores>();
-                try
-                {
-                    IQueryable<g_vendedores> listaDbVendedores = db.g_vendedores.Select(p => p).Where(p => p.ativo == true).OrderBy(p => p.nome);
-                    foreach (g_vendedores item3 in listaDbVendedores)
-                    {
-                        dataSetVendedores.Add(item3);
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_dataSetVendedores = dataSetVendedores;
-            }
-            else
-            {
-                List<g_vendedores> DatasetVendedores = CachePersister.contextoModel.gc_dataSetVendedores;
-                CachePersister.contextoModel.gc_dataSetVendedores = DatasetVendedores;
-            }
-            return CachePersister.contextoModel.gc_dataSetVendedores;
-        }
+            => LookupQueryServiceAccessor.Current.GetDatasetGVendedores(db);
+
         public static List<SelectListItem> LoadComboGcClientesContatos(GdiPlataformEntities db, int IdCliente)
-        {
-            EnsureContextoModel();
-            var ComboClientesContatos = new List<SelectListItem>();
-            ComboClientesContatos.Add(new SelectListItem { Value = "0", Text = "[ INFORME A PESSOA DE CONTATO ]" });
-            try
-            {
-                var listaDbClientesContatos = db.g_clientes_contatos.Select(p => new { p.id_contato, p.ativo, p.id_cliente, p.contato, p.telefone, p.email }).Where(p => (p.ativo == true && p.id_cliente == IdCliente)).ToList();
-                foreach (var item_g_clientes_contatos in listaDbClientesContatos)
-                {
-                    ComboClientesContatos.Add(new SelectListItem { Value = item_g_clientes_contatos.id_contato.ToString(), Text = item_g_clientes_contatos.contato.ToString() });
-                }
-            }
-            finally { }
-            return CloneSelectList(ComboClientesContatos);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcClientesContatos(db, IdCliente);
 
         public static List<SelectListItem> LoadComboGcClientesContatosPedido(GdiPlataformEntities db, int IdCliente)
         {
@@ -629,40 +416,7 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboStatusMovimentos));
         }
         public static List<SelectListItem> LoadComboGcProdutosServicosTodos(GdiPlataformEntities db)
-        {
-            if ((CachePersister.contextoModel.gc_comboProdutosServicosTodos.Count == 0) || (LibDB.IsTableUpdate("g_produtos", "LoadComboGcProdutosServicosTodos", db) == true))
-            {
-                var comboProdutosServicos = new List<SelectListItem>();
-                try
-                {
-                    int _DisplayScreenWidth = 0;
-                    int _SizeNomeItem = 100;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    var listaDbProdutosServicos = db.g_produtos.Select(p => new { p.id_produto, p.codigo, p.nome, p.preco_venda, p.has_corecharge, p.ativo, p.importado }).Where(p => p.ativo == true).ToList();
-                    comboProdutosServicos.Add(new SelectListItem { Value = "-1", Text = "" });
-                    _SizeNomeItem = (_DisplayScreenWidth / 100) * 8;
-                    if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 500)) { _SizeNomeItem = (_DisplayScreenWidth / 100 * 10); }
-                    foreach (var item_g_produtos in listaDbProdutosServicos)
-                    {
-                        String IdProduto = item_g_produtos.id_produto.EmptyIfNull().ToString().Trim();
-                        String NomeProduto = item_g_produtos.nome.EmptyIfNull().ToString().Trim();
-                        if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                        if (NomeProduto.EmptyIfNull().ToString().Trim().Length > 0)
-                        {
-                            comboProdutosServicos.Add(new SelectListItem { Value = IdProduto, Text = NomeProduto });
-                        }
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboProdutosServicosTodos = comboProdutosServicos;
-            }
-            else
-            {
-                List<SelectListItem> ListaProdutosServicos = CachePersister.contextoModel.gc_comboProdutosServicosTodos;
-                CachePersister.contextoModel.gc_comboProdutosServicosTodos = ListaProdutosServicos;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboProdutosServicosTodos));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcProdutosServicosTodos(db);
 
         public static List<SelectListItem> LoadComboGcProdutosServicosTodosComId(GdiPlataformEntities db)
         {
@@ -701,203 +455,22 @@ namespace GdiPlataform.Lib
         }
 
         public static List<SelectListItem> LoadComboGcProdutosServicosImportados(GdiPlataformEntities db)
-        {
-            if ((CachePersister.contextoModel.gc_comboProdutosServicosImportados.Count == 0) || (LibDB.IsTableUpdate("g_produtos", "LoadComboGcProdutosServicosImportados", db) == true))
-            {
-                var comboProdutosServicos = new List<SelectListItem>();
-                try
-                {
-                    int _DisplayScreenWidth = 0;
-                    int _SizeNomeItem = 100;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    var listaDbProdutosServicos = db.g_produtos.Select(p => new { p.id_produto, p.codigo, p.nome, p.preco_venda, p.has_corecharge, p.ativo, p.importado }).Where(p => p.ativo == true && p.importado == true).ToList();
-                    comboProdutosServicos.Add(new SelectListItem { Value = "-1", Text = "" });
-                    _SizeNomeItem = (_DisplayScreenWidth / 100) * 8;
-                    if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 500)) { _SizeNomeItem = (_DisplayScreenWidth / 100 * 10); }
-                    foreach (var item_g_produtos in listaDbProdutosServicos)
-                    {
-                        String IdProduto = item_g_produtos.id_produto.EmptyIfNull().ToString().Trim();
-                        String NomeProduto = item_g_produtos.nome.EmptyIfNull().ToString().Trim();
-                        if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                        if (NomeProduto.EmptyIfNull().ToString().Trim().Length > 0)
-                        {
-                            comboProdutosServicos.Add(new SelectListItem { Value = IdProduto, Text = NomeProduto });
-                        }
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboProdutosServicosImportados = comboProdutosServicos;
-            }
-            else
-            {
-                List<SelectListItem> ListaProdutosServicos = CachePersister.contextoModel.gc_comboProdutosServicosImportados;
-                CachePersister.contextoModel.gc_comboProdutosServicosImportados = ListaProdutosServicos;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboProdutosServicosImportados));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcProdutosServicosImportados(db);
 
         public static List<CstDatasetProdutosServicos> LoadDatasetGcProdutosServicos(GdiPlataformEntities db)
-        {
-            // Produtos/Serviços
-            if ((CachePersister.contextoModel.gc_dataSetProdutosServicos.Count == 0) || (LibDB.IsTableUpdate("g_produtos", "LoadDatasetGcProdutosServicos", db) == true))
-            {
-                var dataSetProdutosServicos = new List<CstDatasetProdutosServicos>();
-                try
-                {
-                    int _DisplayScreenWidth = 0;
-                    int _SizeNomeItem = 100;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    var listaDbProdutosServicos = db.g_produtos.Select(p => new { p.id_produto, p.codigo, p.nome, p.preco_venda, p.fob1_dollar, p.fob2_dollar, p.fob3_dollar, p.fob1_id_importacao, p.fob2_id_importacao, p.fob3_id_importacao, p.has_corecharge, p.ativo, p.id_unidade_medida_venda, p.id_produto_ncm, p.saldo_01_disponivel, p.saldo_03_disponivel }).Where(p => p.ativo == true).ToList(); // 20210618
-                    if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 500)) { _SizeNomeItem = 50; }
-                    if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 400)) { _SizeNomeItem = 40; }
-                    if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 300)) { _SizeNomeItem = 30; }
-                    foreach (var item_g_produtos in listaDbProdutosServicos)
-                    {
-                        String NomeProduto = item_g_produtos.nome.EmptyIfNull().ToString().Trim();
-                        if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                        CstDatasetProdutosServicos record_cstDatasetProdutosServicos = new CstDatasetProdutosServicos();
-                        record_cstDatasetProdutosServicos.id_produto_servico = item_g_produtos.id_produto;
-                        record_cstDatasetProdutosServicos.descricao_longa = NomeProduto; // Aqui
-                        record_cstDatasetProdutosServicos.codigo = item_g_produtos.codigo;
-                        record_cstDatasetProdutosServicos.preco_venda = item_g_produtos.preco_venda;
-                        record_cstDatasetProdutosServicos.fob1_dollar = item_g_produtos.fob1_dollar;
-                        record_cstDatasetProdutosServicos.fob1_id_importacao = item_g_produtos.fob1_id_importacao;
-                        record_cstDatasetProdutosServicos.fob2_dollar = item_g_produtos.fob2_dollar;
-                        record_cstDatasetProdutosServicos.fob2_id_importacao = item_g_produtos.fob2_id_importacao;
-                        record_cstDatasetProdutosServicos.fob3_dollar = item_g_produtos.fob3_dollar;
-                        record_cstDatasetProdutosServicos.fob3_id_importacao = item_g_produtos.fob3_id_importacao;
-                        record_cstDatasetProdutosServicos.has_corecharge = item_g_produtos.has_corecharge;
-                        record_cstDatasetProdutosServicos.id_unidade_medida_venda = item_g_produtos.id_unidade_medida_venda;
-                        record_cstDatasetProdutosServicos.id_produto_ncm = item_g_produtos.id_produto_ncm ;
-                        record_cstDatasetProdutosServicos.saldo_01_disponivel = item_g_produtos.saldo_01_disponivel;
-                        record_cstDatasetProdutosServicos.saldo_03_disponivel = item_g_produtos.saldo_03_disponivel;
-                        dataSetProdutosServicos.Add(record_cstDatasetProdutosServicos);
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_dataSetProdutosServicos = dataSetProdutosServicos;
-            }
-            else
-            {
-                List<CstDatasetProdutosServicos> ListaDataSetProdutosServicos = CachePersister.contextoModel.gc_dataSetProdutosServicos;
-                CachePersister.contextoModel.gc_dataSetProdutosServicos = ListaDataSetProdutosServicos;
-            }
-            return CachePersister.contextoModel.gc_dataSetProdutosServicos;
-        }
+            => LookupQueryServiceAccessor.Current.GetDatasetGcProdutosServicos(db);
+
         public static List<SelectListItem> LoadComboGcLocaisEstoqueOrders(GdiPlataformEntities db)
-        {
-            // Locais de Estoque
-            if (CachePersister.contextoModel.gc_comboLocaisEstoqueOrders.Count == 0)
-            {
-                var comboLocaisEstoqueOrders = new List<SelectListItem>();
-                try
-                {
-                    comboLocaisEstoqueOrders.Add(new SelectListItem { Value = "-1", Text = "Estoque" });
-                    IQueryable<gc_locais_estoque> listaDbLocaisEstoqueOrders = db.gc_locais_estoque.Select(p => p).Where(p => p.allow_order == true).OrderBy(p => p.id_local_estoque);
-                    foreach (gc_locais_estoque ItemLocaisEstoqueOrders in listaDbLocaisEstoqueOrders)
-                    {
-                        comboLocaisEstoqueOrders.Add(new SelectListItem { Value = ItemLocaisEstoqueOrders.id_local_estoque.ToString(), Text = ItemLocaisEstoqueOrders.sigla.EmptyIfNull().ToString() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboLocaisEstoqueOrders = comboLocaisEstoqueOrders;
-            }
-            else
-            {
-                List<SelectListItem> ListaLocaisEstoqueOrders = CachePersister.contextoModel.gc_comboLocaisEstoqueOrders;
-                CachePersister.contextoModel.gc_comboLocaisEstoqueOrders = ListaLocaisEstoqueOrders;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboLocaisEstoqueOrders));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcLocaisEstoqueOrders(db);
+
         public static List<SelectListItem> LoadComboGClientesFornecedores(GdiPlataformEntities db)
-        {
-            // Clientes
-            if ((CachePersister.contextoModel.gc_comboGClientesFornecedores.Count == 0) || (LibDB.IsTableUpdate("g_clientes", "LoadComboGClientesFornecedores", db) == true))
-            {
-                var ComboGClientesFornecedores = new List<SelectListItem>();
-                try
-                {
-                    int _DisplayScreenWidth = 0;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    var ListaTemp = db.g_clientes.Select(c => new { c.id_cliente, c.is_cliente, c.is_fornecedor, c.ativo, c.nome, c.id_ciclo_faturamento, c.id_coligada, c.id_filial }).Where(p => (p.ativo == true)).OrderBy(p => p.nome).ToList();
-                    foreach (var RecordTemp in ListaTemp)
-                    {
-                        String NomeCliente = RecordTemp.nome.EmptyIfNull().ToString().Trim();
-                        if ((NomeCliente.Length > 50) && (_DisplayScreenWidth < 500)) { NomeCliente = NomeCliente.Substring(0, 50); };
-                        ComboGClientesFornecedores.Add(new SelectListItem { Value = RecordTemp.id_cliente.ToString(), Text = NomeCliente + "\xA0\xA0\xA0\xA0\xA0" + "[Id: " + RecordTemp.id_cliente.ToString() + "]" });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboGClientesFornecedores = ComboGClientesFornecedores;
-            }
-            else
-            {
-                List<SelectListItem> ListaClientes = CachePersister.contextoModel.gc_comboGClientesFornecedores;
-                CachePersister.contextoModel.gc_comboGClientesFornecedores = ListaClientes;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboGClientesFornecedores));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGClientesFornecedores(db);
+
         public static List<SelectListItem> LoadComboGClientesFornecedoresComDoc(GdiPlataformEntities db)
-        {
-            // Clientes
-            if ((CachePersister.contextoModel.gc_comboGClientesFornecedoresComDoc.Count == 0) || (LibDB.IsTableUpdate("g_clientes", "LoadComboGClientesFornecedoresComDoc", db) == true))
-            {
-                var ComboGClientesFornecedoresComDoc = new List<SelectListItem>();
-                try
-                {
-                    String Documento = string.Empty;
-                    int _DisplayScreenWidth = 0;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    var ListaTemp = db.g_clientes.Select(c => new { c.id_cliente, c.cpf, c.cnpj, c.is_cliente, c.is_fornecedor, c.ativo, c.nome, c.id_ciclo_faturamento, c.id_coligada, c.id_filial }).Where(p => (p.ativo == true)).OrderBy(p => p.nome).ToList();
-                    foreach (var RecordTemp in ListaTemp)
-                    {
-                        if (RecordTemp.cpf.EmptyIfNull().ToString().Trim().Length > 0) { Documento = RecordTemp.cpf.Trim(); }
-                        else if (RecordTemp.cnpj.EmptyIfNull().ToString().Trim().Length > 0) { Documento = RecordTemp.cnpj.Trim(); };
-                        String NomeCliente = RecordTemp.nome.EmptyIfNull().ToString().Trim();
-                        if ((NomeCliente.Length > 50) && (_DisplayScreenWidth < 500)) { NomeCliente = NomeCliente.Substring(0, 50); };
-                        ComboGClientesFornecedoresComDoc.Add(new SelectListItem { Value = RecordTemp.id_cliente.ToString(), Text = NomeCliente + "\xA0\xA0\xA0\xA0\xA0" + "[ " + Documento + " ]" });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboGClientesFornecedoresComDoc = ComboGClientesFornecedoresComDoc;
-            }
-            else
-            {
-                List<SelectListItem> ListaClientesComDoc = CachePersister.contextoModel.gc_comboGClientesFornecedoresComDoc;
-                CachePersister.contextoModel.gc_comboGClientesFornecedoresComDoc = ListaClientesComDoc;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboGClientesFornecedoresComDoc));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGClientesFornecedoresComDoc(db);
 
         public static List<SelectListItem> LoadComboSomenteGClientes(GdiPlataformEntities db)
-        {
-            // Clientes
-            if ((CachePersister.contextoModel.gc_comboSomenteGClientes.Count == 0) || (LibDB.IsTableUpdate("g_clientes", "LoadComboSomenteGClientes", db) == true))
-            {
-                var ComboSomenteGClientes = new List<SelectListItem>();
-                try
-                {
-                    int _DisplayScreenWidth = 0;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    var ListaTemp = db.g_clientes.Select(c => new { c.id_cliente, c.is_cliente, c.is_fornecedor, c.ativo, c.nome, c.id_ciclo_faturamento, c.id_coligada, c.id_filial }).Where(p => (p.ativo == true) && (p.is_cliente == true)).OrderBy(p => p.nome).ToList();
-                    foreach (var RecordTemp in ListaTemp)
-                    {
-                        String NomeCliente = RecordTemp.nome.EmptyIfNull().ToString().Trim();
-                        if ((NomeCliente.Length > 50) && (_DisplayScreenWidth < 500)) { NomeCliente = NomeCliente.Substring(0, 50); }
-                        else if (NomeCliente.Length > 100) { NomeCliente = NomeCliente.Substring(0, 100); };
-                        ComboSomenteGClientes.Add(new SelectListItem { Value = RecordTemp.id_cliente.ToString(), Text = NomeCliente + "\xA0\xA0\xA0\xA0\xA0" + "[Id: " + RecordTemp.id_cliente.ToString() + "]" }); 
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboSomenteGClientes = ComboSomenteGClientes;
-            }
-            else
-            {
-                List<SelectListItem> ListaTemp = CachePersister.contextoModel.gc_comboSomenteGClientes;
-                CachePersister.contextoModel.gc_comboSomenteGClientes = ListaTemp;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboSomenteGClientes));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboSomenteGClientes(db);
         public static List<SelectListItem> LoadComboSomenteGClientesComDoc(GdiPlataformEntities db)
         {
             // Clientes
@@ -1200,42 +773,7 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboFinanceiroFiltroStatus));
         }
         public static List<SelectListItem> LoadComboGContasCaixas(GdiPlataformEntities db)
-        {
-            // Contas Caixas
-            if (CachePersister.contextoModel.gc_comboContasCaixas.Count == 0)
-            {
-                var comboContasCaixas = new List<SelectListItem>();
-                try
-                {
-                    var listaDbContasCaixas = new List<Db.g_contas_caixas>();
-                    String SentencaSQL = string.Empty;
-                    SentencaSQL += "select c.* from g_contas_caixas c ";
-                    SentencaSQL += "     left join g_contas_caixas_acessos a on (c.id_conta_caixa = a.id_conta_caixa) ";
-                    SentencaSQL += "     where (c.ativo = 1) and (c.is_gerencial = 1) and (a.id_usuario = " + CachePersister.userIdentity.IdUsuario.ToString() + ") order by c.ordem";
-                    listaDbContasCaixas = db.g_contas_caixas.SqlQuery(SentencaSQL).ToList();
-
-                    if (listaDbContasCaixas.Count > 0)
-                    {
-                        foreach (g_contas_caixas itemContaCaixa in listaDbContasCaixas)
-                        {
-                            comboContasCaixas.Add(new SelectListItem { Value = itemContaCaixa.id_conta_caixa.ToString(), Text = itemContaCaixa.nome.ToString() });
-                        }
-                    }
-                    else
-                    {
-                        comboContasCaixas.Add(new SelectListItem { Value = "0", Text = "CONTA CAIXA INTERNA" }); ;
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboContasCaixas = comboContasCaixas;
-            }
-            else
-            {
-                List<SelectListItem> ListaContasCaixas = CachePersister.contextoModel.gc_comboContasCaixas;
-                CachePersister.contextoModel.gc_comboContasCaixas = ListaContasCaixas;
-            }
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboContasCaixas));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGContasCaixas(db);
         public static List<SelectListItem> LoadComboGContasCaixasGerencial(GdiPlataformEntities db)
         {
             // Contas Caixas
@@ -1305,32 +843,7 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.g_comboContratosTipos));
         }
         public static List<SelectListItem> LoadComboGcMovimentosPosicao(GdiPlataformEntities db)
-        {
-            // Entregas Prazos
-            if (CachePersister.contextoModel.gc_comboGcMovimentosPosicao.Count == 0)
-            {
-                var comboMovimentosPosicao = new List<SelectListItem>();
-                try
-                {
-                    IQueryable<gc_movimentos_posicao> listaMovimentosPosicao = null;
-                    listaMovimentosPosicao = db.gc_movimentos_posicao.Select(c => c).OrderBy(c => c.id_movimento_posicao);
-                    comboMovimentosPosicao.Add(new SelectListItem { Value = "-1", Text = "Todos" });
-                    foreach (gc_movimentos_posicao itemMovimentosPosicao in listaMovimentosPosicao)
-                    {
-                        comboMovimentosPosicao.Add(new SelectListItem { Value = itemMovimentosPosicao.id_movimento_posicao.ToString(), Text = itemMovimentosPosicao.id_movimento_posicao.ToString() + " - " + itemMovimentosPosicao.posicao.ToString() });
-                    }
-                }
-                finally { }
-                CachePersister.contextoModel.gc_comboGcMovimentosPosicao = comboMovimentosPosicao;
-            }
-            else
-            {
-                List<SelectListItem> ListaMovimentosPosicao = CachePersister.contextoModel.gc_comboGcMovimentosPosicao;
-                CachePersister.contextoModel.gc_comboGcMovimentosPosicao = ListaMovimentosPosicao;
-            }
-            //return CachePersister.contextoModel.gc_comboGcTransportadora;
-            return JsonConvert.DeserializeObject<List<SelectListItem>>(JsonConvert.SerializeObject(CachePersister.contextoModel.gc_comboGcMovimentosPosicao));
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcMovimentosPosicao(db);
         public static List<SelectListItem> LoadComboGcCfopFinalidade(GdiPlataformEntities db)
         {
             // Entregas Prazos
@@ -1497,146 +1010,19 @@ namespace GdiPlataform.Lib
 
 
         public static List<SelectListItem> LoadComboGcEstoqueEnderecoArea(GdiPlataformEntities db, int IdLocalEstoque)
-        {
-            EnsureContextoModel();
-            var comboEstoqueEnderecoArea = new List<SelectListItem>();
-            try
-            {
-                comboEstoqueEnderecoArea.Add(new SelectListItem { Value = "0", Text = "[ Área ]" });
-                IQueryable<gc_estoque_endereco_area> listaDb = IdLocalEstoque == 0
-                    ? db.gc_estoque_endereco_area.Where(p => p.ativo == true).OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_area)
-                    : db.gc_estoque_endereco_area.Where(p => p.ativo == true && p.id_local_estoque == IdLocalEstoque).OrderBy(p => p.id_estoque_area);
-                foreach (gc_estoque_endereco_area item in listaDb)
-                {
-                    comboEstoqueEnderecoArea.Add(new SelectListItem { Value = item.id_estoque_area.ToString(), Text = item.nome.ToString() });
-                }
-            }
-            finally { }
-            return CloneSelectList(comboEstoqueEnderecoArea);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcEstoqueEnderecoArea(db, IdLocalEstoque);
 
         public static List<SelectListItem> LoadComboGcEstoqueEnderecoSecao(GdiPlataformEntities db, int IdLocalEstoque)
-        {
-            EnsureContextoModel();
-            var comboEstoqueEnderecoSecao = new List<SelectListItem>();
-            try
-            {
-                comboEstoqueEnderecoSecao.Add(new SelectListItem { Value = "0", Text = "[ Seção ]" });
-                IQueryable<gc_estoque_endereco_secao> listaDb = IdLocalEstoque == 0
-                    ? db.gc_estoque_endereco_secao.Where(p => p.ativo == true).OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_secao)
-                    : db.gc_estoque_endereco_secao.Where(p => p.ativo == true && p.id_local_estoque == IdLocalEstoque).OrderBy(p => p.id_estoque_secao);
-                foreach (gc_estoque_endereco_secao item in listaDb)
-                {
-                    comboEstoqueEnderecoSecao.Add(new SelectListItem { Value = item.id_estoque_secao.ToString(), Text = item.nome.ToString() });
-                }
-            }
-            finally { }
-            return CloneSelectList(comboEstoqueEnderecoSecao);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcEstoqueEnderecoSecao(db, IdLocalEstoque);
 
         public static List<SelectListItem> LoadComboGcEstoqueEnderecoCorredor(GdiPlataformEntities db, int IdLocalEstoque)
-        {
-            EnsureContextoModel();
-            var comboEstoqueEnderecoCorredor = new List<SelectListItem>();
-            try
-            {
-                comboEstoqueEnderecoCorredor.Add(new SelectListItem { Value = "0", Text = "[ Corredor ]" });
-                IQueryable<gc_estoque_endereco_corredor> listaDb = IdLocalEstoque == 0
-                    ? db.gc_estoque_endereco_corredor.Where(p => p.ativo == true).OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_corredor)
-                    : db.gc_estoque_endereco_corredor.Where(p => p.ativo == true && p.id_local_estoque == IdLocalEstoque).OrderBy(p => p.id_estoque_corredor);
-                foreach (gc_estoque_endereco_corredor item in listaDb)
-                {
-                    comboEstoqueEnderecoCorredor.Add(new SelectListItem { Value = item.id_estoque_corredor.ToString(), Text = item.nome.ToString() });
-                }
-            }
-            finally { }
-            return CloneSelectList(comboEstoqueEnderecoCorredor);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcEstoqueEnderecoCorredor(db, IdLocalEstoque);
 
         public static List<SelectListItem> LoadComboGcEstoqueEnderecoPrateleira(GdiPlataformEntities db, int IdLocalEstoque)
-        {
-            EnsureContextoModel();
-            var comboEstoqueEnderecoPrateleira = new List<SelectListItem>();
-            try
-            {
-                comboEstoqueEnderecoPrateleira.Add(new SelectListItem { Value = "0", Text = "[ Prateleira ]" });
-                IQueryable<gc_estoque_endereco_prateleira> listaDb = IdLocalEstoque == 0
-                    ? db.gc_estoque_endereco_prateleira.Where(p => p.ativo == true).OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_prateleira)
-                    : db.gc_estoque_endereco_prateleira.Where(p => p.ativo == true && p.id_local_estoque == IdLocalEstoque).OrderBy(p => p.id_estoque_prateleira);
-                foreach (gc_estoque_endereco_prateleira item in listaDb)
-                {
-                    comboEstoqueEnderecoPrateleira.Add(new SelectListItem { Value = item.id_estoque_prateleira.ToString(), Text = item.nome.ToString() });
-                }
-            }
-            finally { }
-            return CloneSelectList(comboEstoqueEnderecoPrateleira);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGcEstoqueEnderecoPrateleira(db, IdLocalEstoque);
 
         public static List<SelectListItem> LoadComboGedArquivosTipos(GdiPlataformEntities db, int IdTipo, int IdTipoPai)
-        {
-            EnsureContextoModel();
-            List<ged_arquivos_tipos> ListaGedTiposAll = new List<ged_arquivos_tipos>();
-
-            if (IdTipo <=0 && IdTipoPai <= 0) { ListaGedTiposAll = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).OrderBy(t => t.descricao).ToList(); }
-            else 
-            {
-                if (IdTipo > 0) { ListaGedTiposAll = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo == IdTipo).OrderBy(t => t.descricao).ToList(); }
-                else if (IdTipoPai > 0) { ListaGedTiposAll = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == IdTipoPai).OrderBy(t => t.descricao).ToList(); }
-            }
-
-            var ComboGedTipos = new List<SelectListItem>();
-            try
-            {
-                if (IdTipo <= 0) // Não passou um tipo especifico
-                { 
-                    ComboGedTipos.Add(new SelectListItem { Value = "0", Text = "[ Selecione o Tipo ]" });
-                    var ListaGedTiposN1 = ListaGedTiposAll.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == IdTipoPai).OrderBy(t => t.descricao).ToList();
-                    foreach (var ItemGedTipoN1 in ListaGedTiposN1)
-                    {
-                        if (ItemGedTipoN1.id_tipo_pai == IdTipoPai)
-                        {
-                            if (ItemGedTipoN1.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN1.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN1.descricao.EmptyIfNull().ToString() }); }
-                            ;
-                            var ListaGedTiposN2 = ListaGedTiposAll.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == ItemGedTipoN1.id_arquivo_tipo).OrderBy(t => t.descricao).ToList();
-                            foreach (var ItemGedTipoN2 in ListaGedTiposN2)
-                            {
-                                //if (ItemGedTipoN2.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN2.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN1.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN2.descricao.EmptyIfNull().ToString() }); };
-                                if (ItemGedTipoN2.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN2.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN2.descricao.EmptyIfNull().ToString() }); }
-                                var ListaGedTiposN3 = ListaGedTiposAll.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == ItemGedTipoN2.id_arquivo_tipo).OrderBy(t => t.descricao).ToList();
-                                foreach (var ItemGedTipoN3 in ListaGedTiposN3)
-                                {
-                                    //if (ItemGedTipoN3.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN3.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN1.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN2.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN3.descricao.EmptyIfNull().ToString() }); };
-                                    if (ItemGedTipoN3.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN3.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN3.descricao.EmptyIfNull().ToString() }); };
-                                    var ListaGedTiposN4 = ListaGedTiposAll.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == ItemGedTipoN3.id_arquivo_tipo).OrderBy(t => t.descricao).ToList();
-                                    foreach (var ItemGedTipoN4 in ListaGedTiposN4)
-                                    {
-
-                                        //if (ItemGedTipoN4.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN4.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN1.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN2.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN3.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN4.descricao.EmptyIfNull().ToString() }); };
-                                        if (ItemGedTipoN4.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN4.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN4.descricao.EmptyIfNull().ToString() }); };
-                                        var ListaGedTiposN5 = ListaGedTiposAll.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == ItemGedTipoN4.id_arquivo_tipo).OrderBy(t => t.descricao).ToList();
-                                        foreach (var ItemGedTipoN5 in ListaGedTiposN5)
-                                        {
-                                            //if (ItemGedTipoN5.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN5.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN1.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN2.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN3.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN4.descricao.EmptyIfNull().ToString() + "  ->  " + ItemGedTipoN5.descricao.EmptyIfNull().ToString() }); };
-                                            if (ItemGedTipoN5.ativo == true) { ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN5.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN5.descricao.EmptyIfNull().ToString() }); };
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else 
-                {
-                    var ListaGedTiposN1 = ListaGedTiposAll.Where(t => t.id_arquivo_tipo == IdTipo).OrderBy(t => t.descricao).ToList();
-                    foreach (var ItemGedTipoN1 in ListaGedTiposN1)
-                    {
-                        ComboGedTipos.Add(new SelectListItem { Value = ItemGedTipoN1.id_arquivo_tipo.ToString(), Text = "  -  " + ItemGedTipoN1.descricao.EmptyIfNull().ToString() });
-                    }
-                };
-            }
-            finally { }
-            return CloneSelectList(ComboGedTipos);
-        }
+            => LookupQueryServiceAccessor.Current.GetComboGedArquivosTipos(db, IdTipo, IdTipoPai);
 
         public static List<SelectListItem> LoadComboGClassificacaoFinanceira(GdiPlataformEntities db)
         {

@@ -837,6 +837,10 @@ namespace GdiPlataform.Lib
             {
                 TableUpdate = true; // Forçar a atualizar o cache
             }
+            if (TableUpdate)
+            {
+                GdiPlataform.Lib.Lookups.LookupCacheInvalidator.OnTableUpdated(DataTableName);
+            }
             return TableUpdate;
         }
     }

@@ -1,3 +1,4 @@
+using GDI_ERP_Plataform.App_Start;
 using GdiPlataform.Lib;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace GDI_ERP_Plataform
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            LookupDependencyConfig.Register();
         }
 
         protected void Application_Error()
