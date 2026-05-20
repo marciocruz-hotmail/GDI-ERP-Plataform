@@ -53,9 +53,11 @@ Atributos no `<select>`:
 
 **Mantidos:** Index/filtros, `ModalConsultaPedidos`, demais modais; `GetDatasetGcProdutosServicos` em actions server que já consultam por id.
 
-## Perfil vendedor (1.6.5 smoke)
+## Filtro de clientes (pedido vs demais)
 
-`LookupSearchQueries.SearchClientes` filtra por `IdVendedor` quando o utilizador não tem role `gc_Movimentos_*` / Admin — alinhado à regra de vendedor do cliente.
+- **Typeahead pedido** (`SearchClientes` / `GetClientesLookup`): `g_clientes` com `ativo = true` e `is_cliente = true`; **sem** filtro por vendedor/perfil do utilizador.
+- **Combos gerais** (`GetComboGClientesFornecedores`): todos os registros com `ativo = true` (clientes e fornecedores).
+- **Combos de pedido** (`GetComboSomenteGClientes`): `ativo = true` e `is_cliente = true`.
 
 ## Ficheiros
 

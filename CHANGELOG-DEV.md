@@ -4,7 +4,7 @@
 > **Histórico integral (187 entradas, ~2900 linhas):** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`  
 > **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md`
 
-**Última atualização:** 2026-05-20 (notificar cliente email/WhatsApp)
+**Última atualização:** 2026-05-20 (lookup clientes sem filtro vendedor)
 
 ---
 
@@ -62,6 +62,12 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-20 — Lookup clientes/fornecedores (sem filtro vendedor)
+
+- `LookupSearchQueries.SearchClientes`: removido filtro por `IdVendedor`/perfil; mantém `ativo` + `is_cliente` (typeahead pedido).
+- `ClientesController` índice: combo lookup lista todos `g_clientes` com `ativo = true`.
+- Demais combos via `GetComboGClientesFornecedores` já consideram todos ativos; pedidos usam `GetComboSomenteGClientes` (`is_cliente`).
 
 ### 2026-05-20 — Notificar Cliente (pedido faturado)
 

@@ -70,13 +70,7 @@ namespace GdiPlataform.Areas.g.Controllers
             var comboClientes = new List<SelectListItem>();
             try
             {
-                IQueryable<g_clientes> listaDbClientes = db.g_clientes.Where(p => p.ativo == true);
-                if (CachePersister.userIdentity.IdPerfil == -800)
-                {
-                    int idVendedor = CachePersister.userIdentity.IdVendedor;
-                    listaDbClientes = listaDbClientes.Where(p => p.id_vendedor == idVendedor);
-                }
-                listaDbClientes = listaDbClientes.OrderBy(p => p.nome);
+                IQueryable<g_clientes> listaDbClientes = db.g_clientes.Where(p => p.ativo == true).OrderBy(p => p.nome);
                 comboClientes.Add(new SelectListItem { Value = "0", Text = "[ SELECIONE O CLIENTE ]" });
                 foreach (g_clientes item in listaDbClientes)
                 {

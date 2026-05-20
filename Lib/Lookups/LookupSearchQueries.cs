@@ -28,8 +28,8 @@ namespace GdiPlataform.Lib.Lookups
             if (term.Length < 2)
                 return new List<LookupAjaxItemDto>();
 
+            // Pedidos: apenas cadastros ativos marcados como cliente (sem filtro por vendedor/perfil).
             var query = db.g_clientes.AsNoTracking().Where(c => c.ativo && c.is_cliente);
-            query = ApplyFiltroVendedorClientes(query);
 
             int idParsed;
             if (int.TryParse(term, out idParsed) && idParsed > 0)
@@ -158,23 +158,6 @@ namespace GdiPlataform.Lib.Lookups
         {
             if (limit <= 0) return DefaultLimit;
             return Math.Min(limit, MaxLimit);
-        }
-
-        private static IQueryable<g_clientes> ApplyFiltroVendedorClientes(IQueryable<g_clientes> query)
-        {
-            var ui = CachePersister.userIdentity;
-            if (ui == null) return query;
-            bool acessoFull = ui.Roles.Contains("SuperAdmin")
-                || ui.Roles.Contains("Admin")
-                || ui.Roles.Contains("gc_Movimentos_*");
-            if (acessoFull || ui.IdVendedor <= 0)
-                return query;
-
-            int idVen = ui.IdVendedor;
-            return query.Where(c =>
-                c.id_vendedor == idVen
-                || c.id_vendedor2 == idVen
-                || c.id_vendedor3 == idVen);
         }
 
         private static string FormatClienteText(string nome, string cpf, string cnpj, int idCliente, int displayWidth)
