@@ -53,9 +53,10 @@ alwaysApply: true
 ## 2. Ordem de leitura antes de agir
 
 1. **`.cursor/CHANGELOG-DEV.md`** — obrigatório em toda sessão com alteração ou análise relevante. Contém decisões, fases (ex.: DataTables/Ajax), armadilhas e ficheiros críticos. Não contradizer o que está registado sem justificativa explícita no próprio changelog ou na resposta. Se o ficheiro **não existir**, **criá-lo** na primeira intervenção significativa e manter entradas objetivas.
-2. **`.cursor/context/`** — quando a alteração tocar a área documentada (ex.: `migracao-472-481.md` para `Robos/`, `Web.config`, NuGet, TLS, `ComexImportacoesController.cs`).
+2. **`.cursor/context/`** — quando a alteração tocar a área documentada (ex.: `tabelas-datatables-vs-mvc.md` para UI com `<table>`; `migracao-472-481.md` para `Robos/`, `Web.config`, NuGet, TLS).
 3. **`CLAUDE.md`** (raiz) — padrões longos já consolidados (helpers `GdiDt*` / `GdiAjax*`, fases de migração de mensagens, ficheiros sensíveis). Usar como complemento; evitar duplicar aqui listas extensas que já lá estão.
-4. **Manutenção do `CLAUDE.md`:** este `.mdc` é a regra **Cursor**; o `CLAUDE.md` é memória longa e índice de padrões **deste** repositório. Registar decisões estáveis durante as sessões (no Cursor: editar diretamente; no Claude Code: fluxo `#` já descrito no próprio `CLAUDE.md`). Manter entradas **objetivas** e **específicas do ERP**. Para intervenções pontuais, preferir primeiro o **CHANGELOG-DEV**; usar o `CLAUDE.md` para padrões que devam sobreviver várias sessões.
+4. **Tabelas na UI (dois tipos):** antes de corrigir layout, CSS ou JS de `<table>`, ler **`.cursor/context/tabelas-datatables-vs-mvc.md`** — distinguir **DataTables** (`display`, `GetDados*`, `GdiDt*`) de **tabelas MVC** (`@for`, `gdi-form-table-*`). Não misturar padrões entre tipos.
+5. **Manutenção do `CLAUDE.md`:** este `.mdc` é a regra **Cursor**; o `CLAUDE.md` é memória longa e índice de padrões **deste** repositório. Registar decisões estáveis durante as sessões (no Cursor: editar diretamente; no Claude Code: fluxo `#` já descrito no próprio `CLAUDE.md`). Manter entradas **objetivas** e **específicas do ERP**. Para intervenções pontuais, preferir primeiro o **CHANGELOG-DEV**; usar o `CLAUDE.md` para padrões que devam sobreviver várias sessões.
 
 *Perfis de publish e pastas de artefactos **são os deste** repositório (ex.: `Properties/PublishProfiles/`). Não presumir nomes de outro produto salvo existirem **aqui** com o mesmo propósito.*
 
@@ -145,6 +146,7 @@ Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **
 
 ## 7. Lembranças técnicas curtas
 
+- **Tabelas:** dois tipos no ERP — **DataTables** (listagens Ajax) e **MVC** (formulário no servidor); ver `.cursor/context/tabelas-datatables-vs-mvc.md` em qualquer intervenção com grelha/tabela.
 - Razor: respeitar `@Html.*`, `@Url.*`, `@model`, `@ViewBag`.
 - UI: preferir padrões AdminLTE 4 do projeto; DataTables e Ajax seguir exemplos existentes e helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (detalhe em `CLAUDE.md`).
 - Evitar `alert()` / `confirm()` nativos onde o projeto usa SweetAlert2 / `LibMessage*`.
@@ -154,6 +156,7 @@ Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **
 
 ## 8. O que esta regra não substitui
 
+- Checklist e padrões **DataTables vs MVC** — **`.cursor/context/tabelas-datatables-vs-mvc.md`** (resumo também em **`CLAUDE.md`**).
 - Detalhe fino de contratos JSON DataTables, listas de controllers por fase e scripts Python de verificação — manter em **`CLAUDE.md`** e **`CHANGELOG-DEV.md`**.
 - Documentação de migração 4.7.2→4.8.1 — **`.cursor/context/`**.
 - **Portal do cliente:** o comportamento e rotas estão no **código** (`UserIdentity`, `Areas/crm`, templates de e-mail); não existe ficheiro de regras Cursor noutro repositório para consultar.

@@ -57,6 +57,17 @@ Nunca contradiga decisões registradas nele sem justificativa explícita.
 
 > Atualize esta seção usando # durante as sessões conforme padrões forem identificados.
 
+### Dois tipos de tabela no ERP (obrigatório em UI)
+
+Toda **investigação, correção ou alteração** que envolva `<table>` deve começar por classificar o tipo. Detalhe: **`.cursor/context/tabelas-datatables-vs-mvc.md`**.
+
+| Tipo | Uso típico | Como reconhecer na view | CSS / JS |
+|------|------------|-------------------------|----------|
+| **DataTables** | Listagens, modais, abas com grelha Ajax | `table.display`, `id="dt..."` / `dataTable...`, `tbody` vazio, init DataTables | `scroll-body-horizontal`, `max-content`, `GdiDt*`, actions `GetDados*` |
+| **MVC (formulário)** | Processamento em lote, `@for` + post do form | Sem `display`; `EditorFor` / `DropDownListFor` / `HiddenFor` no servidor | `gdi-form-table-scroll`, `gdi-form-table-fixed`, **não** contrato `GetDados` |
+
+**Armadilha:** aplicar regras de DataTables (ex. `scroll-body-horizontal` + `width: max-content`) a tabelas MVC corta a primeira coluna. Inventários: `Scripts/gdi_inventory_scroll_body_form_tables.py` (MVC), `Scripts/gdi_inventory_datatables_g_area.py` (DataTables).
+
 ### Mensagens UX — DataTables e Ajax (SweetAlert2 / `LibMessage*`)
 
 Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregado por `Views/Shared/_Layout.cshtml` **após** `~/bundles/libui-swal-compat`):
@@ -108,6 +119,7 @@ Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregad
 
 > Atualize esta seção usando # durante as sessões conforme decisões forem consolidadas.
 
+- **Dois tipos de tabela (2026):** **DataTables** (listagens Ajax) e **tabelas MVC** (formulário server-side) — regras de layout, CSS e contrato de dados **não são intercambiáveis**; ver `.cursor/context/tabelas-datatables-vs-mvc.md`.
 - **Migração mensagens DataTables + Ajax (2026):** padronização progressiva — Fases **0–16** (helpers `GdiDt*`/`GdiAjax*`, `error.dt`/`xhr.dt`, servidor `errorMessage`/`stackTrace`/`yesFilterOnOff`, documentação + `gdi_verify_csproj_gdi_helpers.py` + `gdi_inventory_datatables_g_area.py`, `alert`→`LibMessageError`, **Fases 8–12** em `gc`, **Fases 13–16** em **`Areas/g`**); detalhe no `.cursor/CHANGELOG-DEV.md`.
 - **APIs Ajax não-DataTables** com `{ ok, error }` (ex.: evidências LMS) mantêm contrato próprio — **não** forçar `errorMessage` sem revisão funcional.
 
@@ -117,6 +129,7 @@ Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregad
 
 > Atualize esta seção usando # durante as sessões conforme problemas recorrentes forem identificados.
 
+- **Confundir DataTables com tabela MVC:** alterações globais em `start.css` (`.scroll-body-horizontal`, `max-content`) ou remoção de wrappers sem distinguir o tipo — validar com o checklist em `.cursor/context/tabelas-datatables-vs-mvc.md`.
 - **Publish Web:** pasta obsoleta em `obj\...\PackageTmp\...\bootbox-compat` pode ficar só leitura e gerar aviso ao publicar — ver também `.cursor/CHANGELOG-DEV.md` (entrada sobre `bootbox-compat` / apagar `obj`).
 - **Cache de `start.js`:** o layout usa `?v=VersionERP` (ou `ViewBag.Version` no login). Sem **incremento** da versão após mudanças em `start.js`, browsers podem manter ficheiro antigo.
 - **Views novas:** `.cshtml` com `GdiAjax*` / `GdiDt*` **fora** do `<Content Include>` do `.csproj` — correr `Scripts/gdi_verify_csproj_gdi_helpers.py` antes do publish.

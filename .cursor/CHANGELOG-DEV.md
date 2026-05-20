@@ -10,6 +10,27 @@
 # - Não apague entradas antigas; elas são memória do projeto
 
 ---
+### [2026-05-20] — Memória do projeto: dois tipos de tabela (DataTables vs MVC)
+**Tipo:** Documentação | Decisão de arquitetura
+**Arquivos tocados:**
+- `.cursor/context/tabelas-datatables-vs-mvc.md` (novo)
+- `CLAUDE.md` — secção «Dois tipos de tabela no ERP»
+- `.cursor/rules/gdi-erp-plataform.mdc` — §2.1 e lembrança §7
+
+**Problema / Demanda:**
+Registrar permanentemente que o ERP usa **duas** famílias de tabelas; investigações e correções devem distinguir o tipo antes de alterar CSS/JS/views.
+
+**O que foi feito:**
+Documento de contexto com checklist, padrões de markup/wrapper/CSS/JS e scripts de inventário por tipo. Regra Cursor e `CLAUDE.md` referenciam o ficheiro. **Obrigatório** em intervenções com `<table>`: identificar DataTables (`display`, `GetDados*`, `GdiDt*`) vs MVC (`@for`, `gdi-form-table-*`).
+
+**Decisões técnicas relevantes:**
+- DataTables: manter `scroll-body-horizontal` + `max-content` onde aplicável.
+- MVC formulário: `gdi-form-table-scroll` / `gdi-form-table-fixed`; não misturar contrato Ajax da grelha.
+
+**Atenção para próximas intervenções:**
+Consultar `.cursor/context/tabelas-datatables-vs-mvc.md` antes de tocar em `start.css` / `start.js` / wrappers de tabela.
+
+---
 ### [2026-05-20] — Tabelas MVC: scroll-body-horizontal (max-content) — inventário e correção em lote
 **Tipo:** Correção | Análise
 **Arquivos tocados:**
