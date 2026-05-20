@@ -290,8 +290,12 @@ namespace GdiPlataform.Areas.gc.Controllers
                     FechamentoTotalDespesasDesembaracoReais += view_gc_comex_importacoes.despesas_despachante;
                     FechamentoTotalDespesasDesembaracoReais += view_gc_comex_importacoes.despesas_taxa_expediente_santos;
                     FechamentoTotalDespesasDesembaracoReais += view_gc_comex_importacoes.despesas_taxa_capatazia;
-                    view_gc_comex_importacoes.total_custo = view_gc_comex_importacoes.despesas_fob_ajustado + (FechamentoTotalDespesasDesembaracoReais / view_gc_comex_importacoes.di_cambio);
-                    view_gc_comex_importacoes.percentual_custo_fob = ((view_gc_comex_importacoes.total_custo * 100) / view_gc_comex_importacoes.despesas_fob_ajustado);
+                    if ((view_gc_comex_importacoes.despesas_fob_ajustado > 0) && (FechamentoTotalDespesasDesembaracoReais > 0) && (view_gc_comex_importacoes.di_cambio > 0))
+                        { view_gc_comex_importacoes.total_custo = view_gc_comex_importacoes.despesas_fob_ajustado + (FechamentoTotalDespesasDesembaracoReais / view_gc_comex_importacoes.di_cambio); }
+                        else { view_gc_comex_importacoes.total_custo = 0; }
+                    if ((view_gc_comex_importacoes.total_custo > 0) && (view_gc_comex_importacoes.despesas_fob_ajustado > 0))
+                        { view_gc_comex_importacoes.percentual_custo_fob = ((view_gc_comex_importacoes.total_custo * 100) / view_gc_comex_importacoes.despesas_fob_ajustado); }
+                        else { view_gc_comex_importacoes.percentual_custo_fob = 0; };
                 }
 
                 view_gc_comex_importacoes.datahora_alteracao = DataHoraAtual;

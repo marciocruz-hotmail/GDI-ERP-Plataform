@@ -1,4 +1,4 @@
-﻿using GdiPlataform.Lib;
+using GdiPlataform.Lib;
 using System;
 using System.Web;
 using System.Web.Mvc;

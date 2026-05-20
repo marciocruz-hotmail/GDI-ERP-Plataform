@@ -10,6 +10,124 @@
 # - Não apague entradas antigas; elas são memória do projeto
 
 ---
+### [2026-05-20] — LibDataSets: documento diagnostico completo e plano (Fases 0–5)
+**Tipo:** Análise | Documentação
+**Arquivos tocados:**
+- `.cursor/context/libdatasets-diagnostico-e-plano.md` (novo)
+- `.cursor/context/lookups-libdatasets.md` — link para o documento acima
+
+**Problema / Demanda:**
+Consolidar em ficheiro MD o diagnostico de arquitetura, riscos, boas praticas Microsoft e plano de modernizacao (ja executado parcialmente nas Fases 0/1).
+
+**O que foi feito:**
+Criado documento unico com fluxo, inicializacao, consumo por controllers, problemas, Fases 0–5 com criterios de aceite e validacao manual; referencia cruzada ao inventario metodo a metodo.
+
+---
+### [2026-05-20] — LibDataSets Fase 0/1: inventario lookups + cache parametrico
+**Tipo:** Análise | Correção
+**Arquivos tocados:**
+- `.cursor/context/lookups-libdatasets.md` (novo)
+- `Scripts/gdi_inventory_libdatasets.py` (novo)
+- `Lib/LibDataSets.cs` — 9 metodos parametricos, `EnsureContextoModel`, `CloneSelectList`
+
+**Problema:**
+Combos/datasets com parametros (IdCliente, IdLocalEstoque, IdTipo) reutilizavam uma unica propriedade em `contextoModel`, devolvendo dados do ultimo filtro.
+
+**Solucao:**
+Fase 0: inventario 67 metodos. Fase 1: consulta sempre alinhada ao parametro; sem gravar em cache global nos metodos listados; copia defensiva sem JSON clone nesses fluxos.
+
+**Atenção:**
+Combos globais (clientes, produtos) mantem cache legado; Fase 2+ prevê chaves compostas ou servico de lookup.
+
+---
+### [2026-05-20] — Encoding: conversão em lote UTF-8 sem BOM (146 ficheiros)
+**Tipo:** Implementação / Padronização
+**Arquivos tocados:**
+- `Scripts/gdi_utf8_no_bom_areas.py --project` (146 ficheiros regravados)
+- Principalmente `Areas/**/*.cshtml` (139), `Web.config`, `Web.Release.config`, `GDI-ERP-Plataform.csproj`, `ControlVersion.cs`, `Lib/LibIcons.cs`, `Models/UserIdentity.cs`, `LibUI_.../start.js`, `Views/Error/*.cshtml`
+
+**Problema / Demanda:**
+Auditoria indicou 146 ficheiros ainda com UTF-8 BOM (14,7% de 990 ficheiros de texto).
+
+**O que foi feito:**
+Executado `python Scripts/gdi_utf8_no_bom_areas.py --project`. Removido BOM (`utf-8-sig` → UTF-8 sem BOM). Re-scan pós-conversão: 990 ficheiros de texto, 100% `utf-8-no-bom`; zero BOM/UTF-16/CP1252 nas extensões analisadas.
+
+**Atenção para próximas intervenções:**
+Novos `.cshtml`/`.cs` salvos pelo VS com BOM — repetir scan ou configurar editor para UTF-8 sem BOM.
+
+---
+### [2026-05-20] — Auditoria filtro inline Index: gc/FinanceiroParametroDifal (id > 1 na base)
+**Tipo:** Correção | Análise
+**Arquivos tocados:**
+- `Areas/gc/Controllers/FinanceiroParametroDifalController.cs`
+
+**Problema / Demanda:**
+Varredura nas demais views com filtro inline (padrão Clientes/Perfis).
+
+**Causa raiz (único outro caso igual a Perfis):**
+`id_parametro_difal > 1` na base + filtro `id_parametro_difal = @id` impedia retorno do registro id 1.
+
+**O que foi feito:**
+Mesmo padrão Perfis: sem `> 1` quando há Id. explícito; `TryParseIdParametroDifalFiltro`; persistência de sigla normalizada. Demais Index com `AplicarFiltro*` usam `id > 0` — OK. Lookups com valor `0` ignorados no servidor (Atendimentos, ComexFinanceiro) ou corrigidos (Clientes).
+
+**Atenção:**
+`g/Financeiro/Index` exige quatro campos preenchidos (legado) — fora do padrão inline Id./Nome; não alterado.
+
+---
+### [2026-05-20] — g/Perfis Index: filtro por Id. sem resultado (base `id_perfil > 1` vs id explícito)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Controllers/PerfisController.cs` — `GetDados`, `AplicarFiltroPerfisNaQuery`, `TryParseIdPerfilFiltro`
+
+**Problema / Demanda:**
+Mesma situação de Clientes: Id. válido + Pesquisar não retornava linhas.
+
+**Causa raiz:**
+`baseQuery` fixava `id_perfil > 1` antes do filtro. Id. 1 (admin/sistema) ou negativos (ex. -800) com `c.id_perfil = @id` geravam interseção vazia.
+
+**O que foi feito:**
+Com Id. numérico explícito (`TryParseIdPerfilFiltro`), a query não aplica `> 1`; lista geral e Limpar mantêm ocultar id <= 1. Filtro id via helper único; persistência do nome normalizada (`NormalizarTermoBuscaTexto`); `hasInline` com `IsNullOrWhiteSpace`.
+
+**Decisões técnicas relevantes:**
+- Id. = igualdade; Nome = LIKE %termo% (inalterado); sem lookup na tela.
+
+**O que foi evitado e por quê:**
+- Alteração na view — envio Ajax já correto.
+
+**Impactos conhecidos:**
+- Pesquisar Id. 1 ou perfil negativo passa a exibir o registro; Limpar continua listando só `id_perfil > 1`.
+
+**Atenção para próximas intervenções:**
+- Replicar padrão “restrição de listagem vs busca por PK” em outros cadastros com `id > 1` na base.
+
+---
+### [2026-05-20] — g/Clientes Index: filtro por Id. sem resultado (lookup "0" gerava LIKE nome)
+**Tipo:** Correção
+**Arquivos tocados:**
+- `Areas/g/Controllers/ClientesController.cs` — `AplicarFiltroClientesInline`
+
+**Problema / Demanda:**
+Ao informar Id. válido e Pesquisar, a grade não retornava registros.
+
+**Causa raiz:**
+Com o combo Cliente em `[ SELECIONE ]` (`yesCustomField02` = `"0"`), o servidor entrava no ramo `else` do lookup e aplicava `c.nome LIKE '%0%'` em **AND** com `c.id_cliente = @idCliente`, excluindo a maioria dos clientes.
+
+**O que foi feito:**
+Lookup só aplica igualdade quando valor numérico `> 0` e diferente de `"0"`; removido LIKE em `nome` a partir do valor do combo. Id. exige `> 0`. CPF/CNPJ e razão legada (LIKE) inalterados no contrato.
+
+**Decisões técnicas relevantes:**
+- Combo lookup = id exato (não texto livre); strings LIKE apenas em `razaoLegado` persistido.
+
+**O que foi evitado e por quê:**
+- Alteração na view/JS — critérios já enviados corretamente; bug só no SQL montado no servidor.
+
+**Impactos conhecidos:**
+- Pesquisa só por Id. + lookup vazio volta a funcionar; múltiplos critérios continuam em AND.
+
+**Atenção para próximas intervenções:**
+- Perfis não-Admin ainda restringem `id_coligada`/`id_filial` (e vendedor em -800); cliente fora do escopo do perfil pode não aparecer mesmo com Id. correto.
+
+---
 
 ## CONTEXTO GERAL DO PROJETO
 

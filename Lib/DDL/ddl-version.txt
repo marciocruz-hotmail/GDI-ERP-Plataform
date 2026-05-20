@@ -1,4 +1,4 @@
-﻿DROP TABLE [dbo].[gc_comex_importacoes_BACKUP_20260429];
+DROP TABLE [dbo].[gc_comex_importacoes_BACKUP_20260429];
 
 -- ============================================================
 -- SCRIPT DE MIGRAÇÃO ESTRUTURAL - gc_movimentos

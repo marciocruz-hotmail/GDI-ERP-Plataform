@@ -70,17 +70,16 @@ namespace GdiPlataform.Areas.gc.Controllers
                     recordFiltro = ObterFiltroPersistidoUsuario();
                 }
 
-                var baseQuery = db.gc_parametros_difal.AsNoTracking().Where(c => c.id_parametro_difal > 1);
-                int totalRecords = baseQuery.Count();
+                int totalRecords = db.gc_parametros_difal.AsNoTracking().Where(c => c.id_parametro_difal > 1).Count();
 
                 string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
                 string siglaStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
-                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(siglaStr);
+                bool hasInline = !String.IsNullOrWhiteSpace(idStr) || !String.IsNullOrWhiteSpace(siglaStr);
 
                 if (!hasInline && !listarTodosExplicito)
                 {
                     TryParseFiltroDifalSemicolon(recordFiltro.sql_filtro, out idStr, out siglaStr);
-                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(siglaStr);
+                    hasInline = !String.IsNullOrWhiteSpace(idStr) || !String.IsNullOrWhiteSpace(siglaStr);
                 }
 
                 if (!listarTodosExplicito && !hasInline)
@@ -97,12 +96,21 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }, JsonRequestBehavior.AllowGet);
                 }
 
-                IQueryable<Db.gc_parametros_difal> query = baseQuery;
+                bool temFiltroIdExplicito = TryParseIdParametroDifalFiltro(idStr, out _);
+                IQueryable<Db.gc_parametros_difal> query = db.gc_parametros_difal.AsNoTracking();
+                if (!temFiltroIdExplicito)
+                {
+                    query = query.Where(c => c.id_parametro_difal > 1);
+                }
                 if (hasInline && !listarTodosExplicito)
                 {
                     filterApplied = true;
                     query = AplicarFiltroDifalNaQuery(query, idStr, siglaStr);
-                    LibDB.setFilterByUser(MontarFiltroDifalPersistido(idStr, siglaStr), controllerName, true, db);
+                    LibDB.setFilterByUser(
+                        MontarFiltroDifalPersistido(idStr, LibStringFormat.NormalizarTermoBuscaCodigo(siglaStr)),
+                        controllerName,
+                        true,
+                        db);
                 }
 
                 int totalDisplayRecords = query.Count();
@@ -184,9 +192,17 @@ namespace GdiPlataform.Areas.gc.Controllers
             return (id ?? String.Empty) + ";" + (sigla ?? String.Empty);
         }
 
+        private static bool TryParseIdParametroDifalFiltro(string idStr, out int idParametro)
+        {
+            idParametro = 0;
+            if (String.IsNullOrWhiteSpace(idStr) || idStr == "0") return false;
+            return int.TryParse(idStr.Trim(), out idParametro) && idParametro != 0;
+        }
+
+        /// <summary>Id. = igualdade; sigla = LIKE %termo% (código normalizado).</summary>
         private static IQueryable<Db.gc_parametros_difal> AplicarFiltroDifalNaQuery(IQueryable<Db.gc_parametros_difal> query, string idStr, string siglaStr)
         {
-            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idParametro))
+            if (TryParseIdParametroDifalFiltro(idStr, out int idParametro))
             {
                 query = query.Where(c => c.id_parametro_difal == idParametro);
             }

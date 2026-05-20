@@ -1,4 +1,4 @@
-﻿// Migrado em 2020_07_15
+// Migrado em 2020_07_15
 
 using System;
 using System.Collections.Generic;

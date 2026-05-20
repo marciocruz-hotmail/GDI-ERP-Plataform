@@ -566,6 +566,10 @@ namespace GdiPlataform.Areas.g.Controllers
             return new string(valor.Where(char.IsDigit).ToArray());
         }
 
+        /// <summary>
+        /// Filtro inline: numérico/lookup = igualdade; documento = dígitos exatos; texto (razão legada) = LIKE %termo%.
+        /// Lookup vazio no combo é valor "0" — não deve gerar critério adicional.
+        /// </summary>
         private static void AplicarFiltroClientesInline(
             List<string> whereParts,
             Dictionary<string, object> args,
@@ -575,29 +579,15 @@ namespace GdiPlataform.Areas.g.Controllers
             string cnpjStr,
             string razaoLegado)
         {
-            if (!String.IsNullOrWhiteSpace(idStr) && idStr != "0" && int.TryParse(idStr, out int idCli))
+            if (!String.IsNullOrWhiteSpace(idStr) && idStr != "0" && int.TryParse(idStr, out int idCli) && idCli > 0)
             {
                 whereParts.Add("c.id_cliente = @idCliente");
                 args["@idCliente"] = idCli;
             }
-            if (!String.IsNullOrWhiteSpace(idLookupStr) && idLookupStr != "0" && int.TryParse(idLookupStr, out int idLookup))
+            if (!String.IsNullOrWhiteSpace(idLookupStr) && idLookupStr != "0" && int.TryParse(idLookupStr, out int idLookup) && idLookup > 0)
             {
                 whereParts.Add("c.id_cliente = @idClienteLookup");
                 args["@idClienteLookup"] = idLookup;
-            }
-            else if (!String.IsNullOrWhiteSpace(idLookupStr))
-            {
-                int digitos;
-                if (int.TryParse(idLookupStr, out digitos) && digitos > 0)
-                {
-                    whereParts.Add("c.id_cliente = @idClienteLookup");
-                    args["@idClienteLookup"] = digitos;
-                }
-                else if (LibStringFormat.TryMontarPadraoLikeContemTexto(idLookupStr, out string padraoNome))
-                {
-                    whereParts.Add("c.nome LIKE @nome");
-                    args["@nome"] = padraoNome;
-                }
             }
             if (!String.IsNullOrWhiteSpace(razaoLegado)
                 && LibStringFormat.TryMontarPadraoLikeContemTexto(razaoLegado, out string padraoRazao))

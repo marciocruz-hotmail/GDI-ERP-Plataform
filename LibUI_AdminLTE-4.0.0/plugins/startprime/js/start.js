@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Substitui bootstrap-waitingfor (removido): expõe window.waitingDialog para LibMessageProcessando
  * e para cópias antigas de start.js ainda em cache.
  */

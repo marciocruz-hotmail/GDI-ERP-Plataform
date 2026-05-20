@@ -73,17 +73,17 @@ namespace GdiPlataform.Areas.g.Controllers
                     recordFiltro = ObterFiltroPersistidoUsuario();
                 }
 
-                var baseQuery = db.g_perfis.AsNoTracking().Where(p => p.id_perfil > 1);
-                int totalRecords = baseQuery.Count();
+                // Universo da grade (lista geral): oculta perfis de sistema id <= 1; busca por Id. explícito pode retornar qualquer id válido.
+                int totalRecords = db.g_perfis.AsNoTracking().Where(p => p.id_perfil > 1).Count();
 
                 string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
                 string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
-                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+                bool hasInline = !String.IsNullOrWhiteSpace(idStr) || !String.IsNullOrWhiteSpace(nomeStr);
 
                 if (!hasInline && !listarTodosExplicito)
                 {
                     TryParseFiltroPerfisSemicolon(recordFiltro.sql_filtro, out idStr, out nomeStr);
-                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+                    hasInline = !String.IsNullOrWhiteSpace(idStr) || !String.IsNullOrWhiteSpace(nomeStr);
                 }
 
                 if (!listarTodosExplicito && !hasInline)
@@ -100,12 +100,21 @@ namespace GdiPlataform.Areas.g.Controllers
                     }, JsonRequestBehavior.AllowGet);
                 }
 
-                IQueryable<Db.g_perfis> query = baseQuery;
+                bool temFiltroIdExplicito = TryParseIdPerfilFiltro(idStr, out _);
+                IQueryable<Db.g_perfis> query = db.g_perfis.AsNoTracking();
+                if (!temFiltroIdExplicito)
+                {
+                    query = query.Where(p => p.id_perfil > 1);
+                }
                 if (hasInline && !listarTodosExplicito)
                 {
                     filterApplied = true;
                     query = AplicarFiltroPerfisNaQuery(query, idStr, nomeStr);
-                    LibDB.setFilterByUser(MontarFiltroPerfisPersistido(idStr, nomeStr), controllerName, true, db);
+                    LibDB.setFilterByUser(
+                        MontarFiltroPerfisPersistido(idStr, LibStringFormat.NormalizarTermoBuscaTexto(nomeStr)),
+                        controllerName,
+                        true,
+                        db);
                 }
 
                 int totalDisplayRecords = query.Count();
@@ -175,9 +184,18 @@ namespace GdiPlataform.Areas.g.Controllers
             return (id ?? String.Empty) + ";" + (nome ?? String.Empty);
         }
 
+        /// <summary>Id. numérico informado no filtro inline (0 e não numérico = sem critério de id).</summary>
+        private static bool TryParseIdPerfilFiltro(string idStr, out int idPerfil)
+        {
+            idPerfil = 0;
+            if (String.IsNullOrWhiteSpace(idStr) || idStr == "0") return false;
+            return int.TryParse(idStr.Trim(), out idPerfil) && idPerfil != 0;
+        }
+
+        /// <summary>Numérico = igualdade; nome = LIKE %termo% (texto normalizado).</summary>
         private static IQueryable<Db.g_perfis> AplicarFiltroPerfisNaQuery(IQueryable<Db.g_perfis> query, string idStr, string nomeStr)
         {
-            if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idPerfil))
+            if (TryParseIdPerfilFiltro(idStr, out int idPerfil))
             {
                 query = query.Where(p => p.id_perfil == idPerfil);
             }

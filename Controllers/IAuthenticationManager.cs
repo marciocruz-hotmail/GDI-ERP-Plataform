@@ -1,4 +1,4 @@
-﻿namespace GdiPlataform.Controllers
+namespace GdiPlataform.Controllers
 {
     internal interface IAuthenticationManager
     {

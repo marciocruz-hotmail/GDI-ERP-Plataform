@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Wordprocessing;
 using GdiPlataform.Areas.qa.Models;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
