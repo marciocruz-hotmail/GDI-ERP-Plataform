@@ -1954,6 +1954,19 @@ namespace GdiPlataform.Areas.gc.Controllers
                 aaData = new List<string[]>()
             }, JsonRequestBehavior.AllowGet);
         }
+        /// <summary>Próxima sequência para item de pedido (1 no primeiro item; max+1 nos seguintes).</summary>
+        private decimal ObterProximaSequenciaItemPedido(int idMovimento)
+        {
+            if (idMovimento <= 0)
+                return 1;
+            decimal? maxSequencia = db.gc_movimentos_itens
+                .Where(m => m.id_movimento == idMovimento)
+                .Select(m => (decimal?)m.sequencia)
+                .DefaultIfEmpty(0)
+                .Max();
+            return (maxSequencia ?? 0) + 1;
+        }
+
         public ActionResult ModalInserirItem(int? idMovimento, int? IdMoeda, int? IdCliente)
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-dice-d6", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Inserir Novo Item</b>";
@@ -1962,6 +1975,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             record_gc_movimento_item.id_movimento = idMovimento.GetValueOrDefault();
             record_gc_movimento_item.id_movimento_item = -1;
             record_gc_movimento_item.quantidade = 1;
+            record_gc_movimento_item.sequencia = ObterProximaSequenciaItemPedido(record_gc_movimento_item.id_movimento);
             record_gc_movimento_item.tag1_int = IdMoeda.GetValueOrDefault();
             record_gc_movimento_item.id_coligada = IdCliente.GetValueOrDefault();
             PreencherLookupsPedidoItemModal();
@@ -1979,6 +1993,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             record_gc_movimento_item.id_movimento_item = -1;
             record_gc_movimento_item.quantidade = 1;
             record_gc_movimento_item.serial = string.Empty;
+            record_gc_movimento_item.sequencia = ObterProximaSequenciaItemPedido(record_item_original.id_movimento);
             record_gc_movimento_item.tag = true;
             PreencherLookupsPedidoItemModal(record_item_original.id_produto);
             return View("ModalPedidoInsertEditItem", record_gc_movimento_item);
@@ -2030,14 +2045,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     if (view_record_gc_movimento_item.id_movimento_item == -1)
                     {
-                        if (view_record_gc_movimento_item.sequencia == 0)
-                        {
-                            decimal Sequencia = 0;
-                            string _Sequencia = LibDB.dbQueryValue("select max(sequencia) from gc_movimentos_itens m where m.id_movimento = " + record_gc_movimentos_itens.id_movimento.ToString(), db);
-                            decimal.TryParse(_Sequencia, out Sequencia);
-                            Sequencia += 1;
-                            view_record_gc_movimento_item.sequencia = Sequencia;
-                        }
+                        view_record_gc_movimento_item.sequencia = ObterProximaSequenciaItemPedido(view_record_gc_movimento_item.id_movimento);
                         record_gc_movimentos_itens.id_movimento = view_record_gc_movimento_item.id_movimento;
                     }
                     else

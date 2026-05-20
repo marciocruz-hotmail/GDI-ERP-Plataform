@@ -166,7 +166,6 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
-
         #region DownloadZipFile
         public FileResult DownloadZipFile()
         {
@@ -1907,7 +1906,6 @@ namespace GdiPlataform.Areas.g.Controllers
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
         #endregion
-
 
         #region AjaxFinanceiroCancelamento
         [HttpPost]

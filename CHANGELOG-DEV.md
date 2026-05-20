@@ -4,7 +4,7 @@
 > **Histórico integral (187 entradas, ~2900 linhas):** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`  
 > **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md`
 
-**Última atualização:** 2026-05-20
+**Última atualização:** 2026-05-20 (pedido item sequência)
 
 ---
 
@@ -62,6 +62,10 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-20 — Comercial pedidos
+
+- **ModalPedidoInsertEditItem:** sequência incremental corrigida — `max(sequencia)` usava `id_movimento` 0 no insert; novo `ObterProximaSequenciaItemPedido` no modal e no `AjaxInsertEditItem`.
 
 ### 2026-05-20 — Documentação, checklist e higiene
 
