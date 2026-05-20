@@ -44,32 +44,22 @@ namespace GdiPlataform.Areas.g.Controllers
             {
             // Parâmetros
             bool filterDb = false;
-            bool filterAdvanced = false;
             String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, false, db);
             var allRecords = new List<Db.g_assistentes>();
             List<string[]> list = new List<string[]>();
 
-            // Verificação se há algum filtro ativo
             if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
 
-            if ((filterDb == false) && (filterAdvanced == false))
+            if (!filterDb)
             {
-                // Não há filtro
                 allRecords = db.g_assistentes.ToList();
             }
-            if (filterDb)
+            else
             {
-                SentencaSQL = string.Empty;
                 if (record_g_filtro.advanced == true) { SentencaSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
-                else { SentencaSQL = "select a.* from g_assistentes a where " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); };
+                else { SentencaSQL = "select a.* from g_assistentes a where " + record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
                 allRecords = db.g_assistentes.SqlQuery(SentencaSQL).ToList();
-            }
-            else if (filterAdvanced)
-            {
-                // Filtro Avançado - Não implementado
-                allRecords = db.g_assistentes.ToList();
             }
 
 
@@ -105,7 +95,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                 });
             }
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+            if (filterDb) { filterOnOff = "1"; }
 
             return Json(new
             {

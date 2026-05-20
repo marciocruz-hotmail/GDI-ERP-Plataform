@@ -1,0 +1,188 @@
+using System.Collections.Generic;
+using System.Web.Mvc;
+using GdiPlataform.Lib.Lookups;
+
+namespace GdiPlataform.Areas.gc.Controllers
+{
+    /// <summary>Fase 4/6a — lookups centralizados via ILookupQueryService.</summary>
+    public partial class MovimentosController
+    {
+        private ILookupQueryService MovimentosLookups => LookupQueryServiceAccessor.Current;
+
+        #region PreencherLookups — pedidos / movimentos (Fase 4)
+
+        /// <summary>IndexPedido — filtros da listagem.</summary>
+        private void PreencherLookupsIndexPedido()
+        {
+            ViewBag.comboClientes = MovimentosLookups.GetComboSomenteGClientes(db);
+            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboTiposMovimentos = MovimentosLookups.GetComboGcTiposMovimentosVendas(db);
+            ViewBag.comboStatusMovimentos = MovimentosLookups.GetComboGcStatusMovimentos(db);
+            ViewBag.comboMovimentosPosicao = MovimentosLookups.GetComboGcMovimentosPosicao(db);
+        }
+
+        /// <summary>FormPedidoCreate — novo pedido/cotação/OS.</summary>
+        private void PreencherLookupsPedidoFormCreate()
+        {
+            PreencherLookupsPedidoFormCore(0, incluirMovimentosPosicao: true, incluirPlaceholderPagRec: true, carregarDestinatarios: false);
+        }
+
+        /// <summary>FormPedidoCreate — edição de pedido existente.</summary>
+        private void PreencherLookupsPedidoFormEdit(int idCliente)
+        {
+            PreencherLookupsPedidoFormCore(idCliente, incluirMovimentosPosicao: false, incluirPlaceholderPagRec: false, carregarDestinatarios: true);
+        }
+
+        private void PreencherLookupsPedidoFormCore(int idCliente, bool incluirMovimentosPosicao, bool incluirPlaceholderPagRec, bool carregarDestinatarios)
+        {
+            var lk = MovimentosLookups;
+
+            ViewBag.comboClientes = LookupSearchQueries.ComboPlaceholderCliente();
+            if (idCliente > 0)
+            {
+                var item = LookupSearchQueries.GetClienteItem(db, idCliente);
+                if (item != null)
+                    ViewBag.comboClientes.Add(new SelectListItem { Value = item.id, Text = item.text, Selected = true });
+            }
+
+            ViewBag.comboTiposMovimentosCreateEdit = lk.GetComboGcTiposMovimentosCreateEdit(db);
+            ViewBag.comboClientesContatos = lk.GetComboGcClientesContatos(db, idCliente);
+            ViewBag.dataSetClientesContatos = lk.GetDatasetGcClientesContatos(db);
+
+            var locaisEstoque = lk.GetComboGcLocaisEstoqueOrders(db);
+            ViewBag.comboLocaisEstoque = locaisEstoque;
+            ViewBag.comboLocaisEstoqueOrders = locaisEstoque;
+
+            ViewBag.comboVendedores = lk.GetComboGVendedores(db);
+
+            ViewBag.comboTransportadora = lk.GetComboGcTransportadora(db);
+            ViewBag.comboTransportadoraComplementar = lk.GetComboGcTransportadora(db);
+            ViewBag.comboTransportadoraComplementar.Insert(0, new SelectListItem { Value = "-1", Text = "[ SEM FRETE COMPLEMENTAR ]" });
+
+            if (incluirMovimentosPosicao)
+            {
+                ViewBag.comboMovimentosPosicao = lk.GetComboGcMovimentosPosicao(db);
+            }
+
+            ViewBag.comboCfopFinalidade = lk.GetComboGcCfopFinalidade(db);
+            ViewBag.comboFreteResponsavel = lk.GetComboGcFreteResponsavel(db);
+            ViewBag.comboFreteResponsavel.Insert(0, new SelectListItem { Value = "-1", Text = "[ Frete ]" });
+            ViewBag.ComboComexImportacoes = lk.GetComboGcComexImportacoesTodas(db);
+
+            if (carregarDestinatarios && idCliente > 0)
+            {
+                ViewBag.comboClienteDestinatarios = lk.GetComboGcClientesDestinatarios(db, idCliente);
+            }
+            else
+            {
+                ViewBag.comboClienteDestinatarios = new List<SelectListItem>();
+            }
+
+            lk.GetDatasetGVendedores(db);
+            ViewBag.comboMoedas = lk.GetComboGMoedas(db);
+            ViewBag.comboPagRecCondicoes = lk.GetComboPagRecCondicoesTodas(db);
+            if (incluirPlaceholderPagRec)
+            {
+                ViewBag.comboPagRecCondicoes.Insert(0, new SelectListItem { Value = "-1", Text = "[ Condição Pagto. ]" });
+            }
+
+            ViewBag.comboGcCfopOperacao = lk.GetComboGcCfopOperacoesTelaPedido(db);
+        }
+
+        /// <summary>Modais inserir/editar/duplicar item do pedido (produto via Ajax — sem dataset/combo completo).</summary>
+        private void PreencherLookupsPedidoItemModal(int idProdutoSelecionado = 0)
+        {
+            var lk = MovimentosLookups;
+            ViewBag.comboProdutosServicos = LookupSearchQueries.ComboPlaceholderProduto();
+            if (idProdutoSelecionado > 0)
+            {
+                var prod = LookupSearchQueries.GetProdutoItem(db, idProdutoSelecionado);
+                if (prod != null)
+                    ViewBag.comboProdutosServicos.Add(new SelectListItem { Value = prod.id, Text = prod.text, Selected = true });
+            }
+            ViewBag.comboProdutosCondicoes = lk.GetComboGProdutoCondicao(db);
+            ViewBag.comboEntregasPrazos = lk.GetComboGcEntregasPrazos(db);
+        }
+
+        /// <summary>ModalPedidoAprovacao.</summary>
+        private void PreencherLookupsPedidoAprovacao(int idCliente)
+        {
+            var lk = MovimentosLookups;
+            lk.GetDatasetGVendedores(db);
+            ViewBag.comboVendedores = lk.GetComboGVendedores(db);
+            ViewBag.comboPagRecCondicoes = lk.GetComboPagRecCondicoesTodas(db);
+            ViewBag.comboLocaisEstoqueOrders = lk.GetComboGcLocaisEstoqueOrders(db);
+            ViewBag.comboTransportadora = lk.GetComboGcTransportadora(db);
+            ViewBag.ComboGcClientesContatosTipos = lk.GetComboGcClientesContatosTipos(db);
+            ViewBag.ComboClientesContatos = lk.GetComboGcClientesContatosPedido(db, idCliente);
+        }
+
+        /// <summary>Modais que só precisam do dataset/combo de vendedores.</summary>
+        private void PreencherLookupsVendedoresModal()
+        {
+            var lk = MovimentosLookups;
+            lk.GetDatasetGVendedores(db);
+            ViewBag.comboVendedores = lk.GetComboGVendedores(db);
+        }
+
+        /// <summary>Modal faturamento NF — CFOP, frete, transportadora.</summary>
+        private void PreencherLookupsFaturamentoPedido(int idCfopOperacao)
+        {
+            var lk = MovimentosLookups;
+            ViewBag.comboCFOP = lk.GetComboGcCfop(db);
+            ViewBag.comboCfopOperacoes = lk.GetComboGcCfopOperacoesFaturamentoPedido(db, idCfopOperacao);
+            ViewBag.comboFreteResponsavel = lk.GetComboGcFreteResponsavel(db);
+            ViewBag.comboTransportadora = lk.GetComboGcTransportadora(db);
+            ViewBag.comboTransportadora.Insert(0, new SelectListItem { Value = "0", Text = "SEM TRANSPORTADORA" });
+            ViewBag.ComboDestinatarios = new List<SelectListItem>();
+        }
+
+        /// <summary>ModalPedidoExpedicao e similares.</summary>
+        private void PreencherLookupsTransportadoraExpedicao()
+        {
+            var lk = MovimentosLookups;
+            ViewBag.comboTransportadora = lk.GetComboGcTransportadora(db);
+            ViewBag.comboTransportadoraComplementar = lk.GetComboGcTransportadora(db);
+            ViewBag.comboTransportadoraComplementar.Insert(0, new SelectListItem { Value = "-1", Text = "[ SEM FRETE COMPLEMENTAR ]" });
+        }
+
+        /// <summary>PainelPedidos.</summary>
+        private void PreencherLookupsPainelPedidos()
+        {
+            var lk = MovimentosLookups;
+            ViewBag.comboClientes = lk.GetComboSomenteGClientes(db);
+            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboMovimentosPosicao = lk.GetComboGcMovimentosPosicao(db);
+            var listaLocaisEstoque = lk.GetComboGcLocaisEstoqueOrders(db);
+            listaLocaisEstoque.RemoveAt(0);
+            listaLocaisEstoque.Add(new SelectListItem { Value = "-1", Text = "[ TODOS ]" });
+            ViewBag.comboLocaisEstoque = listaLocaisEstoque;
+        }
+
+        /// <summary>ModalConsultaPedidos.</summary>
+        private void PreencherLookupsConsultaPedidos()
+        {
+            var lk = MovimentosLookups;
+            ViewBag.comboClientes = lk.GetComboSomenteGClientes(db);
+            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "0", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ SELECIONE O CLIENTE ]" });
+            ViewBag.comboProdutosServicos = lk.GetComboGcProdutosServicosTodos(db);
+            ViewBag.comboProdutosServicos.Insert(0, new SelectListItem { Value = "0", Text = "[ TODOS OS PRODUTOS ]" });
+            ViewBag.comboProdutosServicos.Insert(0, new SelectListItem { Value = "-1", Text = "[ SELECIONE O PRODUTO ]" });
+        }
+
+        /// <summary>Contatos do cliente no contexto do movimento.</summary>
+        private void PreencherLookupsClientesContatos(int idCliente)
+        {
+            ViewBag.comboClientesContatos = MovimentosLookups.GetComboGcClientesContatos(db, idCliente);
+        }
+
+        /// <summary>Importações COMEX no formulário de pedido.</summary>
+        private void PreencherLookupsComexImportacoesPedido()
+        {
+            ViewBag.ComboComexImportacoes = MovimentosLookups.GetComboGcComexImportacoesTodas(db);
+        }
+
+        #endregion
+    }
+}

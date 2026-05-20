@@ -157,7 +157,7 @@
         {
             $.fn.dataTable.ext.errMode = 'none';
             otableGCidades = $('#dtGCidades').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
-                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 else if (json && json.yesFilterOnOff !== undefined) {
                     jsAtualizarIndicadorFiltroCidades(json.yesFilterOnOff);
                 }

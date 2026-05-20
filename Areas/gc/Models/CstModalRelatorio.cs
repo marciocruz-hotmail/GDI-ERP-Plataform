@@ -13,6 +13,9 @@ namespace GdiPlataform.Areas.gc.Models
         public String Field_Text_03 { get; set; }
         public String Field_Text_04 { get; set; }
         public String Field_Text_05 { get; set; }
+        public String Field_Text_06 { get; set; }
+        public String Field_Text_07 { get; set; }
+        public String Field_Text_08 { get; set; }
         public int Field_Int_01 { get; set; }
         public int Field_Int_02 { get; set; }
         public int Field_Int_03 { get; set; }
@@ -43,6 +46,9 @@ namespace GdiPlataform.Areas.gc.Models
             Field_Text_03 = string.Empty;
             Field_Text_04 = string.Empty;
             Field_Text_05 = string.Empty;
+            Field_Text_06 = string.Empty;
+            Field_Text_07 = string.Empty;
+            Field_Text_08 = string.Empty;
             Field_Int_01 = -1;
             Field_Int_02 = -1;
             Field_Int_03 = -1;

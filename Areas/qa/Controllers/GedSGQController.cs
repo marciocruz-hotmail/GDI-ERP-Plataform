@@ -11,7 +11,7 @@ using System.Web.Mvc;
 
 namespace GdiPlataform.Areas.qa.Controllers
 {
-    public class GedSGQController : Controller
+    public partial class GedSGQController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "qa_GedSGQ";
@@ -27,7 +27,7 @@ namespace GdiPlataform.Areas.qa.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,qa_GedSGQ_Default,qa_GedSGQ_IndexDocsSGQ_*,qa_GedSGQ_IndexDocsSGQ_Actionread")]
         public ActionResult IndexDocsSGQ()
         {
-            ViewBag.ComboGedTiposFiltro = LibDataSets.LoadComboGedArquivosTipos(db, 8, 0); // Qualidade
+            PreencherLookupsGedTiposFiltro(8, 0); // Qualidade
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Qualidade - Documentos SGQ";
             return View();
         }
@@ -152,7 +152,7 @@ namespace GdiPlataform.Areas.qa.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,qa_GedSGQ_Default,qa_GedSGQ_IndexPops_*,qa_GedSGQ_IndexPops_Actionread")]
         public ActionResult IndexPops()
         {
-            ViewBag.ComboGedTiposFiltro = LibDataSets.LoadComboGedArquivosTipos(db, 34, 0); // Pops
+            PreencherLookupsGedTiposFiltro(34, 0); // Pops
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Qualidade - Procedimentos Operacionais Padrão";
             return View();
         }
@@ -280,7 +280,7 @@ namespace GdiPlataform.Areas.qa.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,qa_GedSGQ_Default,qa_GedSGQ_IndexComunicados_*,qa_GedSGQ_IndexComunicados_Actionread")]
         public ActionResult IndexComunicados()
         {
-            ViewBag.ComboGedTiposFiltro = LibDataSets.LoadComboGedArquivosTipos(db, 20, 0); // Comunicados
+            PreencherLookupsGedTiposFiltro(20, 0); // Comunicados
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Qualidade - Comunicados Internos";
             return View();
         }
@@ -408,7 +408,7 @@ namespace GdiPlataform.Areas.qa.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,qa_GedSGQ_Default,qa_GedSGQ_IndexAtasReunioes_*,qa_GedSGQ_IndexAtasReunioes_Actionread")]
         public ActionResult IndexAtasReunioes()
         {
-            ViewBag.ComboGedTiposFiltro = LibDataSets.LoadComboGedArquivosTipos(db, 33, 0); // AtasReunioes
+            PreencherLookupsGedTiposFiltro(33, 0); // AtasReunioes
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Qualidade - Atas de Reuniões";
             return View();
         }

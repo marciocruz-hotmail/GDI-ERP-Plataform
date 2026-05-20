@@ -301,7 +301,7 @@
             if (otableNfeLogs == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableNfeLogs = $('#dataTables-NfeLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableNfeLogs = $('#dataTables-NfeLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {

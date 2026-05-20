@@ -21,7 +21,7 @@ using GdiPlataform.Models;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Clientes_*,g_Clientes_Default")]
-    public class ClientesController : Controller
+    public partial class ClientesController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_Clientes";
@@ -224,7 +224,7 @@ namespace GdiPlataform.Areas.g.Controllers
             comboIndicadorIE.Add(new SelectListItem { Value = "3", Text = "Não Contribuinte" });
             ViewBag.comboIndicadorIE = comboIndicadorIE;
 
-            ViewBag.ComboGcClientesContatosTipos = LibDataSets.LoadComboGcClientesContatosTipos(db);
+            PreencherLookupsClientesContatosTipos();
         }
         #endregion
 
@@ -1597,7 +1597,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 ViewBag.idCliente = IdCliente;
                 RecordContato = db.g_clientes_contatos.Find(IdContato);
             }
-            ViewBag.ComboGcClientesContatosTipos = LibDataSets.LoadComboGcClientesContatosTipos(db);
+            PreencherLookupsClientesContatosTipos();
             return View(RecordContato);
         }
 
@@ -1733,7 +1733,7 @@ namespace GdiPlataform.Areas.g.Controllers
             if (IdContato == null) { IdContato = 0; };
             g_clientes_contatos RecordContato = db.g_clientes_contatos.Find(IdContato);
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-power-off", "", "red", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Desativar Contato</b>";
-            ViewBag.ComboGcClientesContatosTipos = LibDataSets.LoadComboGcClientesContatosTipos(db);
+            PreencherLookupsClientesContatosTipos();
             return View(RecordContato);
         }
 

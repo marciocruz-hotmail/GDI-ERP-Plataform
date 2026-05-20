@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using GdiPlataform.Areas.gc.Models;
@@ -10,8 +11,8 @@ using GdiPlataform.Security;
 
 namespace GdiPlataform.Lib.Lookups
 {
-    /// <summary>Implementação Fase 2/3 — lookups em MemoryCache (sem slots em ContextoModel).</summary>
-    public sealed class LookupQueryService : ILookupQueryService
+    /// <summary>Implementação Fase 2/3 — lookups em MemoryCache (sem slots em ContextoModel). Partials: Comercial, Financeiro, CadastrosG (ex-Wave6a).</summary>
+    public sealed partial class LookupQueryService : ILookupQueryService
     {
         public List<SelectListItem> GetComboGcTransportadora(GdiPlataformEntities db) =>
             LookupQueryServiceCache.GetOrLoadCombo(
@@ -25,8 +26,10 @@ namespace GdiPlataform.Lib.Lookups
                     {
                         new SelectListItem { Value = "0", Text = "[ CLIENTE RETIRA ]" }
                     };
-                    var lista = db.g_clientes.Where(c => c.param_gc_transportadora == true).OrderBy(c => c.nome);
-                    foreach (var r in lista)
+                    foreach (var r in db.g_clientes.AsNoTracking()
+                        .Where(c => c.param_gc_transportadora == true)
+                        .OrderBy(c => c.nome)
+                        .Select(c => new { c.id_cliente, c.nome }))
                         combo.Add(new SelectListItem { Value = r.id_cliente.ToString(), Text = r.nome });
                     return combo;
                 });
@@ -40,7 +43,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem> { new SelectListItem { Value = "-1", Text = "[ Selecionar ]" } };
-                    foreach (var v in db.g_vendedores.Where(p => p.ativo == true).OrderBy(p => p.nome))
+                    foreach (var v in db.g_vendedores.AsNoTracking().Where(p => p.ativo == true).OrderBy(p => p.nome)
+                        .Select(v => new { v.id_vendedor, v.nome }))
                         combo.Add(new SelectListItem { Value = v.id_vendedor.ToString(), Text = v.nome });
                     return combo;
                 });
@@ -51,7 +55,7 @@ namespace GdiPlataform.Lib.Lookups
                 "g_vendedores",
                 "LoadDatasetGVendedores",
                 db,
-                () => db.g_vendedores.Where(p => p.ativo == true).OrderBy(p => p.nome).ToList());
+                () => db.g_vendedores.AsNoTracking().Where(p => p.ativo == true).OrderBy(p => p.nome).ToList());
 
         public List<SelectListItem> GetComboGcCfop(GdiPlataformEntities db) =>
             LookupQueryServiceCache.GetOrLoadCombo(
@@ -62,7 +66,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem>();
-                    foreach (var item in db.gc_cfop.Where(p => p.ativo == true).OrderBy(p => p.numero))
+                    foreach (var item in db.gc_cfop.AsNoTracking().Where(p => p.ativo == true).OrderBy(p => p.numero)
+                        .Select(p => new { p.id_cfop, p.numero, p.descricao }))
                     {
                         var desc = item.numero + "  -  " + item.descricao.Trim();
                         combo.Add(new SelectListItem { Value = item.id_cfop.ToString(), Text = desc });
@@ -79,7 +84,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem>();
-                    foreach (var r in db.gc_frete_responsavel.Where(p => p.ativo == true).OrderBy(p => p.descricao))
+                    foreach (var r in db.gc_frete_responsavel.AsNoTracking().Where(p => p.ativo == true).OrderBy(p => p.descricao)
+                        .Select(r => new { r.id_frete_responsavel, r.descricao }))
                         combo.Add(new SelectListItem { Value = r.id_frete_responsavel.ToString(), Text = r.descricao });
                     return combo;
                 });
@@ -93,7 +99,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem>();
-                    foreach (var r in db.gc_entregas_prazos.OrderBy(p => p.id_entrega_prazo))
+                    foreach (var r in db.gc_entregas_prazos.AsNoTracking().OrderBy(p => p.id_entrega_prazo)
+                        .Select(r => new { r.id_entrega_prazo, r.sigla }))
                         combo.Add(new SelectListItem { Value = r.id_entrega_prazo.ToString(), Text = r.sigla });
                     return combo;
                 });
@@ -107,7 +114,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem>();
-                    foreach (var r in db.g_produtos_condicoes.OrderBy(p => p.id_produto_condicao))
+                    foreach (var r in db.g_produtos_condicoes.AsNoTracking().OrderBy(p => p.id_produto_condicao)
+                        .Select(r => new { r.id_produto_condicao, r.sigla, r.descricao }))
                         combo.Add(new SelectListItem
                         {
                             Value = r.id_produto_condicao.ToString(),
@@ -125,7 +133,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem> { new SelectListItem { Value = "-1", Text = "Estoque" } };
-                    foreach (var loc in db.gc_locais_estoque.Where(p => p.allow_order == true).OrderBy(p => p.id_local_estoque))
+                    foreach (var loc in db.gc_locais_estoque.AsNoTracking().Where(p => p.allow_order == true).OrderBy(p => p.id_local_estoque)
+                        .Select(loc => new { loc.id_local_estoque, loc.sigla }))
                         combo.Add(new SelectListItem { Value = loc.id_local_estoque.ToString(), Text = loc.sigla.EmptyIfNull().ToString() });
                     return combo;
                 });
@@ -139,7 +148,8 @@ namespace GdiPlataform.Lib.Lookups
                 () =>
                 {
                     var combo = new List<SelectListItem> { new SelectListItem { Value = "-1", Text = "Todos" } };
-                    foreach (var p in db.gc_movimentos_posicao.OrderBy(c => c.id_movimento_posicao))
+                    foreach (var p in db.gc_movimentos_posicao.AsNoTracking().OrderBy(c => c.id_movimento_posicao)
+                        .Select(p => new { p.id_movimento_posicao, p.posicao }))
                         combo.Add(new SelectListItem
                         {
                             Value = p.id_movimento_posicao.ToString(),
@@ -192,6 +202,34 @@ namespace GdiPlataform.Lib.Lookups
                 db,
                 () => BuildComboProdutosServicos(db, importadosOnly: true, includeIdInText: false));
 
+        /// <summary>Sem cache: truncamento depende de <see cref="CachePersister.userIdentity.DisplayScreenWidth"/> por utilizador.</summary>
+        public List<SelectListItem> GetComboGcProdutosPosicaoEstoqueIndex(GdiPlataformEntities db) =>
+            BuildComboGcProdutosPosicaoEstoqueIndex(db);
+
+        private static List<SelectListItem> BuildComboGcProdutosPosicaoEstoqueIndex(GdiPlataformEntities db)
+        {
+            int sizeNomeItem = 100;
+            int displayWidth = 0;
+            int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out displayWidth);
+            if (displayWidth > 0 && displayWidth < 500) sizeNomeItem = 50;
+            if (displayWidth > 0 && displayWidth < 400) sizeNomeItem = 40;
+            if (displayWidth > 0 && displayWidth < 300) sizeNomeItem = 30;
+
+            var combo = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ TODOS OS PRODUTOS ]" },
+                new SelectListItem { Value = "-1", Text = "[ PRODUTOS COM SALDO ]" }
+            };
+            foreach (var p in db.g_produtos.AsNoTracking().Where(x => x.ativo).OrderBy(x => x.nome)
+                .Select(p => new { p.id_produto, p.nome }))
+            {
+                var nome = p.nome.EmptyIfNull().ToString().Trim();
+                if (nome.Length > sizeNomeItem) nome = nome.Substring(0, sizeNomeItem) + "...";
+                combo.Add(new SelectListItem { Value = p.id_produto.ToString(), Text = nome });
+            }
+            return combo;
+        }
+
         private static List<SelectListItem> BuildComboProdutosServicos(GdiPlataformEntities db, bool importadosOnly, bool includeIdInText)
         {
             var combo = new List<SelectListItem> { new SelectListItem { Value = "-1", Text = "" } };
@@ -200,9 +238,9 @@ namespace GdiPlataform.Lib.Lookups
             int sizeNome = (displayWidth / 100) * 8;
             if (displayWidth > 0 && displayWidth < 500) sizeNome = (displayWidth / 100 * 10);
 
-            var query = db.g_produtos
-                .Select(p => new { p.id_produto, p.nome, p.ativo, p.importado })
-                .Where(p => p.ativo == true);
+            var query = db.g_produtos.AsNoTracking()
+                .Where(p => p.ativo == true)
+                .Select(p => new { p.id_produto, p.nome, p.importado });
             if (importadosOnly) query = query.Where(p => p.importado == true);
             foreach (var item in query.ToList())
             {
@@ -232,12 +270,14 @@ namespace GdiPlataform.Lib.Lookups
                     if (displayWidth > 0 && displayWidth < 400) sizeNome = 40;
                     if (displayWidth > 0 && displayWidth < 300) sizeNome = 30;
 
-                    var lista = db.g_produtos.Select(p => new
-                    {
-                        p.id_produto, p.codigo, p.nome, p.preco_venda, p.fob1_dollar, p.fob2_dollar, p.fob3_dollar,
-                        p.fob1_id_importacao, p.fob2_id_importacao, p.fob3_id_importacao, p.has_corecharge, p.ativo,
-                        p.id_unidade_medida_venda, p.id_produto_ncm, p.saldo_01_disponivel, p.saldo_03_disponivel
-                    }).Where(p => p.ativo == true).ToList();
+                    var lista = db.g_produtos.AsNoTracking()
+                        .Where(p => p.ativo == true)
+                        .Select(p => new
+                        {
+                            p.id_produto, p.codigo, p.nome, p.preco_venda, p.fob1_dollar, p.fob2_dollar, p.fob3_dollar,
+                            p.fob1_id_importacao, p.fob2_id_importacao, p.fob3_id_importacao, p.has_corecharge,
+                            p.id_unidade_medida_venda, p.id_produto_ncm, p.saldo_01_disponivel, p.saldo_03_disponivel
+                        }).ToList();
 
                     foreach (var item in lista)
                     {
@@ -298,9 +338,9 @@ namespace GdiPlataform.Lib.Lookups
 
             if (comDoc)
             {
-                var listaDoc = db.g_clientes
-                    .Select(c => new { c.id_cliente, c.cpf, c.cnpj, c.is_cliente, c.is_fornecedor, c.ativo, c.nome })
-                    .Where(p => p.ativo == true);
+                var listaDoc = db.g_clientes.AsNoTracking()
+                    .Where(p => p.ativo == true)
+                    .Select(c => new { c.id_cliente, c.cpf, c.cnpj, c.is_cliente, c.is_fornecedor, c.nome });
                 if (somenteCliente) listaDoc = listaDoc.Where(p => p.is_cliente == true);
                 if (somenteFornecedor) listaDoc = listaDoc.Where(p => p.is_fornecedor == true);
                 foreach (var r in listaDoc.OrderBy(p => p.nome).ToList())
@@ -317,9 +357,9 @@ namespace GdiPlataform.Lib.Lookups
             }
             else
             {
-                var lista = db.g_clientes
-                    .Select(c => new { c.id_cliente, c.is_cliente, c.is_fornecedor, c.ativo, c.nome })
-                    .Where(p => p.ativo == true);
+                var lista = db.g_clientes.AsNoTracking()
+                    .Where(p => p.ativo == true)
+                    .Select(c => new { c.id_cliente, c.is_cliente, c.is_fornecedor, c.nome });
                 if (somenteCliente) lista = lista.Where(p => p.is_cliente == true);
                 if (somenteFornecedor) lista = lista.Where(p => p.is_fornecedor == true);
                 foreach (var r in lista.OrderBy(p => p.nome).ToList())
@@ -354,7 +394,7 @@ namespace GdiPlataform.Lib.Lookups
                     {
                         new SelectListItem { Value = "0", Text = "[ INFORME A PESSOA DE CONTATO ]" }
                     };
-                    var lista = db.g_clientes_contatos
+                    var lista = db.g_clientes_contatos.AsNoTracking()
                         .Where(p => p.ativo == true && p.id_cliente == idCliente)
                         .Select(p => new { p.id_contato, p.contato })
                         .ToList();
@@ -374,9 +414,10 @@ namespace GdiPlataform.Lib.Lookups
                     {
                         new SelectListItem { Value = "0", Text = "[ O PRÓPRIO CLIENTE ]" }
                     };
-                    foreach (var r in db.g_clientes_destinatarios
+                    foreach (var r in db.g_clientes_destinatarios.AsNoTracking()
                         .Where(c => c.id_cliente == idCliente && c.ativo == true)
-                        .OrderBy(c => c.nome))
+                        .OrderBy(c => c.nome)
+                        .Select(c => new { c.id_cliente_destinatario, c.nome }))
                     {
                         combo.Add(new SelectListItem
                         {
@@ -397,7 +438,7 @@ namespace GdiPlataform.Lib.Lookups
                     {
                         new g_clientes_destinatarios { id_cliente_destinatario = 0, nome = "O PRÓPRIO CLIENTE" }
                     };
-                    lista.AddRange(db.g_clientes_destinatarios
+                    lista.AddRange(db.g_clientes_destinatarios.AsNoTracking()
                         .Where(p => p.ativo == true && p.id_cliente == idCliente)
                         .ToList());
                     return lista;
@@ -435,7 +476,7 @@ namespace GdiPlataform.Lib.Lookups
 
         public List<SelectListItem> GetComboGcEstoqueEnderecoArea(GdiPlataformEntities db, int idLocalEstoque) =>
             BuildComboEstoqueEndereco(db, idLocalEstoque, LookupCacheKeys.GcEstoqueEnderecoArea, "gc_estoque_endereco_area", "[ Área ]",
-                () => db.gc_estoque_endereco_area.Where(p => p.ativo == true),
+                () => db.gc_estoque_endereco_area.AsNoTracking().Where(p => p.ativo == true),
                 idLocalEstoque,
                 q => idLocalEstoque == 0 ? q.OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_area)
                     : q.Where(p => p.id_local_estoque == idLocalEstoque).OrderBy(p => p.id_estoque_area),
@@ -443,7 +484,7 @@ namespace GdiPlataform.Lib.Lookups
 
         public List<SelectListItem> GetComboGcEstoqueEnderecoSecao(GdiPlataformEntities db, int idLocalEstoque) =>
             BuildComboEstoqueEndereco(db, idLocalEstoque, LookupCacheKeys.GcEstoqueEnderecoSecao, "gc_estoque_endereco_secao", "[ Seção ]",
-                () => db.gc_estoque_endereco_secao.Where(p => p.ativo == true),
+                () => db.gc_estoque_endereco_secao.AsNoTracking().Where(p => p.ativo == true),
                 idLocalEstoque,
                 q => idLocalEstoque == 0 ? q.OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_secao)
                     : q.Where(p => p.id_local_estoque == idLocalEstoque).OrderBy(p => p.id_estoque_secao),
@@ -451,7 +492,7 @@ namespace GdiPlataform.Lib.Lookups
 
         public List<SelectListItem> GetComboGcEstoqueEnderecoCorredor(GdiPlataformEntities db, int idLocalEstoque) =>
             BuildComboEstoqueEndereco(db, idLocalEstoque, LookupCacheKeys.GcEstoqueEnderecoCorredor, "gc_estoque_endereco_corredor", "[ Corredor ]",
-                () => db.gc_estoque_endereco_corredor.Where(p => p.ativo == true),
+                () => db.gc_estoque_endereco_corredor.AsNoTracking().Where(p => p.ativo == true),
                 idLocalEstoque,
                 q => idLocalEstoque == 0 ? q.OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_corredor)
                     : q.Where(p => p.id_local_estoque == idLocalEstoque).OrderBy(p => p.id_estoque_corredor),
@@ -459,7 +500,7 @@ namespace GdiPlataform.Lib.Lookups
 
         public List<SelectListItem> GetComboGcEstoqueEnderecoPrateleira(GdiPlataformEntities db, int idLocalEstoque) =>
             BuildComboEstoqueEndereco(db, idLocalEstoque, LookupCacheKeys.GcEstoqueEnderecoPrateleira, "gc_estoque_endereco_prateleira", "[ Prateleira ]",
-                () => db.gc_estoque_endereco_prateleira.Where(p => p.ativo == true),
+                () => db.gc_estoque_endereco_prateleira.AsNoTracking().Where(p => p.ativo == true),
                 idLocalEstoque,
                 q => idLocalEstoque == 0 ? q.OrderBy(p => p.id_local_estoque).ThenBy(p => p.id_estoque_prateleira)
                     : q.Where(p => p.id_local_estoque == idLocalEstoque).OrderBy(p => p.id_estoque_prateleira),
@@ -500,11 +541,11 @@ namespace GdiPlataform.Lib.Lookups
         {
             List<ged_arquivos_tipos> listaAll;
             if (idTipo <= 0 && idTipoPai <= 0)
-                listaAll = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).OrderBy(t => t.descricao).ToList();
+                listaAll = db.ged_arquivos_tipos.AsNoTracking().Where(t => t.id_arquivo_tipo > 0).OrderBy(t => t.descricao).ToList();
             else if (idTipo > 0)
-                listaAll = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo == idTipo).OrderBy(t => t.descricao).ToList();
+                listaAll = db.ged_arquivos_tipos.AsNoTracking().Where(t => t.id_arquivo_tipo == idTipo).OrderBy(t => t.descricao).ToList();
             else
-                listaAll = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == idTipoPai).OrderBy(t => t.descricao).ToList();
+                listaAll = db.ged_arquivos_tipos.AsNoTracking().Where(t => t.id_arquivo_tipo > 0 && t.id_tipo_pai == idTipoPai).OrderBy(t => t.descricao).ToList();
 
             var combo = new List<SelectListItem>();
             if (idTipo <= 0)

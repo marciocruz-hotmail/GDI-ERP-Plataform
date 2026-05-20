@@ -1,0 +1,131 @@
+Você está atuando como assistente técnico em um projeto ASP.NET MVC .NET Framework em processo de modernização e refatoração incremental.
+
+Contexto do projeto:
+- Aplicação ASP.NET MVC em .NET Framework.
+- Uso de SQL Server.
+- Publicação em IIS no Windows Server.
+- O projeto está sendo modernizado/refatorado com apoio de Claude Code e Cursor.
+- Todas as alterações relevantes são registradas no arquivo CHANGELOG-DEV.md.
+- O objetivo agora é reduzir a carga de contexto para LLMs, melhorar a rastreabilidade técnica e separar histórico, contexto operacional e backlog.
+
+Objetivo:
+Implementar uma arquitetura documental simples e organizada para suporte ao desenvolvimento assistido por IA.
+
+Arquivos a criar ou ajustar:
+
+1. AI-CONTEXT.md
+Criar este arquivo na raiz do projeto.
+Ele deve conter o contexto técnico fixo e atual do projeto, incluindo:
+- Nome e natureza do projeto.
+- Stack principal.
+- Objetivo da modernização.
+- Regras de trabalho para alterações assistidas por IA.
+- Áreas sensíveis do sistema.
+- Padrão esperado para qualquer alteração.
+- Como registrar mudanças no changelog.
+- Restrições importantes, como não alterar banco de dados sem autorização e não remover funcionalidades existentes.
+
+2. BACKLOG-DEV.md
+Criar este arquivo na raiz do projeto.
+Ele deve conter pendências técnicas organizadas por prioridade:
+- Alta prioridade.
+- Média prioridade.
+- Baixa prioridade.
+- Itens em análise.
+- Itens concluídos recentemente, se aplicável.
+
+3. docs/dev-history/
+Criar esta pasta, caso ainda não exista.
+
+4. CHANGELOG-DEV.md
+Reestruturar o arquivo atual para funcionar como um changelog compacto e operacional.
+Ele deve conter:
+- Estado atual do projeto.
+- Decisões técnicas ativas.
+- Últimas alterações relevantes.
+- Pendências abertas.
+- Referência aos arquivos históricos localizados em docs/dev-history/.
+
+5. Histórico do changelog atual
+Antes de substituir ou compactar o CHANGELOG-DEV.md atual, preservar o conteúdo completo em:
+docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md
+
+Regras importantes:
+- Não apagar informações históricas.
+- Não remover evidências técnicas relevantes.
+- Não alterar código-fonte da aplicação nesta tarefa.
+- Não alterar arquivos .cs, .cshtml, .config, .json, .js, .css ou arquivos de banco de dados.
+- Alterar somente arquivos markdown e estrutura de pastas documental.
+- Manter linguagem técnica clara, objetiva e útil para Claude Code, Cursor e desenvolvedores humanos.
+- Evitar excesso de detalhe operacional no CHANGELOG-DEV.md principal.
+- O CHANGELOG-DEV.md deve ser curto o suficiente para ser carregado com frequência no contexto da IA.
+- O histórico completo deve ficar preservado em docs/dev-history/.
+
+Formato esperado para AI-CONTEXT.md:
+
+# AI-CONTEXT.md
+
+## Projeto
+
+## Stack principal
+
+## Objetivo atual
+
+## Estratégia de modernização
+
+## Regras para alterações assistidas por IA
+
+## Áreas sensíveis
+
+## Padrão obrigatório antes de alterar código
+
+## Padrão de registro no CHANGELOG-DEV.md
+
+## Arquivos de referência
+
+Formato esperado para BACKLOG-DEV.md:
+
+# BACKLOG-DEV.md
+
+## Alta prioridade
+
+## Média prioridade
+
+## Baixa prioridade
+
+## Itens em análise
+
+## Concluídos recentemente
+
+Formato esperado para CHANGELOG-DEV.md:
+
+# CHANGELOG-DEV.md
+
+## Estado atual do projeto
+
+## Decisões técnicas ativas
+
+## Últimas alterações relevantes
+
+## Pendências abertas
+
+## Histórico completo
+
+Procedimento:
+1. Verifique se existe CHANGELOG-DEV.md.
+2. Se existir, copie o conteúdo integral para docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md.
+3. Crie ou atualize AI-CONTEXT.md.
+4. Crie ou atualize BACKLOG-DEV.md.
+5. Compacte o CHANGELOG-DEV.md, mantendo apenas informações atuais e relevantes.
+6. Ao final, apresente um resumo das alterações realizadas e a lista dos arquivos criados ou modificados.
+
+Critério de sucesso:
+A raiz do projeto deve conter:
+- AI-CONTEXT.md
+- CHANGELOG-DEV.md
+- BACKLOG-DEV.md
+
+E a pasta docs/dev-history/ deve conter:
+- CHANGELOG-DEV-HISTORICO-INICIAL.md
+
+Não execute refatorações de código nesta tarefa.

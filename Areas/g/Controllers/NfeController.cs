@@ -158,54 +158,13 @@ namespace GdiPlataform.Areas.g.Controllers
                     return JsonDataTableException(new InvalidOperationException("Banco de dados não inicializado."), param, filterOnOff);
                 }
 
-                bool filterAdvanced = param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0;
-                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
+                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 bool filterDb = recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
 
                 List<g_nfe> allRecords = new List<g_nfe>();
                 var statusList = db.g_nfe_status.AsNoTracking().ToList();
 
-                if (filterAdvanced)
-                {
-                    filterOnOff = "1";
-                    string[] campos = param.yesFilterAdvancedText.EmptyIfNull().ToString().Split(';');
-                    IQueryable<g_nfe> q = db.g_nfe.AsNoTracking().Where(n => n.id_nfe > 0);
-                    if (campos.Length >= 8)
-                    {
-                        string sid = campos[0].Trim();
-                        string nome = campos[1].Trim();
-                        string cnpj = campos[2].Trim();
-                        string cpf = campos[3].Trim();
-                        string tipo = campos[4].Trim();
-                        string idStatus = campos[5].Trim();
-                        string d1s = campos[6].Trim();
-                        string d2s = campos[7].Trim();
-                        if (!string.IsNullOrEmpty(sid) && sid != "0" && int.TryParse(sid, out int idNfe)) { q = q.Where(n => n.id_nfe == idNfe); }
-                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(nome, out string padraoNome))
-                        {
-                            q = q.Where(n => n.nome != null && System.Data.Entity.DbFunctions.Like(n.nome, padraoNome));
-                        }
-                        if (LibStringFormat.TryMontarPadraoLikeContemCodigo(cnpj, out string padraoCnpj))
-                        {
-                            q = q.Where(n => n.cnpj != null && System.Data.Entity.DbFunctions.Like(n.cnpj, padraoCnpj));
-                        }
-                        if (LibStringFormat.TryMontarPadraoLikeContemCodigo(cpf, out string padraoCpf))
-                        {
-                            q = q.Where(n => n.cpf != null && System.Data.Entity.DbFunctions.Like(n.cpf, padraoCpf));
-                        }
-                        if (!string.IsNullOrEmpty(tipo) && tipo != "0") { q = q.Where(n => n.tipo_r_c == tipo); }
-                        if (!string.IsNullOrEmpty(idStatus) && idStatus != "0" && int.TryParse(idStatus, out int idSt)) { q = q.Where(n => n.id_nfe_status == idSt); }
-                        DateTime d1, d2;
-                        if (DateTime.TryParse(d1s, new CultureInfo("pt-BR"), DateTimeStyles.None, out d1)
-                            && DateTime.TryParse(d2s, new CultureInfo("pt-BR"), DateTimeStyles.None, out d2))
-                        {
-                            DateTime fim = d2.Date.AddDays(1).AddTicks(-1);
-                            q = q.Where(n => n.data_vencimento >= d1 && n.data_vencimento <= fim);
-                        }
-                    }
-                    allRecords = q.OrderByDescending(n => n.id_nfe).ToList();
-                }
-                else if (filterDb)
+                if (filterDb)
                 {
                     filterOnOff = "1";
                     string sentenca = recordFiltro.advanced
@@ -213,16 +172,6 @@ namespace GdiPlataform.Areas.g.Controllers
                         : "select * from g_nfe where id_nfe > 0 and " + recordFiltro.sql_filtro;
                     LibDB.setFilterByUser(sentenca, controllerName, true, db);
                     allRecords = db.g_nfe.SqlQuery(sentenca).ToList();
-                }
-                else if (!param.yesFilterField.EmptyIfNull().ToString().Trim().Equals(String.Empty)
-                    && !param.yesFilterField.Trim().Equals("*")
-                    && !param.yesFilterOperador.EmptyIfNull().ToString().Trim().Equals(String.Empty))
-                {
-                    filterOnOff = "1";
-                    string sql = "select * from g_nfe where id_nfe > 0 and ";
-                    sql += LibStringFormat.SentencaSQLFiltroGenerico(param.yesFilterField, param.yesFilterOperador, param.yesFilterText);
-                    LibDB.setFilterByUser(sql, controllerName, true, db);
-                    allRecords = db.g_nfe.SqlQuery(sql).ToList();
                 }
                 else
                 {

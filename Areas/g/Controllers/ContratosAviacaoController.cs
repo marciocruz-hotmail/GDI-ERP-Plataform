@@ -16,7 +16,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContratosAviacao_*,g_ContratosAviacao_Default")]
-    public class ContratosAviacaoController : Controller
+    public partial class ContratosAviacaoController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_contratos_aviacao";
@@ -267,9 +267,7 @@ namespace GdiPlataform.Areas.g.Controllers
             newRecord.anexo = false;
             newRecord.id_cliente = -1;
             newRecord.data_assinatura = DataHoraAtual.Date;
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ INFORME O CLIENTE ]" });
-            ViewBag.comboContratosTipos = LibDataSets.LoadComboGContratosTipos(db);
+            PreencherLookupsContratoCreateEdit();
             return View("CreateEdit", newRecord);
         }
 
@@ -355,9 +353,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
                 }
             }
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ INFORME O CLIENTE ]" });
-            ViewBag.comboContratosTipos = LibDataSets.LoadComboGContratosTipos(db);
+            PreencherLookupsContratoCreateEdit();
             return View("CreateEdit", record_g_contratos_aviacao);
         }
 
@@ -374,9 +370,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>" + LibStringFormat.GetTabHtml(1) + record_g_contratos_aviacao.id_contrato.EmptyIfNull().ToString() + " - " + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString();
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ INFORME O CLIENTE ]" });
-            ViewBag.comboContratosTipos = LibDataSets.LoadComboGContratosTipos(db);
+            PreencherLookupsContratoCreateEdit();
             return View("CreateEdit", record_g_contratos_aviacao);
         }
 
@@ -405,9 +399,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
             }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>" + LibStringFormat.GetTabHtml(1) + record_g_contratos_aviacao.id_contrato.EmptyIfNull().ToString() + " - " + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString();
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ INFORME O CLIENTE ]" });
-            ViewBag.comboContratosTipos = LibDataSets.LoadComboGContratosTipos(db);
+            PreencherLookupsContratoCreateEdit();
             return View("CreateEdit", record_g_contratos_aviacao);
         }
         #endregion

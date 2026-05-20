@@ -14,7 +14,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_CfopOperacoes_*,g_CfopOperacoes_Default")]
-    public class CfopOperacoesController : Controller
+    public partial class CfopOperacoesController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_CfopOperacoes";
@@ -232,7 +232,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             try
             {
                 if ((IdOperacao != null) && (IdOperacao > 0)) { record_gc_cfop_operacoes = db.gc_cfop_operacoes.Find(IdOperacao); };
-                ViewBag.comboCFOP = LibDataSets.LoadComboGcCfop(db);
+                PreencherLookupsCfop();
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Operação - " + record_gc_cfop_operacoes.id_cfop_operacao.EmptyIfNull().ToString() + "</b>";
                 return View("ModalCreateEditOperacao", record_gc_cfop_operacoes);
             }

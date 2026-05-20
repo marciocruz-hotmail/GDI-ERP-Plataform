@@ -14,12 +14,13 @@ using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 using GdiPlataform.Security;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueInventario_*,gc_EstoqueInventario_Default")]
-    public class EstoqueInventarioController : Controller
+    public partial class EstoqueInventarioController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "gc_EstoqueInventario";
@@ -34,7 +35,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueInventario_*,gc_EstoqueInventario_Actionread")]
         public ActionResult Index()
         {
-            ViewBag.comboLocaisEstoque = LibDataSets.LoadComboGcLocaisEstoqueOrders(db);
+            PreencherLookupsIndexInventario();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-warehouse", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Estoque > Inventário";
             return View();
         }
@@ -408,7 +409,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 // 5) Produtos (somente IDs da página) via dataset existente
                 //    Obs: dataset é em memória, mas carregamos 1x.
                 // ----------------------------
-                var dsProdutos = LibDataSets.LoadDatasetGcProdutosServicos(db);
+                var dsProdutos = GetDatasetProdutosServicosLookup();
                 var idsProdutosPagina = page.Select(x => x.id_produto).Distinct().ToList();
 
                 // Monta dicionário id_produto => descricao_longa para lookup O(1)
@@ -526,14 +527,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 ViewBag.Title = TituloInventario;
                 ViewBag.MsgBloqueio = MsgBloqueio;
-                List<SelectListItem> comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosImportados(db);
-                comboProdutosServicos.RemoveAt(comboProdutosServicos.FindIndex(p => p.Value == "-1"));
-                ViewBag.comboProdutosServicos = comboProdutosServicos;
-                ViewBag.comboProdutosServicos.Insert(0, new SelectListItem { Value = "0", Text = "[ TODOS OS ITENS ]" });
-                ViewBag.comboEstoqueEnderecoArea = LibDataSets.LoadComboGcEstoqueEnderecoArea(db, RecordInventario.id_local_estoque);
-                ViewBag.comboEstoqueEnderecoSecao = LibDataSets.LoadComboGcEstoqueEnderecoSecao(db, RecordInventario.id_local_estoque);
-                ViewBag.comboEstoqueEnderecoCorredor = LibDataSets.LoadComboGcEstoqueEnderecoCorredor(db, RecordInventario.id_local_estoque);
-                ViewBag.comboEstoqueEnderecoPrateleira = LibDataSets.LoadComboGcEstoqueEnderecoPrateleira(db, RecordInventario.id_local_estoque);
+                PreencherLookupsFormInventarioItens(RecordInventario.id_local_estoque);
                 return View(RecordInventario);
             }
         }
@@ -561,11 +555,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 RecordInventarioItem.qtd_disponivel = RecordInventarioItem.qtd_disponivel_anterior;
             }
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-            ViewBag.comboEstoqueEnderecoArea = LibDataSets.LoadComboGcEstoqueEnderecoArea(db, RecordInventario.id_local_estoque);
-            ViewBag.comboEstoqueEnderecoSecao = LibDataSets.LoadComboGcEstoqueEnderecoSecao(db, RecordInventario.id_local_estoque);
-            ViewBag.comboEstoqueEnderecoCorredor = LibDataSets.LoadComboGcEstoqueEnderecoCorredor(db, RecordInventario.id_local_estoque);
-            ViewBag.comboEstoqueEnderecoPrateleira = LibDataSets.LoadComboGcEstoqueEnderecoPrateleira(db, RecordInventario.id_local_estoque);
+            PreencherLookupsModalInventarioItem(RecordInventario.id_local_estoque);
             ViewBag.MsgBloqueio = MsgBloqueio;
             return View("ModalCreateEditInventarioItem", RecordInventarioItem);
         }
@@ -690,7 +680,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Abrir Novo Inventário</b>";
             gc_estoque_inventario NovoInventario = new gc_estoque_inventario();
             NovoInventario.id_local_estoque = -1;
-            ViewBag.comboLocaisEstoque = LibDataSets.LoadComboGcLocaisEstoqueOrders(db);
+            PreencherLookupsModalCreateInventario();
             return View(NovoInventario);
         }
 

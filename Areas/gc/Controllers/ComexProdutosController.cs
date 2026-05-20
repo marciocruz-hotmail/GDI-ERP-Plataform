@@ -18,7 +18,7 @@ using System.Web.Mvc;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_ComexProdutos_*,gc_ComexProdutos_Default,gc_ComexProdutos_ProdutosPre")]
-    public class ComexProdutosController : Controller
+    public partial class ComexProdutosController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "gc_ComexProdutos";
@@ -47,12 +47,12 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_ComexProdutos_*,gc_ComexProdutos_Default,gc_ComexProdutos_ProdutosPre")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             string errorMessage = "";
             string stackTrace = "";
 
             // Parâmetros/filtros
             bool filterDb = false;
-            bool filterAdvanced = false;
             string filterOnOff = "0";
 
             try
@@ -64,13 +64,13 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 // Observação: LibDB.getFilterByUser parece depender do flag filterAdvanced;
                 // aqui mantemos a chamada como no seu padrão.
-                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
+                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
 
-                // Verificação se há algum filtro ativo
-                if (recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) filterDb = true;
-                else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) filterAdvanced = true;
-
-                if (filterDb || filterAdvanced) filterOnOff = "1";
+                if (recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0)
+                {
+                    filterDb = true;
+                    filterOnOff = "1";
+                }
 
                 // ----------------------------------------
                 // 1) Monta a "query base" (preferência LINQ)
@@ -172,61 +172,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
 
                 // ----------------------------------------
-                // 3) Filtro avançado (filterAdvanced) -> LINQ (mais seguro) + persistência do SQL (se precisar)
-                // ----------------------------------------
-                if (filterAdvanced)
-                {
-                    string[] campos;
-                    try { campos = param.yesFilterAdvancedText.EmptyIfNull().ToString().Split(';'); }
-                    catch { campos = new string[1] { "" }; }
-
-                    if (campos.Length == 5)
-                    {
-                        string f0 = campos[0].Trim();
-                        string f1 = campos[1].Trim();
-                        string f2 = campos[2].Trim();
-                        string f3 = campos[3].Trim();
-                        string f4 = campos[4].Trim();
-
-                        // id_comex_produto
-                        if (!string.IsNullOrWhiteSpace(f0) && int.TryParse(f0, out int idComex))
-                            query = query.Where(p => p.id_comex_produto == idComex);
-
-                        if (LibStringFormat.TryMontarPadraoLikeContemCodigo(f1, out string padraoPn))
-                        {
-                            query = query.Where(p => p.pn != null && DbFunctions.Like(p.pn, padraoPn));
-                        }
-
-                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(f2, out string padraoDesc))
-                        {
-                            query = query.Where(p => p.description != null && DbFunctions.Like(p.description, padraoDesc));
-                        }
-
-                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(f3, out string padraoTrad))
-                        {
-                            query = query.Where(p => p.traducao != null && DbFunctions.Like(p.traducao, padraoTrad));
-                        }
-
-                        if (LibStringFormat.TryMontarPadraoLikeContemTexto(f4, out string padraoFab))
-                        {
-                            query = query.Where(p => p.manufacturer != null && DbFunctions.Like(p.manufacturer, padraoFab));
-                        }
-
-                        // Se você precisa continuar persistindo o SQL no mesmo formato do seu sistema:
-                        // (mantive a construção original, mas só para gravar no filtro)
-                        sentencaSql = " select p.* from gc_comex_produtos p where ativo = 1 ";
-                        if (!string.IsNullOrWhiteSpace(f0)) sentencaSql += " and p.id_comex_produto = '" + f0 + "'";
-                        if (!string.IsNullOrWhiteSpace(f1)) sentencaSql += " and p.pn like '%" + f1 + "%'";
-                        if (!string.IsNullOrWhiteSpace(f2)) sentencaSql += " and p.description like '%" + f2 + "%'";
-                        if (!string.IsNullOrWhiteSpace(f3)) sentencaSql += " and p.traducao like '%" + f3 + "%'";
-                        if (!string.IsNullOrWhiteSpace(f4)) sentencaSql += " and p.manufacturer like '%" + f4 + "%'";
-
-                        LibDB.setFilterByUser(sentencaSql, controllerName, true, db);
-                    }
-                }
-
-                // ----------------------------------------
-                // 4) Totais + ordenação + paginação (LINQ)
+                // 3) Totais + ordenação + paginação (LINQ) — listagem padrão
                 // ----------------------------------------
                 int totalRecords = query.Count();
                 int totalDisplayRecords = totalRecords;
@@ -338,6 +284,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_ComexProdutos_*,gc_ComexProdutos_Default,gc_ComexProdutos_ProdutosPre")]
         public ActionResult GetDadosProdutosPre(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             string errorMessage = "";
             string stackTrace = "";
 
@@ -532,7 +479,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }
                     CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_comex_produtos);
                 }
-                ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
+                PreencherLookupsProdutosServicosTodos();
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex</b>" + LibStringFormat.GetTabHtml(1) + record_gc_comex_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_gc_comex_produtos.description.EmptyIfNull().ToString();
                 return View("ModalCreateEdit", record_gc_comex_produtos);
             }
@@ -1128,7 +1075,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             int IdProdutoComex = 0;
             int.TryParse(id, out IdProdutoComex);
             ViewBag.Title = "Produto Comex - Desativar Cadastro";
-            ViewBag.comboComexProdutos = LibDataSets.LoadComboGcComexProdutosComID(db);
+            PreencherLookupsComexProdutosComId();
             gc_comex_produtos RecordComexProduto = db.gc_comex_produtos.Find(IdProdutoComex);
             return View(RecordComexProduto);
         }

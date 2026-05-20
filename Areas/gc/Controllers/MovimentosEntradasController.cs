@@ -24,7 +24,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_MovimentosEntradas_*,gc_MovimentosEntradas_Default")]
 
-    public class MovimentosEntradasController : Controller
+    public partial class MovimentosEntradasController : Controller
     {
         public string MsgGeral = string.Empty;
 
@@ -1857,16 +1857,13 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             CstImportacaoNFEntrada record_cstImportacaoNFEntrada = new CstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Entrada Nacional - Upload/Processamento";
-            var comboMovimentosTipos = new List<SelectListItem>();
-            comboMovimentosTipos.Add(new SelectListItem { Value = "5", Text = "1.1.1 - Entrada - Fornecedor - Nacional" });
-            ViewBag.comboMovimentosTipos = comboMovimentosTipos;
+            PreencherLookupsModalImportarNacional();
             record_cstImportacaoNFEntrada.id_movimento_tipo = 5;
             return View("ModalNFEntradaImportar", record_cstImportacaoNFEntrada);
         }
 
         public ActionResult FormProcessarNFCompraNacional(int? id)
         {
-            var comboProdutos = new List<SelectListItem>();
             CstMovimentoEntradaNF record_cstMovimentoEntradaNF = new CstMovimentoEntradaNF();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Entrada Nacional - Processamento";
             gc_movimentos RecordMovimentoCompraNacional = db.gc_movimentos.Find(id);
@@ -1919,22 +1916,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     record_cstMovimentoEntradaNF.allItens.Add(record_cstMovimentoEntradaNFItem);
                 }
-                try
-                {
-                    int _DisplayScreenWidth = 0;
-                    int _SizeNomeItem = 100;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    comboProdutos.Add(new SelectListItem { Value = "0", Text = "[ SELECIONE ]" });
-                    IQueryable<g_produtos> listaDbProdutos = db.g_produtos.Select(p => p).Where(p => p.ativo == true).OrderBy(p => p.nome);
-                    foreach (g_produtos item1 in listaDbProdutos)
-                    {
-                        String IdProduto = item1.id_produto.EmptyIfNull().ToString().Trim();
-                        String NomeProduto = item1.nome.EmptyIfNull().ToString().Trim();
-                        if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                        comboProdutos.Add(new SelectListItem { Value = IdProduto, Text = NomeProduto });
-                    }
-                }
-                finally { }
+                PreencherLookupsComboProdutosEntradaNacional();
             }
             else
             {
@@ -1948,8 +1930,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     record_cstMovimentoEntradaNF.movimento_permitido = false;
                     record_cstMovimentoEntradaNF.msg_erro = "Movimento já foi Processado anteriormente!";
                 }
+                ViewBag.comboProdutos = new List<SelectListItem>();
             }
-            ViewBag.comboProdutos = comboProdutos;
             return View(record_cstMovimentoEntradaNF);
         }
 
@@ -2057,16 +2039,13 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             CstImportacaoNFEntrada record_cstImportacaoNFEntrada = new CstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-arrow-rotate-left", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Devolução - Upload/Processamento";
-            var comboMovimentosTipos = new List<SelectListItem>();
-            comboMovimentosTipos.Add(new SelectListItem { Value = "9", Text = "1.1.4 - Devolução" });
-            ViewBag.comboMovimentosTipos = comboMovimentosTipos;
+            PreencherLookupsModalImportarDevolucao();
             record_cstImportacaoNFEntrada.id_movimento_tipo = 9;
             return View("ModalNFEntradaImportar", record_cstImportacaoNFEntrada);
         }
 
         public ActionResult FormProcessarNFDevolucao(int? id)
         {
-            var comboProdutos = new List<SelectListItem>();
             CstMovimentoEntradaNF record_cstMovimentoEntradaNF = new CstMovimentoEntradaNF();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-shop", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "NFe Devolução - Upload/Processamento";
             gc_movimentos RecordMovimentoDevolucao = db.gc_movimentos.Find(id);
@@ -2113,24 +2092,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         record_cstMovimentoEntradaNFItem.valor_total_formatado = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", valorTotal).Replace("R$ ", "").Replace("R$", "").Replace("$", "");
                         record_cstMovimentoEntradaNF.allItens.Add(record_cstMovimentoEntradaNFItem);
                     }
-                    int _DisplayScreenWidth = 0;
-                    int _SizeNomeItem = 100;
-                    int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-                    comboProdutos.Add(new SelectListItem { Value = "0", Text = "[ SELECIONE ]" });
-                    String SentencaSQLItens = "select mi.id_movimento_item, mi.sequencia, mi.id_produto, p.nome " +
-                                            " from gc_movimentos_itens mi " +
-                                            " left join g_produtos p on (mi.id_produto = p.id_produto) " +
-                                            " where mi.id_movimento = " + RecordMovimentoDevolucao.id_movimento_ref.ToString() +
-                                            " order by mi.sequencia";
-                    DataTable tableItemReferencia = LibDB.GetDataTable(SentencaSQLItens, db);
-                    List<DataRow> allItensReferencia = tableItemReferencia.AsEnumerable().ToList();
-                    foreach (var dsRowItemReferencia in allItensReferencia)
-                    {
-                        String IdProduto = dsRowItemReferencia["id_produto"].EmptyIfNull().ToString();
-                        String NomeProduto = dsRowItemReferencia["nome"].EmptyIfNull().ToString();
-                        if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                        comboProdutos.Add(new SelectListItem { Value = IdProduto, Text = NomeProduto });
-                    }
+                    PreencherLookupsComboProdutosDevolucao(RecordMovimentoDevolucao.id_movimento_ref);
                     if (RecordMovimentoDevolucao.nf_chave_referenciada.EmptyIfNull().ToString().Length > 0)
                     {
                         gc_movimentos_nf record_gc_movimentos_nf = db.gc_movimentos_nf.Where(m => m.nf_chave_acesso == RecordMovimentoDevolucao.nf_chave_referenciada).FirstOrDefault();
@@ -2151,8 +2113,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     record_cstMovimentoEntradaNF.movimento_permitido = false;
                     record_cstMovimentoEntradaNF.msg_erro = "Movimento já foi Processado anteriormente!";
                 }
+                ViewBag.comboProdutos = new List<SelectListItem>();
             }
-            ViewBag.comboProdutos = comboProdutos;
             return View(record_cstMovimentoEntradaNF);
         }
 
@@ -2257,9 +2219,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             CstImportacaoNFEntrada record_cstImportacaoNFEntrada = new CstImportacaoNFEntrada();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-passport", "", "#B7950B", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importação - Upload (XML e Danfe)";
-            var comboMovimentosTipos = new List<SelectListItem>();
-            comboMovimentosTipos.Add(new SelectListItem { Value = "6", Text = "1.1.2 - Entrada - Fornecedor - Exterior" });
-            ViewBag.comboMovimentosTipos = comboMovimentosTipos;
+            PreencherLookupsModalImportarImportacao();
             record_cstImportacaoNFEntrada.id_movimento_tipo = 6;
             return View("ModalNFEntradaImportar", record_cstImportacaoNFEntrada);
         }
@@ -2728,7 +2688,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 _cstFaturarNFImportacao.NfeNaoAutorizada = false;
                 _cstFaturarNFImportacao.MsgBloqueio = "Nota fiscal não localizada!";
             }
-            ViewBag.comboFreteResponsavel = LibDataSets.LoadComboGcFreteResponsavel(db);
+            PreencherLookupsFreteResponsavel();
             return View(_cstFaturarNFImportacao);
         }
 

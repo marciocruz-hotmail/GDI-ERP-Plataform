@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
@@ -17,6 +18,7 @@ namespace GdiPlataform.Areas.g.Controllers
     public class FiliaisController : Controller
     {
         private GdiPlataformEntities db;
+        private readonly String controllerName = "g_Filiais";
 
         public FiliaisController()
         {
@@ -30,77 +32,193 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Filiais";
-            return View();
+            var model = new CstFiliaisIndex
+            {
+                FiliaisIndex_id_filial = String.Empty,
+                FiliaisIndex_nome = String.Empty
+            };
+            ViewBag.RestoreFilterAutoSearch = false;
+            g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
+            string idRestore, nomeRestore;
+            if (TryParseFiltroFiliaisSemicolon(filtroPersistido.sql_filtro, out idRestore, out nomeRestore))
+            {
+                model.FiliaisIndex_id_filial = idRestore;
+                model.FiliaisIndex_nome = nomeRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(nomeRestore);
+            }
+            return View(model);
         }
 
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
-            if (param == null) param = new jQueryDataTableParamModel();
             string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            var allRecords = new List<Db.g_filiais>();
-            var allRecordsColigadas = db.g_coligadas.Select(g => new { g.id_coligada, g.razao_social }).ToList();
+                bool filterApplied = false;
+                string yesFilterField = param.yesFilterField.EmptyIfNull().ToString().Trim();
+                bool listarTodosExplicito = yesFilterField == "*";
 
-            // Perfil Adm visualiza todos os registros independente de Coligada e Filial
-            if (CachePersister.userIdentity.IdPerfil == 1)
-            { allRecords = db.g_filiais.Where(p => p.id_filial > 0).OrderBy(p => p.nome).ToList(); }
-            else
-            { allRecords = db.g_filiais.Where(f => f.id_filial > 0).OrderBy(p => p.nome).ToList(); }
-
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_filiais, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_filial) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.nome :
-                                     "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
+                g_filtros recordFiltro;
+                if (listarTodosExplicito)
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_filial); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.nome); }
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
                 }
                 else
                 {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_filial); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.nome); }
+                    recordFiltro = ObterFiltroPersistidoUsuario();
                 }
-            }
 
-            List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
-            {
-                var recordGColigadas = allRecordsColigadas.Find(f => f.id_coligada == c.id_coligada);
+                var baseQuery = db.g_filiais.AsNoTracking().Where(f => f.id_filial > 0);
+                int totalRecords = baseQuery.Count();
 
-                list.Add(new[] {
-                                    "", // Coluna de Seleção
-                                    c.id_filial.ToString(),
-                                    c.nome.EmptyIfNull().ToString(),
-                                    (recordGColigadas != null ? recordGColigadas.razao_social.EmptyIfNull().ToString() : String.Empty)
-                                });
-            }
+                string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                if (!hasInline && !listarTodosExplicito)
+                {
+                    TryParseFiltroFiliaisSemicolon(recordFiltro.sql_filtro, out idStr, out nomeStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(nomeStr);
+                }
+
+                if (!listarTodosExplicito && !hasInline)
+                {
+                    return Json(new
+                    {
+                        errorMessage = "",
+                        stackTrace = "",
+                        yesFilterOnOff = "0",
+                        sEcho = param.sEcho,
+                        iTotalRecords = totalRecords,
+                        iTotalDisplayRecords = 0,
+                        aaData = new List<string[]>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                IQueryable<Db.g_filiais> query = baseQuery;
+                if (hasInline && !listarTodosExplicito)
+                {
+                    filterApplied = true;
+                    query = AplicarFiltroFiliaisNaQuery(query, idStr, nomeStr);
+                    LibDB.setFilterByUser(MontarFiltroFiliaisPersistido(idStr, LibStringFormat.NormalizarTermoBuscaTexto(nomeStr)), controllerName, true, db);
+                }
+
+                int totalDisplayRecords = query.Count();
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+                if (length > 100) { length = 100; }
+
+                query = AplicarOrdenacaoFiliaisNaQuery(query, param);
+                var page = query
+                    .Skip(start)
+                    .Take(length)
+                    .Select(f => new { f.id_filial, f.nome, f.id_coligada })
+                    .ToList();
+
+                var coligadaIds = page.Select(f => f.id_coligada).Distinct().ToList();
+                var coligadasPorId = db.g_coligadas.AsNoTracking()
+                    .Where(c => coligadaIds.Contains(c.id_coligada))
+                    .Select(c => new { c.id_coligada, c.razao_social })
+                    .ToList()
+                    .ToDictionary(c => c.id_coligada, c => c.razao_social ?? String.Empty);
+
+                var list = page.Select(f =>
+                {
+                    string razao = coligadasPorId.ContainsKey(f.id_coligada) ? coligadasPorId[f.id_coligada] : String.Empty;
+                    return new[]
+                    {
+                        "",
+                        f.id_filial.ToString(),
+                        f.nome ?? "",
+                        razao
+                    };
+                }).ToList();
+
+                filterOnOff = filterApplied ? "1" : "0";
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalDisplayRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
                 return JsonDataTableException(e, param, filterOnOff);
             }
+        }
+
+        private g_filtros ObterFiltroPersistidoUsuario()
+        {
+            if (CachePersister.userIdentity.allFiltros == null)
+            {
+                return new g_filtros();
+            }
+            string token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
+            g_filtros filtro = CachePersister.userIdentity.allFiltros
+                .Where(f => f.token == token && f.controller == controllerName)
+                .FirstOrDefault();
+            return filtro ?? new g_filtros();
+        }
+
+        private static bool TryParseFiltroFiliaisSemicolon(string raw, out string id, out string nome)
+        {
+            id = nome = String.Empty;
+            if (String.IsNullOrWhiteSpace(raw)) return false;
+            string[] campos = raw.Split(';');
+            if (campos.Length < 2) return false;
+            id = campos[0].EmptyIfNull().ToString().Trim();
+            nome = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(nome);
+        }
+
+        private static string MontarFiltroFiliaisPersistido(string id, string nome)
+        {
+            return (id ?? String.Empty) + ";" + (nome ?? String.Empty);
+        }
+
+        private static bool TryParseIdFilialFiltro(string idStr, out int idFilial)
+        {
+            idFilial = 0;
+            if (String.IsNullOrWhiteSpace(idStr) || idStr == "0") return false;
+            return int.TryParse(idStr.Trim(), out idFilial) && idFilial != 0;
+        }
+
+        private static IQueryable<Db.g_filiais> AplicarFiltroFiliaisNaQuery(IQueryable<Db.g_filiais> query, string idStr, string nomeStr)
+        {
+            if (TryParseIdFilialFiltro(idStr, out int idFilial))
+            {
+                query = query.Where(f => f.id_filial == idFilial);
+            }
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
+            {
+                query = query.Where(f => f.nome != null && DbFunctions.Like(f.nome, padraoNome));
+            }
+            return query;
+        }
+
+        private static IQueryable<Db.g_filiais> AplicarOrdenacaoFiliaisNaQuery(IQueryable<Db.g_filiais> query, jQueryDataTableParamModel param)
+        {
+            bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
+            if (param.iSortingCols > 0)
+            {
+                if (param.iSortCol_0 == 2)
+                {
+                    return asc ? query.OrderBy(f => f.nome) : query.OrderByDescending(f => f.nome);
+                }
+                if (param.iSortCol_0 == 1)
+                {
+                    return asc ? query.OrderBy(f => f.id_filial) : query.OrderByDescending(f => f.id_filial);
+                }
+            }
+            return query.OrderBy(f => f.nome);
         }
 
         #region PreencherLookupsCreateEdit

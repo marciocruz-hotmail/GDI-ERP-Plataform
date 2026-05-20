@@ -21,7 +21,7 @@ using System.Web.Mvc;
 
 namespace GdiPlataform.Areas.g.Controllers
 {
-    public class GedController : Controller
+    public partial class GedController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_Ged";
@@ -58,7 +58,7 @@ namespace GdiPlataform.Areas.g.Controllers
 
         public ActionResult Index()
         {
-            ViewBag.ComboGedTiposFiltro = LibDataSets.LoadComboGedArquivosTipos(db, 0, 0);
+            PreencherLookupsGedTiposFiltro();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Gestão Eletrônica de Documentos";
             return View();
         }
@@ -72,9 +72,8 @@ namespace GdiPlataform.Areas.g.Controllers
             {
             // Parâmetros
             bool filterDb = false;
-            bool filterAdvanced = false;
             String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, false, db);
             List<g_usuarios> allUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
             List<ged_arquivos_tipos> allArquivosTipos = db.ged_arquivos_tipos.Where(t => t.ativo == true).ToList();
             var allRecords = new List<Db.ged_arquivos>();
@@ -86,11 +85,10 @@ namespace GdiPlataform.Areas.g.Controllers
 
             // Verificação se há algum filtro ativo
             if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) { filterDb = true; }
-            else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) { filterAdvanced = true; };
 
             SentencaSQL = " select * from ged_arquivos ged where ged.ativo = 1 ";
 
-            if ((filterDb == false) && (filterAdvanced == false))
+            if (!filterDb)
             {
                 if ((param.yesCustomField01.EmptyIfNull().ToString().Trim().Length > 0) && (param.yesCustomField01.EmptyIfNull().ToString().Trim() != "-1") && (param.yesCustomField01.EmptyIfNull().ToString().Trim() != "0"))
                 {
@@ -163,7 +161,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                 });
             }
 
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
+            if (filterDb) { filterOnOff = "1"; }
 
             return Json(new
             {
@@ -208,7 +206,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Arquivo</b>";
             }
 
-            ViewBag.ComboGedTipos = LibDataSets.LoadComboGedArquivosTipos(db, IdTipo.GetValueOrDefault(), IdTipoPai.GetValueOrDefault());
+            PreencherLookupsGedTipos(IdTipo.GetValueOrDefault(), IdTipoPai.GetValueOrDefault());
             return View("ModalUploadFileGed", record_cstUploadGed);
         }
 
@@ -786,7 +784,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Alterar Metadados de Arquivo</b>";
             }
 
-            ViewBag.ComboGedTipos = LibDataSets.LoadComboGedArquivosTipos(db, 0, 0);
+            PreencherLookupsGedTipos(0, 0);
             return View("ModalEditFileGed", record_cstUploadGed);
         }
 

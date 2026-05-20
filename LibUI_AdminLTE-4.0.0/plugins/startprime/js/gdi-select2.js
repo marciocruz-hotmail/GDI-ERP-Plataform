@@ -106,6 +106,49 @@ function gdiSelect2BuildOptions($el, dropdownParentResolved, extraOpts) {
     return opts;
 }
 
+/**
+ * Select2 com Ajax (contrato servidor: { items: [{ id, text }] } — ver GetClientesLookup / GetProdutosLookup).
+ * Atributos no &lt;select&gt;: data-gdi-lookup-url (obrig.), data-gdi-lookup-min-length (opc., default 2).
+ */
+function gdiSelect2BuildAjaxOptions($el, dropdownParentResolved, extraOpts) {
+    var url = ($el.attr('data-gdi-lookup-url') || '').trim();
+    var minLen = parseInt($el.attr('data-gdi-lookup-min-length') || '2', 10);
+    if (isNaN(minLen) || minLen < 0) {
+        minLen = 2;
+    }
+    var opts = gdiSelect2BuildOptions($el, dropdownParentResolved, extraOpts);
+    opts.minimumInputLength = minLen;
+    opts.ajax = {
+        url: url,
+        dataType: 'json',
+        delay: 300,
+        cache: true,
+        data: function (params) {
+            return {
+                q: params.term || '',
+                page: params.page || 1
+            };
+        },
+        processResults: function (data) {
+            if (data && data.errorMessage) {
+                if (typeof GdiAjaxNotifyInconsistencias === 'function') {
+                    GdiAjaxNotifyInconsistencias(data.errorMessage, { severity: data.severity || 'error' });
+                } else if (typeof LibMessageError === 'function') {
+                    LibMessageError('Atenção', data.errorMessage);
+                }
+                return { results: [] };
+            }
+            var items = (data && data.items) ? data.items : [];
+            return {
+                results: items.map(function (x) {
+                    return { id: x.id, text: x.text };
+                })
+            };
+        }
+    };
+    return opts;
+}
+
 function gdiDestroySelect2IfAny($el) {
     try {
         if ($el.hasClass('select2-hidden-accessible') && typeof $el.select2 === 'function') {
@@ -279,8 +322,9 @@ function gdiInitSelect2OnCollection(selector, dropdownParent, extraOpts) {
             }
             return;
         }
+        var lookupUrl = ($el.attr('data-gdi-lookup-url') || '').trim();
         var nOpts = gdiSelect2StaticOptionCount($el);
-        if (nOpts <= 5 && $el.attr('data-gdi-select2-search') !== 'true') {
+        if (!lookupUrl && nOpts <= 5 && $el.attr('data-gdi-select2-search') !== 'true') {
             gdiDestroySelect2IfAny($el);
             if (window.GDI_DEBUG) {
                 console.log('[gdi-select2] lista curta (≤5 options), mantém <select> nativo. Forçar Select2: data-gdi-select2-search="true".', $el.get(0));
@@ -290,7 +334,8 @@ function gdiInitSelect2OnCollection(selector, dropdownParent, extraOpts) {
         var $resolvedParent = gdiSelect2ResolveDropdownParent($el, dropdownParent);
         gdiDestroySelect2IfAny($el);
         try {
-            $el.select2(gdiSelect2BuildOptions($el, $resolvedParent, extraOpts));
+            var buildFn = lookupUrl ? gdiSelect2BuildAjaxOptions : gdiSelect2BuildOptions;
+            $el.select2(buildFn($el, $resolvedParent, extraOpts));
             gdiSyncSelect2ValidationToContainer($el);
         } catch (e) {
             if (window.GDI_DEBUG) {

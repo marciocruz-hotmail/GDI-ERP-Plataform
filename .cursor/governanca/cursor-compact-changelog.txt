@@ -1,0 +1,119 @@
+Você está atuando como assistente técnico em um projeto ASP.NET MVC .NET Framework em processo de modernização e refatoração incremental.
+
+Objetivo:
+Compactar, higienizar e reorganizar o arquivo CHANGELOG-DEV.md atual para reduzir consumo de contexto por LLMs, mantendo rastreabilidade técnica e preservando o histórico completo.
+
+Contexto:
+- O arquivo CHANGELOG-DEV.md atual contém histórico detalhado de alterações, modernizações, refatorações, correções e decisões técnicas.
+- Esse arquivo é usado por Claude Code e Cursor como referência.
+- O arquivo ficou grande e pode estar consumindo contexto desnecessário.
+- O objetivo não é apagar histórico, mas separar o histórico completo de um changelog operacional compacto.
+
+Arquivos envolvidos:
+- CHANGELOG-DEV.md
+- docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md
+- BACKLOG-DEV.md, caso exista
+- AI-CONTEXT.md, caso exista
+
+Tarefa principal:
+1. Ler integralmente o CHANGELOG-DEV.md atual.
+2. Preservar uma cópia completa e sem compactação em:
+   docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md
+3. Reescrever o CHANGELOG-DEV.md em formato compacto.
+4. Manter no CHANGELOG-DEV.md apenas:
+   - Estado atual do projeto.
+   - Decisões técnicas ainda válidas.
+   - Últimas alterações relevantes.
+   - Pendências abertas.
+   - Alertas técnicos importantes.
+   - Referências para arquivos históricos.
+5. Remover do CHANGELOG-DEV.md principal:
+   - Repetições.
+   - Microalterações sem impacto técnico relevante.
+   - Logs muito granulares de arquivos alterados.
+   - Registros duplicados.
+   - Descrições operacionais excessivas.
+6. Não perder nenhuma informação histórica, pois o conteúdo completo deve ficar arquivado.
+
+Critérios para manter informação no CHANGELOG-DEV.md principal:
+Manter informações que respondam:
+- Qual é o estado atual do projeto?
+- Quais decisões técnicas continuam válidas?
+- Quais módulos foram alterados recentemente?
+- Quais pendências ainda exigem atenção?
+- Quais riscos técnicos precisam ser lembrados?
+- Onde está o histórico completo?
+
+Critérios para mover apenas para histórico:
+Mover para o arquivo histórico, mas remover do changelog principal:
+- Lista longa de arquivos alterados.
+- Correções pequenas já concluídas.
+- Ajustes de formatação.
+- Detalhes intermediários de tentativa e erro.
+- Logs repetidos de execução.
+- Mensagens extensas de ferramentas.
+- Itens que não afetam decisão técnica futura.
+
+Formato obrigatório do novo CHANGELOG-DEV.md:
+
+# CHANGELOG-DEV.md
+
+## Estado atual do projeto
+
+Descrever em poucos parágrafos o estado técnico atual do projeto.
+
+## Decisões técnicas ativas
+
+Listar decisões que continuam válidas, por exemplo:
+- Manter .NET Framework nesta fase.
+- Realizar modernização incremental.
+- Evitar alteração de banco de dados sem autorização.
+- Preservar funcionalidades existentes.
+- Priorizar baixo risco e commits pequenos.
+
+## Últimas alterações relevantes
+
+Organizar por data, fase ou módulo.
+Usar resumo técnico, não log granular.
+
+Exemplo:
+### 2026-05
+- Refatorado módulo financeiro para melhorar organização e reduzir duplicidade.
+- Ajustada integração com AWS S3 para padronizar credenciais e permissões.
+- Revisadas views críticas para compatibilidade com Bootstrap/AdminLTE.
+
+## Pendências abertas
+
+Listar pendências técnicas ainda não concluídas.
+
+## Alertas técnicos
+
+Registrar pontos sensíveis, riscos ou cuidados importantes.
+
+## Histórico completo
+
+Informar que o histórico completo foi preservado em:
+- docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md
+
+Se existirem arquivos históricos adicionais, listar também.
+
+Regras obrigatórias:
+- Não alterar código-fonte.
+- Não alterar arquivos de configuração.
+- Não apagar histórico completo.
+- Não inventar alterações que não estejam no changelog original.
+- Não transformar pendência em concluído sem evidência no changelog original.
+- Não remover decisões técnicas ainda válidas.
+- Não modificar o sentido técnico das entradas existentes.
+- Se houver dúvida sobre a relevância de um item, manter no CHANGELOG-DEV.md ou registrá-lo em uma seção "Itens a revisar".
+
+Saída esperada:
+Ao final, apresente:
+1. Arquivos criados ou modificados.
+2. Quantidade aproximada de redução do CHANGELOG-DEV.md, se possível.
+3. Principais informações preservadas.
+4. Pendências identificadas.
+5. Confirmação de que o histórico completo foi arquivado.
+
+Importante:
+O resultado deve facilitar o uso futuro por Claude Code e Cursor, reduzindo a janela de contexto necessária sem perder rastreabilidade.

@@ -7,7 +7,7 @@ Execute o checklist completo de pré-publish para o GDI-ERP-Plataform.
 Execute o script de verificação e reporte os resultados:
 
 ```
-python Scripts/gdi_verify_csproj_gdi_helpers.py
+python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py
 ```
 
 Se exit code 1: liste as views com GdiAjax*/GdiDt* ausentes do .csproj e pergunte se deve corrigir.
@@ -15,7 +15,7 @@ Se exit code 1: liste as views com GdiAjax*/GdiDt* ausentes do .csproj e pergunt
 ## Passo 2 — Verificar DataTables área g
 
 ```
-python Scripts/gdi_inventory_datatables_g_area.py
+python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py
 ```
 
 Reporte controllers em Areas/g que ainda não têm o padrão try/catch + errorMessage.

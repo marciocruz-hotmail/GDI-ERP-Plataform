@@ -5,7 +5,7 @@ using GdiPlataform.Lib.Lookups;
 
 namespace GDI_ERP_Plataform.App_Start
 {
-    /// <summary>Registo MVC 5 de ILookupQueryService (Fase 2 LibDataSets).</summary>
+    /// <summary>Registo MVC 5 de ILookupQueryService (Fase 2 LibDataSets). <see cref="LookupQueryServiceAccessor.Current"/> resolve daqui em request MVC; construtores piloto (ex. Estoque, Atendimentos) aceitam injeção explícita para testes.</summary>
     public static class LookupDependencyConfig
     {
         public static void Register()

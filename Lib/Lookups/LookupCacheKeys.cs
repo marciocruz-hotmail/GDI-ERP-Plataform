@@ -39,6 +39,40 @@ namespace GdiPlataform.Lib.Lookups
         public const string GcEstoqueEnderecoCorredor = "gc_estoque_endereco_corredor";
         public const string GcEstoqueEnderecoPrateleira = "gc_estoque_endereco_prateleira";
         public const string GcClientesDestinatariosDataset = "gc_clientes_destinatarios_dataset";
+        public const string GcClientesContatosDataset = "gc_clientes_contatos_dataset";
+        public const string GcTiposMovimentosVendas = "gc_tipos_movimentos_vendas";
+        public const string GcTiposMovimentosCompras = "gc_tipos_movimentos_compras";
+        public const string GcTiposMovimentosCreateEdit = "gc_tipos_movimentos_create_edit";
+        public const string GcStatusMovimentos = "gc_status_movimentos";
+        public const string GcMoedas = "gc_moedas";
+        public const string GcPagRecCondicoesTodas = "gc_pagrec_condicoes_todas";
+        public const string GcPagRecCondicoesFaturaveis = "gc_pagrec_condicoes_faturaveis";
+        public const string GcPagRecTiposFaturaveis = "gc_pagrec_tipos_faturaveis";
+        public const string GcFinanceiroStatus = "gc_financeiro_status";
+        public const string GcFinanceiroFiltroStatus = "gc_financeiro_filtro_status";
+        public const string GContasCaixasGerencial = "g_contas_caixas_gerencial";
+        public const string GDebitoCredito = "g_debito_credito";
+        public const string ARowsColors = "a_rows_colors";
+        public const string GClassificacaoFinanceira = "g_classificacao_financeira";
+        public const string GcCfopFinalidade = "gc_cfop_finalidade";
+        public const string GcCfopOperacoesTelaPedido = "gc_cfop_operacoes_tela_pedido";
+        public const string GcComexImportacoesTodas = "gc_comex_importacoes_todas";
+        public const string GcComexProdutosComId = "gc_comex_produtos_com_id";
+        public const string GcClientesContatosTipos = "gc_clientes_contatos_tipos";
+        public const string GcClientesContatosPedido = "gc_clientes_contatos_pedido";
+        public const string GProdutosTipos = "g_produtos_tipos";
+        public const string GProdutosNcm = "g_produtos_ncm";
+        public const string GcIcmsUfIsento = "gc_icms_uf_isento";
+        public const string GcIcmsCstSimples = "gc_icms_cst_simples";
+        public const string GUnidadeMedida = "g_unidade_medida";
+        public const string GContratosTipos = "g_contratos_tipos";
+        public const string GcProdutosFamilia = "gc_produtos_familia";
+        public const string GcProdutosStatus = "gc_produtos_status";
+        public const string GUsuariosAtendimentoResponsavel = "g_usuarios_atendimento_responsavel";
+        public const string GUsuariosAtendimentoSolicitante = "g_usuarios_atendimento_solicitante";
+        public const string GDepartamentos = "g_departamentos";
+        public const string GAtendimentosStatus = "g_atendimentos_status";
+        public const string GAtendimentosCategorias = "g_atendimentos_categorias";
 
         /// <summary>Combo global (sem parâmetros de negócio).</summary>
         public static string Combo(string lookupName, string sessionToken)

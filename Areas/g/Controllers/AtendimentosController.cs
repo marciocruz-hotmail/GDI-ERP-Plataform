@@ -2,6 +2,7 @@ using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 using GdiPlataform.Security;
 using System;
 using System.Collections.Generic;
@@ -15,13 +16,18 @@ using System.Web.Mvc;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Atendimentos_*,g_Atendimentos_Default")]
-    public class AtendimentosController : Controller
+    public partial class AtendimentosController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_Atendimentos";
+        private readonly ILookupQueryService _lookupQueryService;
 
-        public AtendimentosController()
+        public AtendimentosController() : this(null) { }
+
+        /// <summary>Piloto 1.9.2 — injeção opcional; fallback via <see cref="LookupQueryServiceAccessor"/>.</summary>
+        public AtendimentosController(ILookupQueryService lookupQueryService)
         {
+            _lookupQueryService = lookupQueryService ?? LookupQueryServiceAccessor.Current;
             if (!CachePersister.dataBase.EmptyIfNull().ToString().Equals(String.Empty))
             {
                 db = new GdiPlataformEntities(CachePersister.dataBase);
@@ -30,11 +36,7 @@ namespace GdiPlataform.Areas.g.Controllers
 
         public ActionResult Index()
         {
-            ViewBag.ComboUsuariosAtendimentoSolicitante = LibDataSets.LoadComboGUsuariosAtendimentoSolicitante(db);
-            ViewBag.ComboUsuariosAtendimentoResponsavel = LibDataSets.LoadComboGUsuariosAtendimentoResponsavel(db);
-            ViewBag.ComboGDepartamentos = LibDataSets.LoadComboGDepartamentos(db);
-            ViewBag.ComboGAtendimentosCategorias = LibDataSets.LoadComboGAtendimentosCategorias(db);
-            ViewBag.ComboGAtendimentosStatus = LibDataSets.LoadComboGAtendimentosStatus(db);
+            PreencherLookupsIndexAtendimentos();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-ticket", "", "", "") + LibStringFormat.GetTabHtml(1) + "Gestão de Atendimentos";
             g_atendimentos record_g_atendimentos = new Db.g_atendimentos();
             record_g_atendimentos.id_atendimento = 0;
@@ -230,15 +232,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Novo Atendimento</b>";
                 record_g_atendimentos.concluido = false;
                 record_g_atendimentos.privado = false;
-                ViewBag.ComboGDepartamentos = LibDataSets.LoadComboGDepartamentos(db);
-                var ComboGAtendimentosCategorias = new List<SelectListItem>();
-                ComboGAtendimentosCategorias.Add(new SelectListItem { Value = "0", Text = "[ Selecione a Categoria ]" });
-                ViewBag.ComboGAtendimentosCategorias = ComboGAtendimentosCategorias;
-                
-                ViewBag.ComboVendedores = LibDataSets.LoadComboGVendedores(db);
-                ViewBag.ComboClientes = LibDataSets.LoadComboSomenteGClientes(db);
-                ViewBag.ComboClientes.Add(new SelectListItem { Value = "0", Text = "[ Selecione o Cliente ]" });
-                ViewBag.ComboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
+                PreencherLookupsAtendimentoFormulario();
                 record_g_atendimentos.id_status = 1;
                 return View("ModalCreateNewAtendimento", record_g_atendimentos);
             }
@@ -589,16 +583,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     g_atendimentos record_g_atendimentos = db.g_atendimentos.Find(id);
                     ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Atendimento</b>" + LibStringFormat.GetTabHtml(1) + record_g_atendimentos.id_atendimento.EmptyIfNull().ToString() + " - " + EncodeAtendimentoDisplay(record_g_atendimentos.solicitacao.EmptyIfNull().ToString());
-                    ViewBag.ComboGDepartamentos = LibDataSets.LoadComboGDepartamentos(db);
-                    ViewBag.ComboGAtendimentosStatus = LibDataSets.LoadComboGAtendimentosStatus(db);
-                    ViewBag.ComboUsuariosAtendimentoResponsavel = LibDataSets.LoadComboGUsuariosAtendimentoResponsavel(db);
-                    var ComboGAtendimentosCategorias = new List<SelectListItem>();
-                    ComboGAtendimentosCategorias.Add(new SelectListItem { Value = "0", Text = "[ Selecione a Categoria ]" });
-                    ViewBag.ComboGAtendimentosCategorias = ComboGAtendimentosCategorias;
-                    ViewBag.ComboVendedores = LibDataSets.LoadComboGVendedores(db);
-                    ViewBag.ComboClientes = LibDataSets.LoadComboSomenteGClientes(db);
-                    ViewBag.ComboClientes.Add(new SelectListItem { Value = "0", Text = "[ Selecione o Cliente ]" });
-                    ViewBag.ComboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
+                    PreencherLookupsAtendimentoEdit();
                     ViewBag.MsgCategoria = EncodeAtendimentoDisplay(db.g_atendimentos_categorias.Find(record_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString());
                     ViewBag.MsgCategoria += " (Solicitante: " + EncodeAtendimentoDisplay(db.g_usuarios.Find(record_g_atendimentos.solicitacao_id_usuario).nome.EmptyIfNull().ToString()) + ")";
                     return View("Edit", record_g_atendimentos);
@@ -711,7 +696,6 @@ namespace GdiPlataform.Areas.g.Controllers
                         record_g_atendimentos_atividades.id_atendimento = IdAtendimento.GetValueOrDefault();
                         record_g_atendimentos_atividades.privado = false;
                     }
-//                    ViewBag.ComboCrmOperadores = LibDataSets.LoadCacheComboCrmOperadores(db);
                     return View("ModalCreateEditAtividade", record_g_atendimentos_atividades);
                 }
             }

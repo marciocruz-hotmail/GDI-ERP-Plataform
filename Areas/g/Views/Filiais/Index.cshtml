@@ -1,4 +1,4 @@
-@model IEnumerable<GdiPlataform.Db.g_filiais>
+@model GdiPlataform.Areas.g.Models.CstFiliaisIndex
 @using GdiPlataform.Security
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -14,6 +14,7 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="Filiais" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -23,6 +24,26 @@
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
             </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 mt-1 pt-1">
+                        @Html.Label("Id", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.FiliaisIndex_id_filial, new { @class = "form-control", @id = "edit_id_filial", @placeholder = "Id.", @onkeypress = "keypressedFiliais(event);" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(model => model.FiliaisIndex_nome, new { @class = "form-control", @id = "edit_nome_filial", @placeholder = "Nome da filial", @onkeypress = "keypressedFiliais(event);" })
+                        </div>
+                        <div class="col-sm-3 text-sm-start">
+                            <button type="button" id="btnPesquisarFiliais" title="Pesquisar filiais" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFiliais()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroFiliais" title="Limpar filtro e listar todos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroFiliais()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card-body m-0 p-1 gdi-index-filiais-dt" style="max-width: 100%; overflow-x: auto;">
                 <div class="form-horizontal m-0 p-0">
                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
@@ -30,9 +51,9 @@
                             <thead>
                                 <tr>
                                     <th>[x]</th>
-                                    <th>@Html.DisplayNameFor(model => model.id_filial)</th>
-                                    <th>@Html.DisplayNameFor(model => model.nome)</th>
-                                    <th>@Html.DisplayNameFor(model => model.id_coligada)</th>
+                                    <th>Id.</th>
+                                    <th>Nome</th>
+                                    <th>Coligada</th>
                                     @if (podeEditarFilial)
                                     {
                                         <th><i class="fa-regular fa-edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar filial"></i></th>
@@ -57,6 +78,12 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroFiliais('0');
+            gdiAplicarFoco('#edit_id_filial', true);
+            @if (ViewBag.RestoreFilterAutoSearch == true)
+            {
+                <text>if (jsFiliaisTemCriterioFiltro()) { jsAjaxPesquisarFiliais(); }</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -64,14 +91,79 @@
         }
     });
 
+    function keypressedFiliais(e)
+    {
+        if (e.keyCode == 13)
+        {
+            e.preventDefault();
+            jsAjaxPesquisarFiliais();
+        }
+    }
+
+    function jsFiliaisTemCriterioFiltro()
+    {
+        return !isEmpty($('#edit_id_filial').val()) || !isEmpty($('#edit_nome_filial').val());
+    }
+
+    function jsAtualizarIndicadorFiltroFiliais(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroFiliais',
+            tituloInativo: 'Limpar filtro e listar todos',
+            tituloAtivo: 'Filtro ativo — limpar e listar todas as filiais'
+        });
+    }
+
+    function jsAjaxPesquisarFiliais()
+    {
+        try
+        {
+            if (!jsFiliaisTemCriterioFiltro())
+            {
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Nome).");
+                return;
+            }
+            LibMessageProcessando('Pesquisando filiais...');
+            document.getElementById("yesFilterField").value = "";
+            $("#dtGFiliais").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsAjaxPesquisarFiliais] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroFiliais()
+    {
+        try
+        {
+            $('#edit_id_filial').val('');
+            $('#edit_nome_filial').val('');
+            document.getElementById("yesFilterField").value = "*";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGFiliais").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroFiliais] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsCreateTable()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
             otableFiliais = $('#dtGFiliais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
-                if (GdiDtNotifyJsonErrorMessage(json)) { }
+                if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                else if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroFiliais(json.yesFilterOnOff);
+                }
+                LibMessageProcessandoHide();
             }).DataTable({
+            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -86,6 +178,9 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
+                        yesFilterController: $('#yesFilterController').val().toString(),
+                        yesCustomField01: emptyIfNull($('#edit_id_filial').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_nome_filial').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -103,7 +198,7 @@
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                 { "width": "8%", orderable: true, className: 'text-sm-center', targets: [1] },
-                { "width": "@(podeEditarFilial ? "46%" : "50%")", orderable: true, className: 'text-sm-start', targets: [2] },
+                { "width": "@(podeEditarFilial ? "34%" : "38%")", orderable: true, className: 'text-sm-start', targets: [2] },
                 { "width": "30%", orderable: false, className: 'text-sm-start', targets: [3] }
                 @if (podeEditarFilial)
                 {
@@ -129,7 +224,7 @@
             },
                 language:
                 {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                    sEmptyTable: 'Informe Id. ou Nome e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',

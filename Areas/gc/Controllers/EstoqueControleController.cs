@@ -16,7 +16,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueControle_*,gc_EstoqueControle_Default")]
-    public class EstoqueControleController : Controller
+    public partial class EstoqueControleController : Controller
     {
         private GdiPlataformEntities db;
         private readonly string controllerName = "gc_EstoqueControle";
@@ -261,9 +261,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             newRecord.ativo = true;
             newRecord.id_coligada = 1;
             newRecord.id_filial = 1;
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-            ViewBag.comboProdutosFamilia = LibDataSets.LoadComboGcProdutosFamilia(db);
-            ViewBag.comboProdutosStatus = LibDataSets.LoadComboGcProdutosStatus(db);
+            PreencherLookupsProdutosControleCreate();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições (Novo)</b";
             return View("CreateEdit", newRecord);
         }
@@ -350,9 +348,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 sucesso = false;
                 msgRetorno = LibExceptions.getExceptionShortMessage(e);
             }
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosImportados(db);
-            ViewBag.comboProdutosFamilia = LibDataSets.LoadComboGcProdutosFamilia(db);
-            ViewBag.comboProdutosStatus = LibDataSets.LoadComboGcProdutosStatus(db);
+            PreencherLookupsProdutosControleImportados();
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Produtos - Controles e Aferições";
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -369,9 +365,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 return RedirectToAction("Index");
             }
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosImportados(db);
-            ViewBag.comboProdutosFamilia = LibDataSets.LoadComboGcProdutosFamilia(db);
-            ViewBag.comboProdutosStatus = LibDataSets.LoadComboGcProdutosStatus(db);
+            PreencherLookupsProdutosControleImportados();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos_controle.id_produto_controle.EmptyIfNull().ToString() + " - " + record_g_produtos_controle.serial.EmptyIfNull().ToString();
             return View("CreateEdit", record_g_produtos_controle);
         }
@@ -402,9 +396,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
                 }
             }
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosImportados(db);
-            ViewBag.comboProdutosFamilia = LibDataSets.LoadComboGcProdutosFamilia(db);
-            ViewBag.comboProdutosStatus = LibDataSets.LoadComboGcProdutosStatus(db);
+            PreencherLookupsProdutosControleImportados();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos_controle.id_produto_controle.EmptyIfNull().ToString() + " - " + record_g_produtos_controle.serial.EmptyIfNull().ToString();
             return View("CreateEdit", record_g_produtos_controle);
         }

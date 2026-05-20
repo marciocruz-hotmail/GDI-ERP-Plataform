@@ -5,7 +5,7 @@ Execute a verificação de integridade entre views que usam helpers GDI e o arqu
 ## Execução
 
 ```
-python Scripts/gdi_verify_csproj_gdi_helpers.py
+python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py
 ```
 
 ## O que verificar

@@ -16,14 +16,21 @@ using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
-    public class EstoqueController : Controller
+    public partial class EstoqueController : Controller
     {
         private GdiPlataformEntities db;
-        public EstoqueController()
+        private readonly ILookupQueryService _lookupQueryService;
+
+        public EstoqueController() : this(null) { }
+
+        /// <summary>Piloto 1.9.2 — injeção opcional; fallback via <see cref="LookupQueryServiceAccessor"/>.</summary>
+        public EstoqueController(ILookupQueryService lookupQueryService)
         {
+            _lookupQueryService = lookupQueryService ?? LookupQueryServiceAccessor.Current;
             if (!CachePersister.dataBase.EmptyIfNull().ToString().Equals(String.Empty))
             {
                 db = new GdiPlataformEntities(CachePersister.dataBase);
@@ -35,35 +42,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             PreencherLookupsEstoque();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-boxes-stacked", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Posição de Estoque";
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosImportados(db);
-            ViewBag.comboProdutosServicos.Insert(0, new SelectListItem { Value = "0", Text = "[ TODOS OS ITENS ]" });
             return View();
-        }
-
-        public void PreencherLookupsEstoque()
-        {
-            int _SizeNomeItem = 100;
-            int _DisplayScreenWidth = 0;
-            int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out _DisplayScreenWidth);
-            if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 500)) { _SizeNomeItem = 50; }
-            if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 400)) { _SizeNomeItem = 40; }
-            if ((_DisplayScreenWidth > 0) && (_DisplayScreenWidth < 300)) { _SizeNomeItem = 30; }
-            var comboProdutos = new List<SelectListItem>();
-            try
-            {
-                comboProdutos.Add(new SelectListItem { Value = "0", Text = "[ TODOS OS PRODUTOS ]" });
-                comboProdutos.Add(new SelectListItem { Value = "-1", Text = "[ PRODUTOS COM SALDO ]" });
-                IQueryable<g_produtos> listaDbProdutos = db.g_produtos.Select(p => p).Where(p => p.ativo == true).OrderBy(p => p.nome);
-                foreach (g_produtos item1 in listaDbProdutos)
-                {
-                    String IdProduto = item1.id_produto.EmptyIfNull().ToString().Trim();
-                    String NomeProduto = item1.nome.EmptyIfNull().ToString().Trim();
-                    if (NomeProduto.Length > _SizeNomeItem) { NomeProduto = NomeProduto.Substring(0, _SizeNomeItem) + "..."; };
-                    comboProdutos.Add(new SelectListItem { Value = IdProduto, Text = NomeProduto });
-                }
-            }
-            finally { }
-            ViewBag.comboProdutos = comboProdutos;
         }
 
         public ActionResult GetDadosEstoque(jQueryDataTableParamModel param)
@@ -232,8 +211,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             RecordEstoqueTransferencia.id_local_estoque_origem = 0;
             RecordEstoqueTransferencia.id_local_estoque_destino = 0;
             RecordEstoqueTransferencia.id_produto = -1;
-            ViewBag.comboLocaisEstoque = LibDataSets.LoadComboGcLocaisEstoqueOrders(db);
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosImportados(db);
+            PreencherLookupsRecebimentoEstoque();
             return View(RecordEstoqueTransferencia);
         }
 

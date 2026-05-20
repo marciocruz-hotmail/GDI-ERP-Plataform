@@ -16,6 +16,8 @@ namespace GdiPlataform.Areas.g.Controllers
     public class CentrosCustosController : Controller
     {
         private GdiPlataformEntities db;
+        private readonly String controllerName = "g_CentrosCustos";
+
         public CentrosCustosController()
         {
             if (!CachePersister.dataBase.EmptyIfNull().ToString().Equals(String.Empty))
@@ -59,20 +61,23 @@ namespace GdiPlataform.Areas.g.Controllers
             if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            if (!param.yesFilterField.EmptyIfNull().ToString().Equals(String.Empty)) { filterOnOff = "1"; }
-
             var allRecords = new List<Db.g_centros_custos>();
             List<string[]> list = new List<string[]>();
 
-            if (param.yesFilterField.EmptyIfNull().ToString().Equals(String.Empty))
+            g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+            bool filterDb = recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
+            if (filterDb) { filterOnOff = "1"; }
+
+            if (!filterDb)
             {
                 allRecords = db.g_centros_custos.Where(x => x.id_centro_custo > 0).OrderBy(x => x.codigo).ToList();
             }
             else
             {
-                String SentencaSQL = "select * from g_centros_custos where id_centro_custo > 0 and ";
-                SentencaSQL += LibStringFormat.SentencaSQLFiltroGenerico(param.yesFilterField, param.yesFilterOperador, param.yesFilterText);
-                allRecords = db.g_centros_custos.SqlQuery(SentencaSQL.ToString()).ToList();
+                string sentencaSql = recordFiltro.advanced == true
+                    ? recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim()
+                    : "select * from g_centros_custos where id_centro_custo > 0 and " + recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim();
+                allRecords = db.g_centros_custos.SqlQuery(sentencaSql).ToList();
             }
 
             var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);

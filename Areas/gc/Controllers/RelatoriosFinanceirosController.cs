@@ -16,7 +16,7 @@ using GdiPlataform.Lib;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
-    public class RelatoriosFinanceirosController : Controller
+    public partial class RelatoriosFinanceirosController : Controller
     {
         private GdiPlataformEntities db;
         private HSSFWorkbook _workbookCatalogo;
@@ -42,13 +42,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             view_cstModalRelatorio.Field_Data_02 = LibDateTime.getUltimoDiaMesAtual();
             view_cstModalRelatorio.Field_Int_01 = 0;
             view_cstModalRelatorio.Field_Int_02 = 0;
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
-            ViewBag.comboContasCaixas = LibDataSets.LoadComboGContasCaixas(db);
-            ViewBag.comboContasCaixas.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS AS CONTAS ]" });
-            ViewBag.comboTipoPagRec = LibDataSets.LoadComboPagRecTiposFaturaveis(db);
-            ViewBag.comboGcFinanceiroStatus = LibDataSets.LoadComboGcFinanceiroStatus(db);
-            ViewBag.comboGcFinanceiroStatus.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS ]" });
+            PreencherLookupsModalLancamentosFinanceiros();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório Financeiro - Lançamentos";
             return View("ModalRelatorioLancamentosFinanceiros", view_cstModalRelatorio);
         }

@@ -104,7 +104,7 @@
                         })
                     }
                     else {
-                        LibMessageAlert("Erro no Processamento", result.msg);
+                        GdiAjaxNotifyInconsistencias(result.msg);
                     }
                 },
                 error: function (result)

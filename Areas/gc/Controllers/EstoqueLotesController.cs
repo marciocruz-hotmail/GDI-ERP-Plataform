@@ -16,7 +16,7 @@ using System.Web.Mvc;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueLotes_*,gc_EstoqueLotes_Default")]
-    public class EstoqueLotesController : Controller
+    public partial class EstoqueLotesController : Controller
     {
         private readonly GdiPlataformEntities db;
 
@@ -380,24 +380,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             return Json(new { success = sucesso, msg = msgRetorno, id_estoque_lote = viewRecord.id_estoque_lote }, JsonRequestBehavior.AllowGet);
         }
         #endregion
-
-        private void LoadCombos()
-        {
-            ViewBag.comboProdutos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-
-            var ComboComexImportacoes = new List<SelectListItem>();
-            try
-            {
-                IQueryable<gc_comex_importacoes> listaComexImportacoes = db.gc_comex_importacoes.Where(i => (i.id_importacao > 0) && (i.ativo == true)).OrderByDescending(i => i.id_importacao);
-                ComboComexImportacoes.Add(new SelectListItem { Value = "0", Text = "[ IMPORTAÇÃO ]" });
-                foreach (gc_comex_importacoes item_gc_comex_importacoes in listaComexImportacoes)
-                {
-                    ComboComexImportacoes.Add(new SelectListItem { Value = item_gc_comex_importacoes.id_importacao.ToString(), Text = item_gc_comex_importacoes.numero.ToString() });
-                }
-            }
-            finally { }
-            ViewBag.ComboComexImportacoes = ComboComexImportacoes;
-        }
 
         public ActionResult GetGedEstoqueLotes(jQueryDataTableParamModel param)
         {

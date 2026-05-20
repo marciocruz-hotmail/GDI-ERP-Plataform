@@ -4,6 +4,7 @@ using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 using GdiPlataform.Robos.Itau;
 using GdiPlataform.Security;
 using Microsoft.Graph.Models;
@@ -29,7 +30,7 @@ using System.Xml.Linq;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
-    public class FinanceiroLancamentosController : Controller
+    public partial class FinanceiroLancamentosController : Controller
     {
         public string MsgGeral = string.Empty;
         public int OrdemPagamento = 0;
@@ -48,13 +49,14 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-sack-dollar","", "#008000","fa-lg") + LibStringFormat.GetTabHtml(1) + "Gestão Financeira";
-            ViewBag.comboContasCaixa = LibDataSets.LoadComboGContasCaixas(db);
-            ViewBag.comboContasCaixaGerencial = LibDataSets.LoadComboGContasCaixasGerencial(db);
-            ViewBag.comboFinanceiroFiltroStatus = LibDataSets.LoadComboFiltroFinanceiroStatus(db);
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            PreencherLookupsIndexFinanceiro();
             LoadComboFiltroCst01();
-            return View();
+            var viewModel = new CstModalRelatorio
+            {
+                Field_Data_01 = LibDateTime.getPrimeiroDiaMesAtual(),
+                Field_Data_02 = LibDateTime.getUltimoDiaMesAtual()
+            };
+            return View(viewModel);
         }
 
         public void LoadComboFiltroCst01()
@@ -890,7 +892,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }
                     ViewBag.comboAdiantamentos = comboAdiantamentos;
                     ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Lançamento - " + record_gc_financeiro_lancamentos.id_lancamento.EmptyIfNull().ToString() + "</b>";
-                    ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db); ;
                 }
                 else
                 {
@@ -913,28 +914,19 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
                         record_gc_financeiro_lancamentos.tipo_pag_rec = 1;
                         ViewBag.Title = LibIcons.getIcon("fa-solid fa-money-bill", "Novo Pagamento", "#cc0000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Novo Pagamento</b>";
-                        ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db); ;
                     }
                     else if (TipoPagRec == 2)
                     {
                         record_gc_financeiro_lancamentos.tipo_pag_rec = 2;
                         ViewBag.Title = LibIcons.getIcon("fa-solid fa-sack-dollar", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Novo Recebimento</b>";
-                        ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db); ;
                     }
                     else
                     {
                         record_gc_financeiro_lancamentos.tipo_pag_rec = 1;
                         ViewBag.Title = LibIcons.getIcon("fa-solid fa-sack-dollar", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Novo Lançamento</b>";
-                        ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedoresComDoc(db); ;
                     }
                 }
-                ViewBag.comboContasCaixa = LibDataSets.LoadComboGContasCaixas(db);
-                ViewBag.comboContasCaixaGerencial = LibDataSets.LoadComboGContasCaixasGerencial(db);
-                ViewBag.comboPagRecTipos = LibDataSets.LoadComboPagRecTiposFaturaveis(db); ;
-                ViewBag.comboFinanceiroStatus = LibDataSets.LoadComboGcFinanceiroStatus(db);
-                ViewBag.comboDebitoCredito = LibDataSets.LoadComboViewDebitoCredito(db);
-                ViewBag.comboRowColors = LibDataSets.LoadComboRowColors(db);
-                ViewBag.comboGClassificacaoFinanceira = LibDataSets.LoadComboGClassificacaoFinanceira(db);
+                PreencherLookupsModalLancamento();
                 return View("ModalCreateEditLancamento", record_gc_financeiro_lancamentos);
             }
             catch (Exception ex)
@@ -1575,7 +1567,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 ViewBag.ObsFinanceiraCliente = ObsFinanceiraCliente;
                 ViewBag.MsgHistorico = MsgHistorico;
                 ViewBag.MsgAdvertencia = MsgAdvertencia;
-                ViewBag.comboPagRecTipos = LibDataSets.LoadComboPagRecTiposFaturaveis(db);
+                PreencherLookupsGerarFinanceiroMovimentos();
                 return View("ModalGerarFinanceiroMovimentos", record_gc_movimento_financeiro);
             }
             catch (Exception ex)

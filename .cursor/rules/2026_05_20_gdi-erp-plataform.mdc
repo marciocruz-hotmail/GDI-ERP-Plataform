@@ -1,0 +1,202 @@
+---
+description: Regras globais do ERP GDI Aviação — stack .NET 4.7.2, portal do cliente integrado neste repo, fonte de verdade .md na raiz, contexto .cursor, restrições de git/deploy e formato de resposta.
+alwaysApply: true
+---
+
+# GDI-ERP-Plataform — Regras do agente (Cursor)
+
+**Objetivo desta regra:** orientar intervenções no repositório **GDI-ERP-Plataform** com contexto mínimo duplicado, prioridade clara e ações verificáveis. **Língua das respostas ao utilizador:** português brasileiro.
+
+**Fonte de verdade na raiz:** em conflito entre outros `.md` (ou documentação Markdown geral) na **raiz deste** repositório e o **código-fonte**, `.csproj` ou `Views/`, **prevalece o repositório** (código e manifestos do projeto).
+
+### Documentação para IA (raiz — ler primeiro)
+
+| Ficheiro | Função |
+|----------|--------|
+| **`AI-CONTEXT.md`** | Contexto técnico fixo: stack, regras, áreas sensíveis, padrões obrigatórios |
+| **`CHANGELOG-DEV.md`** | Estado atual, decisões ativas, últimas alterações (compacto) |
+| **`BACKLOG-DEV.md`** | Pendências por prioridade |
+
+| Histórico / detalhe | Caminho |
+|---------------------|---------|
+| Changelog integral (arquivo) | `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` |
+| Contexto por tema | `.cursor/context/*.md` |
+| Padrões longos | `CLAUDE.md` |
+| Redirecionamento legado | `.cursor/CHANGELOG-DEV.md` → aponta para a raiz |
+
+---
+
+## 0. Portal do cliente e repositório único
+
+> O produto **GDI-PortalCliente-Plataform** (repositório / site separado) foi **descontinuado**; as funcionalidades do portal público do cliente vivem **neste** monólito **GDI-ERP-Plataform**. **Não** assumir um segundo repositório “irmão” nem caminhos absolutos a outro projeto para regras ou código.
+
+### 0.1 Onde está o portal no código (referência rápida)
+
+| Fluxo | Local principal |
+|-------|-------------------|
+| Login / links em e-mail (`AcessoPortal`) | `Controllers/UserIdentityController.cs` — `IsPortalClienteHost`, `CompletePortalClienteLogin`, tenant `portalflightx` em `SetTenants` |
+| Área autenticada (pedidos, boleto, ficheiros) | `Areas/crm/` — `PedidosController`, `GlobalController`; role `gc_PortalCliente_PortalFinanceiro` |
+| UI partilhada | `Views/Shared/_Layout.cshtml`, `_Navbar.cshtml`, `Views/UserIdentity/Index.cshtml` |
+| Legado área **g** (portal financeiro interno / vendedor) | `Areas/g/Views/PortalCliente/PortalFinanceiro.cshtml` — **não** confundir com o portal **externo** em `crm` |
+
+- **Stack:** seguir sempre a **§1** deste ficheiro (Bootstrap 5, AdminLTE 4, etc.). **Não** reintroduzir padrões do portal legado separado (ex.: AdminLTE 3 / Bootstrap 4) salvo pedido explícito de migração documentada.
+- **Histórico da migração:** pesquisar `portal`, `crm`, `AcessoPortal` em **`CHANGELOG-DEV.md`** (raiz) ou `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`.
+
+### 0.2 Processo e documentação (única codebase)
+
+| Tema | Nota |
+|------|------|
+| Política de ambiente, metodologia, docs raiz (`AI-CONTEXT`, `CHANGELOG-DEV`, `BACKLOG-DEV`), formato de resposta (§6), português BR | §§2–7 deste `.mdc` + ficheiros na **raiz** |
+| E-mails com `[LinkPortalDireto]` | URL pública do **mesmo** site que serve o ERP (ex.: `UserIdentity/AcessoPortal` em host `*.portalflightx.com`); ver `Areas/gc/Controllers/MovimentosController.cs` e templates |
+
+---
+
+## 1. Identidade do projeto (referência rápida)
+
+| Área | Padrão |
+|------|--------|
+| Backend | ASP.NET MVC, **.NET Framework 4.7.2** |
+| Dados | SQL Server — manter **um** padrão por fluxo (Entity Framework **ou** ADO.NET; não misturar) |
+| UI | Bootstrap 5, AdminLTE 4, Font Awesome 7.2.0 |
+| JS | DataTables (datatables.net-bs5 2.3.2), SweetAlert2, Tempus Dominus 6.9.4 |
+| Publicação | Visual Studio Publish → IIS (Windows); o agente **não** publica em remoto (ver §3) |
+
+**Empresa / domínio:** GDI Aviação — ERP de importação, comercialização e distribuição de peças aeronáuticas (matriz BH-MG, filial SP).
+
+---
+
+## 2. Ordem de leitura antes de agir
+
+1. **`AI-CONTEXT.md`** (raiz) — contexto fixo do projeto; regras de intervenção e áreas sensíveis.
+2. **`CHANGELOG-DEV.md`** (raiz) — estado atual e decisões ativas (compacto). Não contradizer o registado sem justificativa. Histórico extenso: `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`.
+3. **`BACKLOG-DEV.md`** (raiz) — pendências por prioridade; alinhar com `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` quando aplicável.
+4. **`.cursor/context/`** — detalhe por tema (ex.: `2026_05_20_tabelas-datatables-vs-mvc.md`, `2026_05_20_migracao-472-481.md`).
+5. **`CLAUDE.md`** (raiz) — padrões longos (`GdiDt*` / `GdiAjax*`, fases DataTables, ficheiros críticos). Complemento; não duplicar listas extensas neste `.mdc`.
+6. **Tabelas na UI:** antes de alterar `<table>`, ler **`.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`** — **DataTables** vs **MVC** (`gdi-form-table-*`).
+7. **Manutenção:** decisões estáveis → `CLAUDE.md` ou context em `.cursor/context/`; registo operacional → **`CHANGELOG-DEV.md`** (tabela «Últimas alterações»); pendências → **`BACKLOG-DEV.md`**. Não reexpandir o changelog com blocos longos (usar histórico em `docs/dev-history/`).
+
+*Perfis de publish e pastas de artefactos **são os deste** repositório (ex.: `Properties/PublishProfiles/`). Não presumir nomes de outro produto salvo existirem **aqui** com o mesmo propósito.*
+
+---
+
+## 3. Restrições absolutas (sem exceção)
+
+Salvo pedido **explícito e inequívoco** do utilizador numa mensagem dedicada:
+
+| Tema | O que não fazer |
+|------|-----------------|
+| **Workspace** | Não criar, editar nem apagar ficheiros/pastas **fora da raiz deste repositório** (`GDI-ERP-Plataform`). |
+| **Git remoto** | Não `git push`, force-push, alterar remoto/branches/tags remotas, nem criar PRs remotas. Alterações git ficam no working tree local. |
+| **Deploy / infra** | Não deploy remoto (Publish para IIS remoto, MSDeploy remoto, FTP, Azure remoto, pipelines que publiquem para remoto). Não configurar IIS remoto, vhosts ou servidores fora do ambiente local do developer. |
+| **Onde ficam as alterações** | Apenas na cópia de trabalho local; sem envio automático para remotos. |
+
+*Compilar localmente ou gerar pasta de publish no disco é permitido; não usar isso como passo para publicar em remoto.*
+
+---
+
+## 4. Metodologia de trabalho
+
+### 4.1 Análise e causa raiz
+
+- Entender o erro ou pedido; localizar ficheiro, método, view ou query exatos.
+- Mapear referências (Controllers, Views, Models, helpers, JS) ao trecho afetado.
+- Identificar **causa raiz** antes de alterar código.
+
+### 4.2 Alterações mínimas (“cirurgia”)
+
+- Alterar só o necessário ao pedido; sem refactors cosméticos fora de escopo.
+- Não remover métodos, propriedades, `ViewBag`/`ViewData` ou rotas sem confirmação de não uso.
+- Não alterar `_Layout.cshtml` nem partials partilhadas sem verificar consumidores.
+- Melhorias fora de escopo → sugerir em `BACKLOG-DEV.md` ou nota no `CHANGELOG-DEV.md`, não implementar sem pedido.
+
+### 4.3 Stack e dados
+
+- Não introduzir NuGet nem libs JS não alinhadas à stack da §1 sem aprovação explícita.
+- Não mudar versões de Bootstrap, AdminLTE, DataTables, SweetAlert2, Tempus Dominus.
+- Não alterar schema SQL Server nem SPs sem necessidade explícita; não hardcodar connection strings.
+
+### 4.4 Impacto (checklist mental)
+
+- Outras actions/views/rotas afetadas? O mesmo bug noutros sítios? Comportamento em produção? Partials e bundles? Model/ViewModel reutilizado?
+
+### 4.5 Nomes de ficheiros em `.cursor/context`, `.cursor/rules` e `Scripts`
+
+Ao **criar** ou **renomear** ficheiros nestas pastas, prefixar com **`AAAA_MM_DD_`** (ano, mês e dia da **criação** do ficheiro, separados por **sublinhado**, com `_` final), seguido do nome descritivo:
+
+| Pasta | Exemplo |
+|-------|---------|
+| `.cursor/context/` | `2026_05_20_tabelas-datatables-vs-mvc.md` |
+| `.cursor/rules/` | `2026_05_20_gdi-erp-plataform.mdc` |
+| `Scripts/` (ferramentas) | `2026_05_20_gdi_verify_csproj_gdi_helpers.py`, `2026_05_20_gdi_check_specific_modals.ps1` |
+
+**`Scripts/` — âmbito:** aplicar a **todos** os ficheiros de **ferramenta de repositório** criados pelo agente/Cursor (`*.py`, `*.ps1`, etc. — tipicamente prefixo `gdi_`, `fix_`, `patch_`, `gen_`, `strip_`). **Não** renomear assets de **runtime/publicação** já referenciados no site ou no `.csproj` como `Content`, por exemplo: `bootstrap*.js`, `jquery.validate*`, `sessionInactivity.js`, `jsFileInputChange.js`, `gdi-session-handler.js`, ficheiros `.map`.
+
+- Obter a data com `CreationTime` do ficheiro (ou data real de criação no repo). **Não** usar a máscara antiga `2026-05-` (só ano-mês).
+- Se o ficheiro **já** tiver prefixo `AAAA_MM_DD_`, não duplicar (`2026_05_20_2026_05_20_…` é inválido).
+- Ficheiros fora destas pastas (controllers, views, `Lib/`, etc.) **não** usam esta máscara.
+- Atualizar referências em `CLAUDE.md`, `CHANGELOG-DEV.md`, `.claude/commands/` e scripts que apontem para caminhos antigos.
+
+### 4.6 Qualidade antes de concluir
+
+- Build sem erros; evitar warnings novos causados pela alteração.
+- Views `.cshtml` novas ou com helpers `GdiAjax*` / `GdiDt*`: garantir inclusão no `GDI-ERP-Plataform.csproj` quando aplicável (ver `CHANGELOG-DEV.md` / `Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py`).
+- `Web.config` / `connectionStrings.config`, `BundleConfig.cs`, `App_Start`, `Filters`, `RouteConfig`: só tocar com intenção documentada.
+- **`Web.Release.config`**, cabeçalhos em `Global.asax.cs` ou endpoint de **health**: ao tocar em release/hardening, seguir o que **este** repo já implementa; não copiar checklist de outro produto sem verificar ficheiros e rotas **aqui**.
+
+## 5. Registo obrigatório após intervenção
+
+Após **toda** intervenção relevante:
+
+1. **`CHANGELOG-DEV.md`** (raiz) — linha na tabela **«Últimas alterações relevantes»** (data + resumo). Detalhe extenso só em `.cursor/context/*.md` ou, se indispensável, em `docs/dev-history/` (não reabrir o histórico inicial salvo arquivo novo datado).
+2. **`BACKLOG-DEV.md`** — marcar pendências resolvidas ou acrescentar novas.
+3. Secção **7** da resposta ao utilizador — bloco pronto para colar (resumo); formato legado longo (`### [data] — …`) reservado ao arquivo histórico, não ao changelog operacional.
+
+---
+
+## 6. Formato obrigatório das respostas ao utilizador
+
+Responder **nesta ordem** (alinhado a `CLAUDE.md`):
+
+| Ordem | Secção | Conteúdo |
+|-------|--------|-----------|
+| 1 | Diagnóstico | Problema, onde ocorre, causa raiz. |
+| 2 | Arquivos afetados | Lista completa (C#, Razor, JS, SQL, etc.). |
+| 3 | Análise de impacto | Dependências, rotas, views, riscos em produção. |
+| 4 | Solução | Alterações concretas; citar código quando útil. |
+| 5 | Atenção para o Publish | IIS, `Web.config`, SQL, bundles, validação manual. |
+| 6 | O que NÃO foi alterado | Preservações intencionais e porquê. |
+| 7 | Registro para o CHANGELOG-DEV.md | Linha/tabela para `CHANGELOG-DEV.md` (raiz) + atualização sugerida em `BACKLOG-DEV.md` se aplicável. |
+| 8 | Linha de commit (Git) | Uma linha no padrão da §6.1 (**só** quando houver implementação, melhoria ou ajuste com alteração de ficheiros no repo; omitir em análise pura sem mudanças). |
+
+Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **Arquivos afetados**, …) desde que a ordem e o conteúdo acima se mantenham.
+
+### 6.1 Linha de commit (Git) — padrão obrigatório
+
+- **Quando:** ao concluir relatório de intervenção que **alterou** código, views, JS, SQL, `.mdc`, `CHANGELOG-DEV`, etc.
+- **Quando não:** perguntas só informativas, avaliação sem alteração de ficheiros, ou pedido explícito de não incluir.
+- **Formato (uma linha, copiar para mensagem de commit):**  
+  `AAAA_MM_DD - ` + resumo curto em **português brasileiro** (o que mudou e onde, numa frase).  
+  - Use a **data da intervenção** (campo *Today's date* do ambiente ou data acordada na conversa).  
+  - **Separador de data:** sublinhado (`_`), não hífen, na parte da data: `2026_05_14` (exemplo).
+- **Exemplo:** `2026_05_14 - Menu lateral: overlay LibMessageProcessando ao navegar por links MVC (start.js)`
+
+---
+
+## 7. Lembranças técnicas curtas
+
+- **Lookups:** Index/filtro → combo **local** (sem cache global); CreateEdit partilhado → `ILookupQueryService` + `*.Lookups.cs`. Detalhe e inventário híbridos: `.cursor/context/2026_05_20_lookups-convencao-index-vs-createedit.md`.
+- **Tabelas:** dois tipos no ERP — **DataTables** (listagens Ajax) e **MVC** (formulário no servidor); ver `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md` em qualquer intervenção com grelha/tabela.
+- Razor: respeitar `@Html.*`, `@Url.*`, `@model`, `@ViewBag`.
+- UI: preferir padrões AdminLTE 4 do projeto; DataTables e Ajax seguir exemplos existentes e helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (detalhe em `CLAUDE.md`).
+- Evitar `alert()` / `confirm()` nativos onde o projeto usa SweetAlert2 / `LibMessage*`.
+- TLS em código novo: não replicar SSL3; preferir **Tls12** ou **Tls12 \| Tls13** (ver `.cursor/context/` quando aplicável).
+
+---
+
+## 8. O que esta regra não substitui
+
+- Checklist e padrões **DataTables vs MVC** — **`.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`** (resumo também em **`CLAUDE.md`**).
+- Detalhe fino de contratos JSON DataTables, listas de controllers por fase e scripts Python — **`CLAUDE.md`**, **`CHANGELOG-DEV.md`** (resumo), histórico em **`docs/dev-history/`**.
+- Convenção lookups Index vs CreateEdit e organização do serviço — **`.cursor/context/2026_05_20_lookups-convencao-index-vs-createedit.md`**.
+- Documentação de migração 4.7.2→4.8.1 — **`.cursor/context/`**.
+- **Portal do cliente:** o comportamento e rotas estão no **código** (`UserIdentity`, `Areas/crm`, templates de e-mail); não existe ficheiro de regras Cursor noutro repositório para consultar.

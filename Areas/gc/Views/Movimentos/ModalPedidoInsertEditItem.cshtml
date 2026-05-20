@@ -57,7 +57,7 @@
                     <div class="form-group row text-sm-end m-1 p-0">
                         @Html.Label("produto", "PN:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                         <div class="col-sm-9 text-sm-start">
-                            @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @id = "id_produto", @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onfocus = "jsResetDadosProduto(); jsHandleSelectOpen();", @onchange = "jsSetDadosProduto();", @onblur = "jsSetDadosProduto(); jsHandleSelectClose();", @onmousedown = "jsHandleSelectOpen();" })
+                            @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @id = "id_produto", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal", @data_container = "body", @onchange = "jsSetDadosProduto();" })
                         </div>
                         <div class="col-sm-2 text-sm-start">
                             <button type="button" name="btnDetailsProducts" tabIndex="-1" title="Informações do Item" onclick="jsShowDetailsProducts();" class="btn btn-primary d-inline-flex align-items-center gap-2"><i class="fa fa-info"></i></button>

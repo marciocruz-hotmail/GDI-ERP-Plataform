@@ -14,7 +14,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_CfopParametros_*,g_CfopParametros_Default")]
-    public class CfopParametrosController : Controller
+    public partial class CfopParametrosController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_CfopParametros";
@@ -226,7 +226,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             try
             {
                 if ((IdParametro != null) && (IdParametro > 0)) { record_gc_cfop_parametros = db.gc_cfop_parametros.Find(IdParametro); };
-                ViewBag.comboCFOP = LibDataSets.LoadComboGcCfop(db);
+                PreencherLookupsCfop();
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Parâmetros - " + record_gc_cfop_parametros.id_cfop_parametro.EmptyIfNull().ToString() + "</b>";
                 return View("ModalCreateEditParametro", record_gc_cfop_parametros);
             }

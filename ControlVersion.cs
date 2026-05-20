@@ -9,16 +9,18 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.01 - 20/05/2026";
+            return "2026.51.02 - 20/05/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.01";
+            return "2026.51.02";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.51.02 - 20/05/2026 - Tabelas MVC gdi-form-table-* / sidebar portal
+// 2026.51.01 - 20/05/2026 - Tabelas MVC scroll-body-horizontal (lote forms)
 // 2026.51.00 - 20/05/2026 - Edit in line / Filtros
 // 2026.50.00 - 19/05/2026 - Modernização e globalização de SweetAlert2
 // 2026.49.00 - 08/05/2026 - Validação de lotes nos movimentos

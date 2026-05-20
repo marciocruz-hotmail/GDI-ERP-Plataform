@@ -23,7 +23,10 @@
   <ItemGroup>
     <Compile Include="LookupCacheKeysTests.cs" />
     <Compile Include="LookupCacheInvalidationTests.cs" />
+    <Compile Include="LookupCacheInvalidatorFacadeTests.cs" />
+    <Compile Include="LookupCacheRegistryTableIsolationTests.cs" />
     <Compile Include="LookupParametricCacheIntegrationTests.cs" />
+    <Compile Include="LookupParametricContatoPedidoKeysTests.cs" />
     <Compile Include="LookupTestAssert.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

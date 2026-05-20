@@ -434,27 +434,41 @@
     <Compile Include="Areas\crm\Models\CstListaPedidosPortal.cs" />
     <Compile Include="Areas\gc\Controllers\CfopController.cs" />
     <Compile Include="Areas\gc\Controllers\CfopOperacoesController.cs" />
+    <Compile Include="Areas\gc\Controllers\CfopOperacoesController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\CfopParametrosController.cs" />
+    <Compile Include="Areas\gc\Controllers\CfopParametrosController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\ComexFinanceiroController.cs" />
     <Compile Include="Areas\gc\Controllers\ComexImportacoesController.cs" />
     <Compile Include="Areas\gc\Controllers\ComexInvoicesController.cs" />
     <Compile Include="Areas\gc\Controllers\ComexProdutosController.cs" />
+    <Compile Include="Areas\gc\Controllers\ComexProdutosController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueControleController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueControleController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueInventarioController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueInventarioController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueLotesController.cs" />
+    <Compile Include="Areas\gc\Controllers\EstoqueLotesController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\FinanceiroDespesasController.cs" />
     <Compile Include="Areas\gc\Controllers\FinanceiroLancamentosController.cs" />
+    <Compile Include="Areas\gc\Controllers\FinanceiroLancamentosController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\FinanceiroParametroDifalController.cs" />
     <Compile Include="Areas\gc\Controllers\FretesController.cs" />
+    <Compile Include="Areas\gc\Controllers\FretesController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\GerencialController.cs" />
     <Compile Include="Areas\gc\Controllers\MovimentosComprasController.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosComprasController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\MovimentosController.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosController.Lookups.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosController.LookupAjax.cs" />
     <Compile Include="Areas\gc\Controllers\MovimentosEntradasController.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosEntradasController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\ParametrosController.cs" />
     <Compile Include="Areas\gc\Controllers\RelatoriosCadastraisController.cs" />
     <Compile Include="Areas\gc\Controllers\RelatoriosComerciaisController.cs" />
     <Compile Include="Areas\gc\Controllers\RelatoriosFinanceirosController.cs" />
+    <Compile Include="Areas\gc\Controllers\RelatoriosFinanceirosController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\RelatoriosRegulamentacaoController.cs" />
     <Compile Include="Areas\gc\gcAreaRegistration.cs" />
     <Compile Include="Areas\gc\Models\CstComexCadastrarAtualizarItens.cs" />
@@ -504,15 +518,19 @@
     <Compile Include="Areas\gc\Services\PedidosVendaServices.cs" />
     <Compile Include="Areas\g\Controllers\AssistentesController.cs" />
     <Compile Include="Areas\g\Controllers\AtendimentosController.cs" />
+    <Compile Include="Areas\g\Controllers\AtendimentosController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\CentrosCustosController.cs" />
     <Compile Include="Areas\g\Controllers\CidadesController.cs" />
     <Compile Include="Areas\g\Controllers\ClassificacaoFinanceiraController.cs" />
     <Compile Include="Areas\g\Controllers\ClientesController.cs" />
+    <Compile Include="Areas\g\Controllers\ClientesController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\ContasCaixasController.cs" />
     <Compile Include="Areas\g\Controllers\ContratosAviacaoController.cs" />
+    <Compile Include="Areas\g\Controllers\ContratosAviacaoController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\FiliaisController.cs" />
     <Compile Include="Areas\g\Controllers\FinanceiroController.cs" />
     <Compile Include="Areas\g\Controllers\GedController.cs" />
+    <Compile Include="Areas\g\Controllers\GedController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\GlobalController.cs" />
     <Compile Include="Areas\g\Controllers\ImportacoesBancariasController.cs" />
     <Compile Include="Areas\g\Controllers\NfeController.cs" />
@@ -520,6 +538,7 @@
     <Compile Include="Areas\g\Controllers\PagRecTiposController.cs" />
     <Compile Include="Areas\g\Controllers\PerfisController.cs" />
     <Compile Include="Areas\g\Controllers\ProdutosController.cs" />
+    <Compile Include="Areas\g\Controllers\ProdutosController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\ProdutosNcmController.cs" />
     <Compile Include="Areas\g\Controllers\UFController.cs" />
     <Compile Include="Areas\g\Controllers\UsuariosController.cs" />
@@ -533,6 +552,7 @@
     <Compile Include="Areas\g\Models\CstPerfisIndex.cs" />
     <Compile Include="Areas\g\Models\CstUsuariosIndex.cs" />
     <Compile Include="Areas\g\Models\CstCidadesIndex.cs" />
+    <Compile Include="Areas\g\Models\CstFiliaisIndex.cs" />
     <Compile Include="Areas\g\Models\CstPagRecTiposIndex.cs" />
     <Compile Include="Areas\g\Models\CstPagRecCondicoesIndex.cs" />
     <Compile Include="Areas\g\Models\CstContasCaixasIndex.cs" />
@@ -548,9 +568,7 @@
     <Compile Include="Areas\g\Models\CstFinanceiroBoletosLancamentos.cs" />
     <Compile Include="Areas\g\Models\CstFinanceiroImpostos.cs" />
     <Compile Include="Areas\g\Models\CstFinanceiroIndex.cs" />
-    <Compile Include="Areas\g\Models\CstFinanceiroLancamentos.cs" />
     <Compile Include="Areas\g\Models\CstFinanceiroProrrogarVencimentoTitulos.cs" />
-    <Compile Include="Areas\g\Models\CstFinanceiroTransferirContaCaixa.cs" />
     <Compile Include="Areas\g\Models\CstImportacoesBancarias.cs" />
     <Compile Include="Areas\g\Models\CstImportacoesWithDate.cs" />
     <Compile Include="Areas\g\Models\CstPerfisAcessos.cs" />
@@ -563,6 +581,7 @@
     <Compile Include="Areas\g\Models\CstViewRevendasTabelasModel.cs" />
     <Compile Include="Areas\g\Models\CstViewVendedoresTabelasModel.cs" />
     <Compile Include="Areas\qa\Controllers\GedSGQController.cs" />
+    <Compile Include="Areas\qa\Controllers\GedSGQController.Lookups.cs" />
     <Compile Include="Areas\qa\Controllers\LmsEvidenceController.cs" />
     <Compile Include="Areas\qa\Controllers\TreinamentosController.cs" />
     <Compile Include="Areas\qa\Models\EvidenceEventDto.cs" />
@@ -1141,10 +1160,14 @@
     <Compile Include="Lib\LibBoletos.cs" />
     <Compile Include="Lib\LibCache.cs" />
     <Compile Include="Lib\LibCnabBancario.cs" />
-    <Compile Include="Lib\LibDataSets.cs" />
+    <Compile Include="Lib\Lookups\LookupAjaxContracts.cs" />
+    <Compile Include="Lib\Lookups\LookupSearchQueries.cs" />
     <Compile Include="Lib\Lookups\ILookupQueryService.cs" />
     <Compile Include="Lib\Lookups\LookupCacheKeys.cs" />
     <Compile Include="Lib\Lookups\LookupQueryService.cs" />
+    <Compile Include="Lib\Lookups\LookupQueryService.Comercial.cs" />
+    <Compile Include="Lib\Lookups\LookupQueryService.Financeiro.cs" />
+    <Compile Include="Lib\Lookups\LookupQueryService.CadastrosG.cs" />
     <Compile Include="Lib\Lookups\LookupQueryServiceAccessor.cs" />
     <Compile Include="Lib\Lookups\LookupQueryServiceCache.cs" />
     <Compile Include="Lib\Lookups\LookupCacheRegistry.cs" />
@@ -1592,7 +1615,6 @@
     <Content Include="Areas\g\Views\Financeiro\ModalGerarRemessaBoletosBancarios.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ModalNotaDebito.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ModalProrrogarVencimentoTitulo.cshtml" />
-    <Content Include="Areas\g\Views\Financeiro\ModalTransferirContaCaixa.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ReportBoletoDDA.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ReportBoletoGC.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ReportBoletoHTML.cshtml" />
@@ -1753,10 +1775,13 @@
     <Content Include="Scripts\sessionInactivity.js" />
     <Content Include="Scripts\gdi-session-handler.js" />
     <Content Include="Scripts\jsFileInputChange.js" />
-    <None Include="Scripts\gdi_verify_csproj_gdi_helpers.py" />
-    <None Include="Scripts\gdi_inventory_datatables_g_area.py" />
-    <None Include="Scripts\gdi_replace_alert_libmessage.py" />
-    <None Include="Scripts\gdi_dedupe_libmessage_if_else.py" />
+    <None Include="Scripts\2026_05_20_gdi_verify_csproj_gdi_helpers.py" />
+    <None Include="Scripts\2026_05_20_gdi_inventory_utf8_bom.py" />
+    <None Include="Scripts\2026_05_20_gdi_utf8_no_bom_area_a.py" />
+    <None Include="Scripts\2026_05_20_gdi_utf8_no_bom_areas.py" />
+    <None Include="Scripts\2026_05_20_gdi_inventory_datatables_g_area.py" />
+    <None Include="Scripts\2026_05_20_gdi_replace_alert_libmessage.py" />
+    <None Include="Scripts\2026_05_20_gdi_dedupe_libmessage_if_else.py" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -1891,13 +1916,17 @@
   <Import Project="packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets" Condition="Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets')" />
   <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets')" />
   <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets')" />
-  <!-- Publish Web (WPP): apagar PackageTmp\.cursor antes de CopyAllFilesToSingleFolder* — evita aviso RemoveEmptyDirectories "Access to the path 'context' is denied" quando restos ficam só leitura ou o IDE segura ficheiros em .cursor\context. -->
-  <Target Name="GdiStripPackageTmpDotCursorBeforeWppCopy" BeforeTargets="CopyAllFilesToSingleFolderForMsdeploy;CopyAllFilesToSingleFolderForPackage" Condition="'$(WPPAllFilesInSingleFolder)' != '' And '$(OS)' == 'Windows_NT'">
+  <!-- Publish Web (WPP): apagar pastas obsoletas/só leitura em PackageTmp antes de CopyAllFilesToSingleFolder* — evita RemoveEmptyDirectories "Access to the path 'X' is denied" (ex.: .cursor\context, Areas\a\Views\Filtros removido 2026-05-19, bootbox-compat legado). -->
+  <Target Name="GdiStripPackageTmpObsoletePathsBeforeWppCopy" BeforeTargets="CopyAllFilesToSingleFolderForMsdeploy;CopyAllFilesToSingleFolderForPackage" Condition="'$(WPPAllFilesInSingleFolder)' != '' And '$(OS)' == 'Windows_NT'">
     <PropertyGroup>
       <_GdiWppTmp>$([System.IO.Path]::GetFullPath($(WPPAllFilesInSingleFolder)))</_GdiWppTmp>
-      <_GdiCursorPkg>$([System.IO.Path]::Combine($(_GdiWppTmp), '.cursor'))</_GdiCursorPkg>
+      <_GdiPkgCursor>$([System.IO.Path]::Combine($(_GdiWppTmp), '.cursor'))</_GdiPkgCursor>
+      <_GdiPkgFiltros>$([System.IO.Path]::Combine($(_GdiWppTmp), 'Areas', 'a', 'Views', 'Filtros'))</_GdiPkgFiltros>
+      <_GdiPkgBootbox>$([System.IO.Path]::Combine($(_GdiWppTmp), 'LibUI_AdminLTE-4.0.0', 'plugins', 'bootbox-compat'))</_GdiPkgBootbox>
     </PropertyGroup>
-    <Exec Command="cmd /c if exist &quot;$(_GdiCursorPkg)&quot; (attrib -r &quot;$(_GdiCursorPkg)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiCursorPkg)&quot; 2&gt;nul)" IgnoreExitCode="true" />
+    <Exec Command="cmd /c if exist &quot;$(_GdiPkgCursor)&quot; (attrib -r &quot;$(_GdiPkgCursor)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgCursor)&quot; 2&gt;nul)" IgnoreExitCode="true" />
+    <Exec Command="cmd /c if exist &quot;$(_GdiPkgFiltros)&quot; (attrib -r &quot;$(_GdiPkgFiltros)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgFiltros)&quot; 2&gt;nul)" IgnoreExitCode="true" />
+    <Exec Command="cmd /c if exist &quot;$(_GdiPkgBootbox)&quot; (attrib -r &quot;$(_GdiPkgBootbox)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgBootbox)&quot; 2&gt;nul)" IgnoreExitCode="true" />
   </Target>
   <!-- Evita FileLoadException 0x80131040: cópias duplicadas no Explorer geram "Antlr3 (1).Runtime.dll" em bin; o ASP.NET carrega todos os .dll e o nome não bate com o manifesto. -->
   <Target Name="RemoveMisnamedAntlrDuplicatesFromBin" AfterTargets="CopyFilesToOutputDirectory">

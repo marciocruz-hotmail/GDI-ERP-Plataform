@@ -250,15 +250,18 @@
 </nav>
 <!-- Sidebar (AdminLTE 4) -->
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-    <div class="sidebar-brand">
-        <a class="brand-link" href="#">
-            <img style="max-width:50%; max-height:40px; margin-top: -7px; margin-left: 1px;" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoMicrosoft.png" alt="Microsoft" />
-            <img style="max-width:40%; max-height:40px; margin-top: -7px; margin-left: 3px;" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoAws.png" alt="AWS" />
-        </a>
-    </div>
+    @if (!isPortalClienteNav)
+    {
+        <div class="sidebar-brand">
+            <a class="brand-link" href="#">
+                <img style="max-width:50%; max-height:40px; margin-top: -7px; margin-left: 1px;" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoMicrosoft.png" alt="Microsoft" />
+                <img style="max-width:40%; max-height:40px; margin-top: -7px; margin-left: 3px;" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/logoAws.png" alt="AWS" />
+            </a>
+        </div>
+    }
 
     <div class="sidebar-brand gdi-sidebar-brand-logo">
-        <a class="brand-link d-flex align-items-center justify-content-center py-0 px-3" href="#">
+        <a class="brand-link d-flex align-items-center justify-content-center py-0 px-3" href="@(isPortalClienteNav ? Url.Action("Index", "Pedidos", new { area = "crm" }) : "#")">
             <img class="gdi-sidebar-brand-logo-img" src="https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/FilesImages/@Model.userIdentity.ImgLogoSubdominio"
                  alt="Logo" />
         </a>

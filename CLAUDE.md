@@ -46,7 +46,7 @@ O repositório **GDI-PortalCliente-Plataform** foi descontinuado; o portal públ
 ## MEMÓRIA DO PROJETO — CARREGADA AUTOMATICAMENTE
 
 As últimas intervenções do projeto são carregadas abaixo via import automático.
-Para o histórico completo, consulte `.cursor/CHANGELOG-DEV.md`.
+Para o histórico completo, consulte `CHANGELOG-DEV.md` (raiz) e `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`.
 Nunca contradiga decisões registradas nele sem justificativa explícita.
 
 @.claude/CHANGELOG-RECENT.md
@@ -59,14 +59,26 @@ Nunca contradiga decisões registradas nele sem justificativa explícita.
 
 ### Dois tipos de tabela no ERP (obrigatório em UI)
 
-Toda **investigação, correção ou alteração** que envolva `<table>` deve começar por classificar o tipo. Detalhe: **`.cursor/context/tabelas-datatables-vs-mvc.md`**.
+Toda **investigação, correção ou alteração** que envolva `<table>` deve começar por classificar o tipo. Detalhe: **`.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`**.
 
 | Tipo | Uso típico | Como reconhecer na view | CSS / JS |
 |------|------------|-------------------------|----------|
 | **DataTables** | Listagens, modais, abas com grelha Ajax | `table.display`, `id="dt..."` / `dataTable...`, `tbody` vazio, init DataTables | `scroll-body-horizontal`, `max-content`, `GdiDt*`, actions `GetDados*` |
 | **MVC (formulário)** | Processamento em lote, `@for` + post do form | Sem `display`; `EditorFor` / `DropDownListFor` / `HiddenFor` no servidor | `gdi-form-table-scroll`, `gdi-form-table-fixed`, **não** contrato `GetDados` |
 
-**Armadilha:** aplicar regras de DataTables (ex. `scroll-body-horizontal` + `width: max-content`) a tabelas MVC corta a primeira coluna. Inventários: `Scripts/gdi_inventory_scroll_body_form_tables.py` (MVC), `Scripts/gdi_inventory_datatables_g_area.py` (DataTables).
+**Armadilha:** aplicar regras de DataTables (ex. `scroll-body-horizontal` + `width: max-content`) a tabelas MVC corta a primeira coluna. Inventários: `Scripts/2026_05_20_gdi_inventory_scroll_body_form_tables.py` (MVC), `Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` (DataTables).
+
+### Lookups — Index/filtro vs CreateEdit (`ILookupQueryService`)
+
+| Contexto | Padrão |
+|----------|--------|
+| **Index / filtro de listagem** | Combo **local** na action (sem cache global); exceções documentadas em `.cursor/context/2026_05_20_lookups-convencao-index-vs-createedit.md`. |
+| **CreateEdit / modal partilhado** | `*.Lookups.cs` + `ILookupQueryService` (`LookupQueryServiceAccessor.Current`). |
+| **Serviço** | Partials por domínio: `LookupQueryService.cs`, `.Comercial.cs`, `.Financeiro.cs`, `.CadastrosG.cs` (ex-`Wave6a`). |
+
+Inventário híbridos: `python Scripts/2026_05_20_gdi_inventory_combo_hybrid_controllers.py`.  
+EF6 read-only nos factories: `.AsNoTracking()` + projeção `Select` em `LookupQueryService*.cs` (1.9.1). Piloto DI: `EstoqueController`, `AtendimentosController`. Testes: `Tests/GDI-ERP-Plataform.Lookups.Tests`. Pós-publish: `.cursor/context/2026_05_20_lookups-monitorizacao-pos-publish.md`.  
+**Typeahead pedidos (1.6):** `GetClientesLookup` / `GetProdutosLookup` + `data-gdi-lookup-url` em Select2 — `.cursor/context/2026_05_20_lookups-typeahead-ajax-pedidos.md`.
 
 ### Mensagens UX — DataTables e Ajax (SweetAlert2 / `LibMessage*`)
 
@@ -80,7 +92,7 @@ Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregad
 
 **Contrato JSON (server-side DataTables)** em falhas: preferir **`errorMessage`** + **`severity`** + **`stackTrace`** (evitar propriedade solta **`error`** salvo exceções documentadas).
 
-**Verificação automática (views vs publish):** `python Scripts/gdi_verify_csproj_gdi_helpers.py` — lista `.cshtml` em `Areas/` e `Views/` que usam `GdiAjax*` / `GdiDt*` e **não** estão em `GDI-ERP-Plataform.csproj` (exit code 1 se houver lacunas).
+**Verificação automática (views vs publish):** `python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` — lista `.cshtml` em `Areas/` e `Views/` que usam `GdiAjax*` / `GdiDt*` e **não** estão em `GDI-ERP-Plataform.csproj` (exit code 1 se houver lacunas).
 
 **Fase 8 — servidor DataTables (geral):** em actions `GetDados*` / equivalentes, envolver lógica em **`try/catch`** e, em falha, devolver JSON com **`errorMessage`**, **`severity`**, **`stackTrace`**, **`yesFilterOnOff`**, **`sEcho`**, **`aaData`** vazio — padrão alinhado a `GdiDtNotifyJsonErrorMessage` no cliente.
 
@@ -92,15 +104,15 @@ Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregad
 
 **Fase 12 — servidor DataTables (`gc` COMEX invoices + entradas NF + inventário):** `ComexInvoicesController` — `GetDadosViewImportacao` / `GetDadosViewInvoicesItens`: `param` nulo, **`yesFilterOnOff`** no JSON de sucesso/erro; `MovimentosEntradasController.GetDadosMovimentosEntradas`: `param` nulo, sucesso/lista vazia com `errorMessage`/`stackTrace` vazios; `EstoqueInventarioController` — `param` nulo em **`GetDadosInventario`** / **`GetDadosInventarioItem`**, **`severity`** no JSON de inventário inválido; views **`CreateEdit`** (aba invoices: `xhr.dt` com notify + atualização segura dos totais), **`ModalInvoice`**, **`FormInventarioItens`** com **`xhr.dt`** / `GdiDtNotifyJsonErrorMessage`.
 
-**Fase 13 — servidor DataTables (`g` cadastros — lote inicial):** `FiliaisController`, `UFController`, `PagRecTiposController` — `GetDados` com `param` nulo, `try/catch`, JSON de sucesso com `errorMessage`/`stackTrace`/`yesFilterOnOff`, **`JsonDataTableException`**; `Filiais` — NRE evitada quando coligada não existe na lista; views **`Filiais/Index`**, **`PagRecTipos/Index`** com **`xhr.dt`** / `GdiDtNotifyJsonErrorMessage`; script **`Scripts/gdi_inventory_datatables_g_area.py`** (inventário `GetDados*` em `Areas/g/Controllers`).
+**Fase 13 — servidor DataTables (`g` cadastros — lote inicial):** `FiliaisController`, `UFController`, `PagRecTiposController` — `GetDados` com `param` nulo, `try/catch`, JSON de sucesso com `errorMessage`/`stackTrace`/`yesFilterOnOff`, **`JsonDataTableException`**; `Filiais` — NRE evitada quando coligada não existe na lista; views **`Filiais/Index`**, **`PagRecTipos/Index`** com **`xhr.dt`** / `GdiDtNotifyJsonErrorMessage`; script **`Scripts/2026_05_20_gdi_inventory_datatables_g_area.py`** (inventário `GetDados*` em `Areas/g/Controllers`).
 
 **Fase 14 — servidor DataTables (`g` cadastros — lote ampliado + financeiro GED):** dezenas de controllers em **`Areas/g`** (`Assistentes`, `PagRecCondicoes`, `Perfis`, `ContasCaixas`, `ProdutosTipos`, `Cidades`, `ProdutosNcm`, `Usuarios`, `Requisicoes`, `Vendedores`, `ContratosAviacao` com correção de tipo/cliente e `FirstOrDefault`, `Ged`, `FinanceiroLancamentos`, `FinanceiroFaturamentos`, `FinanceiroController` — `GetDados`, **`getValoresConsolidados`**, **`GetDadosGrafico`**; `ClientesController` — `GetDados` (`stackTrace` sucesso + `JsonDataTableException`), **`GetDadosContatos`**, **`GetDadosDestinatarios`**; views com **`xhr.dt`** onde faltava (`Perfis`, `ContasCaixas`, `PagRecCondicoes`, `Requisicoes`, `Usuarios`, `FinanceiroFaturamentos`, **`Financeiro/DadosConsolidados`**, **`Clientes/CreateEdit`** destinatários); gráfico consolidados: guard em `success` para `errorMessage`.
 
-**Fase 16 — controllers `Nfe` + `PortalVendedor` + DRY Atendimentos + build `g` Lib:** **`NfeController`** (novo) — `Index`, `Edit`, `GetDados` / `GetDadosNfeLogs` com contrato DataTables + filtros; modais existentes; Ajax com `success: false` até integração e-Notas; **`PortalVendedorController`** — `PortalFinanceiro` + `GetDados` (carteira vendedor); **`AtendimentosController`** — **`JsonDataTableException`**; views **`PortalVendedor/PortalFinanceiro`**, **`Nfe/CreateEdit`** (logs) com **`xhr.dt`**; **`.csproj`** — novos controllers + **`Areas\g\Models\Lib\LibFinanceiro*.cs`**.
+**Fase 16–17 — `NfeController` + e-Notas:** `Index`, `Edit`, `GetDados` / `GetDadosNfeLogs` (DataTables + `JsonDataTableException`); modais Ajax com `{ success, msg }` e **`RoboEnotasNFE`** (gerar/atualizar/cancelar/sincronizar — ver `.cursor/context/2026_05_20_nfe-enotas-arquitetura.md`). **`PortalVendedorController` removido** (2026-05-19); roles `g_PortalVendedor_*` mantidas só em troca de senha vendedor (`UsuariosController`, `TokenAcesso` V). **`AtendimentosController`** — **`JsonDataTableException`**; **`Nfe/CreateEdit`** logs com **`xhr.dt`**.
 
 **Fase 15 — servidor DataTables (`g` produtos + centros/classificação + atendimentos):** `ProdutosController.GetDados` — `param` nulo, `try/catch`, sucesso com `errorMessage`/`stackTrace` vazios, **`JsonDataTableException`**; `CentrosCustosController` / `ClassificacaoFinanceiraController` — **`getDados`** com o mesmo padrão + `yesFilterOnOff` quando filtro SQL genérico; NRE evitada no nome do registro pai; `AtendimentosController` — **`getDadosAtendimentos`**, **`getDadosAtividades`**, **`getDadosAtendimentosLogs`**, **`GetDadosGedAtendimento`** (antes `GetGedAtendimento`): sucesso com `errorMessage`/`stackTrace` vazios, `yesFilterOnOff` onde faltava, NRE em usuário GED e operador de atividade.
 
-**Fase 7 — `alert(` nativo em `.cshtml`:** preferir **`LibMessageError("Atenção", …)`** em `catch` / handlers de erro (não substituir **`GdiSwal2.alert`**). Scripts: `python Scripts/gdi_replace_alert_libmessage.py` (substituição inicial); `python Scripts/gdi_dedupe_libmessage_if_else.py` (remove `if (typeof LibMessageError)… else` duplicado após troca mecânica).
+**Fase 7 — `alert(` nativo em `.cshtml`:** preferir **`LibMessageError("Atenção", …)`** em `catch` / handlers de erro (não substituir **`GdiSwal2.alert`**). Scripts: `python Scripts/2026_05_20_gdi_replace_alert_libmessage.py` (substituição inicial); `python Scripts/2026_05_20_gdi_dedupe_libmessage_if_else.py` (remove `if (typeof LibMessageError)… else` duplicado após troca mecânica).
 
 ---
 
@@ -119,8 +131,10 @@ Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregad
 
 > Atualize esta seção usando # durante as sessões conforme decisões forem consolidadas.
 
-- **Dois tipos de tabela (2026):** **DataTables** (listagens Ajax) e **tabelas MVC** (formulário server-side) — regras de layout, CSS e contrato de dados **não são intercambiáveis**; ver `.cursor/context/tabelas-datatables-vs-mvc.md`.
-- **Migração mensagens DataTables + Ajax (2026):** padronização progressiva — Fases **0–16** (helpers `GdiDt*`/`GdiAjax*`, `error.dt`/`xhr.dt`, servidor `errorMessage`/`stackTrace`/`yesFilterOnOff`, documentação + `gdi_verify_csproj_gdi_helpers.py` + `gdi_inventory_datatables_g_area.py`, `alert`→`LibMessageError`, **Fases 8–12** em `gc`, **Fases 13–16** em **`Areas/g`**); detalhe no `.cursor/CHANGELOG-DEV.md`.
+- **Dois tipos de tabela (2026):** **DataTables** (listagens Ajax) e **tabelas MVC** (formulário server-side) — regras de layout, CSS e contrato de dados **não são intercambiáveis**; ver `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`.
+- **LibDataSets Fase 4 (2026):** P1 `Movimentos*` + P2 `FinanceiroLancamentos` / `EstoqueInventario` — `PreencherLookups*` em `*.Lookups.cs`; sem `LibDataSets` inline nos actions migrados. P3–P4: ver `.cursor/context/2026_05_20_lookups-libdatasets.md`.
+- **Lookups convenção Index vs CreateEdit (2026):** ver `.cursor/context/2026_05_20_lookups-convencao-index-vs-createedit.md`; serviço repartido em partials Comercial/Financeiro/CadastrosG (1.8).
+- **Migração mensagens DataTables + Ajax (2026):** padronização progressiva — Fases **0–16** (helpers `GdiDt*`/`GdiAjax*`, `error.dt`/`xhr.dt`, servidor `errorMessage`/`stackTrace`/`yesFilterOnOff`, documentação + `2026_05_20_gdi_verify_csproj_gdi_helpers.py` + `2026_05_20_gdi_inventory_datatables_g_area.py`, `alert`→`LibMessageError`, **Fases 8–12** em `gc`, **Fases 13–16** em **`Areas/g`**); detalhe no `.cursor/CHANGELOG-DEV.md`.
 - **APIs Ajax não-DataTables** com `{ ok, error }` (ex.: evidências LMS) mantêm contrato próprio — **não** forçar `errorMessage` sem revisão funcional.
 
 ---
@@ -129,10 +143,10 @@ Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregad
 
 > Atualize esta seção usando # durante as sessões conforme problemas recorrentes forem identificados.
 
-- **Confundir DataTables com tabela MVC:** alterações globais em `start.css` (`.scroll-body-horizontal`, `max-content`) ou remoção de wrappers sem distinguir o tipo — validar com o checklist em `.cursor/context/tabelas-datatables-vs-mvc.md`.
+- **Confundir DataTables com tabela MVC:** alterações globais em `start.css` (`.scroll-body-horizontal`, `max-content`) ou remoção de wrappers sem distinguir o tipo — validar com o checklist em `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`.
 - **Publish Web:** pasta obsoleta em `obj\...\PackageTmp\...\bootbox-compat` pode ficar só leitura e gerar aviso ao publicar — ver também `.cursor/CHANGELOG-DEV.md` (entrada sobre `bootbox-compat` / apagar `obj`).
 - **Cache de `start.js`:** o layout usa `?v=VersionERP` (ou `ViewBag.Version` no login). Sem **incremento** da versão após mudanças em `start.js`, browsers podem manter ficheiro antigo.
-- **Views novas:** `.cshtml` com `GdiAjax*` / `GdiDt*` **fora** do `<Content Include>` do `.csproj` — correr `Scripts/gdi_verify_csproj_gdi_helpers.py` antes do publish.
+- **Views novas:** `.cshtml` com `GdiAjax*` / `GdiDt*` **fora** do `<Content Include>` do `.csproj` — correr `Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` antes do publish.
 
 ---
 
@@ -263,7 +277,7 @@ O que foi preservado e a razão, especialmente onde havia risco de alteração i
 Bloco de registro já formatado e pronto para colar no topo do histórico.
 
 ### Linha de commit (Git)
-Uma linha no padrão `AAAA_MM_DD - resumo em português numa linha` (data com `_`; detalhe em `.cursor/rules/gdi-erp-plataform.mdc` §6.1). **Só** quando a intervenção alterou ficheiros no repositório; omitir se for só análise sem mudanças.
+Uma linha no padrão `AAAA_MM_DD - resumo em português numa linha` (data com `_`; detalhe em `.cursor/rules/2026_05_20_gdi-erp-plataform.mdc` §6.1). **Só** quando a intervenção alterou ficheiros no repositório; omitir se for só análise sem mudanças.
 
 ---
 

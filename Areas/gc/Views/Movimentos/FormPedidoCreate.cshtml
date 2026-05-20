@@ -103,7 +103,7 @@
                                         <div class="form-group row text-sm-end m-0 pt-1">
                                             @Html.Label("Cliente", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                                             <div class="col-sm-6">
-                                                @Html.DropDownList("id_cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "id_cliente", @class = "form-control", @onfocus = "jsSetDadosCliente();", @onchange = "jsSetDadosCliente();", @onblur = "jsSetDadosCliente();" })
+                                                @Html.DropDownList("id_cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "id_cliente", @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @onchange = "jsSetDadosCliente();" })
                                             </div>
                                             <div class="col-sm-2 mt-1 text-sm-start">
                                                 <div class="form-check form-switch form-switch-lg">

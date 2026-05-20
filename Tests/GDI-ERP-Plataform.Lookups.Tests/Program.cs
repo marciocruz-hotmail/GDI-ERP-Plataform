@@ -10,7 +10,10 @@ namespace GdiPlataform.Lookups.Tests
             {
                 LookupCacheKeysTests.Run();
                 LookupParametricCacheIntegrationTests.Run();
+                LookupParametricContatoPedidoKeysTests.Run();
                 LookupCacheInvalidationTests.Run();
+                LookupCacheInvalidatorFacadeTests.Run();
+                LookupCacheRegistryTableIsolationTests.Run();
                 Console.WriteLine("OK: Lookup tests passed.");
                 return 0;
             }

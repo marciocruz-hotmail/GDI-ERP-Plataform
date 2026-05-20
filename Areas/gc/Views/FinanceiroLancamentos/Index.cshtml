@@ -1,4 +1,7 @@
 @using GdiPlataform.Security
+@using System.Collections.Generic
+@using System.Web.Mvc
+@model GdiPlataform.Areas.gc.Models.CstModalRelatorio
 @functions {
     private static bool GcFinanceiroLancamentosHasRole(string role)
     {
@@ -79,10 +82,16 @@
             </div>
             <div class="card-body m-0 p-1" style="height: 100%">
                 <div class="form-horizontal m-0 p-0">
+                    @{
+                        var comboContasCaixaGerencial = ViewBag.comboContasCaixaGerencial as List<SelectListItem> ?? new List<SelectListItem>();
+                        var comboFinanceiroFiltroStatus = ViewBag.comboFinanceiroFiltroStatus as List<SelectListItem> ?? new List<SelectListItem>();
+                        var comboClientes = ViewBag.comboClientes as List<SelectListItem> ?? new List<SelectListItem>();
+                        var comboFiltroCst01 = ViewBag.comboFiltroCst01 as List<SelectListItem> ?? new List<SelectListItem>();
+                    }
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Conta Caixa", htmlAttributes: new { @class = "col-form-label col-sm-1"})
                         <div class="col-sm-3">
-                            @Html.DropDownListFor(model => model.Field_Text_01, ViewBag.comboContasCaixaGerencial as List<SelectListItem>, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                            @Html.DropDownListFor(model => model.Field_Text_01, comboContasCaixaGerencial, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
                         </div>
                         @Html.Label("Pagto", new { @class = "col-sm-1 col-form-label" })
                         
@@ -103,7 +112,7 @@
 
                         @Html.Label("Status", "Status", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                     <div class="col-sm-2">
-                        @Html.DropDownListFor(model => model.Field_Text_02, ViewBag.comboFinanceiroFiltroStatus as List<SelectListItem>, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                        @Html.DropDownListFor(model => model.Field_Text_02, comboFinanceiroFiltroStatus, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
                     </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
@@ -127,11 +136,11 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", "Cli./For.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                         <div class="col-sm-6">
-                            @Html.DropDownListFor(model => model.Field_Text_07, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                            @Html.DropDownListFor(model => model.Field_Text_07, comboClientes, new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
                         </div>
                         @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-2">
-                            @Html.DropDownListFor(model => model.Field_Text_08, ViewBag.comboFiltroCst01 as List<SelectListItem>, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                            @Html.DropDownListFor(model => model.Field_Text_08, comboFiltroCst01, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
                         </div>
                         <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFinanceiroLancamentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
@@ -207,8 +216,8 @@
         try
         {
             jsInitForm();
-            jsDatepicker('#ig_gc_fin_lancamentos_idx_d1');
-            jsDatepicker('#ig_gc_fin_lancamentos_idx_d2');
+            jsDatepickerFirstDayMonth('#ig_gc_fin_lancamentos_idx_d1');
+            jsDatepickerLastDayMonth('#ig_gc_fin_lancamentos_idx_d2');
             jsCreateTableGcFinanceiroLancamentosIndex();
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }

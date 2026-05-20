@@ -68,13 +68,6 @@
                             {
                                 if (qtdMenusTitulos > 0)
                                 {<div class="dropdown-divider"></div> }
-                                <a class="d-flex align-items-center dropdown-item" href="#" onclick="modalTransferirContaCaixa()" title="Transferir títulos filtrados (Em Aberto) para outra conta caixa com emissão de boleto"><i class="fa-solid fa-right-left me-2" aria-hidden="true"></i>Transferir Conta Caixa (filtro da grade)</a>
-                                qtdMenusTitulos = qtdMenusTitulos + 1;
-                            }
-                            @if ((CachePersister.userIdentity.Roles.Contains("g_Financeiro_*")) || (CachePersister.userIdentity.Roles.Contains("g_Financeiro_GerarRemessaBoletosBancarios")))
-                            {
-                                if (qtdMenusTitulos > 0)
-                                {<div class="dropdown-divider"></div> }
                                 <a class="d-flex align-items-center dropdown-item" href="#" onclick="jsModalGerarRemessaBoletosBancarios(otableFinanceiro, 'Id.')" title="Gerar Remessa - Boletos Bancários (Títulos Abertos)"><i class="fa-regular fa-file me-2" aria-hidden="true"></i>Gerar Remessa - Boletos Bancários (Títulos Abertos)</a>
                                 qtdMenusTitulos = qtdMenusTitulos + 1;
                             }
@@ -286,18 +279,6 @@
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
-    function modalTransferirContaCaixa()
-    {
-        try {
-            $("#mainModal").load('@Url.Action("ModalTransferirContaCaixa", "Financeiro", new { Area = "g" })?id=1', function () {
-                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-            })
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[modalTransferirContaCaixa] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
 
     function ajaxEnviarBoletosEmail()
     {

@@ -12,13 +12,14 @@ using GdiPlataform.Controllers;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
 using GdiPlataform.Lib;
+using GdiPlataform.Lib.Lookups;
 using ClosedXML.Excel;
 using System.Data.Entity;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_MovimentosCompras_*,gc_MovimentosCompras_Default")]
-    public class MovimentosComprasController : Controller
+    public partial class MovimentosComprasController : Controller
     {
         private GdiPlataformEntities db;
         public MovimentosComprasController()
@@ -32,11 +33,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region IndexCompras
         public ActionResult IndexCompras()
         {
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db); ;
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
-            ViewBag.comboTiposMovimentos = LibDataSets.LoadComboGcTiposMovimentosCompras(db);
-            ViewBag.comboStatusMovimentos = LibDataSets.LoadComboGcStatusMovimentos(db);
-            ViewBag.comboMovimentosPosicao = LibDataSets.LoadComboGcMovimentosPosicao(db);
+            PreencherLookupsIndexCompras();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-clipboard-list", "", "#008000", "fa-lg") + "&nbsp;" + LibIcons.getIcon("fa-solid fa-boxes", "", "#008000", "fa-lg") + "  Painel de Compras  -  Cotações / Pedidos";
             //LibStringFormat.GetTabHtml(2)
             return View();
@@ -73,20 +70,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             record_gc_movimento.id_local_estoque = -1;
             if (CachePersister.userIdentity.IdVendedor > 0) { record_gc_movimento.id_vendedor = CachePersister.userIdentity.IdVendedor; }; // Set Vendedor logado            
             ViewBag.idMovimento = (CachePersister.userIdentity.IdUsuario * -1).ToString(); // O Id, será o negativo do id do usuário;
-            ViewBag.comboClientes = LibDataSets.LoadComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ SELECIONE ]" });
-            ViewBag.comboTiposMovimentosCreateEdit = LibDataSets.LoadComboGcTiposMovimentosCreateEdit(db);
-            ViewBag.comboClientesContatos = LibDataSets.LoadComboGcClientesContatos(db, 0);
-            ViewBag.dataSetClientesContatos = LibDataSets.LoadDatasetGcClientesContatos(db);
-            ViewBag.comboLocaisEstoque = LibDataSets.LoadComboGcLocaisEstoqueOrders(db);
-            ViewBag.comboLocaisEstoqueOrders = LibDataSets.LoadComboGcLocaisEstoqueOrders(db);
-            ViewBag.comboVendedores = LibDataSets.LoadComboGVendedores(db);
-            ViewBag.comboVendedores.Insert(0, new SelectListItem { Value = "0", Text = "[ ESTOQUE ]" });
-            ViewBag.comboTransportadora = LibDataSets.LoadComboGcTransportadora(db);
-            ViewBag.comboMovimentosPosicao = LibDataSets.LoadComboGcMovimentosPosicao(db);
-            LibDataSets.LoadDatasetGVendedores(db);
-            ViewBag.comboMoedas = LibDataSets.LoadComboGMoedas(db);
-            ViewBag.comboPagRecCondicoes = LibDataSets.LoadComboPagRecCondicoesFaturaveis(db);
+            PreencherLookupsCompraPedidoForm();
             return View("CreateCotacaoPedidoCompra", record_gc_movimento);
         }
 
@@ -98,10 +82,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             record_gc_movimento_item.id_movimento = idMovimento.GetValueOrDefault();
             record_gc_movimento_item.id_movimento_item = -1;
             record_gc_movimento_item.quantidade = 1;
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-            ViewBag.comboProdutosCondicoes = LibDataSets.LoadComboGProdutoCondicao(db);
-            ViewBag.comboEntregasPrazos = LibDataSets.LoadComboGcEntregasPrazos(db);
-            ViewBag.dataSetProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
+            PreencherLookupsCompraItemModal();
             return View("ModalPedidoInsertEditItemCompra", record_gc_movimento_item);
         }
 
@@ -109,10 +90,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Editar Item";
             gc_movimentos_itens record_gc_movimento_item = db.gc_movimentos_itens.Find(IdItem);
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-            ViewBag.comboProdutosCondicoes = LibDataSets.LoadComboGProdutoCondicao(db);
-            ViewBag.comboEntregasPrazos = LibDataSets.LoadComboGcEntregasPrazos(db);
-            ViewBag.dataSetProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
+            PreencherLookupsCompraItemModal();
             return View("ModalPedidoInsertEditItemCompra", record_gc_movimento_item);
         }
 
@@ -240,10 +218,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             record_gc_movimento_item.quantidade = 1;
             record_gc_movimento_item.serial = string.Empty;
             record_gc_movimento_item.tag = true;
-            ViewBag.comboProdutosServicos = LibDataSets.LoadComboGcProdutosServicosTodos(db);
-            ViewBag.comboProdutosCondicoes = LibDataSets.LoadComboGProdutoCondicao(db);
-            ViewBag.comboEntregasPrazos = LibDataSets.LoadComboGcEntregasPrazos(db);
-            ViewBag.dataSetProdutosServicos = LibDataSets.LoadDatasetGcProdutosServicos(db);
+            PreencherLookupsCompraItemModal();
             return View("ModalPedidoInsertEditItemCompra", record_gc_movimento_item);
         }
 

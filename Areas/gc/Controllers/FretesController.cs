@@ -10,7 +10,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_Fretes_*,gc_Fretes_Default")]
-    public class FretesController : Controller
+    public partial class FretesController : Controller
     {
         private GdiPlataformEntities db;
         public FretesController()
@@ -22,7 +22,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         public ActionResult Index()
         {
-            ViewBag.comboTransportadora = LibDataSets.LoadComboGcTransportadora(db);
+            PreencherLookupsTransportadora();
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-truck fa-lg", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>" + "Gestão de Fretes" + "</b>";
             return View();
         }
