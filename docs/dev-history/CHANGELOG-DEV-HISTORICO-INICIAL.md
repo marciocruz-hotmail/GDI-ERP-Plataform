@@ -1,7 +1,8 @@
 # CHANGELOG-DEV — histórico inicial (arquivo preservado)
 
-> **Snapshot:** cópia integral de `.cursor/CHANGELOG-DEV.md` antes da reestruturação documental (2026-05-20).  
-> **Não editar** para registo operacional diário — usar `CHANGELOG-DEV.md` na raiz do repositório.  
+> **Snapshot:** cópia integral de `.cursor/CHANGELOG-DEV.md` antes da compactação (2026-05-20).  
+> **Estatísticas:** ~2903 linhas, **187** blocos `### [data]`. Conteúdo **não compactado**.  
+> **Não editar** para registo diário — usar `CHANGELOG-DEV.md` (raiz).  
 > **Índice vivo:** `AI-CONTEXT.md`, `BACKLOG-DEV.md`, `.cursor/context/*.md`
 
 ---

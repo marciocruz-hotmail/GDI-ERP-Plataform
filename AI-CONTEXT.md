@@ -111,9 +111,9 @@ Formato legado (blocos `### [data]`) preservado apenas no arquivo histórico `CH
 
 | Tipo | Caminho |
 |------|---------|
-| Changelog operacional | `CHANGELOG-DEV.md` |
+| Changelog operacional (~200 linhas) | `CHANGELOG-DEV.md` |
 | Backlog | `BACKLOG-DEV.md` |
-| Histórico changelog | `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` |
+| Histórico changelog (187 entradas, arquivo) | `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` |
 | Checklist ERP | `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` |
 | Regras Cursor | `.cursor/rules/2026_05_20_gdi-erp-plataform.mdc` (ordem de leitura: este ficheiro → `CHANGELOG-DEV` → `BACKLOG-DEV`) |
 | Padrões Claude | `CLAUDE.md` |
