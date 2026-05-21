@@ -84,7 +84,7 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-8 min-w-0">
-                            @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();" })
+                            @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
                         <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
@@ -98,7 +98,7 @@
                         <thead>
                             <tr>
                                 <th>[TableRowColor]</th>
-                                <th>[x]</th>
+                                <th></th>
                                 <th>@Html.Encode("Id.")</th>
                                 <th><i class="fa-solid fa-bolt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Operação"></i></th>
                                 <th>@Html.Encode("NF")</th>
@@ -230,13 +230,13 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "0%", visible: false, targets: [0] },
-                { "width": "2%", orderable: false, className: 'text-sm-center', targets: [1], render: DataTable.render.select() },
+                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [1], render: DataTable.render.select() },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [3] },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [4] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [5] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [6] },
-                { "width": "31%", orderable: false, className: 'text-sm-start', targets: [7] },
+                { "width": "30%", orderable: false, className: 'text-sm-start', targets: [7] },
                 { "width": "6%", orderable: false, className: 'text-sm-start', targets: [8] },
                 { "width": "6%", orderable: false, className: 'text-sm-center', targets: [9] },
                 { "width": "3%", orderable: false, className: 'text-sm-center', targets: [10] },

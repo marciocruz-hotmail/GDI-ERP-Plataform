@@ -19,6 +19,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 db = new GdiPlataformEntities(CachePersister.dataBase);
             }
         }
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutLite)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-sliders", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Parâmetros Comerciais";

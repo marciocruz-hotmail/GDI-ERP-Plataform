@@ -9,6 +9,12 @@ namespace GdiPlataform.Security
     {
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
+            if (filterContext.ActionDescriptor.IsDefined(typeof(AllowAnonymousAttribute), inherit: true)
+                || filterContext.ActionDescriptor.ControllerDescriptor.IsDefined(typeof(AllowAnonymousAttribute), inherit: true))
+            {
+                return;
+            }
+
             if (CachePersister.userIdentity == null)
             {
                 // Se o usuário não estava conectado
@@ -32,7 +38,9 @@ namespace GdiPlataform.Security
                     }
                     else
                     {
-                        filterContext.Controller.TempData["Info"] = "Tempo de conexão expirado, Efetue nova conexão";
+                        GdiPlataform.Lib.LibFlashMessage.SetInfo(
+                            filterContext.Controller as Controller,
+                            "Tempo de conexão expirado, Efetue nova conexão");
                         filterContext.Result = new RedirectToRouteResult
                             (new System.Web.Routing.RouteValueDictionary(new { controller = "UserIdentity", action = "Index", area = String.Empty }));
                     }

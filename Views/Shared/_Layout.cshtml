@@ -1,17 +1,9 @@
 @using GdiPlataform.Security
+@{ Html.RenderPartial("~/Views/Shared/_LayoutPageScriptsInit.cshtml"); }
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="@CachePersister.userIdentity.GoogleTagURL"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', '@CachePersister.userIdentity.GoogleTag');
-    </script>
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>@(ViewBag.PortalClienteBrowserTitle as bool? == true ? "GDI - Portal do Cliente" : ("aeroflightx.com - " + CachePersister.userIdentity.VersionERP))</title>
@@ -24,37 +16,10 @@
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/sweetalert2.min.css" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/bootstrap-5.min.css" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/sweetalert2/gdi-swal2-overrides.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/css/tempus-dominus.min.css" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap4-toggle/bootstrap4-toggle.min.css" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.css" rel="stylesheet" />
-    <link href="~/Content/gdi-datatables-bs5.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
+    @{ Html.RenderPartial("~/Views/Shared/_LayoutHeadOptionalScripts.cshtml"); }
     <link href="~/Content/gdi-section-cards.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
     <link href="~/Content/gdi-sidebar-nav.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/themes/default/style.css" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/select2/select2.min.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
-    <link href="~/LibUI_AdminLTE-4.0.0/plugins/select2/select2-bootstrap-5-theme.min.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
     <link href="~/LibUI_AdminLTE-4.0.0/plugins/startprime/css/start.css?v=@(CachePersister.userIdentity.VersionERP)" rel="stylesheet" />
-
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/jquery-3.6.0/jquery.min.js"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/overlayscrollbars-2.11.0/overlayscrollbars.browser.es5.min.js"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.js"></script>
-
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/popper.min.js"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/tempus-dominus.min.js"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/jQuery-provider.min.js?v=@CachePersister.userIdentity.VersionERP"></script>
-    @Scripts.Render("~/bundles/libui-swal-compat")
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/jquery.spin.fgnass-2.3.2/spin.min.js"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/js/adminlte.min.js"></script>
-
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/jstree.min.js"></script>
-
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/select2/select2.min.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/select2/i18n/pt-BR.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/gdi-select2.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
-
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js?v=@(CachePersister.userIdentity.VersionERP)&amp;gdiBusy=6"></script>
-    <script src="~/Scripts/jsFileInputChange.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
-    <script src="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap4-toggle/bootstrap4-toggle.min.js"></script>
 
     <style type="text/css">
         #loading {
@@ -118,7 +83,8 @@
     </style>
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary" @GdiPlataform.Lib.GdiPageScriptsDefaults.HtmlDiagnosticAttribute="@(((int)ViewBag.GdiPageScripts).ToString())">
+    @{ Html.RenderPartial("_LayoutScriptsAuthenticated"); }
     @{ if (CachePersister.contextoModel == null)
         {
             Response.Redirect(@Url.Action("Index", "UserIdentity", new { area = "" }));
@@ -146,6 +112,11 @@
         }
     }
 
+    @* G-PERF-20 Fase 3: carregamento condicional; Tempus só nas views host (20c-bis) *@
+    @{ Html.RenderPartial("~/Views/Shared/_LayoutScriptsOptional.cshtml"); }
+    @* start.js sem defer: executa após parse dos defer acima no fecho do documento; antes de DOMContentLoaded (gdi-session-handler) *@
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js?v=@(CachePersister.userIdentity.VersionERP)&amp;gdiBusy=6"></script>
+
     <script type="text/javascript">
         function reloadPageMain() { location.reload(); }
         @* Timeout de inatividade: 900 segundos = 15 min - deve coincidir com Web.config sessionState timeout="15" *@
@@ -153,7 +124,7 @@
         window.GDI_LoginUrl = '@Url.Action("Index", "UserIdentity", new { area = "" })';
     </script>
     <script src="~/Scripts/sessionInactivity.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
-    @* Sessão 401: gdi-session-handler exige jQuery + ~/bundles/libui-swal-compat + start.js (LibMessageError) antes — ver cabeçalho do .js *@
+    @* Sessão 401: gdi-session-handler exige jQuery + ~/bundles/libui-swal-compat + start.js (LibMessageError) antes — ver gdi-session-handler.js *@
     <script src="~/Scripts/gdi-session-handler.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

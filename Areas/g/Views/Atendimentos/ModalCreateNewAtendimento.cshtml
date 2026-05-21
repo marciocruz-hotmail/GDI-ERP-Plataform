@@ -74,7 +74,7 @@
                                 <div class="form-group row text-sm-end m-0 pt-1">
                                     @Html.Label("param_id_cliente", "Cliente", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                     <div class="col-sm-10">
-                                        @Html.DropDownListFor(model => model.param_id_cliente, ViewBag.ComboClientes as List<SelectListItem>, new { @class = "form-control" })
+                                        @Html.DropDownListFor(model => model.param_id_cliente, ViewBag.ComboClientes as List<SelectListItem>, new { @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Atendimentos", new { area = "g" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
                                     </div>
                                 </div>
                             </div>
@@ -193,14 +193,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                $("#dtGAtendimentos").DataTable().draw(false);
-                                LibMessageHideAll();
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            $("#dtGAtendimentos").DataTable().draw(false);
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

@@ -64,7 +64,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 // Observação: LibDB.getFilterByUser parece depender do flag filterAdvanced;
                 // aqui mantemos a chamada como no seu padrão.
-                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
 
                 if (recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0)
                 {
@@ -288,8 +288,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             string errorMessage = "";
             string stackTrace = "";
 
-            // Mantido por compatibilidade com o front (mesmo que aqui não haja filtro avançado/db no código original)
-            bool filterAdvanced = false;
             string filterOnOff = "0";
 
             try
@@ -297,9 +295,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 int start = param.iDisplayStart;
                 int length = (param.iDisplayLength <= 0 ? 20 : param.iDisplayLength);
 
-                // (Opcional) Se seu framework usa isso para exibir ícone/estado no front
-                // Aqui não há uso real, mas mantemos o padrão
-                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
+                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
 
                 // ----------------------------------------
                 // 1) Query base (LINQ) - SEM SQL concatenado
@@ -488,8 +484,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "ComexProdutosController";
                 msg += "<br/>" + "ModalCreateEdit";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }

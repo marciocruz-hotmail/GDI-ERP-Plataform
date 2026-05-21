@@ -46,21 +46,15 @@ namespace GdiPlataform.Areas.g.Controllers
             record_g_atendimentos.responsavel_id_usuario = 0;
             return View(record_g_atendimentos);
         }
+        /// <summary>DT-1: nome legado (não renomear — views Index/Edit). Contrato DataTables Fase 15+.</summary>
         public ActionResult getDadosAtendimentos(jQueryDataTableParamModel param)
         {
-            String filterOnOff = "0";
-            if (param == null)
-            {
-                param = new jQueryDataTableParamModel();
-            }
+            string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            String SentencaSQL = string.Empty;
-            List<Db.g_atendimentos> allRecords = new List<Db.g_atendimentos>();
-            List<Db.g_usuarios> ListaUsuarios = db.g_usuarios.ToList();
-            List<Db.g_departamentos> ListaDepartamentos = db.g_departamentos.ToList();
-            List<Db.g_atendimentos_status> ListaAtendimentosStatus = db.g_atendimentos_status.ToList();
-            List<Db.g_atendimentos_categorias> ListaAtendimentosCategorias = db.g_atendimentos_categorias.ToList();
+            int start = param.iDisplayStart;
+            int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
             DateTime DataHoraAtual = GdiPlataform.Lib.LibDateTime.getDataHoraBrasilia();
 
             param.yesCustomField01 = param.yesCustomField01.EmptyIfNull().ToString().Trim();
@@ -69,48 +63,61 @@ namespace GdiPlataform.Areas.g.Controllers
             param.yesCustomField04 = param.yesCustomField04.EmptyIfNull().ToString().Trim();
             param.yesCustomField05 = param.yesCustomField05.EmptyIfNull().ToString().Trim();
 
-            SentencaSQL = "select * from g_atendimentos where id_atendimento > 0";
-            if (param.yesCustomField01 != String.Empty && param.yesCustomField01 != "0") { SentencaSQL += " and id_atendimento = " + param.yesCustomField01; };
-            if (param.yesCustomField02 != String.Empty && param.yesCustomField02 != "0") { SentencaSQL += " and solicitante_id_usuario = " + param.yesCustomField02; };
-            if (param.yesCustomField03 != String.Empty && param.yesCustomField03 == "0") { SentencaSQL += " and id_status in (1,2) "; }
-            else if (param.yesCustomField03 != String.Empty && param.yesCustomField03 != "0") { SentencaSQL += " and id_status = " + param.yesCustomField03; };
-            if (param.yesCustomField04 != String.Empty && param.yesCustomField04 != "0") { SentencaSQL += " and responsavel_id_departamento = " + param.yesCustomField04; };
-            if (param.yesCustomField05 != String.Empty && param.yesCustomField05 != "0") { SentencaSQL += " and responsavel_id_usuario = " + param.yesCustomField05; };
+            string sentencaSql = "select * from g_atendimentos where id_atendimento > 0";
+            if (param.yesCustomField01 != String.Empty && param.yesCustomField01 != "0") { sentencaSql += " and id_atendimento = " + param.yesCustomField01; }
+            if (param.yesCustomField02 != String.Empty && param.yesCustomField02 != "0") { sentencaSql += " and solicitante_id_usuario = " + param.yesCustomField02; }
+            if (param.yesCustomField03 != String.Empty && param.yesCustomField03 == "0") { sentencaSql += " and id_status in (1,2) "; }
+            else if (param.yesCustomField03 != String.Empty && param.yesCustomField03 != "0") { sentencaSql += " and id_status = " + param.yesCustomField03; }
+            if (param.yesCustomField04 != String.Empty && param.yesCustomField04 != "0") { sentencaSql += " and responsavel_id_departamento = " + param.yesCustomField04; }
+            if (param.yesCustomField05 != String.Empty && param.yesCustomField05 != "0") { sentencaSql += " and responsavel_id_usuario = " + param.yesCustomField05; }
 
-            LibDB.setFilterByUser(SentencaSQL, controllerName, true, db);
-            allRecords = db.g_atendimentos.SqlQuery(SentencaSQL.ToString()).ToList();
+            filterOnOff = "1";
+            LibDB.setFilterByUser(sentencaSql, controllerName, true, db);
+            string sqlData = sentencaSql + " order by id_atendimento desc";
+            int totalRecords = LibDataTableSqlPaging.SqlCount(db, sqlData);
+            var pageList = db.g_atendimentos.SqlQuery(LibDataTableSqlPaging.SqlPage(sqlData, start, length)).ToList();
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_atendimentos, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.param_id_cliente) :
-                                     "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
+            var usuarioIds = new List<int>();
+            foreach (var c in pageList)
             {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.param_id_cliente); }
-                }
-                else
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.param_id_cliente); }
-                }
+                if (c.solicitacao_id_usuario > 0) usuarioIds.Add(c.solicitacao_id_usuario);
+                if (c.responsavel_id_usuario.GetValueOrDefault() > 0) usuarioIds.Add(c.responsavel_id_usuario.Value);
             }
+            usuarioIds = usuarioIds.Distinct().ToList();
+            var usuariosDict = usuarioIds.Count > 0
+                ? db.g_usuarios.AsNoTracking().Where(u => usuarioIds.Contains(u.id_usuario))
+                    .ToDictionary(u => u.id_usuario, u => u)
+                : new Dictionary<int, Db.g_usuarios>();
+
+            var deptIds = pageList.Select(c => c.responsavel_id_departamento).Where(id => id > 0).Distinct().ToList();
+            var deptDict = deptIds.Count > 0
+                ? db.g_departamentos.AsNoTracking().Where(d => deptIds.Contains(d.id_departamento))
+                    .ToDictionary(d => d.id_departamento, d => d)
+                : new Dictionary<int, Db.g_departamentos>();
+
+            var statusDict = db.g_atendimentos_status.AsNoTracking().ToDictionary(s => s.id_status, s => s);
+            var catIds = pageList.Select(c => c.id_atendimento_categoria).Distinct().ToList();
+            var catDict = catIds.Count > 0
+                ? db.g_atendimentos_categorias.AsNoTracking().Where(cat => catIds.Contains(cat.id_atendimento_categoria))
+                    .ToDictionary(cat => cat.id_atendimento_categoria, cat => cat)
+                : new Dictionary<int, Db.g_atendimentos_categorias>();
 
             List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
+            foreach (var c in pageList)
             {
                 String _Solicitante = String.Empty;
                 String _CategoriaSolicitacao = String.Empty;
                 String _StatusAtendimento = String.Empty;
-                var ArraySolicitante = ListaUsuarios.Find(u => u.id_usuario == c.solicitacao_id_usuario);
-                var ArrayDepartamento = ListaDepartamentos.Find(d => d.id_departamento == c.responsavel_id_departamento);
-                var ArrayResponsavel = ListaUsuarios.Find(u => u.id_usuario == c.responsavel_id_usuario);
-                var ArrayStatus = ListaAtendimentosStatus.Find(u => u.id_status == c.id_status);
-                var ArrayAtendimentoCategoria = ListaAtendimentosCategorias.Find(cat => cat.id_atendimento_categoria == c.id_atendimento_categoria);
+                Db.g_usuarios ArraySolicitante;
+                usuariosDict.TryGetValue(c.solicitacao_id_usuario, out ArraySolicitante);
+                Db.g_departamentos ArrayDepartamento;
+                deptDict.TryGetValue(c.responsavel_id_departamento.GetValueOrDefault(), out ArrayDepartamento);
+                Db.g_usuarios ArrayResponsavel;
+                usuariosDict.TryGetValue(c.responsavel_id_usuario.GetValueOrDefault(), out ArrayResponsavel);
+                Db.g_atendimentos_status ArrayStatus;
+                statusDict.TryGetValue(c.id_status, out ArrayStatus);
+                Db.g_atendimentos_categorias ArrayAtendimentoCategoria;
+                catDict.TryGetValue(c.id_atendimento_categoria, out ArrayAtendimentoCategoria);
 
                 if (c.id_status == 1) { _StatusAtendimento = LibIcons.getIcon("fa-solid fa-list-check", "Aberto", "gray", ""); }
                 else if (c.id_status == 2) { _StatusAtendimento = LibIcons.getIcon("fa-solid fa-ticket", "Atendimento", "orange", ""); }
@@ -142,8 +149,8 @@ namespace GdiPlataform.Areas.g.Controllers
                 stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count,
-                iTotalDisplayRecords = allRecords.Count,
+                iTotalRecords = totalRecords,
+                iTotalDisplayRecords = totalRecords,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
@@ -155,66 +162,85 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         #region GetDadosGedAtendimento
+        /// <summary>DT-1: ex-GetGedAtendimento. GED do atendimento (aba Edit).</summary>
         public ActionResult GetDadosGedAtendimento(jQueryDataTableParamModel param)
         {
-            String filterOnOff = "0";
+            const string filterOnOff = "0";
             if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            int IdTable = 0;
-            int.TryParse(param.yesCustomIdPK, out IdTable);
-            List<g_usuarios> ListaUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
-            List<ged_arquivos> ListaArquivosGed = db.ged_arquivos.Where(g => g.ativo == true && g.id_atendimento == IdTable).ToList();
-            List<ged_arquivos_tipos> ListaArquivosGedTipos = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).ToList();
-            List<string[]> list = new List<string[]>();
+                int idAtendimento = 0;
+                int.TryParse(param.yesCustomIdPK, out idAtendimento);
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
 
-            var displayedRecords = ListaArquivosGed.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.ged_arquivos, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+                var query = db.ged_arquivos.AsNoTracking()
+                    .Where(g => g.ativo && g.id_atendimento == idAtendimento);
+                int totalRecords = query.Count();
 
-            foreach (var RecordGed in displayedRecords)
-            {
-                String DataReferencia = String.Empty;
-                String DescricaoTipoArquivo = String.Empty;
-                String NomeUsuario = String.Empty;
-                var uCad = ListaUsuarios.Where(u => u.id_usuario == RecordGed.id_usuario_cadastro).FirstOrDefault();
-                if (uCad != null) { NomeUsuario = uCad.login.EmptyIfNull().ToString(); }
-                if (RecordGed.datahora_cadastro != null) { DataReferencia = RecordGed.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); }
-                ;
-                if (RecordGed.id_arquivo_tipo > 0)
+                IOrderedQueryable<Db.ged_arquivos> ordered = query.OrderByDescending(g => g.id_arquivo);
+                if (param.iSortingCols > 0)
                 {
-                    ged_arquivos_tipos RecordArquivoTipo = ListaArquivosGedTipos.Where(t => t.id_arquivo_tipo == RecordGed.id_arquivo_tipo).FirstOrDefault();
-                    if (RecordArquivoTipo != null) { DescricaoTipoArquivo = RecordArquivoTipo.descricao.EmptyIfNull().ToString(); }
-                    ;
+                    bool asc = (param.sSortDir_0 ?? "desc").Equals("asc", StringComparison.OrdinalIgnoreCase);
+                    switch (param.iSortCol_0)
+                    {
+                        case 1:
+                            ordered = asc ? query.OrderBy(g => g.id_arquivo) : query.OrderByDescending(g => g.id_arquivo);
+                            break;
+                        case 2:
+                            ordered = asc ? query.OrderBy(g => g.filename) : query.OrderByDescending(g => g.filename);
+                            break;
+                        case 3:
+                            ordered = asc ? query.OrderBy(g => g.descricao) : query.OrderByDescending(g => g.descricao);
+                            break;
+                    }
                 }
 
-                list.Add(new[] {
-                                    RecordGed.id_arquivo.ToString(),
-                                    DescricaoTipoArquivo.ToString(),
-                                    RecordGed.descricao.ToString(),
-                                    RecordGed.filename.ToString(),
-                                    DataReferencia,
-                                    NomeUsuario,
-                                    "" // Botão Download
-                                });
-            }
+                var page = ordered.Skip(start).Take(length).ToList();
+                var usuarioIds = page.Select(g => g.id_usuario_cadastro).Where(id => id > 0).Distinct().ToList();
+                var usuariosDict = usuarioIds.Count > 0
+                    ? db.g_usuarios.AsNoTracking().Where(u => usuarioIds.Contains(u.id_usuario))
+                        .ToDictionary(u => u.id_usuario, u => u.login.EmptyIfNull().ToString())
+                    : new Dictionary<int, string>();
+                var tipoIds = page.Select(g => g.id_arquivo_tipo).Where(id => id > 0).Distinct().ToList();
+                var tiposDict = tipoIds.Count > 0
+                    ? db.ged_arquivos_tipos.AsNoTracking().Where(t => tipoIds.Contains(t.id_arquivo_tipo))
+                        .ToDictionary(t => t.id_arquivo_tipo, t => t.descricao.EmptyIfNull().ToString())
+                    : new Dictionary<int, string>();
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = ListaArquivosGed.Count(),
-                iTotalDisplayRecords = ListaArquivosGed.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                var list = new List<string[]>();
+                foreach (var ged in page)
+                {
+                    string nomeUsuario;
+                    usuariosDict.TryGetValue(ged.id_usuario_cadastro.GetValueOrDefault(), out nomeUsuario);
+                    string descricaoTipo = string.Empty;
+                    if (ged.id_arquivo_tipo > 0)
+                        tiposDict.TryGetValue(ged.id_arquivo_tipo, out descricaoTipo);
+                    string dataReferencia = ged.datahora_cadastro != null
+                        ? ged.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy")
+                        : string.Empty;
+
+                    list.Add(new[] {
+                        ged.id_arquivo.ToString(),
+                        descricaoTipo ?? string.Empty,
+                        ged.descricao.ToString(),
+                        ged.filename.ToString(),
+                        dataReferencia,
+                        nomeUsuario ?? string.Empty,
+                        ""
+                    });
+                }
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
@@ -241,8 +267,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "AtendimentosController";
                 msg += "<br/>" + "ModalCreateNewAtendimento";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -583,9 +608,9 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     g_atendimentos record_g_atendimentos = db.g_atendimentos.Find(id);
                     ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Atendimento</b>" + LibStringFormat.GetTabHtml(1) + record_g_atendimentos.id_atendimento.EmptyIfNull().ToString() + " - " + EncodeAtendimentoDisplay(record_g_atendimentos.solicitacao.EmptyIfNull().ToString());
-                    PreencherLookupsAtendimentoEdit();
-                    ViewBag.MsgCategoria = EncodeAtendimentoDisplay(db.g_atendimentos_categorias.Find(record_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString());
-                    ViewBag.MsgCategoria += " (Solicitante: " + EncodeAtendimentoDisplay(db.g_usuarios.Find(record_g_atendimentos.solicitacao_id_usuario).nome.EmptyIfNull().ToString()) + ")";
+                    PreencherLookupsAtendimentoEdit(record_g_atendimentos.param_id_cliente);
+                    ViewBag.MsgCategoria = db.g_atendimentos_categorias.Find(record_g_atendimentos.id_atendimento_categoria).nome.EmptyIfNull().ToString().Trim();
+                    ViewBag.MsgCategoria += " (Solicitante: " + db.g_usuarios.Find(record_g_atendimentos.solicitacao_id_usuario).nome.EmptyIfNull().ToString().Trim() + ")";
                     return View("Edit", record_g_atendimentos);
                 }
             }
@@ -594,78 +619,82 @@ namespace GdiPlataform.Areas.g.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "AtendimentosController";
                 msg += "<br/>" + "Edit";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
         #endregion
 
         #region getDadosAtividades
+        /// <summary>DT-1: atividades do atendimento (modal/aba Edit).</summary>
         public ActionResult getDadosAtividades(jQueryDataTableParamModel param)
         {
-            String filterOnOff = "0";
-            if (param == null)
-            {
-                param = new jQueryDataTableParamModel();
-            }
+            const string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            int IdAtendimento = -1;
-            int.TryParse(param.yesCustomIdPK, out IdAtendimento);
+                int idAtendimento = -1;
+                int.TryParse(param.yesCustomIdPK, out idAtendimento);
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
 
-            var allRecords = db.g_atendimentos_atividades.Where(a => a.id_atendimento == IdAtendimento).OrderBy(a => a.ordem).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            var allOperadores = db.g_usuarios.ToList();
+                var query = db.g_atendimentos_atividades.AsNoTracking()
+                    .Where(a => a.id_atendimento == idAtendimento);
+                int totalRecords = query.Count();
+                var page = query.OrderBy(a => a.ordem).Skip(start).Take(length).ToList();
 
+                var operadorIds = page.Where(a => a.responsavel_id_usuario > 0)
+                    .Select(a => a.responsavel_id_usuario).Distinct().ToList();
+                var operadoresDict = operadorIds.Count > 0
+                    ? db.g_usuarios.AsNoTracking().Where(u => operadorIds.Contains(u.id_usuario))
+                        .ToDictionary(u => u.id_usuario, u => u.login.EmptyIfNull().ToString())
+                    : new Dictionary<int, string>();
 
-            List<string[]> list = new List<string[]>();
-            foreach (var RecordAtividade in displayedRecords)
-            {
-                String IconeStatus = String.Empty;
-                String NomeOperador = String.Empty;
-                String DataSLA = String.Empty;
-                String DataFinalizacao = String.Empty;
-
-                if (RecordAtividade.concluido == true)
+                var list = new List<string[]>();
+                foreach (var atividade in page)
                 {
-                    IconeStatus = LibIcons.getIcon("fa-solid fa-lock", "Fechado", "", "");
-                    DataFinalizacao = Convert.ToDateTime(RecordAtividade.conclusao_datahora, new CultureInfo("en-US")).ToString("dd/MM/yy");
-                    if (DataFinalizacao.EmptyIfNull().ToString() == "01/01/01") { DataFinalizacao = ""; };
-                }
-                else
-                {
-                    IconeStatus = LibIcons.getIcon("fa-solid fa-list-check", "Aberto", "", "");
-                    DataSLA = Convert.ToDateTime(RecordAtividade.sla_datahora, new CultureInfo("en-US")).ToString("dd/MM/yy");
-                    if (DataSLA.EmptyIfNull().ToString() == "01/01/01") { DataSLA = ""; };
-                }
-                
-                if (RecordAtividade.responsavel_id_usuario > 0)
-                {
-                    var op = allOperadores.Find(o => o.id_usuario == RecordAtividade.responsavel_id_usuario);
-                    NomeOperador = op != null ? op.login.EmptyIfNull().ToString() : String.Empty;
-                }
-                list.Add(new[] {
-                                    RecordAtividade.id_atendimento_atividade.EmptyIfNull().ToString(),
-                                    IconeStatus,
-                                    EncodeAtendimentoDisplay(RecordAtividade.solicitacao.EmptyIfNull().ToString()),
-                                    DataSLA,
-                                    DataFinalizacao,
-                                    "",
-                                });
-            }
+                    string iconeStatus;
+                    string dataSla = string.Empty;
+                    string dataFinalizacao = string.Empty;
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                    if (atividade.concluido == true)
+                    {
+                        iconeStatus = LibIcons.getIcon("fa-solid fa-lock", "Fechado", "", "");
+                        dataFinalizacao = Convert.ToDateTime(atividade.conclusao_datahora, new CultureInfo("en-US")).ToString("dd/MM/yy");
+                        if (dataFinalizacao == "01/01/01") { dataFinalizacao = string.Empty; }
+                    }
+                    else
+                    {
+                        iconeStatus = LibIcons.getIcon("fa-solid fa-list-check", "Aberto", "", "");
+                        dataSla = Convert.ToDateTime(atividade.sla_datahora, new CultureInfo("en-US")).ToString("dd/MM/yy");
+                        if (dataSla == "01/01/01") { dataSla = string.Empty; }
+                    }
+
+                    string nomeOperador = string.Empty;
+                    int idOperador = atividade.responsavel_id_usuario.GetValueOrDefault();
+                    if (idOperador > 0)
+                        operadoresDict.TryGetValue(idOperador, out nomeOperador);
+
+                    list.Add(new[] {
+                        atividade.id_atendimento_atividade.EmptyIfNull().ToString(),
+                        iconeStatus,
+                        EncodeAtendimentoDisplay(atividade.solicitacao.EmptyIfNull().ToString()),
+                        dataSla,
+                        dataFinalizacao,
+                        ""
+                    });
+                }
+
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {
@@ -704,8 +733,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "AtendimentosController";
                 msg += "<br/>" + "ModalCreateAtividade";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -858,52 +886,57 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region getDadosLogs
+        /// <summary>DT-1: logs automáticos do atendimento (aba Edit).</summary>
         public ActionResult getDadosAtendimentosLogs(jQueryDataTableParamModel param)
         {
-            String filterOnOff = "0";
-            if (param == null)
-            {
-                param = new jQueryDataTableParamModel();
-            }
+            const string filterOnOff = "0";
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            int IdAtendimento = -1;
-            int.TryParse(param.yesCustomIdPK, out IdAtendimento);
+                int idAtendimento = -1;
+                int.TryParse(param.yesCustomIdPK, out idAtendimento);
+                int start = Math.Max(0, param.iDisplayStart);
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
 
-            var allRecords = db.g_atendimentos_logs.Where(l => l.id_atendimento == IdAtendimento && l.log_automatico == true).OrderBy(l => l.datahora_cadastro).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            List<Db.g_usuarios> ListaUsuarios = db.g_usuarios.ToList();
-            List<Db.g_departamentos> ListaDepartamentos = db.g_departamentos.ToList();
+                var query = db.g_atendimentos_logs.AsNoTracking()
+                    .Where(l => l.id_atendimento == idAtendimento && l.log_automatico == true);
+                int totalRecords = query.Count();
+                var page = query.OrderBy(l => l.datahora_cadastro).Skip(start).Take(length).ToList();
 
-            String _status = String.Empty;
-            String _Operador = String.Empty;
+                var usuarioIds = page.Select(l => l.id_usuario_cadastro).Distinct().ToList();
+                var usuariosDict = usuarioIds.Count > 0
+                    ? db.g_usuarios.AsNoTracking().Where(u => usuarioIds.Contains(u.id_usuario))
+                        .ToDictionary(u => u.id_usuario, u => u)
+                    : new Dictionary<int, Db.g_usuarios>();
 
-            List<string[]> list = new List<string[]>();
-            foreach (var l in displayedRecords)
-            {
-                String _DataUsuario = l.datahora_cadastro.ToString("dd/MM/yy HH:mm");
-                var ArrayUsuario = ListaUsuarios.Find(u => u.id_usuario == l.id_usuario_cadastro);
-                g_usuarios RecordUsuario = ListaUsuarios.Where(u => u.id_usuario == l.id_usuario_cadastro).FirstOrDefault();
-                if (ArrayUsuario != null) { _DataUsuario += "<br/>" + EncodeAtendimentoDisplay(LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(ArrayUsuario.nome.ToString()))); };
-                String _Log = l.log.EmptyIfNull().ToString().Trim().Replace("\r\n", "<br/>");
-                list.Add(new[] {
-                                    l.id_atendimento_log.EmptyIfNull().ToString(),
-                                    _DataUsuario,
-                                    _Log,
-                                });
-            }
+                var list = new List<string[]>();
+                foreach (var log in page)
+                {
+                    string dataUsuario = log.datahora_cadastro.ToString("dd/MM/yy HH:mm");
+                    Db.g_usuarios usuario;
+                    if (usuariosDict.TryGetValue(log.id_usuario_cadastro, out usuario) && usuario != null)
+                    {
+                        dataUsuario += "<br/>" + EncodeAtendimentoDisplay(
+                            LibStringFormat.ToTitleCase(LibStringFormat.GetPrimeiroNome(usuario.nome.ToString())));
+                    }
+                    string textoLog = log.log.EmptyIfNull().ToString().Trim().Replace("\r\n", "<br/>");
+                    list.Add(new[] {
+                        log.id_atendimento_log.EmptyIfNull().ToString(),
+                        dataUsuario,
+                        textoLog
+                    });
+                }
 
-            return Json(new
-            {
-                errorMessage = "",
-                stackTrace = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                return Json(new
+                {
+                    errorMessage = "",
+                    stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalRecords,
+                    aaData = list
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception e)
             {

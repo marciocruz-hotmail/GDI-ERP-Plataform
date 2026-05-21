@@ -37,8 +37,6 @@ namespace GdiPlataform.Models
         public string Dominio { get; set; }
         public string SubDominio { get; set; }
         public string ImgLogoSubdominio { get; set; }
-        public string GoogleTag { get; set; }
-        public string GoogleTagURL { get; set; }
         public string[] Roles { get; set; }
         public DateTime DataHoraExpiracao { get; set; }
         public string AmbienteDatabase { get; set; }

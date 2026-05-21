@@ -29,6 +29,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
         }
 
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutHubReport)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatórios Cadastrais";

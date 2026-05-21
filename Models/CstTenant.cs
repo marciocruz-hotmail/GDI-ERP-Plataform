@@ -11,7 +11,5 @@ namespace GdiPlataform.Models
         public string subDominio { get; set; }
         public string ImgLogoSubdominio { get; set; }
         public string database { get; set; }
-        public string GoogleTag { get; set; }
-        public string GoogleTagURL { get; set; }
     }
 }

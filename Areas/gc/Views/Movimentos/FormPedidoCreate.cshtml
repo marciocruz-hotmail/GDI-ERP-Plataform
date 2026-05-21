@@ -949,30 +949,13 @@
         try {
             if ((@Model.id_movimento_status <= 2) && ('@Model.movimento_nf'.toLowerCase() == 'false'))
             {
-                LibMessageDialog({
-                    title: "Confirmação",
-                    message: "Confirma a exclusão do item ?" + "<br/><br/>" + "<b>" + produto + "</b>",
+                LibMessageConfirm('Confirmação', 'Confirma a exclusão do item ?' + '<br/><br/>' + '<b>' + produto + '</b>', {
+                    icon: 'warning',
                     closeButton: false,
-                    centerVertical: true,
                     onEscape: false,
                     backdrop: true,
-                    buttons: {
-                        cancelar: {
-                            label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
-                            className: 'btn-outline-warning',
-                            callback: function () {
-                                LibMessageHideAll();
-                            }
-                        },
-                        confirmar: {
-                            label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
-                            className: 'btn-outline-success',
-                            callback: function ()
-                            {
-                                jsAjaxDeleteItem(id);
-                            }
-                        }
-                    }
+                    confirmLabel: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                    onConfirm: function () { jsAjaxDeleteItem(id); }
                 });
             }
             else
@@ -1066,25 +1049,14 @@
                     if (result.success == true)
                     {
                         LibMessageProcessandoHide();
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            size: 'extra-large',
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        LibMessageHideAll();
-                                        jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            LibMessageHideAll();
+                            jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -1122,25 +1094,14 @@
                     if (result.success == true)
                     {
                         LibMessageProcessandoHide();
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            size: 'extra-large',
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        LibMessageHideAll();
-                                        jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            LibMessageHideAll();
+                            jsYesCancelRecord('@Url.Action("IndexPedido","Movimentos",new { Area = "gc" })');
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -1556,30 +1517,7 @@
 
     function jsDesativarAnexo(id) {
         try {
-            LibMessageDialog({
-                title: "Confirmação",
-                message: "Deseja REALMENTE DESATIVAR esse arquivo anexo ?" + "<br/><br/>" + "<b>Atenção:</b> O Log dessa operação ficará armazenado no banco de dados para futuras auditorias!",
-                closeButton: false,
-                centerVertical: true,
-                onEscape: false,
-                backdrop: true,
-                buttons: {
-                    cancelar: {
-                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
-                        className: 'btn-outline-warning',
-                        callback: function () {
-                            LibMessageHideAll();
-                        }
-                    },
-                    confirmar: {
-                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
-                        className: 'btn-outline-success',
-                        callback: function () {
-                            jsAjaxDesativarAnexo(id);
-                        }
-                    }
-                }
-            });
+            GdiConfirmDesativarAnexo(function () { jsAjaxDesativarAnexo(id); });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));

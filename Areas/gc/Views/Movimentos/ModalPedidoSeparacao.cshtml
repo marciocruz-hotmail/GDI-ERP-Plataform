@@ -328,49 +328,31 @@
     {
         try
         {
-            LibMessageDialog({
-                title: "<b>" + '@CachePersister.userIdentity.Username' +"</b>  você confirma a conferência de todos os itens do checklist abaixo?",
-                message:
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Itens/PNs, Lotes, Seriais, Quantidades?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Fechamento seguro com fita reforçada?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Componentes protegidos adequadamente?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Caplugs aplicados(quando aplicável)?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Espaços vazios preenchidos?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Componentes sem movimento excessivo(teste de balanço)?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas externas aplicadas corretamente?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas internas(packing list) incluídas?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Código de barras legível e escaneável?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Símbolos de manuseio aplicados quando necessário?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação técnica incluída?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Peso e dimensões registrados?<br/>' +
-                            '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Conformidade com manual do cliente(se aplicável)',
-                closeButton: false,
-                centerVertical: true,
-                onEscape: false,
-                backdrop: true,
-                buttons:
+            LibMessageConfirmChecklist(
+                '<b>' + '@CachePersister.userIdentity.Username' + '</b>  você confirma a conferência de todos os itens do checklist abaixo?',
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Itens/PNs, Lotes, Seriais, Quantidades?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Fechamento seguro com fita reforçada?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Componentes protegidos adequadamente?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Caplugs aplicados(quando aplicável)?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Espaços vazios preenchidos?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Componentes sem movimento excessivo(teste de balanço)?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas externas aplicadas corretamente?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas internas(packing list) incluídas?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Código de barras legível e escaneável?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Símbolos de manuseio aplicados quando necessário?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação técnica incluída?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Peso e dimensões registrados?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Conformidade com manual do cliente(se aplicável)',
                 {
-                    cancelar:
-                    {
-                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
-                        className: 'btn-outline-warning',
-                        callback: function ()
-                        {
-                            LibMessageHideAll();
-                        }
-                    },
-                    confirmar:
-                    {
-                        label: '<i class="fa-regular fa-square-check me-2" aria-hidden="true"></i>SIM, o checklist foi conferido',
-                        className: 'btn-outline-success',
-                        callback: function ()
-                        {
-                            jsSendForm();
-                            LibMessageHideAll();
-                        }
+                    closeButton: false,
+                    onEscape: false,
+                    backdrop: true,
+                    confirmLabel: '<i class="fa-regular fa-square-check me-2" aria-hidden="true"></i>SIM, o checklist foi conferido',
+                    onConfirm: function () {
+                        jsSendForm();
+                        LibMessageHideAll();
                     }
-                }
-            })
+                });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsChecklistSeparacao] " + (err && err.message ? err.message.toString() : String(err)));
@@ -393,25 +375,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            $("#dataTableGCIndexPedido").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -490,34 +462,16 @@
     {
         try
         {
-            LibMessageDialog({
-                title: "Confirmação",
-                message: 'Deseja Realmente Executar O Fechamento de Estoque da Competência Anterior?',
+            LibMessageConfirm('Confirmação', 'Deseja Realmente Executar O Fechamento de Estoque da Competência Anterior?', {
                 closeButton: false,
-                centerVertical: true,
                 onEscape: false,
                 backdrop: true,
-                buttons:
-                {
-                    cancelar:
-                    {
-                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
-                        className: 'btn-outline-warning',
-                        callback: function () {
-                            LibMessageHideAll();
-                        }
-                    },
-                    confirmar:
-                    {
-                        label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
-                        className: 'btn-outline-success',
-                        callback: function () {
-                            jsFechamentoCompetenciaEstoque();
-                            LibMessageHideAll();
-                        }
-                    }
+                confirmLabel: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                onConfirm: function () {
+                    jsFechamentoCompetenciaEstoque();
+                    LibMessageHideAll();
                 }
-            })
+            });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsConfirmacaoFechamentoCompetenciaEstoque] " + (err && err.message ? err.message.toString() : String(err)));
@@ -540,25 +494,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            $("#dataTableGCIndexPedido").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

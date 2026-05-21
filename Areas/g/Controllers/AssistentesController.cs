@@ -45,7 +45,7 @@ namespace GdiPlataform.Areas.g.Controllers
             // Parâmetros
             bool filterDb = false;
             String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, false, db);
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, db);
             var allRecords = new List<Db.g_assistentes>();
             List<string[]> list = new List<string[]>();
 

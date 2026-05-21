@@ -9,16 +9,38 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.02 - 20/05/2026";
+            return "2026.51.27 - 21/05/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.02";
+            return "2026.51.27";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.51.24 - 21/05/2026 - G-PERF-20: TempusDominus no layout por flag; rotas jsDatepicker; Parametros DT; IndexPops jstree
+// 2026.51.23 - 20/05/2026 - LibMessageConfirm/Checklist + GdiConfirmDesativarAnexo; migração 17 LibMessageDialog (2 botões) em views
+// 2026.51.22 - 20/05/2026 - gdi-datatables-defaults: restaura $.fn.DataTable().api() (corrige .draw em Limpar/Pesquisar)
+// 2026.51.21 - 20/05/2026 - DataTables deferLoading: mensagem aguardando filtro (nao Carregando); hook global
+// 2026.51.20 - 20/05/2026 - DataTables PT-BR global: gdi-datatables-defaults (lazy _Blank + registry); GdiDataTablesPtBr
+// 2026.51.19 - 20/05/2026 - DataTables: colspan vazio (dt-empty) — CSS :has + remoção host em grelhas <=10 col.
+// 2026.51.18 - 20/05/2026 - gdi-datatables-defaults.js: oLanguage PT-BR global; dt-empty visível no host
+// 2026.51.17 - 20/05/2026 - start.css: DataTables gdi-dt-scroll-host quebra linha por omissão; .dt-wrap/.dt-nowrap
+// 2026.51.16 - 20/05/2026 - GdiMainModalLoad: aguarda Tempus defer do host (evita reload ~25s no modal)
+// 2026.51.15 - 20/05/2026 - G-PERF-20: bootstrap.bundle em páginas sem DataTables; GdiMainModalShow
+// 2026.51.14 - 20/05/2026 - G-PERF-20f: GdiMainModalLoad extrai body de _Modal.cshtml (modais hubs relatório)
+// 2026.51.13 - 20/05/2026 - G-PERF-20f: GdiMainModalLoad executa scripts do modal; hub RelatoriosRegulamentacao layout
+// 2026.51.12 - 20/05/2026 - G-PERF-20f: lazy load scripts #mainModal (GdiLoadScriptOnce, patch jQuery.load)
+// 2026.51.11 - 20/05/2026 - G-PERF-20 Fase 4 lote C: LayoutLite por action (CreateEdit, IndexPops, forms COMEX/NF)
+// 2026.51.10 - 20/05/2026 - G-PERF-20 Fase 4 lote B: Treinamentos + Pedidos portal [GdiPageScripts]; preset LayoutPortalCliente
+// 2026.51.09 - 20/05/2026 - G-PERF-20 Fase 3: partials agregados Head/ScriptsOptional + GdiPageScriptsView; data-gdi-page-scripts
+// 2026.51.08 - 20/05/2026 - G-PERF-20e: [GdiPageScripts] hubs validados; presets LayoutHub*; RelatoriosFinanceiros +Select2
+// 2026.51.07 - 20/05/2026 - G-PERF-20d: _Layout scripts condicionais + GdiPageScriptsActionFilter; opt-out DT hubs relatório
+// 2026.51.06 - 20/05/2026 - G-PERF-20c-bis: Tempus fora do _Layout; partials em 22 views (jsDatepicker + hubs modais)
+// 2026.51.05 - 20/05/2026 - G-PERF-20c: jstree fora do _Layout global; partials CentrosCustos + ClassificacaoFinanceira
+// 2026.51.04 - 20/05/2026 - G-PERF-20b: _Layout scripts no body + defer (DataTables/Select2/jstree/Tempus); partial _LayoutScriptsAuthenticated
+// 2026.51.03 - 20/05/2026 - PUB-1/PUB-2: health /health, Release Web.config, cache-bust publish
 // 2026.51.02 - 20/05/2026 - Tabelas MVC gdi-form-table-* / sidebar portal
 // 2026.51.01 - 20/05/2026 - Tabelas MVC scroll-body-horizontal (lote forms)
 // 2026.51.00 - 20/05/2026 - Edit in line / Filtros

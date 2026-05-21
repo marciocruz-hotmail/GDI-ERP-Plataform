@@ -19,13 +19,13 @@
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                                 <div class="col-sm-9">
-                                    @Html.DropDownListFor(model => model.Field_Int_01, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "z-index:99;" })
+                                    @Html.DropDownListFor(model => model.Field_Int_01, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "z-index:99;", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
                                 </div>
                             </div>
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("produto", "Part Number:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                                 <div class="col-sm-9 text-sm-start">
-                                    @Html.DropDownListFor(model => model.Field_Int_02, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "margin-top:5px; overflow:visible;" })
+                                    @Html.DropDownListFor(model => model.Field_Int_02, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "margin-top:5px; overflow:visible;", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
                                 </div>
                             </div>
                             <div class="form-group row text-sm-end m-0 pt-1">

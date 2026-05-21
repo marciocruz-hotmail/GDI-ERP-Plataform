@@ -62,7 +62,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {
@@ -241,8 +241,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "CfopOperacoesController";
                 msg += "<br/>" + "ModalCreateEditOperacao";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }

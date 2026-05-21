@@ -227,10 +227,9 @@ namespace GdiPlataform.Domain
             UserIdentity g_usuarioContexto = CachePersister.userIdentity;
             try
             {
-                var queryTasks = from _t in ContextDb.g_tasks
-                                 where (_t.ativo == true)
-                                 //where (_t.ativo == true && (_t.id_perfil == g_usuarioContexto.IdPerfil || _t.id_usuario == g_usuarioContexto.IdUsuario))
-                                 select _t;
+                var queryTasks = (from _t in ContextDb.g_tasks
+                                  where (_t.ativo == true && (_t.id_perfil == g_usuarioContexto.IdPerfil || _t.id_usuario == g_usuarioContexto.IdUsuario))
+                                  select _t).Take(50);
                 foreach (var itemTasks in queryTasks)
                 {
                     listTasks.Add(new NavbarItemTask

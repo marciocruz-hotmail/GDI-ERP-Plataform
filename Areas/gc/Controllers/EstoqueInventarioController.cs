@@ -54,15 +54,9 @@ namespace GdiPlataform.Areas.gc.Controllers
                 // ----------------------------
                 // 1) Flags de filtro (mantido para UI)
                 // ----------------------------
-                bool filterDb = false;
-                bool filterAdvanced = false;
-
-                g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, filterAdvanced, db);
-
-                if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0) filterDb = true;
-                else if (param.yesFilterAdvancedText.EmptyIfNull().ToString().Trim().Length > 0) filterAdvanced = true;
-
-                if (filterDb || filterAdvanced) filterOnOff = "1";
+                g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, db);
+                bool filterDb = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
+                if (filterDb) filterOnOff = "1";
 
                 // ----------------------------
                 // 2) Filtro Local de Estoque

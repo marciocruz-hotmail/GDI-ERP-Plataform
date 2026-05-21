@@ -1,0 +1,335 @@
+Você é um especialista sênior em performance de aplicações ASP.NET MVC .NET Framework, SQL Server, Entity Framework/Ado.NET, IIS, front-end web corporativo e análise de experiência do usuário.
+
+Contexto do projeto:
+Estou modernizando/refatorando um ERP desenvolvido em ASP.NET MVC com .NET Framework, publicado em IIS, usando SQL Server como banco de dados. O objetivo desta análise é identificar oportunidades concretas de melhoria de performance percebida pelo usuário final nas telas do ERP.
+
+Importante:
+- Não altere código neste momento.
+- Não implemente correções automaticamente.
+- Faça somente uma investigação técnica completa.
+- Leia o código-fonte, controllers, services, repositories, views, scripts, configurações, chamadas ao banco, uso de sessão, cache, arquivos estáticos, Web.config e demais componentes relevantes.
+- Ao final, gere um relatório técnico objetivo, priorizado e acionável.
+
+Objetivo principal:
+Investigar o código-fonte completo do ERP para identificar gargalos, riscos e oportunidades de melhoria de performance, com foco em tornar a navegação, abertura de telas, filtros, consultas, listagens, gravações e interações do sistema mais rápidas para o usuário final.
+
+Escopo da investigação:
+
+1. Performance percebida pelo usuário
+Avalie tudo que pode impactar a velocidade percebida nas interfaces:
+- Tempo de abertura de páginas.
+- Tempo de carregamento de grids, tabelas, filtros e dashboards.
+- Tempo de resposta após cliques em botões.
+- Requisições síncronas desnecessárias.
+- Processamentos pesados feitos durante o carregamento de telas.
+- Consultas executadas antes de serem realmente necessárias.
+- Telas que carregam muitos dados de uma vez.
+- Excesso de dados enviados do servidor para o navegador.
+- Views muito pesadas ou com renderização custosa.
+- Uso ineficiente de partial views, modais, componentes e scripts.
+
+2. Cache
+Investigue oportunidades e problemas relacionados a cache:
+- Dados que são consultados repetidamente e poderiam ser cacheados.
+- Cadastros de baixa volatilidade que aparecem em combos, filtros ou menus.
+- Parâmetros do sistema, permissões, configurações e tabelas auxiliares.
+- Cache em memória no servidor.
+- Cache distribuído, caso exista.
+- Cache por usuário, por sessão, por perfil ou por tenant, se aplicável.
+- Possíveis riscos de cache incorreto, stale data ou vazamento de dados entre usuários.
+- Headers de cache para arquivos estáticos.
+- Uso de cache em scripts, CSS, imagens e bibliotecas.
+- Oportunidades para Redis, MemoryCache, OutputCache ou cache customizado.
+- Pontos onde o cache não deve ser aplicado por risco funcional ou de segurança.
+
+3. Consultas ao banco de dados
+Analise profundamente os acessos ao SQL Server:
+- Queries executadas em controllers, services, repositories, DAOs ou classes auxiliares.
+- Uso de Entity Framework, LINQ, ADO.NET, Dapper ou SQL direto, conforme existir.
+- Consultas com SELECT * ou excesso de colunas.
+- Consultas sem paginação.
+- Consultas feitas dentro de loops.
+- Problemas de N+1 queries.
+- Filtros aplicados em memória em vez de serem aplicados no banco.
+- Ordenações, agrupamentos e joins custosos.
+- Uso inadequado de Include, lazy loading ou eager loading.
+- Consultas que retornam muitos registros.
+- Falta de AsNoTracking em consultas somente leitura, caso use Entity Framework.
+- Conversões que impedem uso de índice, como ToString, Contains mal aplicado, DateTime convertido incorretamente, funções em colunas filtradas.
+- Possíveis índices ausentes, embora a criação de índice dependa de validação no banco.
+- Stored procedures, views SQL e funções, se existirem.
+- Uso de transações longas.
+- Locks, deadlocks potenciais e contenção.
+- Consultas repetidas dentro da mesma requisição.
+- Chamadas ao banco em layout, menus, filtros globais ou componentes carregados em todas as páginas.
+
+4. Buffer, memória e processamento no servidor
+Avalie:
+- Manipulação de listas grandes em memória.
+- Carregamento de arquivos grandes.
+- Uso de byte arrays, MemoryStream, DataTable, DataSet ou objetos pesados.
+- Serialização/deserialização de JSON.
+- Conversões custosas.
+- Processamentos bloqueantes.
+- Geração de relatórios, PDFs, Excel ou arquivos dentro da requisição web.
+- Operações de I/O síncronas.
+- Processos que deveriam ser assíncronos, enfileirados ou executados em background.
+- Uso de Session com objetos pesados.
+- Uso excessivo de ViewBag, TempData ou Session.
+- Possíveis vazamentos de memória.
+- Reuso inadequado de HttpClient, conexões, streams ou objetos descartáveis.
+- Falta de using/dispose em recursos críticos.
+
+5. Front-end e assets
+Investigue a performance do lado do navegador:
+- Quantidade e tamanho de arquivos JS e CSS.
+- Scripts carregados em páginas onde não são usados.
+- Bundling, minificação e versionamento de assets.
+- Ordem de carregamento de scripts.
+- Bloqueios de renderização.
+- Uso excessivo de plugins.
+- Inicializações repetidas de DataTables, Select2, DatePicker ou componentes similares.
+- DataTables carregando todos os dados de uma vez.
+- Possibilidade de paginação server-side em grids grandes.
+- Requisições AJAX redundantes.
+- Chamadas duplicadas.
+- Manipulação pesada de DOM.
+- Views com loops grandes renderizados no servidor.
+- Imagens grandes ou não otimizadas.
+- Ícones, fontes e bibliotecas carregadas de forma ineficiente.
+
+6. IIS, Web.config e configuração da aplicação
+Avalie configurações que podem afetar performance:
+- Compilation debug habilitado indevidamente.
+- Configurações de sessionState.
+- Configurações de caching.
+- Static content.
+- Compressão HTTP.
+- Bundling/minification.
+- Timeout de requisições.
+- Tamanho de payload.
+- Configurações de autenticação/autorização que geram consultas excessivas.
+- Logs excessivos ou síncronos.
+- Configurações que impactam cold start.
+- App pool, reciclagem e aquecimento da aplicação, quando inferível pelo projeto.
+
+7. Autenticação, autorização e permissões
+Investigue:
+- Consultas de permissão executadas repetidamente.
+- Validação de perfil em cada request sem cache.
+- Menus montados dinamicamente a cada carregamento.
+- Claims, roles, permissões e dados do usuário carregados sem necessidade.
+- Possibilidade de cache seguro por usuário/perfil.
+
+8. Logs, auditoria e rastreabilidade
+Avalie:
+- Logs síncronos em excesso.
+- Escrita em arquivo ou banco a cada ação.
+- Auditorias que impactam o tempo da requisição.
+- Logs detalhados demais em produção.
+- Tratamento de exceções que pode mascarar lentidão.
+- Pontos onde seria útil criar métricas de performance.
+
+9. Integrações externas
+Investigue chamadas externas:
+- APIs chamadas durante abertura de telas.
+- Serviços externos chamados de forma síncrona.
+- Falta de timeout.
+- Falta de retry controlado.
+- Falta de cache para dados externos.
+- Chamadas repetidas para o mesmo dado.
+- Processos que deveriam ser desacoplados da interação do usuário.
+
+10. Arquitetura geral de performance
+Avalie:
+- Separação entre leitura e escrita.
+- Consultas complexas dentro de controllers.
+- Falta de camadas claras para caching e consulta otimizada.
+- Telas que misturam muitas responsabilidades.
+- Pontos candidatos a CQRS simples para consultas pesadas.
+- Pontos candidatos a endpoints específicos para carregamento sob demanda.
+- Pontos candidatos a pré-processamento ou materialização de dados.
+- Pontos candidatos a jobs agendados.
+
+Critérios de análise:
+Para cada problema ou oportunidade encontrada, classifique usando:
+
+- Severidade:
+  - Alta: impacto direto e frequente na lentidão percebida pelo usuário.
+  - Média: impacto relevante, mas limitado a algumas telas, filtros ou volumes.
+  - Baixa: melhoria pontual, técnica ou preventiva.
+
+- Tipo:
+  - Banco de dados
+  - Cache
+  - Backend
+  - Front-end
+  - IIS/configuração
+  - Arquitetura
+  - Integração externa
+  - Logs/auditoria
+  - Segurança relacionada a performance
+
+- Esforço estimado:
+  - Baixo
+  - Médio
+  - Alto
+
+- Risco de alteração:
+  - Baixo
+  - Médio
+  - Alto
+
+Formato obrigatório do relatório final:
+
+1. Resumo executivo
+Explique em linguagem objetiva:
+- Estado geral da performance do ERP.
+- Principais causas prováveis de lentidão.
+- Áreas com maior potencial de ganho.
+- Recomendações prioritárias.
+
+2. Top 10 oportunidades de melhoria
+Monte uma tabela com:
+- Prioridade
+- Arquivo/local
+- Problema identificado
+- Impacto na experiência do usuário
+- Recomendação
+- Severidade
+- Esforço
+- Risco
+
+3. Achados detalhados por categoria
+Organize por:
+- Banco de dados
+- Cache
+- Backend
+- Front-end
+- IIS/Web.config
+- Sessão/memória/buffer
+- Integrações externas
+- Logs/auditoria
+- Arquitetura
+
+Para cada achado, informe:
+- Arquivo ou trecho analisado.
+- Evidência técnica.
+- Por que isso pode causar lentidão.
+- Sugestão de melhoria.
+- Cuidados antes de alterar.
+- Como testar a melhoria.
+
+4. Telas ou fluxos críticos encontrados
+Liste as telas, controllers, actions ou views que parecem mais sensíveis à performance:
+- Nome da tela/fluxo, se inferível.
+- Controller/action/view.
+- Motivo da criticidade.
+- Recomendações específicas.
+
+5. Oportunidades de cache
+Crie uma tabela específica com:
+- Dado candidato ao cache
+- Local atual de consulta
+- Frequência provável de uso
+- Volatilidade do dado
+- Tipo de cache recomendado
+- Chave de cache sugerida
+- Tempo de expiração sugerido
+- Riscos
+- Cuidados de invalidação
+
+Considere, quando aplicável:
+- MemoryCache para dados simples e locais.
+- Redis para cache compartilhado, escalável ou persistente entre instâncias.
+- OutputCache para páginas ou fragments seguros.
+- Cache de permissões por usuário/perfil.
+- Cache de parâmetros e cadastros auxiliares.
+- Cache de menus e configurações.
+
+6. Oportunidades no banco de dados
+Crie uma tabela com:
+- Consulta/local
+- Problema
+- Possível impacto
+- Recomendação
+- Necessita índice?
+- Necessita paginação?
+- Necessita refatoração da query?
+- Observação de risco
+
+Não crie scripts de índice definitivos sem evidência do plano de execução real. Quando sugerir índice, marque como "candidato a validação no SQL Server".
+
+7. Oportunidades no front-end
+Crie uma tabela com:
+- View/script
+- Problema
+- Impacto percebido
+- Recomendação
+- Possibilidade de carregamento sob demanda
+- Possibilidade de paginação server-side
+- Possibilidade de reduzir JS/CSS
+
+8. Recomendações de instrumentação
+Sugira como medir performance antes e depois:
+- Logs de tempo por action.
+- Tempo de query SQL.
+- Tempo de renderização.
+- Tempo de chamadas externas.
+- Métricas por tela.
+- Correlação por request.
+- Ferramentas sugeridas.
+- Pontos mínimos de telemetria.
+
+9. Plano de ação incremental
+Monte um plano em fases:
+
+Fase 1, ganhos rápidos e baixo risco:
+- Ajustes simples.
+- Cache seguro.
+- Paginação.
+- Redução de consultas repetidas.
+- Ajustes em assets.
+
+Fase 2, melhorias estruturais:
+- Refatoração de consultas.
+- Server-side processing em grids.
+- Camada padronizada de cache.
+- Instrumentação de performance.
+
+Fase 3, melhorias avançadas:
+- Redis, se fizer sentido.
+- Jobs em background.
+- Pré-processamento de dados.
+- Otimizações arquiteturais.
+
+10. Backlog técnico priorizado
+Crie uma lista de tarefas pronta para implementação posterior, com:
+- Código da tarefa
+- Título
+- Descrição
+- Arquivos envolvidos
+- Critério de aceite
+- Risco
+- Esforço
+- Dependências
+
+Regras importantes:
+- Não faça alterações no código neste momento.
+- Não remova arquivos.
+- Não altere banco de dados.
+- Não aplique índices automaticamente.
+- Não instale pacotes.
+- Não mude configurações.
+- Apenas investigue, classifique e recomende.
+- Quando não tiver certeza, marque como "necessita validação em runtime" ou "necessita validação com plano de execução SQL".
+- Diferencie problemas confirmados por evidência no código de hipóteses prováveis.
+- Priorize melhorias que o usuário final percebe diretamente.
+- Evite recomendações genéricas. Toda recomendação deve estar ligada a um arquivo, padrão de código, tela, consulta ou comportamento encontrado no projeto.
+
+Saída esperada:
+Gere um arquivo Markdown chamado:
+
+PERFORMANCE-AUDIT-ERP.md
+
+O relatório deve ser claro, técnico, priorizado e pronto para ser usado como base de planejamento de melhorias de performance do ERP.

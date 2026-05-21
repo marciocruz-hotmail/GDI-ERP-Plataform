@@ -16,7 +16,7 @@ using System.Web.Mvc;
 namespace GdiPlataform.Areas.gc.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_ComexFinanceiro_*,gc_ComexFinanceiro_Default")]
-    public class ComexFinanceiroController : Controller
+    public partial class ComexFinanceiroController : Controller
     {
         private GdiPlataformEntities db;
         public ComexFinanceiroController()
@@ -218,63 +218,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 aaData = new List<string[]>()
             }, JsonRequestBehavior.AllowGet);
         }
-
-        public void PreencherLookups(int? IdFinanceiro)
-        {
-            String DisplaySaldo = string.Empty;
-            gc_comex_financeiro record_gc_comex_financeiro = new Db.gc_comex_financeiro();
-            record_gc_comex_financeiro.id_importacao = 0;
-            record_gc_comex_financeiro.id_invoice = 0;
-            if (IdFinanceiro > 0) { record_gc_comex_financeiro = db.gc_comex_financeiro.Find(IdFinanceiro); }
-
-            var comboComexImportacoes = new List<SelectListItem>();
-            var comboComexImportacoesCrud = new List<SelectListItem>();
-            try
-            {
-                IQueryable<gc_comex_importacoes> listaComexImportacoes = db.gc_comex_importacoes.Where(i => (i.id_importacao > 0) && (i.ativo == true)).OrderBy(i => i.numero);
-                comboComexImportacoes.Add(new SelectListItem { Value = "0", Text = "[ TODAS ]" });
-                foreach (gc_comex_importacoes item_gc_comex_importacoes in listaComexImportacoes)
-                {
-                    DisplaySaldo = "   ( " +  string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", item_gc_comex_importacoes.cambio_debito).Replace("R$ ", "").Replace("R$", "").Replace("$", "") + 
-                                   " | " + string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", (item_gc_comex_importacoes.cambio_debito - item_gc_comex_importacoes.cambio_credito)).Replace("R$ ", "").Replace("R$", "").Replace("$", "") + " )";
-                    comboComexImportacoes.Add(new SelectListItem { Value = item_gc_comex_importacoes.id_importacao.ToString(), Text = item_gc_comex_importacoes.numero.ToString() + DisplaySaldo });
-                    if ((item_gc_comex_importacoes.cambio_credito < item_gc_comex_importacoes.cambio_debito) || (item_gc_comex_importacoes.id_importacao == record_gc_comex_financeiro.id_importacao))
-                    {
-                        comboComexImportacoesCrud.Add(new SelectListItem { Value = item_gc_comex_importacoes.id_importacao.ToString(), Text = item_gc_comex_importacoes.numero.ToString() + DisplaySaldo });
-                    }
-                }
-            }
-            finally { }
-            ViewBag.comboComexImportacoes = comboComexImportacoes;
-            ViewBag.comboComexImportacoesCrud = comboComexImportacoesCrud;
-
-            var comboComexInvoices = new List<SelectListItem>();
-            var comboComexInvoicesCrud = new List<SelectListItem>();
-            try
-            {
-                IQueryable<gc_comex_invoices> listaComexInvoices = db.gc_comex_invoices.Where(i => (i.id_invoice > 0) && (i.ativo == true)).OrderBy(i => i.invoice);
-                comboComexInvoices.Add(new SelectListItem { Value = "0", Text = "[ TODAS ]" });
-                foreach (gc_comex_invoices item_gc_comex_invoices in listaComexInvoices)
-                {
-                    DisplaySaldo = "   ( " + string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", item_gc_comex_invoices.cambio_debito).Replace("R$ ", "").Replace("R$", "").Replace("$", "") +
-                                   " | " + string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", (item_gc_comex_invoices.cambio_debito - item_gc_comex_invoices.cambio_credito)).Replace("R$ ", "").Replace("R$", "").Replace("$", "") + " )";
-                    comboComexInvoices.Add(new SelectListItem { Value = item_gc_comex_invoices.id_invoice.ToString(), Text = item_gc_comex_invoices.invoice.ToString() + DisplaySaldo });
-                    if ((item_gc_comex_invoices.cambio_credito < item_gc_comex_invoices.cambio_debito) || (item_gc_comex_invoices.id_invoice == record_gc_comex_financeiro.id_invoice))
-                    {
-                        comboComexInvoicesCrud.Add(new SelectListItem { Value = item_gc_comex_invoices.id_invoice.ToString(), Text = item_gc_comex_invoices.invoice.ToString() + DisplaySaldo });
-                    }
-                }
-            }
-            finally { }
-            ViewBag.comboComexInvoices = comboComexInvoices;
-            ViewBag.comboComexInvoicesCrud = comboComexInvoicesCrud;
-
-            var comboPagRec = new List<SelectListItem>();
-            comboPagRec.Add(new SelectListItem { Value = "1", Text = "Pagamento" });
-            comboPagRec.Add(new SelectListItem { Value = "2", Text = "Débito/Fatura" });
-            ViewBag.comboPagRec = comboPagRec;
-        }
         #endregion
+
         public ActionResult ModalCreateEditGcComexFinanceiro(int? IdFinanceiro)
         {
             gc_comex_financeiro record_gc_comex_financeiro;

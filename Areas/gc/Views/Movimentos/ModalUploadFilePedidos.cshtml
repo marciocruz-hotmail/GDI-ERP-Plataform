@@ -110,37 +110,38 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                if (result.tag == "GcMovimentosIndexPedido")
-                                {
-                                    LibMessageProcessando("Atualizando anexos . . .")
-                                    $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + $('#id_gc_movimento').val().toString(), function () {
-                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                                    })
-                                    LibMessageHideAll();
-                                }
-                                else if (result.tag == "GcMovimentosFormPedidoCreate") {
-                                    $("#dtGcMovimentosGed").DataTable().draw(false);
-                                    document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                    LibMessageHideAll();
-                                }
-                                else if (result.tag == "GcMovimentosPainelPedidos")
-                                {
-                                    LibMessageProcessando("Atualizando anexos . . .")
-                                    $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + $('#id_gc_movimento').val().toString(), function () {
-                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                                    })
-                                    LibMessageHideAll();
-                                }
-                                else
-                                {
-                                    document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                    LibMessageHideAll();
-                                }
+                            if (result.tag == "GcMovimentosIndexPedido")
+                            {
+                            LibMessageProcessando("Atualizando anexos . . .")
+                            $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + $('#id_gc_movimento').val().toString(), function () {
+                            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                            })
+                            LibMessageHideAll();
                             }
-                        })
+                            else if (result.tag == "GcMovimentosFormPedidoCreate") {
+                            $("#dtGcMovimentosGed").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
+                            }
+                            else if (result.tag == "GcMovimentosPainelPedidos")
+                            {
+                            LibMessageProcessando("Atualizando anexos . . .")
+                            $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + $('#id_gc_movimento').val().toString(), function () {
+                            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                            })
+                            LibMessageHideAll();
+                            }
+                            else
+                            {
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
+                            }
+                            }
+                        });
                     }
                     else
                     {

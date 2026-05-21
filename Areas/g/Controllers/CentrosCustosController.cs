@@ -27,6 +27,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_CentrosCustos_*,g_CentrosCustos_Actionread")]
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutHubJstree)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Centros de Custos";
@@ -64,7 +65,7 @@ namespace GdiPlataform.Areas.g.Controllers
             var allRecords = new List<Db.g_centros_custos>();
             List<string[]> list = new List<string[]>();
 
-            g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+            g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
             bool filterDb = recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
             if (filterDb) { filterOnOff = "1"; }
 

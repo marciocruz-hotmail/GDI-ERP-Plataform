@@ -118,39 +118,28 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar:
-                                {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        if ((result.idmovtipo == "5") && (result.idmov != "0")) // Compra Nacional
-                                        {
-                                            LibMessageProcessando("");
-                                            window.location = '@Url.Action("FormProcessarNFCompraNacional", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + result.idmov;
-                                        }
-                                        else if ((result.idmovtipo == "9") && (result.idmov != "0")) // Devolução
-                                        {
-                                            LibMessageProcessando("");
-                                            window.location = '@Url.Action("FormProcessarNFDevolucao", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + result.idmov;
-                                        }
-                                        else
-                                        {
-                                            $("#dtGcMovimentosIndexEntrada").DataTable().draw(false);
-                                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                            LibMessageHideAll();
-                                        }
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            if ((result.idmovtipo == "5") && (result.idmov != "0")) // Compra Nacional
+                            {
+                            LibMessageProcessando("");
+                            window.location = '@Url.Action("FormProcessarNFCompraNacional", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + result.idmov;
                             }
-                        })
+                            else if ((result.idmovtipo == "9") && (result.idmov != "0")) // Devolução
+                            {
+                            LibMessageProcessando("");
+                            window.location = '@Url.Action("FormProcessarNFDevolucao", "MovimentosEntradas", new { Area = "gc" })' + "?id=" + result.idmov;
+                            }
+                            else
+                            {
+                            $("#dtGcMovimentosIndexEntrada").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
+                            }
+                            }
+                        });
                     }
                     else
                     {

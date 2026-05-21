@@ -67,7 +67,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {
@@ -429,14 +429,12 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region ModalUsuarioTrocarSenha
-        [CustomAuthorize(Roles = "SuperAdmin,Admin,*,Home,gc_PortalCliente_PortalFinanceiro,g_PortalVendedor_Default,g_PortalVendedor_*")]
+        /// <summary>Troca de senha (logons U/L/C/V). Roles <c>g_Vendedores_*</c> — perfil vendedor; módulo PortalVendedor foi removido (NFE-1).</summary>
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,*,Home,gc_PortalCliente_PortalFinanceiro,g_Vendedores_Default,g_Vendedores_*")]
         public ActionResult ModalUsuarioTrocarSenha(int? id)
         {
             String TokenAcesso = CachePersister.userIdentity.TokenAcesso;
 
-
-            //String IdColigada = TempData["IdColigada"].ToString();
-            
 
             if (TokenAcesso.StartsWith("U")) //Usuario
             {
@@ -460,7 +458,7 @@ namespace GdiPlataform.Areas.g.Controllers
 
         [HttpPost]
         [GdiValidateAntiForgeryToken]
-        [CustomAuthorize(Roles = "SuperAdmin,Admin,*,Home,gc_PortalCliente_PortalFinanceiro,g_PortalVendedor_Default,g_PortalVendedor_*")]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,*,Home,gc_PortalCliente_PortalFinanceiro,g_Vendedores_Default,g_Vendedores_*")]
         public ActionResult AjaxUsuarioTrocarSenha(g_usuarios record_g_usuarios)
         {
             bool sucesso = false;

@@ -1,0 +1,103 @@
+{
+  "mode": "static",
+  "utc": "2026-05-21T12:25:45.264891+00:00",
+  "versionerp": "2026.51.12",
+  "meta": {
+    "transferred_kb_max": 800,
+    "finish_ms_max": 1500
+  },
+  "disclaimer": "Estimativa a partir do tamanho em disco dos assets do layout × 0,35 (proxy gzip). Não inclui HTML, navbar Ajax, imagens nem 1º GetDados. Finish/DCL exigem --live.",
+  "routes": [
+    {
+      "route": "gc/Movimentos/IndexPedido",
+      "flags": 39,
+      "data_gdi_page_scripts": 39,
+      "note": "regressao_comercial",
+      "assets_raw_kb": 1458,
+      "estimated_transferred_kb": 510,
+      "baseline_perf000_transferred_kb": 1100,
+      "delta_vs_perf000_kb": -590,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 0,
+      "missing_assets": []
+    },
+    {
+      "route": "gc/Movimentos/CreatePedido",
+      "flags": 39,
+      "data_gdi_page_scripts": 39,
+      "note": "regressao_create",
+      "assets_raw_kb": 1458,
+      "estimated_transferred_kb": 510,
+      "baseline_perf000_transferred_kb": 960,
+      "delta_vs_perf000_kb": -450,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 0,
+      "missing_assets": []
+    },
+    {
+      "route": "g/Financeiro/Index",
+      "flags": 39,
+      "data_gdi_page_scripts": 39,
+      "note": "regressao_financeiro",
+      "assets_raw_kb": 1458,
+      "estimated_transferred_kb": 510,
+      "baseline_perf000_transferred_kb": 1200,
+      "delta_vs_perf000_kb": -690,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 0,
+      "missing_assets": []
+    },
+    {
+      "route": "gc/RelatoriosRegulamentacao/Index",
+      "flags": 33,
+      "data_gdi_page_scripts": 33,
+      "note": "hub_pos_20",
+      "assets_raw_kb": 952,
+      "estimated_transferred_kb": 333,
+      "baseline_perf000_transferred_kb": null,
+      "delta_vs_perf000_kb": null,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 147,
+      "missing_assets": []
+    },
+    {
+      "route": "gc/RelatoriosFinanceiros/Index",
+      "flags": 37,
+      "data_gdi_page_scripts": 37,
+      "note": "hub_select2",
+      "assets_raw_kb": 1084,
+      "estimated_transferred_kb": 379,
+      "baseline_perf000_transferred_kb": null,
+      "delta_vs_perf000_kb": null,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 147,
+      "missing_assets": []
+    },
+    {
+      "route": "gc/Parametros/Index",
+      "flags": 33,
+      "data_gdi_page_scripts": 33,
+      "note": "hub_lite",
+      "assets_raw_kb": 806,
+      "estimated_transferred_kb": 282,
+      "baseline_perf000_transferred_kb": null,
+      "delta_vs_perf000_kb": null,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 0,
+      "missing_assets": []
+    },
+    {
+      "route": "g/CentrosCustos/Index",
+      "flags": 49,
+      "data_gdi_page_scripts": 49,
+      "note": "hub_jstree",
+      "assets_raw_kb": 944,
+      "estimated_transferred_kb": 331,
+      "baseline_perf000_transferred_kb": null,
+      "delta_vs_perf000_kb": null,
+      "meta_transferred_ok": true,
+      "tempus_partial_kb": 0,
+      "missing_assets": []
+    }
+  ]
+}

@@ -19,7 +19,7 @@ namespace GdiPlataform.Areas.g.Controllers
 {
 
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ProdutosNcm_*,g_ProdutosNcm_Default")]
-    public class ProdutosNcmController : Controller
+    public partial class ProdutosNcmController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_ProdutosNcm";
@@ -53,83 +53,6 @@ namespace GdiPlataform.Areas.g.Controllers
             return View(model);
         }
 
-        #region PreencherLookupsCreateEdit
-        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ProdutosNcm_*,g_ProdutosNcm_Actionread,g_ProdutosNcm_Actionupdate")]
-        public void PreencherLookupsCreateEdit()
-        {
-            var comboCstIcmsEntrada = new List<SelectListItem>();
-            IQueryable<gc_icms_cst> listaDbCstIcmsEntrada = null;
-            if (CachePersister.userIdentity.IdPerfil == 1) { listaDbCstIcmsEntrada = db.gc_icms_cst.Where(p => p.id_icms_cst > 0).OrderBy(p => p.id_icms_cst); }
-            else { listaDbCstIcmsEntrada = db.gc_icms_cst.Where(p => p.id_icms_cst > 0).OrderBy(p => p.id_icms_cst); };
-            foreach (gc_icms_cst item1 in listaDbCstIcmsEntrada)
-            {
-                comboCstIcmsEntrada.Add(new SelectListItem { Value = item1.id_icms_cst.ToString(), Text = item1.codigo_cst + " - " + item1.descricao.ToString() });
-            }
-            ViewBag.comboCstIcmsEntrada = comboCstIcmsEntrada;
-
-
-            var comboCstIpiEntrada = new List<SelectListItem>();
-            IQueryable<gc_tributos_cst> listaDbCstIpiEntrada = null;
-            listaDbCstIpiEntrada = db.gc_tributos_cst.Where(p => p.ativo == true && p.ipi_entrada == true).OrderBy(p => p.id_tributo_cst);
-            foreach (gc_tributos_cst item2 in listaDbCstIpiEntrada)
-            {
-                comboCstIpiEntrada.Add(new SelectListItem { Value = item2.id_tributo_cst.ToString(), Text = item2.codigo + " - " + item2.descricao.ToString() });
-            }
-            ViewBag.comboCstIpiEntrada = comboCstIpiEntrada;
-
-
-            var comboCstIpiSaida = new List<SelectListItem>();
-            IQueryable<gc_tributos_cst> listaDbCstIpiSaida = null;
-            listaDbCstIpiSaida = db.gc_tributos_cst.Where(p => p.ativo == true && p.ipi_saida == true).OrderBy(p => p.id_tributo_cst);
-            foreach (gc_tributos_cst item3 in listaDbCstIpiSaida)
-            {
-                comboCstIpiSaida.Add(new SelectListItem { Value = item3.id_tributo_cst.ToString(), Text = item3.codigo + " - " + item3.descricao.ToString() });
-            }
-            ViewBag.comboCstIpiSaida = comboCstIpiSaida;
-
-
-            var comboCstPisEntrada = new List<SelectListItem>();
-            IQueryable<gc_tributos_cst> listaDbCstPisEntrada = null;
-            listaDbCstPisEntrada = db.gc_tributos_cst.Where(p => p.ativo == true && p.pis_entrada == true).OrderBy(p => p.id_tributo_cst);
-            foreach (gc_tributos_cst item4 in listaDbCstPisEntrada)
-            {
-                comboCstPisEntrada.Add(new SelectListItem { Value = item4.id_tributo_cst.ToString(), Text = item4.codigo + " - " + item4.descricao.ToString() });
-            }
-            ViewBag.comboCstPisEntrada = comboCstPisEntrada;
-
-
-            var comboCstPisSaida = new List<SelectListItem>();
-            IQueryable<gc_tributos_cst> listaDbCstPisSaida = null;
-            listaDbCstPisSaida = db.gc_tributos_cst.Where(p => p.ativo == true && p.pis_saida == true).OrderBy(p => p.id_tributo_cst);
-            foreach (gc_tributos_cst item5 in listaDbCstPisSaida)
-            {
-                comboCstPisSaida.Add(new SelectListItem { Value = item5.id_tributo_cst.ToString(), Text = item5.codigo + " - " + item5.descricao.ToString() });
-            }
-            ViewBag.comboCstPisSaida = comboCstPisSaida;
-
-
-            var comboCstCofinsEntrada = new List<SelectListItem>();
-            IQueryable<gc_tributos_cst> listaDbCstCofinsEntrada = null;
-            listaDbCstCofinsEntrada = db.gc_tributos_cst.Where(p => p.ativo == true && p.cofins_entrada == true).OrderBy(p => p.id_tributo_cst);
-            foreach (gc_tributos_cst item6 in listaDbCstCofinsEntrada)
-            {
-                comboCstCofinsEntrada.Add(new SelectListItem { Value = item6.id_tributo_cst.ToString(), Text = item6.codigo + " - " + item6.descricao.ToString() });
-            }
-            ViewBag.comboCstCofinsEntrada = comboCstCofinsEntrada;
-
-
-            var comboCstCofinsSaida = new List<SelectListItem>();
-            IQueryable<gc_tributos_cst> listaDbCstCofinsSaida = null;
-            listaDbCstCofinsSaida = db.gc_tributos_cst.Where(p => p.ativo == true && p.cofins_saida == true).OrderBy(p => p.id_tributo_cst);
-            foreach (gc_tributos_cst item7 in listaDbCstCofinsSaida)
-            {
-                comboCstCofinsSaida.Add(new SelectListItem { Value = item7.id_tributo_cst.ToString(), Text = item7.codigo + " - " + item7.descricao.ToString() });
-            }
-            ViewBag.comboCstCofinsSaida = comboCstCofinsSaida;
-
-        }
-        #endregion
-
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ProdutosNcm_*,g_ProdutosNcm_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
@@ -145,7 +68,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {

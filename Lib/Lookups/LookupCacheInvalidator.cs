@@ -8,6 +8,7 @@ namespace GdiPlataform.Lib.Lookups
         /// <summary>Remove entradas lookup:* da sessão atual associadas à tabela SQL (ex.: g_clientes).</summary>
         public static void InvalidateForTable(string tableName)
         {
+            LibDB.ResetTableUpdateVerification(tableName);
             var token = LookupQueryServiceCache.ResolveSessionTokenPublic();
             LookupCacheRegistry.InvalidateTable(token, tableName);
         }

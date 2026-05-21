@@ -14,7 +14,7 @@ namespace GdiPlataform.Lookups.Tests
             const string tableClientes = "g_clientes";
             const string tableOutra = "g_vendedores";
 
-            var keyClientes = LookupCacheKeys.Combo(LookupCacheKeys.GClientesFornecedores, token);
+            var keyClientes = LookupCacheKeys.Combo(LookupCacheKeys.GcTransportadora, token);
             var keyVendedores = LookupCacheKeys.Combo(LookupCacheKeys.GVendedores, token);
             var listClientes = new List<string> { "c1" };
             var listVendedores = new List<string> { "v1" };

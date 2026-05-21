@@ -16,9 +16,6 @@ namespace GdiPlataform.Lib.Lookups
         public List<SelectListItem> GetComboGcTiposMovimentosVendas(GdiPlataformEntities db) =>
             LookupQueryServiceCache.GetOrLoadCombo(LookupCacheKeys.GcTiposMovimentosVendas, null, null, db, BuildComboGcTiposMovimentosVendas);
 
-        public List<SelectListItem> GetComboGcTiposMovimentosCompras(GdiPlataformEntities db) =>
-            LookupQueryServiceCache.GetOrLoadCombo(LookupCacheKeys.GcTiposMovimentosCompras, null, null, db, BuildComboGcTiposMovimentosCompras);
-
         public List<SelectListItem> GetComboGcTiposMovimentosCreateEdit(GdiPlataformEntities db) =>
             LookupQueryServiceCache.GetOrLoadCombo(LookupCacheKeys.GcTiposMovimentosCreateEdit, null, null, db, BuildComboGcTiposMovimentosCreateEdit);
 
@@ -113,17 +110,6 @@ namespace GdiPlataform.Lib.Lookups
                     return dataSet;
                 });
         private static List<SelectListItem> BuildComboGcTiposMovimentosVendas()
-        {
-            return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "-1", Text = "Todos" },
-                new SelectListItem { Value = "3", Text = "Cotações" },
-                new SelectListItem { Value = "4", Text = "Pedidos" },
-                new SelectListItem { Value = "8", Text = "OS" }
-            };
-        }
-
-        private static List<SelectListItem> BuildComboGcTiposMovimentosCompras()
         {
             return new List<SelectListItem>
             {

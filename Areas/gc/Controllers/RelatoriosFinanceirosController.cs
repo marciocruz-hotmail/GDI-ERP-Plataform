@@ -27,6 +27,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 db = new GdiPlataformEntities(CachePersister.dataBase);
             }
         }
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutHubReportSelect2)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatórios Financeiros";

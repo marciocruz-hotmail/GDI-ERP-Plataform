@@ -362,6 +362,7 @@ namespace GdiPlataform.Lib
             return TextoSaida;
         }
 
+        [System.Obsolete("Filtro genérico por operador/texto removido (G-FLT-05). Use g_filtros / filtros inline.", false)]
         public static String SentencaSQLFiltroGenerico(string filterField, string filterOperador, string filterText)
         {
             var SentencaSQL = String.Empty;

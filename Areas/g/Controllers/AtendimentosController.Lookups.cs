@@ -35,12 +35,11 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.ComboGDepartamentos = lk.GetComboGDepartamentos(db);
             ViewBag.ComboGAtendimentosCategorias = ComboCategoriaPlaceholder();
             ViewBag.ComboVendedores = lk.GetComboGVendedores(db);
-            ViewBag.ComboClientes = lk.GetComboSomenteGClientes(db);
-            ViewBag.ComboClientes.Add(new SelectListItem { Value = "0", Text = "[ Selecione o Cliente ]" });
+            ViewBag.ComboClientes = LookupSearchQueries.ComboPlaceholderAtendimentoCliente();
             ViewBag.ComboProdutosServicos = lk.GetComboGcProdutosServicosTodos(db);
         }
 
-        private void PreencherLookupsAtendimentoEdit()
+        private void PreencherLookupsAtendimentoEdit(int idCliente)
         {
             var lk = AtendimentosLookups;
             ViewBag.ComboGDepartamentos = lk.GetComboGDepartamentos(db);
@@ -48,8 +47,7 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.ComboUsuariosAtendimentoResponsavel = lk.GetComboGUsuariosAtendimentoResponsavel(db);
             ViewBag.ComboGAtendimentosCategorias = ComboCategoriaPlaceholder();
             ViewBag.ComboVendedores = lk.GetComboGVendedores(db);
-            ViewBag.ComboClientes = lk.GetComboSomenteGClientes(db);
-            ViewBag.ComboClientes.Add(new SelectListItem { Value = "0", Text = "[ Selecione o Cliente ]" });
+            ViewBag.ComboClientes = LookupSearchQueries.BuildComboClienteAtendimento(db, idCliente);
             ViewBag.ComboProdutosServicos = lk.GetComboGcProdutosServicosTodos(db);
         }
 

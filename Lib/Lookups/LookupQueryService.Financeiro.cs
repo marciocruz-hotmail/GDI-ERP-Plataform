@@ -90,6 +90,27 @@ namespace GdiPlataform.Lib.Lookups
                     combo.Add(new SelectListItem { Value = c.id_classificacao_financeira.ToString(), Text = c.descricao_resumida });
                 return combo;
             });
+        public List<SelectListItem> GetComboGFinanceiroStatusTitulos(GdiPlataformEntities db) =>
+            LookupQueryServiceCache.GetOrLoadCombo(LookupCacheKeys.GFinanceiroStatusTitulos, "g_financeiro_status", "LoadComboGFinanceiroStatusTitulos", db, () =>
+            {
+                var combo = new List<SelectListItem> { new SelectListItem { Value = "0", Text = "[ TODOS ]" } };
+                foreach (var s in db.g_financeiro_status.AsNoTracking().OrderBy(f => f.nome)
+                    .Select(s => new { s.id_financeiro_status, s.nome }))
+                    combo.Add(new SelectListItem { Value = s.id_financeiro_status.ToString(), Text = s.nome });
+                return combo;
+            });
+
+        public List<SelectListItem> GetComboGContasCaixasBoletoEmissao(GdiPlataformEntities db) =>
+            LookupQueryServiceCache.GetOrLoadCombo(LookupCacheKeys.GContasCaixasBoleto, "g_contas_caixas", "LoadComboGContasCaixasBoleto", db, () =>
+            {
+                var combo = new List<SelectListItem>();
+                foreach (var c in db.g_contas_caixas.AsNoTracking()
+                    .Where(p => p.ativo && p.boleto_emissao && p.boleto_cnab_retorno).OrderBy(p => p.nome)
+                    .Select(c => new { c.id_conta_caixa, c.nome }))
+                    combo.Add(new SelectListItem { Value = c.id_conta_caixa.ToString(), Text = c.nome });
+                return combo;
+            });
+
         private static List<SelectListItem> BuildComboContasCaixasGerencial(GdiPlataformEntities db)
         {
             int idUsuario;

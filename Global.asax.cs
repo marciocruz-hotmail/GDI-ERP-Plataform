@@ -20,6 +20,10 @@ namespace GDI_ERP_Plataform
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+#if !DEBUG
+            // PERF-013: minificação/concatenação de bundles (build Configuration=Release)
+            BundleTable.EnableOptimizations = true;
+#endif
             LookupDependencyConfig.Register();
         }
 

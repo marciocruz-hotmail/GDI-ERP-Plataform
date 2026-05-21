@@ -324,28 +324,17 @@
             else {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    LibMessageDialog({
-                        title: "Confirma??o",
-                        closeButton: false,
-                        message: "Deseja <b>REALMENTE</b> exportar os pre?os da tabela <b>" + selectedNomeTabela + "</b> ?" + "<br/><br/>" + "<b>Aten??o:</b> O LOG dessa opera??o ser? gravado no Banco de Dados e ficar? dispon?vel para futuras consultas!",
-                        centerVertical: true,
-                        onEscape: false,
-                        backdrop: true,
-                        buttons: {
-                            cancelar: {
-                                label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
-                                className: 'btn-outline-warning',
-                                callback: function () {
-                                    LibMessageHideAll();
-                                }
-                            },
-                            confirmar: {
-                                label: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
-                                className: 'btn-outline-success',
-                                callback: function () { sendAjaxExportarPrecosTabelasVendedores(selectedIds); }
-                            }
-                        }
-                    })
+                    LibMessageConfirm('Confirmação',
+                        'Deseja <b>REALMENTE</b> exportar os preços da tabela <b>' + selectedNomeTabela + '</b> ?' + '<br/><br/>' +
+                        '<b>Atenção:</b> O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!',
+                        {
+                            closeButton: false,
+                            onEscape: false,
+                            backdrop: true,
+                            confirmLabel: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+                            hideOnCancel: true,
+                            onConfirm: function () { sendAjaxExportarPrecosTabelasVendedores(selectedIds); }
+                        });
                 }
                 else
                 {
@@ -380,26 +369,16 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirma??o",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirma??o", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        $("#dtGVendedores").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            $("#dtGVendedores").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

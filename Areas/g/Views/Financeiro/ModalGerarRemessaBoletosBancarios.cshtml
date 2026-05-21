@@ -66,27 +66,17 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        $("#dataTables-Titulos").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                        jsAjaxPesquisarFinanceiro();
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            $("#dataTables-Titulos").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                            jsAjaxPesquisarFinanceiro();
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else {
                         GdiAjaxNotifyInconsistencias(result.msg);

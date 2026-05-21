@@ -80,9 +80,11 @@ Inventário híbridos: `python Scripts/2026_05_20_gdi_inventory_combo_hybrid_con
 EF6 read-only nos factories: `.AsNoTracking()` + projeção `Select` em `LookupQueryService*.cs` (1.9.1). Piloto DI: `EstoqueController`, `AtendimentosController`. Testes: `Tests/GDI-ERP-Plataform.Lookups.Tests`. Pós-publish: `.cursor/context/2026_05_20_lookups-monitorizacao-pos-publish.md`.  
 **Typeahead pedidos (1.6):** `GetClientesLookup` / `GetProdutosLookup` + `data-gdi-lookup-url` em Select2 — `.cursor/context/2026_05_20_lookups-typeahead-ajax-pedidos.md`.
 
-### Mensagens UX — DataTables e Ajax (SweetAlert2 / `LibMessage*`)
+### Mensagens UX — SweetAlert2 / `LibMessage*`
 
-Três helpers em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregado por `Views/Shared/_Layout.cshtml` **após** `~/bundles/libui-swal-compat`):
+Pirâmide (2026-05-20): `LibMessageSuccess` / `Alert` / `Error` (1 botão); **`LibMessageConfirm`** / **`LibMessageConfirmChecklist`** / **`GdiConfirmDesativarAnexo`** (2 botões); `LibMessageDialog` legado só em `start.js`. Detalhe: `.cursor/context/2026_05_20_libmessage-confirm-arquitetura.md`.
+
+Três helpers DataTables em `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (carregado por `Views/Shared/_Layout.cshtml` **após** `~/bundles/libui-swal-compat`):
 
 | Helper | Quando usar |
 |--------|-------------|

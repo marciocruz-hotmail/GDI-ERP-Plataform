@@ -20,7 +20,7 @@ using Newtonsoft.Json.Linq;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Nfe_*,g_Nfe_Default")]
-    public class NfeController : Controller
+    public partial class NfeController : Controller
     {
         private GdiPlataformEntities db;
         private readonly string controllerName = "g_Nfe";
@@ -88,7 +88,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_nfe_config cfg = db.g_nfe_config.OrderBy(c => c.id_nfe_config).FirstOrDefault();
                 if (cfg == null)
                 {
-                    TempData["message"] = "Não há configuração de NFe (g_nfe_config). Cadastre antes de incluir notas.";
+                    LibFlashMessage.SetModalMessage(this, "Não há configuração de NFe (g_nfe_config). Cadastre antes de incluir notas.");
                     return RedirectToAction("Index");
                 }
                 viewModel.id_nfe_config = cfg.id_nfe_config;
@@ -106,39 +106,16 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                TempData["message"] = LibExceptions.getDbEntityValidationException(ex);
+                LibFlashMessage.SetModalMessage(this, LibExceptions.getDbEntityValidationException(ex));
                 if (viewModel != null && viewModel.id_nfe > 0) { return RedirectToAction("Edit", new { id = viewModel.id_nfe }); }
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["message"] = LibExceptions.getExceptionShortMessage(ex);
+                LibFlashMessage.SetModalMessage(this, LibExceptions.getExceptionShortMessage(ex));
                 if (viewModel != null && viewModel.id_nfe > 0) { return RedirectToAction("Edit", new { id = viewModel.id_nfe }); }
                 return RedirectToAction("Index");
             }
-        }
-
-        private void PreencherLookupsCreateEdit(g_nfe record)
-        {
-            var comboCidade = new List<SelectListItem>();
-            foreach (g_cidades item in db.g_cidades.Where(p => p.ativo == true).OrderBy(p => p.nome))
-            {
-                comboCidade.Add(new SelectListItem { Value = item.id_cidade.ToString(), Text = item.nome.ToString() });
-            }
-            ViewBag.comboCidade = comboCidade;
-
-            var comboUF = new List<SelectListItem>();
-            foreach (g_uf item in db.g_uf.OrderBy(p => p.sigla))
-            {
-                comboUF.Add(new SelectListItem { Value = item.id_uf.ToString(), Text = item.sigla.ToString() });
-            }
-            ViewBag.comboUF = comboUF;
-
-            g_nfe_status st = db.g_nfe_status.FirstOrDefault(s => s.id_nfe_status == record.id_nfe_status);
-            ViewBag.NfeStatus = st != null ? st.descricao.EmptyIfNull().ToString() : String.Empty;
-            ViewBag.NfeKey = record.nfe_key.EmptyIfNull().ToString();
-            ViewBag.UrlPDF = record.url_pdf.EmptyIfNull().ToString();
-            ViewBag.UrlXML = record.url_xml.EmptyIfNull().ToString();
         }
 
         #endregion
@@ -158,7 +135,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     return JsonDataTableException(new InvalidOperationException("Banco de dados não inicializado."), param, filterOnOff);
                 }
 
-                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 bool filterDb = recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
 
                 List<g_nfe> allRecords = new List<g_nfe>();

@@ -20,7 +20,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Default")]
-    public class VendedoresController : Controller
+    public partial class VendedoresController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_Vendedores";
@@ -54,33 +54,6 @@ namespace GdiPlataform.Areas.g.Controllers
             return View(model);
         }
 
-        #region PreencherLookupsCreateEdit
-        public void PreencherLookupsCreateEdit()
-        {
-
-            var comboRevenda = new List<SelectListItem>();
-            try
-            {
-                IQueryable<g_revendas> listaDbRevenda = null;
-                if (CachePersister.userIdentity.IdPerfil == 1)
-                {
-                    listaDbRevenda = db.g_revendas.Select(p => p).OrderBy(p => p.nome);
-                }
-                else
-                {
-                    listaDbRevenda = db.g_revendas.Where(p => p.id_revenda > 0).OrderBy(p => p.nome);
-                };
-                comboRevenda.Add(new SelectListItem { Value = "0", Text = " " });
-                foreach (g_revendas item1 in listaDbRevenda)
-                {
-                    comboRevenda.Add(new SelectListItem { Value = item1.id_revenda.ToString(), Text = item1.nome.ToString() });
-                }
-            }
-            finally { }
-            ViewBag.comboRevenda = comboRevenda;
-        }
-        #endregion
-
         #region GetDados
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actionread")]
         public ActionResult GetDados(jQueryDataTableParamModel param)
@@ -96,7 +69,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {

@@ -263,6 +263,14 @@ namespace GdiPlataform.Security
                 }
                 try
                 {
+                    NavbarFragmentCache.InvalidateSession(tokenId);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning("[CachePersister] logout: NavbarFragmentCache.InvalidateSession {0}: {1}", tokenId, ex.Message);
+                }
+                try
+                {
                     _cache.Remove("contextoModel_" + tokenId);
                 }
                 catch (Exception ex)

@@ -140,13 +140,14 @@
                 success: function (result) {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function () {
-                                LibMessageProcessando("");
-                                yesDestroyModal('#ModalUploadAnexoEstoqueLotes');
-                                $("#mainModal").load('@Url.Action("Edit", "EstoqueLotes", new { area = "gc" })?id=' + $('#id_estoque_lote').val().toString(), function () {
-                                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                                });
+                            LibMessageProcessando("");
+                            yesDestroyModal('#ModalUploadAnexoEstoqueLotes');
+                            $("#mainModal").load('@Url.Action("Edit", "EstoqueLotes", new { area = "gc" })?id=' + $('#id_estoque_lote').val().toString(), function () {
+                            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                            });
                             }
                         });
                     }

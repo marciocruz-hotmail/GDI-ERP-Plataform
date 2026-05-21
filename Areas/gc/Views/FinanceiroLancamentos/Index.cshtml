@@ -136,7 +136,7 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", "Cli./For.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                         <div class="col-sm-6">
-                            @Html.DropDownListFor(model => model.Field_Text_07, comboClientes, new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
+                            @Html.DropDownListFor(model => model.Field_Text_07, comboClientes, new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
                         @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-2">
@@ -571,14 +571,15 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                LibMessageHideAll();
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else {
                         GdiAjaxNotifyInconsistencias(result.msg);
@@ -683,13 +684,14 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                LibMessageHideAll();
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else {
                         GdiAjaxNotifyInconsistencias(result.msg);
@@ -722,13 +724,14 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                LibMessageHideAll();
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else {
                         GdiAjaxNotifyInconsistencias(result.msg);

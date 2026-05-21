@@ -89,14 +89,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                LibMessageHideAll();
+                            JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -145,14 +146,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                LibMessageHideAll();
+                            JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -202,14 +204,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                LibMessageHideAll();
+                            JsNewRecord('@Url.Action("Create", "Clientes", new { Area = "g" })');
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

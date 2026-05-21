@@ -25,6 +25,7 @@ namespace GdiPlataform.Areas.qa.Controllers
             }
         }
 
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutLite)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-graduation-cap", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Universidade Corporativa - GDI Aviação";

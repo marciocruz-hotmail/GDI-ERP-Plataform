@@ -75,16 +75,35 @@ var GdiSwal2 = (function () {
         config = options;
       }
 
-      return swalUi.fire({
+      var sizeMap = { small: '22em', medium: '32em', large: '48em' };
+      var widthOpt = {};
+      if (config.size && sizeMap[config.size]) {
+        widthOpt.width = sizeMap[config.size];
+      }
+
+      var iconOpt = Object.prototype.hasOwnProperty.call(config, 'icon')
+        ? config.icon
+        : 'question';
+
+      var fireOpts = {
         title: config.title || 'Confirmação',
-        html: config.message || '',
-        icon: 'question',
+        html: config.message || config.html || '',
         showCancelButton: true,
         confirmButtonText: btnLabel(config.buttons ? config.buttons.confirm : null, 'Sim'),
         cancelButtonText: btnLabel(config.buttons ? config.buttons.cancel : null, 'Cancelar'),
         buttonsStyling: true,
-        reverseButtons: true
-      }).then(function (result) {
+        reverseButtons: true,
+        showCloseButton: config.closeButton !== false,
+        allowOutsideClick: config.backdrop !== false && config.allowOutsideClick !== false,
+        allowEscapeKey: config.allowEscapeKey !== false && config.onEscape !== false
+      };
+      if (iconOpt === false) {
+        fireOpts.icon = false;
+      } else if (iconOpt !== '' && iconOpt != null && iconOpt !== undefined) {
+        fireOpts.icon = iconOpt;
+      }
+
+      return swalUi.fire(Object.assign(fireOpts, widthOpt)).then(function (result) {
         if (typeof config.callback === 'function') {
           config.callback(result.isConfirmed);
         }

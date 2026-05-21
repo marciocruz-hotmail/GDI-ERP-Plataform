@@ -172,7 +172,7 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-8 min-w-0">
-                            @Html.DropDownList("Cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "edit_cliente", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                            @Html.DropDownList("Cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "edit_cliente", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
@@ -653,27 +653,16 @@
             else {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    LibMessageDialog({
-                        title: "Atenção Usuário",
-                        closeButton: false,
-                        message: "Essa opção só deverá ser utilizada quando se tratar de uma <b>NOVA VENDA</b> para o mesmo cliente!<br/>ou <b>SEPARAR</b> os itens desse pedido em mais de um pedido!",
-                        centerVertical: true,
-                        onEscape: false,
-                        backdrop: true,
-                        size: 'large',
-                        buttons: {
-                            confirmar: {
-                                label: 'OK',
-                                callback: function ()
-                                {
+                                                    LibMessageSuccess("Atenção Usuário", "Essa opção só deverá ser utilizada quando se tratar de uma <b>NOVA VENDA</b> para o mesmo cliente!<br/>ou <b>SEPARAR</b> os itens desse pedido em mais de um pedido!", {
+                                    backdrop: true,
+                                    callback: function ()
+                                    {
                                     LibMessageProcessando("");
                                     $("#mainModal").load('@Url.Action("ModalPedidoDuplicar", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
-                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
                                     })
-                                }
-                            }
-                        }
-                    })
+                                    }
+                                });
                 }
                 else
                 {

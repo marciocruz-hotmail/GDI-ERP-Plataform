@@ -107,6 +107,23 @@ function gdiSelect2BuildOptions($el, dropdownParentResolved, extraOpts) {
 }
 
 /**
+ * Pedido Ajax cancelado pelo Select2 ao digitar (termo anterior) — não é falha de servidor.
+ * @param {jqXHR} jqXHR
+ * @param {string} textStatus
+ * @param {string} errorThrown
+ * @returns {boolean}
+ */
+function gdiSelect2IsLookupAjaxAbort(jqXHR, textStatus, errorThrown) {
+    if (textStatus === 'abort' || errorThrown === 'abort') {
+        return true;
+    }
+    if (jqXHR && jqXHR.statusText && /abort|canceled/i.test(String(jqXHR.statusText))) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * Select2 com Ajax (contrato servidor: { items: [{ id, text }] } — ver GetClientesLookup / GetProdutosLookup).
  * Atributos no &lt;select&gt;: data-gdi-lookup-url (obrig.), data-gdi-lookup-min-length (opc., default 2).
  */
@@ -128,6 +145,38 @@ function gdiSelect2BuildAjaxOptions($el, dropdownParentResolved, extraOpts) {
                 q: params.term || '',
                 page: params.page || 1
             };
+        },
+        transport: function (params, success, failure) {
+            var request = $.ajax($.extend({}, params, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }));
+            request.then(success);
+            request.fail(function (jqXHR, textStatus, errorThrown) {
+                /* Select2 cancela o GET anterior quando o utilizador ainda digita (delay 300ms).
+                   jQuery dispara .fail() com textStatus "abort" — não mostrar modal nesse caso. */
+                if (gdiSelect2IsLookupAjaxAbort(jqXHR, textStatus, errorThrown)) {
+                    failure();
+                    return;
+                }
+                var msg = 'Não foi possível carregar os resultados do lookup.';
+                if (jqXHR && jqXHR.status === 404) {
+                    msg = 'Endpoint de lookup não encontrado (404). Em views de área, use Url.Action(..., new { area = "" }) para controllers na raiz.';
+                } else if (jqXHR && jqXHR.responseJSON) {
+                    var j = jqXHR.responseJSON;
+                    if (j.errorMessage) {
+                        msg = j.errorMessage;
+                    } else if (j.mensagem) {
+                        msg = j.mensagem;
+                    }
+                }
+                if (typeof GdiAjaxNotifyInconsistencias === 'function') {
+                    GdiAjaxNotifyInconsistencias(msg, { severity: 'error' });
+                } else if (typeof LibMessageError === 'function') {
+                    LibMessageError('Atenção', msg);
+                }
+                failure();
+            });
+            return request;
         },
         processResults: function (data) {
             if (data && data.errorMessage) {

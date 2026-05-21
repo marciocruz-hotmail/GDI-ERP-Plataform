@@ -108,15 +108,16 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                $("#dtGAtendimentoAtividades").DataTable().draw(false);
-                                $("#dtGAtendimentosLogs").DataTable().draw(false);
-                                LibMessageHideAll();
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            $("#dtGAtendimentoAtividades").DataTable().draw(false);
+                            $("#dtGAtendimentosLogs").DataTable().draw(false);
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

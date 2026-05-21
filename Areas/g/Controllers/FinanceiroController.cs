@@ -22,7 +22,7 @@ using System.Web.Mvc;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Financeiro_*,g_Financeiro_Default,gc_Movimentos_*,gc_Movimentos_Default")]
-    public class FinanceiroController : Controller
+    public partial class FinanceiroController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_Financeiro";
@@ -105,40 +105,6 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Títulos Financeiros";
             return View(record_cstFinanceiroIndex);
         }
-
-        #region PreencherLookupsIndex
-        public void PreencherLookupsIndex()
-        {
-            var comboClientes = new List<SelectListItem>();
-            try
-            {
-                IQueryable<g_clientes> listaDbClientes = null;
-                if (CachePersister.userIdentity.IdPerfil == 1) { listaDbClientes = db.g_clientes.Where(p => p.ativo == true).OrderBy(p => p.id_cliente); }
-                else { listaDbClientes = db.g_clientes.Where(p => p.ativo == true).OrderBy(p => p.id_cliente); };
-                comboClientes.Add(new SelectListItem { Value = "0", Text = "[ TODOS ]" });
-                foreach (g_clientes item1 in listaDbClientes)
-                {
-                    comboClientes.Add(new SelectListItem { Value = item1.id_cliente.ToString(), Text = item1.id_cliente.ToString("0000") + " - " + item1.nome.ToString() });
-                }
-            }
-            finally { }
-            ViewBag.comboClientes = comboClientes;
-
-
-            var comboFinanceiroStatus = new List<SelectListItem>();
-            try
-            {
-                IQueryable<g_financeiro_status> listaDbFinanceiroStatus = db.g_financeiro_status.Select(f => f).OrderBy(f => f.nome);
-                comboFinanceiroStatus.Add(new SelectListItem { Value = "0", Text = "[ TODOS ]" });
-                foreach (g_financeiro_status item1 in listaDbFinanceiroStatus)
-                {
-                    comboFinanceiroStatus.Add(new SelectListItem { Value = item1.id_financeiro_status.ToString(), Text = item1.nome.ToString() });
-                }
-            }
-            finally { }
-            ViewBag.comboFinanceiroStatus = comboFinanceiroStatus;
-        }
-        #endregion
 
         #region GravarLogFinanceiro
         public bool GravarLogFinanceiro(int id_financeiro, String campo, String conteudo_anterior, String conteudo_novo)
@@ -261,56 +227,65 @@ namespace GdiPlataform.Areas.g.Controllers
             try
             {
             var allRecords = new List<Db.g_financeiro>();
-            var allRecordsFinanceiroStatus = db.g_financeiro_status.Select(f => new { f.id_financeiro_status, f.nome }).ToList();
-            var allRecordsClientes = db.g_clientes.Select(g => new { g.id_cliente, g.ativo, g.nome }).Where(g => g.ativo == true).ToList();
+            var allRecordsFinanceiroStatus = db.g_financeiro_status.AsNoTracking()
+                .Select(f => new { f.id_financeiro_status, f.nome }).ToList();
             DateTime DataField02 = new DateTime();
             DateTime DataField03 = new DateTime();
             DateTime.TryParse(param.yesCustomField02.EmptyIfNull().ToString().Trim(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataField02);
             DateTime.TryParse(param.yesCustomField03.EmptyIfNull().ToString().Trim(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataField03);
+            int totalRecords = 0;
+            int start = param.iDisplayStart;
+            int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
 
             if (param.yesFilterField.EmptyIfNull().ToString().Trim().Equals("*")) // Usuário realizou uma pesquisa
             {
-                String SentencaSQL = string.Empty;
-
                 if ((param.yesCustomField01.EmptyIfNull().ToString().Trim() != String.Empty)
                 && (param.yesCustomField02.EmptyIfNull().ToString().Trim() != String.Empty)
                 && (param.yesCustomField03.EmptyIfNull().ToString().Trim() != String.Empty)
                 && (param.yesCustomField04.EmptyIfNull().ToString().Trim() != String.Empty))
                 {
-                    SentencaSQL = "select f.* from g_financeiro f where f.id_financeiro > 0 ";
-                    SentencaSQL += " and f.data_vencimento between '" + DataField02.ToString("yyyy-MM-dd") + " 00:00:00" + "' and '" + DataField03.ToString("yyyy-MM-dd") + " 23:59:59'";
-                    if (param.yesCustomField01.EmptyIfNull().ToString().Trim() != "0") { SentencaSQL += " and f.id_cliente = " + param.yesCustomField01.EmptyIfNull().ToString().Trim(); }
-                    if (param.yesCustomField04.EmptyIfNull().ToString().Trim() != "0") { SentencaSQL += " and f.id_financeiro_status = " + param.yesCustomField04.EmptyIfNull().ToString().Trim(); }
-                    LibDB.setFilterByUser(SentencaSQL, controllerName, true, db);
-                    allRecords = db.g_financeiro.SqlQuery(SentencaSQL.ToString()).ToList();
+                    string sqlWhere = " from g_financeiro f where f.id_financeiro > 0 ";
+                    sqlWhere += " and f.data_vencimento between '" + DataField02.ToString("yyyy-MM-dd") + " 00:00:00" + "' and '" + DataField03.ToString("yyyy-MM-dd") + " 23:59:59'";
+                    if (param.yesCustomField01.EmptyIfNull().ToString().Trim() != "0")
+                        sqlWhere += " and f.id_cliente = " + param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                    if (param.yesCustomField04.EmptyIfNull().ToString().Trim() != "0")
+                        sqlWhere += " and f.id_financeiro_status = " + param.yesCustomField04.EmptyIfNull().ToString().Trim();
+
+                    string sqlData = "select f.* " + sqlWhere;
+                    LibDB.setFilterByUser(sqlData, controllerName, true, db);
+
+                    string sqlCount = "select count(*) " + sqlWhere;
+                    totalRecords = db.Database.SqlQuery<int>(sqlCount).FirstOrDefault();
                     filterOnOff = "1";
+
+                    string sqlPage = sqlData + " order by f.id_financeiro desc OFFSET " + start + " ROWS FETCH NEXT " + length + " ROWS ONLY";
+                    allRecords = db.g_financeiro.SqlQuery(sqlPage).ToList();
                 }
             }
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_financeiro, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_cliente) :
-                                     "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
+            IEnumerable<Db.g_financeiro> displayedRecords = allRecords;
+            if (param.iSortingCols > 0 && param.iSortCol_0 == 1)
             {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_cliente); }
-                }
-                else
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_cliente); }
-                }
+                displayedRecords = param.sSortDir_0 == "asc"
+                    ? allRecords.OrderBy(c => c.id_cliente)
+                    : allRecords.OrderByDescending(c => c.id_cliente);
             }
+
+            var pageList = displayedRecords.ToList();
+            var clienteIds = pageList.Select(c => c.id_cliente).Distinct().ToList();
+            var clientesDict = clienteIds.Count > 0
+                ? db.g_clientes.AsNoTracking()
+                    .Where(g => clienteIds.Contains(g.id_cliente) && g.ativo)
+                    .Select(g => new { g.id_cliente, g.nome })
+                    .ToList()
+                    .ToDictionary(g => g.id_cliente, g => g.nome)
+                : new Dictionary<int, string>();
 
             List<string[]> list = new List<string[]>();
-            foreach (var c in displayedRecords)
+            foreach (var c in pageList)
             {
-                var arrayCliente = allRecordsClientes.Find(f => f.id_cliente == c.id_cliente);
+                string nomeCliente;
+                clientesDict.TryGetValue(c.id_cliente, out nomeCliente);
                 var stFin = allRecordsFinanceiroStatus.FirstOrDefault(e => e.id_financeiro_status == c.id_financeiro_status);
                 String nomeStatusFin = stFin != null ? stFin.nome.ToString() : String.Empty;
 
@@ -319,7 +294,7 @@ namespace GdiPlataform.Areas.g.Controllers
                                     c.id_financeiro.ToString(),
                                     nomeStatusFin,
                                     c.id_cliente.ToString(),
-                                    ((arrayCliente != null) ? arrayCliente.nome.ToString() : String.Empty),
+                                    nomeCliente.EmptyIfNull().ToString(),
                                     c.data_processamento.ToString("dd/MM/yy"),
                                     c.data_vencimento.ToString("dd/MM/yy"),
                                     string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", c.valor_total_bruto).Replace("R$ ","").Replace("R$","").Replace("$",""),
@@ -335,8 +310,8 @@ namespace GdiPlataform.Areas.g.Controllers
                 stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count,
-                iTotalDisplayRecords = allRecords.Count,
+                iTotalRecords = totalRecords,
+                iTotalDisplayRecords = totalRecords,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
@@ -512,28 +487,12 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = "Gerar Remessa - Boletos Bancários (Títulos Abertos e Cancelados)";
             jQueryDataTableParamModel param = new jQueryDataTableParamModel();
             string filterSQL = String.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, true, db);
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, db);
             if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0)
             { filterSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
             g_contas_caixas record_g_contas_caixas = new g_contas_caixas();
             if (filterSQL.Trim().Length == 0) { record_g_contas_caixas.id_processamento = -1; } else { record_g_contas_caixas.id_processamento = 0; };
             return View(record_g_contas_caixas);
-        }
-
-        public void preencherCombosModalGerarRemessaBoletosBancarios()
-        {
-            var comboContasCaixas = new List<SelectListItem>();
-            try
-            {
-                // Apenas para banco do tipo emissão boleto true                
-                IQueryable<g_contas_caixas> listaDbContasCaixas = db.g_contas_caixas.Where(p => p.boleto_emissao == true && p.boleto_cnab_retorno == true).OrderBy(p => p.nome);
-                foreach (g_contas_caixas record_g_contas_caixas in listaDbContasCaixas)
-                {
-                    comboContasCaixas.Add(new SelectListItem { Value = record_g_contas_caixas.id_conta_caixa.ToString(), Text = record_g_contas_caixas.nome.ToString() });
-                }
-            }
-            finally { }
-            ViewBag.comboContasCaixas = comboContasCaixas;
         }
 
         [HttpPost]
@@ -566,7 +525,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 // Verificar o Filtro
                 jQueryDataTableParamModel param = new jQueryDataTableParamModel();
 
-                g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, true, db);
+                g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, db);
                 if (record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0)
                 { filterSQL = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim(); }
 

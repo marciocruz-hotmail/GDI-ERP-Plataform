@@ -137,7 +137,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     Decimal CotacaoDolarDia = SetCotacaoDollarDia();
                     if (record_gc_movimento.cotacao_dolar_oficial_venda != CotacaoDolarDia) { record_gc_movimento.cotacao_dolar_oficial_venda = CotacaoDolarDia; };
                 }
-                PreencherLookupsPedidoFormEdit(record_gc_movimento.id_cliente);
+                PreencherLookupsPedidoFormEdit(record_gc_movimento.id_cliente, record_gc_movimento.id_importacao);
                 if (record_gc_movimento.id_movimento_posicao > 0) { MsgInfo = "<b>Atenção</b> Pedido somente para visualização!"; };
                 ViewBag.MsgInfo = MsgInfo;
                 return View("FormPedidoCreate", record_gc_movimento);
@@ -151,6 +151,27 @@ namespace GdiPlataform.Areas.gc.Controllers
                 DataTable tableRegistroDeleteExtratos = LibDB.GetDataTable(SqlDelete, db);
             }
             catch (Exception) { };
+        }
+
+        /// <summary>
+        /// Produtos referenciados nos itens do movimento (validação/gravação/markup em AjaxSavePedido e afins).
+        /// Usa EF com entidade completa: SqlQuery com lista parcial de colunas quebra quando o modelo ganha campos (ex.: id_produto_substituto).
+        /// </summary>
+        private List<g_produtos> LoadProdutosPedidoItens(int idMovimento)
+        {
+            if (idMovimento == 0)
+            {
+                return new List<g_produtos>();
+            }
+
+            var idsProduto = db.gc_movimentos_itens.AsNoTracking()
+                .Where(i => i.id_movimento == idMovimento)
+                .Select(i => i.id_produto)
+                .Distinct();
+
+            return db.g_produtos.AsNoTracking()
+                .Where(p => idsProduto.Contains(p.id_produto))
+                .ToList();
         }
         public decimal SetCotacaoDollarDia()
         {
@@ -1052,8 +1073,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (qtdInconsistencias == 0)
                 {
                     ListaItensPedido = db.gc_movimentos_itens.Where(i => i.id_movimento == idMovimentoTemp).OrderBy(i => i.id_movimento_item).ToList();
-                    String SqlListaProdutosPedido = "select * from g_produtos where id_produto in (select distinct(id_produto) from gc_movimentos_itens where id_movimento = " + idMovimentoTemp.ToString() + ")";
-                    ListaProdutosPedido = db.g_produtos.SqlQuery(SqlListaProdutosPedido).ToList();
+                    ListaProdutosPedido = LoadProdutosPedidoItens(idMovimentoTemp);
                     if (ListaItensPedido.Count <= 0)
                     {
                         qtdInconsistencias += 1;
@@ -3454,8 +3474,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Decimal ItemCustoReais = 0;
                         Decimal MarkupPedido = 0;
                         Decimal MarkupItem = 0;
-                        String SqlListaProdutosPedido = "select * from g_produtos where id_produto in (select distinct(id_produto) from gc_movimentos_itens where id_movimento = " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + ")";
-                        var ListaProdutosPedido = db.g_produtos.SqlQuery(SqlListaProdutosPedido).ToList();
+                        var ListaProdutosPedido = LoadProdutosPedidoItens(record_gc_movimento.id_movimento);
                         String SqlListaItensPedido = "select * from gc_movimentos_itens where id_movimento = " + record_gc_movimento.id_movimento.EmptyIfNull().ToString();
                         var ListaItensPedido = db.gc_movimentos_itens.SqlQuery(SqlListaItensPedido).ToList();
                         List<gc_movimentos_itens> ListaItensPedidosAtualizar = new List<gc_movimentos_itens>();
@@ -3704,14 +3723,19 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
             int IdMovimento = -1;
             int.TryParse(param.yesCustomIdPK, out IdMovimento);
-            var allRecords = (from _m in db.gc_movimentos_itens
-                              join _p in db.g_produtos on _m.id_produto equals _p.id_produto
-                              where _m.id_movimento == IdMovimento
-                              orderby _m.sequencia, _m.id_movimento_item
-                              select new { item = _m, produto = _p }).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
+            int start = param.iDisplayStart;
+            int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+
+            var query = from _m in db.gc_movimentos_itens.AsNoTracking()
+                        join _p in db.g_produtos.AsNoTracking() on _m.id_produto equals _p.id_produto
+                        where _m.id_movimento == IdMovimento
+                        select new { item = _m, produto = _p };
+
+            int totalRecords = query.Count();
+            var pageList = query.OrderBy(x => x.item.sequencia).ThenBy(x => x.item.id_movimento_item)
+                .Skip(start).Take(length).ToList();
             List<string[]> list = new List<string[]>();
-            foreach (var l in displayedRecords)
+            foreach (var l in pageList)
             {
                 String ValorTotal = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", l.item.valor_total).Replace("R$ ", "").Replace("R$", "").Replace("$", "");
                 String NomeProduto = l.produto.nome.EmptyIfNull().ToString().Trim();
@@ -3729,8 +3753,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
+                iTotalRecords = totalRecords,
+                iTotalDisplayRecords = totalRecords,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
@@ -4583,7 +4607,6 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             String filterOnOff = "0";
 
-            var allRecords = new List<Db.gc_movimentos_nf>();
             var allRecordsAtualizarNFE = new List<Db.gc_movimentos_nf>();
             var allRecordsNfeStatus = db.g_nfe_status.Select(s => new { s.id_nfe_status, s.processamento, s.descricao_resumida }).ToList();
             var allRecordsCfop = db.gc_cfop.Select(c => new { c.id_cfop, c.numero }).ToList();
@@ -4608,31 +4631,13 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
             }
 
-            allRecords = db.gc_movimentos_nf.SqlQuery(SentencaSQL).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.gc_movimentos_nf, string> orderingFunction = (c => param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_movimento) : "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_movimento); }
-                    else if (param.iSortCol_0 == 7) { displayedRecords = displayedRecords.OrderByDescending(c => c.datahora_cadastro); }
-                    else if (param.iSortCol_0 == 10) { displayedRecords = displayedRecords.OrderByDescending(c => c.valor_total_bruto); }
-                }
-                else
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_movimento); }
-                    else if (param.iSortCol_0 == 7) { displayedRecords = displayedRecords.OrderBy(c => c.datahora_cadastro); }
-                    else if (param.iSortCol_0 == 10) { displayedRecords = displayedRecords.OrderBy(c => c.valor_total_bruto); }
-                }
-            }
+            int startNf = param.iDisplayStart;
+            int lengthNf = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+            int totalRecordsNf = LibDataTableSqlPaging.SqlCount(db, SentencaSQL);
+            var pageListNf = db.gc_movimentos_nf.SqlQuery(LibDataTableSqlPaging.SqlPage(SentencaSQL, startNf, lengthNf)).ToList();
 
             List<string[]> list = new List<string[]>();
-            foreach (var nf in displayedRecords)
+            foreach (var nf in pageListNf)
             {
                 String CfopNumero = String.Empty;
                 if (nf.id_cfop > 0)
@@ -4675,8 +4680,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
+                iTotalRecords = totalRecordsNf,
+                iTotalDisplayRecords = totalRecordsNf,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
@@ -5207,7 +5212,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             try
             {
 
-            var allRecords = new List<Db.g_nfe_carta_correcao>();
             var allRecordsAtualizarCartaCorrecao = new List<Db.g_nfe_carta_correcao>();
             var allRecordsNfeStatus = db.g_nfe_status.Select(s => new { s.id_nfe_status, s.descricao_resumida }).ToList();
             var allRecordsCfop = db.gc_cfop.Select(c => new { c.id_cfop, c.numero }).ToList();
@@ -5233,27 +5237,13 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
             }
 
-            allRecords = db.g_nfe_carta_correcao.SqlQuery(SentencaSQL).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_nfe_carta_correcao, string> orderingFunction = (c => param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_nfe_carta_correcao) : "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_nfe_carta_correcao); }
-                }
-                else
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_nfe_carta_correcao); }
-                }
-            }
+            int startCc = param.iDisplayStart;
+            int lengthCc = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+            int totalRecordsCc = LibDataTableSqlPaging.SqlCount(db, SentencaSQL);
+            var pageListCc = db.g_nfe_carta_correcao.SqlQuery(LibDataTableSqlPaging.SqlPage(SentencaSQL, startCc, lengthCc)).ToList();
 
             List<string[]> list = new List<string[]>();
-            foreach (var nf in displayedRecords)
+            foreach (var nf in pageListCc)
             {
                 String Status = nf.status.EmptyIfNull().ToString();
                 String Obs = nf.correcao.EmptyIfNull().ToString();
@@ -5273,8 +5263,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
+                iTotalRecords = totalRecordsCc,
+                iTotalDisplayRecords = totalRecordsCc,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
@@ -6157,12 +6147,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             DateTime DataField03 = new DateTime();
             DateTime DataField04 = new DateTime();
             DateTime.TryParse(param.yesCustomField03.EmptyIfNull().ToString().Trim(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataField03);
-            DateTime.TryParse(param.yesCustomField02.EmptyIfNull().ToString().Trim(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataField04);
+            DateTime.TryParse(param.yesCustomField04.EmptyIfNull().ToString().Trim(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataField04);
 
-            var allRecords = new List<Db.gc_movimentos>();
-            var allRecordsClientes = db.g_clientes.Select(g => new { g.id_cliente, g.nome }).ToList();
-            var allRecordsVendedores = db.g_vendedores.Select(v => new { v.id_vendedor, v.apelido }).ToList();
-            var allRecordsLocaisEstoqueOrders = db.gc_locais_estoque.Select(e => new { e.id_local_estoque, e.sigla }).ToList();
             String SentencaSQL = string.Empty;
 
             if ((param.yesCustomField01.EmptyIfNull().ToString().Trim() == "-1") && (param.yesCustomField02.EmptyIfNull().ToString().Trim() == "-1"))
@@ -6181,36 +6167,73 @@ namespace GdiPlataform.Areas.gc.Controllers
                 SentencaSQL += " and movimento.datahora_alteracao between '" + DataField03.ToString("yyyy-MM-dd") + " 00:00:00" + "' and '" + DataField04.ToString("yyyy-MM-dd") + " 23:59:59'";
                 SentencaSQL += " order by movimento.datahora_alteracao desc ";
             }
-            allRecords = db.gc_movimentos.SqlQuery(SentencaSQL).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.gc_movimentos, string> orderingFunction = (c => param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_movimento) : "");
+            int start = param.iDisplayStart;
+            int length = param.iDisplayLength <= 0 ? 10 : param.iDisplayLength;
+            int totalRecords = 0;
+            List<Db.gc_movimentos> pageList;
 
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
+            if ((param.yesCustomField01.EmptyIfNull().ToString().Trim() == "-1") && (param.yesCustomField02.EmptyIfNull().ToString().Trim() == "-1"))
             {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_movimento); }
-                    else if (param.iSortCol_0 == 7) { displayedRecords = displayedRecords.OrderByDescending(c => c.datahora_cadastro); }
-                    else if (param.iSortCol_0 == 10) { displayedRecords = displayedRecords.OrderByDescending(c => c.valor_total_bruto); }
-                }
-                else
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_movimento); }
-                    else if (param.iSortCol_0 == 7) { displayedRecords = displayedRecords.OrderBy(c => c.datahora_cadastro); }
-                    else if (param.iSortCol_0 == 10) { displayedRecords = displayedRecords.OrderBy(c => c.valor_total_bruto); }
-                }
+                pageList = new List<Db.gc_movimentos>();
+            }
+            else
+            {
+                totalRecords = LibDataTableSqlPaging.SqlCount(db, SentencaSQL);
+                pageList = db.gc_movimentos.SqlQuery(LibDataTableSqlPaging.SqlPage(SentencaSQL, start, length)).ToList();
+            }
+            var movimentoIds = pageList.Select(m => m.id_movimento).Distinct().ToList();
+            var clienteIds = pageList.Select(m => m.id_cliente).Distinct().ToList();
+            var vendedorIds = pageList.Where(m => m.id_vendedor > 0).Select(m => m.id_vendedor).Distinct().ToList();
+
+            var clientesDict = clienteIds.Count > 0
+                ? db.g_clientes.AsNoTracking()
+                    .Where(c => clienteIds.Contains(c.id_cliente))
+                    .Select(c => new { c.id_cliente, c.nome })
+                    .ToList()
+                    .ToDictionary(c => c.id_cliente, c => c.nome)
+                : new Dictionary<int, string>();
+
+            var vendedoresDict = vendedorIds.Count > 0
+                ? db.g_vendedores.AsNoTracking()
+                    .Where(v => vendedorIds.Contains(v.id_vendedor))
+                    .Select(v => new { v.id_vendedor, v.apelido })
+                    .ToList()
+                    .ToDictionary(v => v.id_vendedor, v => v.apelido)
+                : new Dictionary<int, string>();
+
+            var itensPorMovimento = new Dictionary<int, List<ConsultaPedidoItemRow>>();
+            if (movimentoIds.Count > 0)
+            {
+                var itensQuery = from item in db.gc_movimentos_itens.AsNoTracking()
+                                 join prod in db.g_produtos.AsNoTracking() on item.id_produto equals prod.id_produto
+                                 where movimentoIds.Contains(item.id_movimento)
+                                 select new ConsultaPedidoItemRow
+                                 {
+                                     IdMovimento = item.id_movimento,
+                                     IdProduto = item.id_produto,
+                                     Descricao = prod.descricao,
+                                     Quantidade = item.quantidade,
+                                     ValorUnit = item.valor_unit
+                                 };
+                if (IdProduto > 0)
+                    itensQuery = itensQuery.Where(x => x.IdProduto == IdProduto);
+
+                itensPorMovimento = itensQuery
+                    .ToList()
+                    .GroupBy(x => x.IdMovimento)
+                    .ToDictionary(g => g.Key, g => g.ToList());
             }
 
             List<string[]> list = new List<string[]>();
-            foreach (var m in displayedRecords)
+            foreach (var m in pageList)
             {
                 String LabelClienteProduto = string.Empty;
-                var arrayCliente = allRecordsClientes.Find(f => f.id_cliente == m.id_cliente);
-                var arrayVendedor = allRecordsVendedores.Find(v => v.id_vendedor == m.id_vendedor);
-                if (arrayCliente != null) { LabelClienteProduto = "<b>" + arrayCliente.nome.EmptyIfNull().ToString() + "   [Id: " + arrayCliente.id_cliente.EmptyIfNull().ToString() + "]" + "</b>"; };
+                string nomeCliente;
+                if (clientesDict.TryGetValue(m.id_cliente, out nomeCliente) && !string.IsNullOrEmpty(nomeCliente))
+                    LabelClienteProduto = "<b>" + nomeCliente + "   [Id: " + m.id_cliente + "]" + "</b>";
+
+                string apelidoVendedor;
+                vendedoresDict.TryGetValue(m.id_vendedor, out apelidoVendedor);
 
                 string iconeTipo = String.Empty;
                 if (m.id_movimento_status == 1) { iconeTipo = LibIcons.getIcon("fa-solid fa-clipboard-list", "Cotação (Aberta)", "#CACFD2", "fa-lg"); }
@@ -6223,35 +6246,26 @@ namespace GdiPlataform.Areas.gc.Controllers
                 string valorFormatado = string.Format(CultureInfo.GetCultureInfo(formatoMoeda), "{0:C}", m.valor_total_bruto);
                 if (m.id_moeda == 2) { valorFormatado = valorFormatado.Replace("$", "$ "); };
 
-                String SqlItens = string.Empty;
-                SqlItens += "select movimento.id_movimento, item.id_produto, produto.descricao, item.quantidade, item.valor_unit, item.valor_total from gc_movimentos movimento ";
-                SqlItens += "join gc_movimentos_itens item on(movimento.id_movimento = item.id_movimento) ";
-                SqlItens += "join g_produtos produto on (item.id_produto = produto.id_produto) ";
-                SqlItens += "where movimento.id_movimento = " + m.id_movimento.ToString() + " ";
-                if (IdProduto > 0) SqlItens += "and item.id_produto = " + IdProduto.ToString();
-                DataTable TableItem = LibDB.GetDataTable(SqlItens, db);
-                List<DataRow> AllItens = TableItem.AsEnumerable().ToList();
-                foreach (var dsRowItem in AllItens)
+                List<ConsultaPedidoItemRow> itensMovimento;
+                itensPorMovimento.TryGetValue(m.id_movimento, out itensMovimento);
+                var allItens = itensMovimento ?? new List<ConsultaPedidoItemRow>();
+                foreach (var rowItem in allItens)
                 {
-                    Decimal QtdProduto = 0;
-                    Decimal ValorUnitProduto = 0;
-                    String NomeProduto = string.Empty;
-                    NomeProduto = dsRowItem["descricao"].EmptyIfNull().ToString().Trim();
+                    String NomeProduto = rowItem.Descricao.EmptyIfNull().ToString().Trim();
                     if (NomeProduto.Length > 120) { NomeProduto = NomeProduto.Substring(0, 120) + "..."; }
-                    decimal.TryParse(dsRowItem["quantidade"].EmptyIfNull().ToString(), out QtdProduto);
-                    decimal.TryParse(dsRowItem["valor_unit"].EmptyIfNull().ToString(), out ValorUnitProduto);
-                    QtdProduto = decimal.Truncate(QtdProduto);
-                    NomeProduto += "     |  <b>" + QtdProduto.ToString("0") + "  x  " + ValorUnitProduto.ToString("###,###,##0.00") + "</b>";
+                    decimal qtdProduto = decimal.Truncate(rowItem.Quantidade);
+                    decimal valorUnitProduto = rowItem.ValorUnit;
+                    NomeProduto += "     |  <b>" + qtdProduto.ToString("0") + "  x  " + valorUnitProduto.ToString("###,###,##0.00") + "</b>";
                     LabelClienteProduto += "<br/>" + NomeProduto;
                 }
 
-                if (AllItens.Count > 0)
+                if (allItens.Count > 0)
                 {
                     list.Add(new[] {
                                     m.id_movimento.ToString(),
                                     iconeTipo,
                                     LabelClienteProduto,
-                                    ((arrayVendedor != null) ? arrayVendedor.apelido.EmptyIfNull().ToString() : String.Empty),
+                                    apelidoVendedor.EmptyIfNull().ToString(),
                                     m.datahora_alteracao.GetValueOrDefault().ToString("dd/MM/yy"),
                                     valorFormatado,
                                 });
@@ -6272,7 +6286,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
             }
 
-            if (displayedRecords.Count() == 0)
+            if (pageList.Count == 0)
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -6293,8 +6307,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
+                iTotalRecords = totalRecords,
+                iTotalDisplayRecords = totalRecords,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
@@ -8421,7 +8435,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             gc_movimentos RecordMovimento = db.gc_movimentos.Find(view_record_gc_movimento.id_movimento);
             List<gc_movimentos_itens> ListaItens = db.gc_movimentos_itens.Where(i => i.id_movimento == RecordMovimento.id_movimento).OrderBy(i => i.quantidade).ToList();
             List<gc_movimentos_itens> ListaItensAtualizar = new List<gc_movimentos_itens>();
-            List<g_produtos> ListaProdutos = db.g_produtos.SqlQuery("select * from g_produtos where id_produto in (select distinct id_produto from gc_movimentos_itens where id_movimento = "+ RecordMovimento.id_movimento.EmptyIfNull().ToString() + ")").ToList();
+            List<g_produtos> ListaProdutos = LoadProdutosPedidoItens(RecordMovimento.id_movimento);
             try
             {
                 // Validações
@@ -8689,7 +8703,32 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
-        [HttpPost]
+        /// <summary>Combo importações COMEX — carga tardia na aba Invoice/SO (PERF-009).</summary>
+        [HttpGet]
+        public ActionResult AjaxComboComexImportacoesPedido(int? idImportacao)
+        {
+            try
+            {
+                if (db == null)
+                {
+                    return Json(new { success = false, msg = "Base de dados indisponível (sessão).", items = new object[0] }, JsonRequestBehavior.AllowGet);
+                }
+                int idSel = idImportacao.GetValueOrDefault();
+                var combo = MovimentosLookups.GetComboGcComexImportacoesTodas(db);
+                var items = combo.Select(c => new
+                {
+                    value = c.Value,
+                    text = c.Text,
+                    selected = idSel > 0 && c.Value == idSel.ToString()
+                }).ToList();
+                return Json(new { success = true, items, selectedValue = idSel.ToString() }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, msg = LibExceptions.getExceptionShortMessage(ex), items = new object[0] }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public ActionResult AjaxDadosClientesDestinatarios(g_clientes view_g_clientes)
         {
             bool sucesso = false;
@@ -9348,6 +9387,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                 iTotalDisplayRecords = 0,
                 aaData = new List<string[]>()
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        private sealed class ConsultaPedidoItemRow
+        {
+            public int IdMovimento { get; set; }
+            public int IdProduto { get; set; }
+            public string Descricao { get; set; }
+            public decimal Quantidade { get; set; }
+            public decimal ValorUnit { get; set; }
         }
 
     }

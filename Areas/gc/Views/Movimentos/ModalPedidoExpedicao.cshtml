@@ -178,53 +178,35 @@
     {
         try
         {
-            LibMessageDialog({
-                title: "<b>" + '@CachePersister.userIdentity.Username' +"</b>  você confirma a conferência de todos os itens do checklist abaixo?",
-                message:
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Faturamento concluído(NF- e emitida e autorizada)?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Status no ERP: Liberado para Expedição?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>DANFE impresso disponível?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação fiscal completa?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Transportadora contratada e confirmada?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Todos os volumes do pedido estão presentes?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Volumes numerados corretamente(1 de X, 2 de X, etc.)?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Embalagens íntegras, sem danos?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas externas legíveis e bem fixadas?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Símbolos de manuseio visíveis?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Peso e dimensões conferem com registrado no ERP?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>DANFE corresponde ao pedido?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Número da NF nas etiquetas corresponde ao DANFE?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação técnica completa dentro da embalagem?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Envelope com documentação preparado?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Packing list incluso em todos os volumes?<br/>' +
-                    '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Artigos perigosos identificados e com documentação específica(se aplicável)',
-                closeButton: false,
-                centerVertical: true,
-                onEscape: false,
-                backdrop: true,
-                buttons:
+            LibMessageConfirmChecklist(
+                '<b>' + '@CachePersister.userIdentity.Username' + '</b>  você confirma a conferência de todos os itens do checklist abaixo?',
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Faturamento concluído(NF- e emitida e autorizada)?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Status no ERP: Liberado para Expedição?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>DANFE impresso disponível?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação fiscal completa?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Transportadora contratada e confirmada?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Todos os volumes do pedido estão presentes?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Volumes numerados corretamente(1 de X, 2 de X, etc.)?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Embalagens íntegras, sem danos?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Etiquetas externas legíveis e bem fixadas?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Símbolos de manuseio visíveis?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Peso e dimensões conferem com registrado no ERP?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>DANFE corresponde ao pedido?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Número da NF nas etiquetas corresponde ao DANFE?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Documentação técnica completa dentro da embalagem?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Envelope com documentação preparado?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Packing list incluso em todos os volumes?<br/>' +
+                '<i class="fa-regular fa-square me-2" aria-hidden="true"></i>Artigos perigosos identificados e com documentação específica(se aplicável)',
                 {
-                    cancelar:
-                    {
-                        label: '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar',
-                        className: 'btn-outline-warning',
-                        callback: function ()
-                        {
-                            LibMessageHideAll();
-                        }
-                    },
-                    confirmar:
-                    {
-                        label: '<i class="fa-regular fa-square-check me-2" aria-hidden="true"></i>SIM, o checklist foi conferido',
-                        className: 'btn-outline-success',
-                        callback: function ()
-                        {
-                            jsSendForm();
-                            LibMessageHideAll();
-                        }
+                    closeButton: false,
+                    onEscape: false,
+                    backdrop: true,
+                    confirmLabel: '<i class="fa-regular fa-square-check me-2" aria-hidden="true"></i>SIM, o checklist foi conferido',
+                    onConfirm: function () {
+                        jsSendForm();
+                        LibMessageHideAll();
                     }
-                }
-            })
+                });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsSistemaON] " + (err && err.message ? err.message.toString() : String(err)));
@@ -247,25 +229,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        $("#dataTableGCIndexPedido").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            $("#dataTableGCIndexPedido").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

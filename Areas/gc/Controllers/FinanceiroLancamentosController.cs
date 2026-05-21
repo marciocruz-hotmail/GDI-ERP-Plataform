@@ -926,7 +926,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         ViewBag.Title = LibIcons.getIcon("fa-solid fa-sack-dollar", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Novo Lançamento</b>";
                     }
                 }
-                PreencherLookupsModalLancamento();
+                PreencherLookupsModalLancamento(record_gc_financeiro_lancamentos.id_cliente);
                 return View("ModalCreateEditLancamento", record_gc_financeiro_lancamentos);
             }
             catch (Exception ex)
@@ -934,8 +934,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalCreateEditLancamento";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -1321,8 +1320,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalViewFinanceiroMovimentos(" + id.ToString() + ")";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -1575,8 +1573,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalGerarFinanceiroMovimentos(" + id.ToString() + ")";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
             finally
@@ -2621,8 +2618,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalBaixarLancamentos(" + id.ToString() + ")";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -2718,8 +2714,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalCancelarLancamentos(" + id.ToString() + ")";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -3149,8 +3144,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalGerarBoletoLancamentoAvulso(" + id.ToString() + ")";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -3381,8 +3375,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalCancelarMovimentoFinanceiro(" + id.ToString() + ")";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }
@@ -3546,8 +3539,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 String msg = LibExceptions.getExceptionShortMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalRelatorioContaCaixaSaldoDiario";
-                TempData["message"] = msg;
-                TempData.Keep("message");
+                LibFlashMessage.SetModalMessage(this, msg);
                 return RedirectToAction("ModalError", "Error", new { area = "" });
             }
         }

@@ -66,7 +66,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {

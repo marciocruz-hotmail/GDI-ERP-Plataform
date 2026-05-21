@@ -28,6 +28,7 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ClassificacaoFinanceira_*,g_ClassificacaoFinanceira_Actionread")]
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutHubJstree)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Classificação Financeira";
@@ -62,72 +63,68 @@ namespace GdiPlataform.Areas.g.Controllers
             if (param == null) { param = new jQueryDataTableParamModel(); }
             try
             {
-            var allRecords = new List<Db.g_classificacao_financeira>();
             List<string[]> list = new List<string[]>();
+            int start = param.iDisplayStart;
+            int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
 
-            g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+            g_filtros recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
             bool filterDb = recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
             if (filterDb) { filterOnOff = "1"; }
 
+            List<Db.g_classificacao_financeira> pageList;
+            int totalRecords;
+
             if (!filterDb)
             {
-                allRecords = db.g_classificacao_financeira.Where(x => x.id_classificacao_financeira > 0).OrderBy(x => x.codigo).ToList();
+                var query = db.g_classificacao_financeira.AsNoTracking()
+                    .Where(x => x.id_classificacao_financeira > 0);
+                totalRecords = query.Count();
+                IQueryable<Db.g_classificacao_financeira> ordered = query.OrderBy(x => x.codigo);
+                if (param.iSortingCols > 0)
+                {
+                    bool asc = (param.sSortDir_0 ?? "asc").Equals("asc", StringComparison.OrdinalIgnoreCase);
+                    switch (param.iSortCol_0)
+                    {
+                        case 1: ordered = asc ? query.OrderBy(c => c.id_classificacao_financeira) : query.OrderByDescending(c => c.id_classificacao_financeira); break;
+                        case 2: ordered = asc ? query.OrderBy(c => c.id_classificacao_financeira_pai) : query.OrderByDescending(c => c.id_classificacao_financeira_pai); break;
+                        case 3: ordered = asc ? query.OrderBy(c => c.consolidador) : query.OrderByDescending(c => c.consolidador); break;
+                        case 4: ordered = asc ? query.OrderBy(c => c.codigo) : query.OrderByDescending(c => c.codigo); break;
+                        case 5: ordered = asc ? query.OrderBy(c => c.nome) : query.OrderByDescending(c => c.nome); break;
+                    }
+                }
+                pageList = ordered.Skip(start).Take(length).ToList();
             }
             else
             {
                 string sentencaSql = recordFiltro.advanced == true
                     ? recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim()
                     : "select * from g_classificacao_financeira where id_classificacao_financeira > 1 and " + recordFiltro.sql_filtro.EmptyIfNull().ToString().Trim();
-                allRecords = db.g_classificacao_financeira.SqlQuery(sentencaSql).ToList();
+                string sqlData = sentencaSql + " order by codigo";
+                totalRecords = LibDataTableSqlPaging.SqlCount(db, sqlData);
+                pageList = db.g_classificacao_financeira.SqlQuery(
+                    LibDataTableSqlPaging.SqlPage(sqlData, start, length)).ToList();
             }
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.g_classificacao_financeira, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_classificacao_financeira) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? Convert.ToString(c.id_classificacao_financeira_pai) :
-                                     param.iSortCol_0 == 4 && param.iSortingCols > 0 ? Convert.ToString(c.consolidador) :
-                                     param.iSortCol_0 == 3 && param.iSortingCols > 0 ? c.codigo :
-                                     param.iSortCol_0 == 3 && param.iSortingCols > 0 ? c.nome :
-                                     "");
-
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            if (param.iSortingCols > 0)
-            {
-                if (param.sSortDir_0 == "asc")
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderBy(c => c.id_classificacao_financeira); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderBy(c => c.id_classificacao_financeira_pai); }
-                    else if (param.iSortCol_0 == 3) { displayedRecords = displayedRecords.OrderBy(c => c.consolidador); }
-                    else if (param.iSortCol_0 == 4) { displayedRecords = displayedRecords.OrderBy(c => c.codigo); }
-                    else if (param.iSortCol_0 == 5) { displayedRecords = displayedRecords.OrderBy(c => c.nome); }
-                }
-                else
-                {
-                    if (param.iSortCol_0 == 1) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_classificacao_financeira); }
-                    else if (param.iSortCol_0 == 2) { displayedRecords = displayedRecords.OrderByDescending(c => c.id_classificacao_financeira_pai); }
-                    else if (param.iSortCol_0 == 3) { displayedRecords = displayedRecords.OrderByDescending(c => c.consolidador); }
-                    else if (param.iSortCol_0 == 4) { displayedRecords = displayedRecords.OrderByDescending(c => c.codigo); }
-                    else if (param.iSortCol_0 == 5) { displayedRecords = displayedRecords.OrderByDescending(c => c.nome); }
-                }
-            }
-
+            var paiIds = pageList.Select(c => c.id_classificacao_financeira_pai).Where(id => id > 0).Distinct().ToList();
+            var paiDict = paiIds.Count > 0
+                ? db.g_classificacao_financeira.AsNoTracking()
+                    .Where(p => paiIds.Contains(p.id_classificacao_financeira))
+                    .ToDictionary(p => p.id_classificacao_financeira, p => p.nome.EmptyIfNull().ToString())
+                : new Dictionary<int, string>();
 
             String _consolidador = String.Empty;
             String _credito = String.Empty;
             String _debito = String.Empty;
-            var allClassificacaoFinanceiraPai = db.g_classificacao_financeira.ToList();
 
-
-            foreach (g_classificacao_financeira c in displayedRecords)
+            foreach (g_classificacao_financeira c in pageList)
             {
 
                 _consolidador = c.consolidador == true ? LibIcons.getIcon("fa-solid fa-check", "", "", "fa-lg") : "";
                 _credito = c.credito == true ? LibIcons.getIcon("fa-solid fa-check", "", "", "fa-lg") : "";
                 _debito = c.debito == true ? LibIcons.getIcon("fa-solid fa-check", "", "", "fa-lg") : "";
-                var parentRecord = allClassificacaoFinanceiraPai.Find(e => e.id_classificacao_financeira == c.id_classificacao_financeira_pai);
-                String nomePai = parentRecord != null ? parentRecord.nome.EmptyIfNull().ToString() : String.Empty;
+                string nomePai;
+                paiDict.TryGetValue(c.id_classificacao_financeira_pai, out nomePai);
+                if (nomePai == null) nomePai = String.Empty;
 
                 list.Add(new[] {
                                     "", // Coluna de Seleção
@@ -148,8 +145,8 @@ namespace GdiPlataform.Areas.g.Controllers
                 stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
+                iTotalRecords = totalRecords,
+                iTotalDisplayRecords = totalRecords,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);

@@ -14,6 +14,12 @@ namespace GDI_ERP_Plataform
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "Health",
+                url: "health",
+                defaults: new { controller = "Health", action = "Index", area = "" }
+            );
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }

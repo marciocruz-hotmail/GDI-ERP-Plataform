@@ -1,0 +1,51 @@
+@* G-PERF-20f — URLs dos bundles opcionais (lazy load em #mainModal); alinhado aos partials _LayoutHead/Scripts* *@
+@using GdiPlataform.Security
+@{
+    var v = CachePersister.userIdentity.VersionERP;
+    var vQ = "?v=" + v;
+}
+<script>
+window.GdiPageScriptRegistry = {
+    version: "@v",
+    flags: { core: 1, dataTables: 2, select2: 4, tempusDominus: 8, jstree: 16, bootstrapToggle: 32 },
+    bundles: {
+        dataTables: {
+            css: [
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.css")",
+                "@Url.Content("~/Content/gdi-datatables-bs5.css")" + "@vQ"
+            ],
+            js: [
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/datatablesnet-bs5-2.3.2/datatables.min.js")",
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/gdi-datatables-defaults.js")" + "@vQ"
+            ]
+        },
+        select2: {
+            css: [
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/select2/select2.min.css")" + "@vQ",
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/select2/select2-bootstrap-5-theme.min.css")" + "@vQ"
+            ],
+            js: [
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/select2/select2.min.js")" + "@vQ",
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/select2/i18n/pt-BR.js")" + "@vQ",
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/startprime/js/gdi-select2.js")" + "@vQ"
+            ]
+        },
+        tempusDominus: {
+            css: ["@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/css/tempus-dominus.min.css")"],
+            js: [
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/popper.min.js")",
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/tempus-dominus.min.js")",
+                "@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/js/jQuery-provider.min.js")" + "@vQ"
+            ]
+        },
+        jstree: {
+            css: ["@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/themes/default/style.css")"],
+            js: ["@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/jstree.min.js")"]
+        },
+        bootstrapToggle: {
+            css: ["@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/bootstrap4-toggle/bootstrap4-toggle.min.css")"],
+            js: ["@Url.Content("~/LibUI_AdminLTE-4.0.0/plugins/bootstrap4-toggle/bootstrap4-toggle.min.js")"]
+        }
+    }
+};
+</script>

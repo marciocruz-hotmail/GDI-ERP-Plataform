@@ -191,31 +191,20 @@ namespace GdiPlataform.Lib
             return resultado;
         }
 
-        public static g_filtros getFilterByUser(jQueryDataTableParamModel param, string controllerName, bool paramAdvanced, GdiPlataformEntities db)
+        /// <summary>Filtro persistido em CachePersister.userIdentity.allFiltros (token + controller). yesFilterField=="*" limpa.</summary>
+        public static g_filtros getFilterByUser(jQueryDataTableParamModel param, string controllerName, GdiPlataformEntities db)
         {
-            String filterSQL = string.Empty;
             g_filtros record_g_filtro = new g_filtros();
 
-            if ((param.yesFilterField.EmptyIfNull().ToString() != string.Empty) && (param.yesFilterOperador.EmptyIfNull().ToString() != string.Empty) && (param.yesFilterText.EmptyIfNull().ToString() != string.Empty))
+            if (param.yesFilterField.EmptyIfNull().ToString().Equals("*"))
             {
-                // filterDefault
-                filterSQL = LibStringFormat.SentencaSQLFiltroGenerico(param.yesFilterField, param.yesFilterOperador, param.yesFilterText);
-                setFilterByUser(filterSQL, controllerName, false, db);
-                record_g_filtro.sql_filtro = filterSQL;
-            }
-            else if (param.yesFilterField.EmptyIfNull().ToString().Equals("*"))
-            {
-                // Remover o Filtro
                 String _token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
                 CachePersister.userIdentity.allFiltros.Remove(CachePersister.userIdentity.allFiltros.Where(f => f.token == _token && f.controller == controllerName).FirstOrDefault());
                 param.yesFilterField = String.Empty;
-                param.yesFilterOperador = String.Empty;
-                param.yesFilterText = String.Empty;
                 record_g_filtro.sql_filtro = string.Empty;
             }
             else
             {
-                // Verificação se há um filtro ativo para o usuário no controller
                 String _token = CachePersister.userIdentity.TokenAcesso.EmptyIfNull().ToString().Trim();
                 record_g_filtro = CachePersister.userIdentity.allFiltros.Where(f => f.token == _token && f.controller == controllerName).FirstOrDefault();
                 if (record_g_filtro == null)
@@ -778,6 +767,42 @@ namespace GdiPlataform.Lib
             return JsonConvert.DeserializeObject<T>(ObjSaida);
         }
 
+        /// <summary>TTL absoluto entre verificações MAX (PERF-015). Alinhado ao sliding 15 min do MemoryCache de lookups.</summary>
+        private static readonly TimeSpan IsTableUpdateTtlDefault = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan IsTableUpdateTtlLargeTable = TimeSpan.FromMinutes(15);
+        private static readonly HashSet<string> IsTableUpdateLargeTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "g_clientes",
+            "g_produtos"
+        };
+
+        private static TimeSpan GetIsTableUpdateVerificationTtl(string tableName)
+        {
+            if (!string.IsNullOrEmpty(tableName) && IsTableUpdateLargeTables.Contains(tableName))
+                return IsTableUpdateTtlLargeTable;
+            return IsTableUpdateTtlDefault;
+        }
+
+        private static bool IsTableUpdateVerificationFresh(ModelControlTableUpdate record, string tableName)
+        {
+            if (record == null || record.DateTimeLastVerified == default(DateTime)) return false;
+            var elapsed = LibDateTime.getDataHoraBrasilia() - record.DateTimeLastVerified;
+            return elapsed >= TimeSpan.Zero && elapsed < GetIsTableUpdateVerificationTtl(tableName);
+        }
+
+        /// <summary>Força próxima IsTableUpdate a executar MAX (ex.: invalidação explícita de lookup).</summary>
+        public static void ResetTableUpdateVerification(string dataTableName)
+        {
+            if (string.IsNullOrWhiteSpace(dataTableName)) return;
+            var ui = CachePersister.userIdentity;
+            if (ui?.ListTablesUpdate == null) return;
+            foreach (var row in ui.ListTablesUpdate.Where(u =>
+                string.Equals(u.TableName, dataTableName, StringComparison.OrdinalIgnoreCase)))
+            {
+                row.DateTimeLastVerified = default(DateTime);
+            }
+        }
+
         public static bool IsTableUpdate(String DataTableName, String ProcessName, GdiPlataformEntities db)
         {
             bool TableUpdate = false;
@@ -789,6 +814,12 @@ namespace GdiPlataform.Lib
             ModelControlTableUpdate RecordModelControlTableUpdate;
             try
             {
+                if (CachePersister.userIdentity == null) return true;
+                if (CachePersister.userIdentity.ListTablesUpdate == null)
+                {
+                    CachePersister.userIdentity.ListTablesUpdate = new List<ModelControlTableUpdate>();
+                }
+
                 RecordModelControlTableUpdate = CachePersister.userIdentity.ListTablesUpdate.Where(u => u.TableName == DataTableName && u.ProcessName == ProcessName).FirstOrDefault();
 
                 if (RecordModelControlTableUpdate != null) { LastDateTimeUpdateTable = RecordModelControlTableUpdate.DateTimeUpdate; }
@@ -798,6 +829,7 @@ namespace GdiPlataform.Lib
                     RecordModelControlTableUpdate.TableName = DataTableName;
                     RecordModelControlTableUpdate.ProcessName = ProcessName;
                     RecordModelControlTableUpdate.DateTimeUpdate = DateTime.Now.AddDays(-1);
+                    RecordModelControlTableUpdate.DateTimeLastVerified = default(DateTime);
                     CachePersister.userIdentity.ListTablesUpdate.Add(RecordModelControlTableUpdate);
                     LastDateTimeUpdateTable = DateTime.Now.AddYears(-1);
                 }
@@ -808,6 +840,13 @@ namespace GdiPlataform.Lib
                 {
                     throw new ArgumentException("Nome de tabela inválido: " + tableName);
                 }
+
+                // PERF-015: carimbo fresco na sessão — combo cacheado não repete MAX na mesma janela TTL
+                if (IsTableUpdateVerificationFresh(RecordModelControlTableUpdate, tableName))
+                {
+                    return false;
+                }
+
                 SqlQuery = "SELECT MAX([datahora_cadastro]) AS [datahora_cadastro], MAX([datahora_alteracao]) AS [datahora_alteracao] FROM [" + tableName + "]";
                 DataTable tableTemp1 = null;
                 tableTemp1 = LibDB.GetDataTable(SqlQuery, db);
@@ -831,7 +870,14 @@ namespace GdiPlataform.Lib
                         }
                     }
                 }
-                if (TableUpdate == true) { CachePersister.userIdentity.ListTablesUpdate.Where(u => u.TableName == DataTableName && u.ProcessName == ProcessName).FirstOrDefault().DateTimeUpdate = DateTimeUpdateTable; };
+                var stampRow = CachePersister.userIdentity.ListTablesUpdate
+                    .FirstOrDefault(u => u.TableName == DataTableName && u.ProcessName == ProcessName);
+                if (stampRow != null)
+                {
+                    stampRow.DateTimeLastVerified = LibDateTime.getDataHoraBrasilia();
+                    if (TableUpdate)
+                        stampRow.DateTimeUpdate = DateTimeUpdateTable;
+                }
             }
             catch (Exception) 
             {

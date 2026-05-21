@@ -80,28 +80,18 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function () {
-                                        $("#dtGNfe").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        if (result.idProcessamento != "0") // Se houver processamento, realizar o download do relatório
-                                        {
-                                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                        }
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function () {
+                            $("#dtGNfe").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            if (result.idProcessamento != "0") // Se houver processamento, realizar o download do relatório
+                            {
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                             }
-                        })
+                            LibMessageHideAll();
+                            }
+                        });
                     }
                     else {
                         GdiAjaxNotifyInconsistencias(result.msg);

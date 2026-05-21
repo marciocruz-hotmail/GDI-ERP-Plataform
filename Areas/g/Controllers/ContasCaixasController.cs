@@ -15,7 +15,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_*,g_ContasCaixas_Default")]
-    public class ContasCaixasController : Controller
+    public partial class ContasCaixasController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_ContasCaixas";
@@ -26,26 +26,6 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 db = new GdiPlataformEntities(CachePersister.dataBase);
             }
-        }
-
-        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_Actioncreate,g_ContasCaixas_Actionupdate")]
-        public void PreencherLookupsCreateEdit()
-        {
-            var comboCidade = new List<SelectListItem>();
-            IQueryable<g_cidades> listaDbCidade = db.g_cidades.Where(p => p.ativo == true).OrderBy(p => p.nome);
-            foreach (g_cidades item_g_cidades in listaDbCidade)
-            {
-                comboCidade.Add(new SelectListItem { Value = item_g_cidades.id_cidade.ToString(), Text = item_g_cidades.nome.ToString() });
-            }
-            ViewBag.comboCidade = comboCidade;
-
-            var comboUF = new List<SelectListItem>();
-            IQueryable<g_uf> listaDbUF = db.g_uf.Select(p => p).OrderBy(p => p.sigla);
-            foreach (g_uf item2 in listaDbUF)
-            {
-                comboUF.Add(new SelectListItem { Value = item2.id_uf.ToString(), Text = item2.sigla.ToString() });
-            }
-            ViewBag.comboUF = comboUF;
         }
 
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_*,g_ContasCaixas_Actionread")]
@@ -84,7 +64,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {

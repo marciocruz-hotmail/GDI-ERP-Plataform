@@ -100,28 +100,11 @@ namespace GdiPlataform.Controllers
                 ViewBag.SessionID = SessionID;
                 ViewBag.DeviceId = DeviceId;
 
-                TempData.Remove("WallPaper");
-                TempData["WallPaper"] = ViewBag.WallPaper;
-                TempData.Keep("WallPaper");
-
-                TempData.Remove("SessionID");
-                TempData["SessionID"] = ViewBag.SessionID;
-                TempData.Keep("SessionID");
-
-                TempData.Remove("DeviceId");
-                TempData["DeviceId"] = ViewBag.DeviceId;
-                TempData.Keep("DeviceId");
-
-                TempData.Remove("Version");
-                TempData["Version"] = ViewBag.Version;
-                TempData.Keep("Version");
-
-                TempData.Remove("yesFilterField");
-                TempData.Remove("yesFilterOperador");
-                TempData.Remove("yesFilterText");
-                TempData.Remove("yesFilterOn");
-                TempData.Remove("yesFilterController");
-                TempData.Remove("yesFilterControllerTemp");
+                SaveLoginChromeToTempData(
+                    ViewBag.WallPaper.ToString(),
+                    ViewBag.SessionID.ToString(),
+                    ViewBag.DeviceId.ToString(),
+                    ViewBag.Version.ToString());
             }
             catch (Exception)
             {
@@ -289,8 +272,6 @@ namespace GdiPlataform.Controllers
 
                 string _ImgLogoSubdominio = string.Empty;
                 string _database = string.Empty;
-                string _GoogleTag = string.Empty;
-                string _GoogleTagURL = string.Empty;
                 string _DbConnectionString = string.Empty;
 
                 if (string.IsNullOrEmpty(avm.userIdentity.Acesso) || string.IsNullOrEmpty(avm.userIdentity.Password))
@@ -312,8 +293,6 @@ namespace GdiPlataform.Controllers
                 {
                     _ImgLogoSubdominio = currentTenant.ImgLogoSubdominio;
                     _database = currentTenant.database;
-                    _GoogleTag = currentTenant.GoogleTag;
-                    _GoogleTagURL = currentTenant.GoogleTagURL;
                     LibDB.CheckConnectionDB(_database);
 
                     db = new GdiPlataformEntities(_database);
@@ -331,7 +310,7 @@ namespace GdiPlataform.Controllers
 
                     #region Login por Usuário Padrão
                     // Usuário Padrão
-                    var queryUsuario = db.g_usuarios.Where(p => p.login == avm.userIdentity.Acesso && p.senha == avm.userIdentity.Password).ToList();
+                    var queryUsuario = db.g_usuarios.Where(p => p.ativo == true && p.login == avm.userIdentity.Acesso && p.senha == avm.userIdentity.Password).ToList();
                     if (queryUsuario.Count() > 0) { regUsuario = queryUsuario.First(); }
                     if (regUsuario != null)
                     {
@@ -343,14 +322,7 @@ namespace GdiPlataform.Controllers
                             Session["TrocaObrigatoria_Database"] = _database;
                             Session["TrocaObrigatoria_IdColigada"] = regUsuario.id_coligada;
                             Session["TrocaObrigatoria_IdFilial"] = regUsuario.id_filial;
-                            ViewBag.WallPaper = TempData["WallPaper"];
-                            ViewBag.SessionID = TempData["SessionID"];
-                            ViewBag.DeviceId = TempData["DeviceId"];
-                            ViewBag.Version = TempData["Version"];
-                            TempData.Keep("WallPaper");
-                            TempData.Keep("SessionID");
-                            TempData.Keep("DeviceId");
-                            TempData.Keep("Version");
+                            ApplyLoginChromeToViewBag();
                             return RedirectToAction("TrocaObrigatoriaSenha");
                         }
 
@@ -391,8 +363,6 @@ namespace GdiPlataform.Controllers
                         userIdentity.Dominio = dominio;
                         userIdentity.SubDominio = subDominio;
                         userIdentity.ImgLogoSubdominio = _ImgLogoSubdominio;
-                        userIdentity.GoogleTag = _GoogleTag;
-                        userIdentity.GoogleTagURL = _GoogleTagURL;
                         userIdentity.DataHoraUltimoLogin = LibDateTime.getDataHoraBrasilia().ToString("dd/MM/yy HH:mm");
                         CachePersister.userIdentity = userIdentity;
 
@@ -441,14 +411,7 @@ namespace GdiPlataform.Controllers
                             db.SaveChanges();
 
                             ViewBag.Error = "Tabela Coligada Não Parametrizada, acesso negado para usuário!";
-                            ViewBag.WallPaper = TempData["WallPaper"];
-                            ViewBag.SessionID = SessionID;
-                            ViewBag.DeviceId = DeviceId;
-                            ViewBag.Version = TempData["Version"];
-                            TempData.Keep("WallPaper");
-                            TempData.Keep("SessionID");
-                            TempData.Keep("DeviceId");
-                            TempData.Keep("Version");
+                            ApplyLoginChromeToViewBag(SessionID, DeviceId);
                             return View("Index");
                         }
 
@@ -478,14 +441,7 @@ namespace GdiPlataform.Controllers
                             db.SaveChanges();
 
                             ViewBag.Error = "Tabela Filial Não Parametrizada, acesso negado para usuário!";
-                            ViewBag.WallPaper = TempData["WallPaper"];
-                            ViewBag.SessionID = TempData["SessionID"];
-                            ViewBag.DeviceId = TempData["DeviceId"];
-                            ViewBag.Version = TempData["Version"];
-                            TempData.Keep("WallPaper");
-                            TempData.Keep("SessionID");
-                            TempData.Keep("DeviceId");
-                            TempData.Keep("Version");
+                            ApplyLoginChromeToViewBag(SessionID, DeviceId);
                             return View("Index");
                         }
                                                 
@@ -514,14 +470,7 @@ namespace GdiPlataform.Controllers
                             db.SaveChanges();
 
                             ViewBag.Error = "Tabela Perfil Não Parametrizada, acesso negado para usuário!";
-                            ViewBag.WallPaper = TempData["WallPaper"];
-                            ViewBag.SessionID = TempData["SessionID"];
-                            ViewBag.DeviceId = TempData["DeviceId"];
-                            ViewBag.Version = TempData["Version"];
-                            TempData.Keep("WallPaper");
-                            TempData.Keep("SessionID");
-                            TempData.Keep("DeviceId");
-                            TempData.Keep("Version");
+                            ApplyLoginChromeToViewBag(SessionID, DeviceId);
                             return View("Index");
                         }
 
@@ -562,14 +511,7 @@ namespace GdiPlataform.Controllers
                         db.SaveChanges();
 
                         ViewBag.Error = "Credenciais Inválidas!";
-                        ViewBag.WallPaper = TempData["WallPaper"];
-                        ViewBag.SessionID = TempData["SessionID"];
-                        ViewBag.DeviceId = TempData["DeviceId"];
-                        ViewBag.Version = TempData["Version"];
-                        TempData.Keep("WallPaper");
-                        TempData.Keep("SessionID");
-                        TempData.Keep("DeviceId");
-                        TempData.Keep("Version");
+                        ApplyLoginChromeToViewBag(SessionID, DeviceId);
                         return View("Index");
                     }
                     #endregion
@@ -581,14 +523,7 @@ namespace GdiPlataform.Controllers
                 String msgErro = LibExceptions.getExceptionShortMessage(ex);
                 msgErro = msgErro.Replace("The underlying provider failed on Open", "Failed to connect to the database.");
                 ViewBag.Error = "Erro ["+msgErro+"]";
-                ViewBag.WallPaper = TempData["WallPaper"];
-                ViewBag.SessionID = TempData["SessionID"];
-                ViewBag.DeviceId = TempData["DeviceId"];
-                ViewBag.Version = TempData["Version"];
-                TempData.Keep("WallPaper");
-                TempData.Keep("SessionID");
-                TempData.Keep("DeviceId");
-                TempData.Keep("Version");
+                ApplyLoginChromeToViewBag();
                 return View("Index");
             }
         }
@@ -603,7 +538,11 @@ namespace GdiPlataform.Controllers
             }
             var vm = new TrocaObrigatoriaSenhaViewModel { Login = Session["TrocaObrigatoria_Login"].ToString() };
             ViewBag.Version = ControlVersion.getShortVersion();
-            ViewBag.WallPaper = TempData["WallPaper"] ?? "https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/wallpaper/1.jpg";
+            ApplyLoginChromeToViewBag();
+            if (ViewBag.WallPaper == null || String.IsNullOrEmpty(ViewBag.WallPaper.ToString()))
+            {
+                ViewBag.WallPaper = "https://bucket-gdi-public-files.s3.sa-east-1.amazonaws.com/wallpaper/1.jpg";
+            }
             return View(vm);
         }
 
@@ -619,7 +558,7 @@ namespace GdiPlataform.Controllers
 
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(database) || idUsuarioObj == null)
             {
-                TempData["Error"] = "Sessão de troca de senha inválida. Efetue o login novamente.";
+                LibFlashMessage.SetError(this, "Sessão de troca de senha inválida. Efetue o login novamente.");
                 return RedirectToAction("Index");
             }
 
@@ -629,24 +568,24 @@ namespace GdiPlataform.Controllers
 
             if (string.IsNullOrEmpty(vm?.SenhaAtual))
             {
-                TempData["Error"] = "Informe a senha atual.";
+                LibFlashMessage.SetError(this, "Informe a senha atual.");
                 return RedirectToAction("TrocaObrigatoriaSenha");
             }
             if (string.IsNullOrEmpty(vm.NovaSenha))
             {
-                TempData["Error"] = "Informe a nova senha.";
+                LibFlashMessage.SetError(this, "Informe a nova senha.");
                 return RedirectToAction("TrocaObrigatoriaSenha");
             }
             if (vm.NovaSenha != vm.ConfirmacaoNovaSenha)
             {
-                TempData["Error"] = "A nova senha e a confirmação não conferem.";
+                LibFlashMessage.SetError(this, "A nova senha e a confirmação não conferem.");
                 return RedirectToAction("TrocaObrigatoriaSenha");
             }
 
             string msgComplexidade;
             if (!Lib.PasswordPolicy.ValidarComplexidade(vm.NovaSenha, out msgComplexidade))
             {
-                TempData["Error"] = msgComplexidade;
+                LibFlashMessage.SetError(this, msgComplexidade);
                 return RedirectToAction("TrocaObrigatoriaSenha");
             }
 
@@ -657,13 +596,13 @@ namespace GdiPlataform.Controllers
                 g_usuarios regUsuario = ctx.g_usuarios.Find(idUsuario);
                 if (regUsuario == null || regUsuario.login != login)
                 {
-                    TempData["Error"] = "Usuário não encontrado. Efetue o login novamente.";
+                    LibFlashMessage.SetError(this, "Usuário não encontrado. Efetue o login novamente.");
                     LimparSessionTrocaObrigatoria();
                     return RedirectToAction("Index");
                 }
                 if (regUsuario.senha != vm.SenhaAtual)
                 {
-                    TempData["Error"] = "Senha atual incorreta.";
+                    LibFlashMessage.SetError(this, "Senha atual incorreta.");
                     return RedirectToAction("TrocaObrigatoriaSenha");
                 }
 
@@ -675,7 +614,7 @@ namespace GdiPlataform.Controllers
                     .ToList();
                 if (!Lib.PasswordPolicy.ValidarNaoReutilizacao(vm.NovaSenha, regUsuario.senha, ultimas3Senhas, out string msgReutilizacao))
                 {
-                    TempData["Error"] = msgReutilizacao;
+                    LibFlashMessage.SetError(this, msgReutilizacao);
                     return RedirectToAction("TrocaObrigatoriaSenha");
                 }
 
@@ -730,13 +669,13 @@ namespace GdiPlataform.Controllers
                 }
 
                 LimparSessionTrocaObrigatoria();
-                TempData["Info"] = "Senha alterada com sucesso. Efetue o login com a nova senha.";
+                LibFlashMessage.SetInfo(this, "Senha alterada com sucesso. Efetue o login com a nova senha.");
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 String msgErro = LibExceptions.getExceptionShortMessage(ex);
-                TempData["Error"] = "Erro ao alterar senha [" + msgErro + "]";
+                LibFlashMessage.SetError(this, "Erro ao alterar senha [" + msgErro + "]");
                 if (ctx != null) ctx.Dispose();
                 return RedirectToAction("TrocaObrigatoriaSenha");
             }
@@ -776,11 +715,48 @@ namespace GdiPlataform.Controllers
         public ActionResult Logout()
         {
             bool porInatividade = "inactivity".Equals(Request.QueryString["reason"], StringComparison.OrdinalIgnoreCase);
-            if (porInatividade) TempData["Info"] = "A sessão foi encerrada devido à inatividade (15 minutos de inatividade). Por favor, faça login novamente.";
+            if (porInatividade)
+            {
+                LibFlashMessage.SetInfo(this, "A sessão foi encerrada devido à inatividade (15 minutos de inatividade). Por favor, faça login novamente.");
+            }
             CachePersister.logout();
             return RedirectToAction("Index");
         }
         #endregion
+
+        #region Login chrome TempData (G-LOGIN-01)
+        private const string LoginTdWallPaper = "WallPaper";
+        private const string LoginTdSessionId = "SessionID";
+        private const string LoginTdDeviceId = "DeviceId";
+        private const string LoginTdVersion = "Version";
+
+        private void SaveLoginChromeToTempData(string wallpaper, string sessionId, string deviceId, string version)
+        {
+            TempData[LoginTdWallPaper] = wallpaper;
+            TempData[LoginTdSessionId] = sessionId;
+            TempData[LoginTdDeviceId] = deviceId;
+            TempData[LoginTdVersion] = version;
+            KeepLoginChromeTempData();
+        }
+
+        private void KeepLoginChromeTempData()
+        {
+            TempData.Keep(LoginTdWallPaper);
+            TempData.Keep(LoginTdSessionId);
+            TempData.Keep(LoginTdDeviceId);
+            TempData.Keep(LoginTdVersion);
+        }
+
+        private void ApplyLoginChromeToViewBag(string sessionIdFallback = null, string deviceIdFallback = null)
+        {
+            if (TempData[LoginTdWallPaper] != null) { ViewBag.WallPaper = TempData[LoginTdWallPaper]; }
+            ViewBag.SessionID = sessionIdFallback ?? (TempData[LoginTdSessionId] ?? ViewBag.SessionID);
+            ViewBag.DeviceId = deviceIdFallback ?? (TempData[LoginTdDeviceId] ?? ViewBag.DeviceId);
+            if (TempData[LoginTdVersion] != null) { ViewBag.Version = TempData[LoginTdVersion]; }
+            KeepLoginChromeTempData();
+        }
+        #endregion
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -800,8 +776,6 @@ namespace GdiPlataform.Controllers
                 subDominio = "localhost",
                 ImgLogoSubdominio = "logoMicrosoft.png",
                 database = "GdiPlataformEntities_localhost",
-                GoogleTag = "G-J35JG2KXZL",
-                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-J35JG2KXZL",
             };
             allTenants.Add(tenant1);
 
@@ -810,8 +784,6 @@ namespace GdiPlataform.Controllers
                 subDominio = "gdidigital",
                 ImgLogoSubdominio = "logoGdi.png",
                 database = "GdiPlataformEntities_gdi_producao",
-                GoogleTag = "G-F73ZPQ7GLY",
-                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
             };
             allTenants.Add(tenant2);
 
@@ -820,8 +792,6 @@ namespace GdiPlataform.Controllers
                 subDominio = "gdidigitalhomologacao",
                 ImgLogoSubdominio = "logoGdi.png",
                 database = "GdiPlataformEntities_gdi_homologacao",
-                GoogleTag = "G-B3BWYET1V4",
-                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
             };
             allTenants.Add(tenant3);
 
@@ -830,8 +800,6 @@ namespace GdiPlataform.Controllers
                 subDominio = "aeroflightx",
                 ImgLogoSubdominio = "logoGdi.png",
                 database = "GdiPlataformEntities_gdi_producao",
-                GoogleTag = "G-F73ZPQ7GLY",
-                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
             };
             allTenants.Add(tenant4);
 
@@ -840,8 +808,6 @@ namespace GdiPlataform.Controllers
                 subDominio = "homologacao",
                 ImgLogoSubdominio = "logoGdi.png",
                 database = "GdiPlataformEntities_gdi_homologacao",
-                GoogleTag = "G-B3BWYET1V4",
-                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
             };
             allTenants.Add(tenant5);
 
@@ -851,8 +817,6 @@ namespace GdiPlataform.Controllers
                 subDominio = "portalflightx",
                 ImgLogoSubdominio = "logoGdi.png",
                 database = "GdiPlataformEntities_gdi_producao",
-                GoogleTag = "G-F73ZPQ7GLY",
-                GoogleTagURL = "https://www.GoogleTagmanager.com/gtag/js?id=G-B3BWYET1V4",
             };
             allTenants.Add(tenantPortalCliente);
 
@@ -892,8 +856,6 @@ namespace GdiPlataform.Controllers
                 Dominio = dominio,
                 SubDominio = subDominio,
                 ImgLogoSubdominio = currentTenant.ImgLogoSubdominio,
-                GoogleTag = currentTenant.GoogleTag,
-                GoogleTagURL = currentTenant.GoogleTagURL,
                 PerfilNome = "Portal do Cliente"
             };
 

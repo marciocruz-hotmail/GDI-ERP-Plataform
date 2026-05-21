@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
 using System.Web.Mvc;
+using GdiPlataform.Lib;
 using GdiPlataform.Lib.Lookups;
 
 namespace GdiPlataform.Areas.gc.Controllers
@@ -11,11 +14,10 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         #region PreencherLookups — pedidos / movimentos (Fase 4)
 
-        /// <summary>IndexPedido — filtros da listagem.</summary>
+        /// <summary>IndexPedido — filtros da listagem (cliente via typeahead Ajax — PERF-004).</summary>
         private void PreencherLookupsIndexPedido()
         {
-            ViewBag.comboClientes = MovimentosLookups.GetComboSomenteGClientes(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboClientes = LookupSearchQueries.ComboFiltroClienteTodosAtivos();
             ViewBag.comboTiposMovimentos = MovimentosLookups.GetComboGcTiposMovimentosVendas(db);
             ViewBag.comboStatusMovimentos = MovimentosLookups.GetComboGcStatusMovimentos(db);
             ViewBag.comboMovimentosPosicao = MovimentosLookups.GetComboGcMovimentosPosicao(db);
@@ -24,16 +26,42 @@ namespace GdiPlataform.Areas.gc.Controllers
         /// <summary>FormPedidoCreate — novo pedido/cotação/OS.</summary>
         private void PreencherLookupsPedidoFormCreate()
         {
-            PreencherLookupsPedidoFormCore(0, incluirMovimentosPosicao: true, incluirPlaceholderPagRec: true, carregarDestinatarios: false);
+            PreencherLookupsPedidoFormCore(0, idImportacaoSelecionada: 0, incluirMovimentosPosicao: true, incluirPlaceholderPagRec: true, carregarDestinatarios: false);
         }
 
         /// <summary>FormPedidoCreate — edição de pedido existente.</summary>
-        private void PreencherLookupsPedidoFormEdit(int idCliente)
+        private void PreencherLookupsPedidoFormEdit(int idCliente, int idImportacaoSelecionada)
         {
-            PreencherLookupsPedidoFormCore(idCliente, incluirMovimentosPosicao: false, incluirPlaceholderPagRec: false, carregarDestinatarios: true);
+            PreencherLookupsPedidoFormCore(idCliente, idImportacaoSelecionada, incluirMovimentosPosicao: false, incluirPlaceholderPagRec: false, carregarDestinatarios: true);
         }
 
-        private void PreencherLookupsPedidoFormCore(int idCliente, bool incluirMovimentosPosicao, bool incluirPlaceholderPagRec, bool carregarDestinatarios)
+        /// <summary>Combo importação COMEX mínimo no HTML; lista completa via Ajax na aba Invoice (PERF-009).</summary>
+        private List<SelectListItem> ComboComexImportacoesPedidoInicial(int idImportacaoSelecionada)
+        {
+            var combo = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ Selecione na aba Invoice / SO ]", Selected = idImportacaoSelecionada <= 0 }
+            };
+            if (idImportacaoSelecionada > 0)
+            {
+                var imp = db.gc_comex_importacoes.AsNoTracking()
+                    .Where(c => c.id_importacao == idImportacaoSelecionada)
+                    .Select(c => new { c.id_importacao, c.numero })
+                    .FirstOrDefault();
+                if (imp != null)
+                {
+                    combo.Add(new SelectListItem
+                    {
+                        Value = imp.id_importacao.ToString(),
+                        Text = imp.numero.EmptyIfNull().ToString().Trim(),
+                        Selected = true
+                    });
+                }
+            }
+            return combo;
+        }
+
+        private void PreencherLookupsPedidoFormCore(int idCliente, int idImportacaoSelecionada, bool incluirMovimentosPosicao, bool incluirPlaceholderPagRec, bool carregarDestinatarios)
         {
             var lk = MovimentosLookups;
 
@@ -67,7 +95,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.comboCfopFinalidade = lk.GetComboGcCfopFinalidade(db);
             ViewBag.comboFreteResponsavel = lk.GetComboGcFreteResponsavel(db);
             ViewBag.comboFreteResponsavel.Insert(0, new SelectListItem { Value = "-1", Text = "[ Frete ]" });
-            ViewBag.ComboComexImportacoes = lk.GetComboGcComexImportacoesTodas(db);
+            ViewBag.ComboComexImportacoes = ComboComexImportacoesPedidoInicial(idImportacaoSelecionada);
 
             if (carregarDestinatarios && idCliente > 0)
             {
@@ -78,7 +106,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                 ViewBag.comboClienteDestinatarios = new List<SelectListItem>();
             }
 
-            lk.GetDatasetGVendedores(db);
             ViewBag.comboMoedas = lk.GetComboGMoedas(db);
             ViewBag.comboPagRecCondicoes = lk.GetComboPagRecCondicoesTodas(db);
             if (incluirPlaceholderPagRec)
@@ -146,12 +173,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.comboTransportadoraComplementar.Insert(0, new SelectListItem { Value = "-1", Text = "[ SEM FRETE COMPLEMENTAR ]" });
         }
 
-        /// <summary>PainelPedidos.</summary>
+        /// <summary>PainelPedidos — filtro cliente via typeahead (PERF-004).</summary>
         private void PreencherLookupsPainelPedidos()
         {
             var lk = MovimentosLookups;
-            ViewBag.comboClientes = lk.GetComboSomenteGClientes(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboClientes = LookupSearchQueries.ComboFiltroClienteTodosAtivos();
             ViewBag.comboMovimentosPosicao = lk.GetComboGcMovimentosPosicao(db);
             var listaLocaisEstoque = lk.GetComboGcLocaisEstoqueOrders(db);
             listaLocaisEstoque.RemoveAt(0);
@@ -159,16 +185,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.comboLocaisEstoque = listaLocaisEstoque;
         }
 
-        /// <summary>ModalConsultaPedidos.</summary>
+        /// <summary>ModalConsultaPedidos — cliente e produto typeahead (CACHE-2d).</summary>
         private void PreencherLookupsConsultaPedidos()
         {
-            var lk = MovimentosLookups;
-            ViewBag.comboClientes = lk.GetComboSomenteGClientes(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "0", Text = "[ TODOS OS CLIENTES ]" });
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ SELECIONE O CLIENTE ]" });
-            ViewBag.comboProdutosServicos = lk.GetComboGcProdutosServicosTodos(db);
-            ViewBag.comboProdutosServicos.Insert(0, new SelectListItem { Value = "0", Text = "[ TODOS OS PRODUTOS ]" });
-            ViewBag.comboProdutosServicos.Insert(0, new SelectListItem { Value = "-1", Text = "[ SELECIONE O PRODUTO ]" });
+            ViewBag.comboClientes = LookupSearchQueries.ComboFiltroClienteSelecione();
+            ViewBag.comboProdutosServicos = LookupSearchQueries.ComboFiltroProdutoConsultaPedidos();
         }
 
         /// <summary>Contatos do cliente no contexto do movimento.</summary>

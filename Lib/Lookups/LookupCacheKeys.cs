@@ -15,8 +15,6 @@ namespace GdiPlataform.Lib.Lookups
         public const string Prefix = "lookup:";
 
         public const string GcProdutosServicosTodos = "gc_produtos_servicos_todos";
-        public const string GClientesFornecedores = "g_clientes_fornecedores";
-        public const string GClientesFornecedoresComDoc = "g_clientes_fornecedores_com_doc";
         public const string GcTransportadora = "gc_transportadora";
         public const string GcLocaisEstoqueOrders = "gc_locais_estoque_orders";
         public const string GcClientesContatos = "gc_clientes_contatos";
@@ -25,7 +23,6 @@ namespace GdiPlataform.Lib.Lookups
         public const string GVendedores = "g_vendedores";
         public const string GVendedoresDataset = "g_vendedores_dataset";
         public const string GcCfop = "gc_cfop";
-        public const string SomenteGClientes = "somente_g_clientes";
         public const string GedArquivosTipos = "ged_arquivos_tipos";
         public const string GcProdutosServicosImportados = "gc_produtos_servicos_importados";
         public const string GcEntregasPrazos = "gc_entregas_prazos";
@@ -41,7 +38,6 @@ namespace GdiPlataform.Lib.Lookups
         public const string GcClientesDestinatariosDataset = "gc_clientes_destinatarios_dataset";
         public const string GcClientesContatosDataset = "gc_clientes_contatos_dataset";
         public const string GcTiposMovimentosVendas = "gc_tipos_movimentos_vendas";
-        public const string GcTiposMovimentosCompras = "gc_tipos_movimentos_compras";
         public const string GcTiposMovimentosCreateEdit = "gc_tipos_movimentos_create_edit";
         public const string GcStatusMovimentos = "gc_status_movimentos";
         public const string GcMoedas = "gc_moedas";
@@ -73,6 +69,19 @@ namespace GdiPlataform.Lib.Lookups
         public const string GDepartamentos = "g_departamentos";
         public const string GAtendimentosStatus = "g_atendimentos_status";
         public const string GAtendimentosCategorias = "g_atendimentos_categorias";
+        public const string GColigadas = "g_coligadas";
+        public const string GRevendasVendedor = "g_revendas_vendedor";
+        public const string GCidadesAtivas = "g_cidades_ativas";
+        public const string GUf = "g_uf";
+        public const string GFinanceiroStatusTitulos = "g_financeiro_status_titulos";
+        public const string GContasCaixasBoleto = "g_contas_caixas_boleto";
+        public const string GcIcmsCstNcm = "gc_icms_cst_ncm";
+        public const string GcTributosIpiEntrada = "gc_tributos_ipi_entrada";
+        public const string GcTributosIpiSaida = "gc_tributos_ipi_saida";
+        public const string GcTributosPisEntrada = "gc_tributos_pis_entrada";
+        public const string GcTributosPisSaida = "gc_tributos_pis_saida";
+        public const string GcTributosCofinsEntrada = "gc_tributos_cofins_entrada";
+        public const string GcTributosCofinsSaida = "gc_tributos_cofins_saida";
 
         /// <summary>Combo global (sem parâmetros de negócio).</summary>
         public static string Combo(string lookupName, string sessionToken)

@@ -84,23 +84,13 @@
             {
                 LibMessageProcessandoHide();
                 if (result.success == true) {
-                    LibMessageDialog({
-                        title: "Simulação de Prorrogação de Vencimento de Título Financeiro",
-                        closeButton: false,
-                        message: result.msg,
-                        centerVertical: true,
-                        onEscape: false,
+                                        LibMessageSuccess("Simulação de Prorrogação de Vencimento de Título Financeiro", result.msg, {
                         backdrop: true,
-                        buttons: {
-                            confirmar: {
-                                label: 'OK',
-                                callback: function ()
-                                {
-                                    LibMessageHideAll();
-                                }
-                            }
+                        callback: function ()
+                        {
+                        LibMessageHideAll();
                         }
-                    })
+                    });
                 }
                 else {
                     GdiAjaxNotifyInconsistencias(result.msg)
@@ -129,25 +119,15 @@
                 {
                     LibMessageProcessandoHide();
                     if (result.success == true) {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        $("#dtGFinanceiro").DataTable().draw(false);
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            $("#dtGFinanceiro").DataTable().draw(false);
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

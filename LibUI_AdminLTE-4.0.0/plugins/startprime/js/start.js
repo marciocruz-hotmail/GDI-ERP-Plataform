@@ -529,6 +529,76 @@ function GdiSalvarDados(config) {
     }
 }
 
+/**
+ * Confirmação Sim/Cancelar (2 botões) — GdiSwal2.confirm com ícone e tema Bootstrap 5.
+ * opcoes: icon ('question'|'warning'|…), size, backdrop, onEscape/allowEscapeKey, confirmLabel, cancelLabel,
+ * onConfirm, onCancel, callback(isConfirmed), hideOnCancel (default true → LibMessageHideAll no cancelar).
+ */
+function LibMessageConfirm(Title, msg, opcoes) {
+    try {
+        if (typeof GdiSwalCompat !== 'undefined' && GdiSwalCompat && typeof GdiSwalCompat.confirm === 'function') {
+            var o = opcoes || {};
+            var cfg = {
+                title: Title,
+                message: msg,
+                icon: o.icon || 'question',
+                size: o.size,
+                backdrop: o.backdrop,
+                allowEscapeKey: o.allowEscapeKey,
+                onEscape: o.onEscape,
+                closeButton: o.closeButton,
+                buttons: {
+                    cancel: { label: o.cancelLabel || '<i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar' },
+                    confirm: { label: o.confirmLabel || '<i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar' }
+                },
+                callback: function (isConfirmed) {
+                    if (isConfirmed) {
+                        if (typeof o.onConfirm === 'function') {
+                            o.onConfirm();
+                        } else if (typeof o.callback === 'function') {
+                            o.callback(true);
+                        }
+                    } else {
+                        if (typeof o.onCancel === 'function') {
+                            o.onCancel();
+                        } else if (o.hideOnCancel !== false && typeof LibMessageHideAll === 'function') {
+                            LibMessageHideAll();
+                        } else if (typeof o.callback === 'function') {
+                            o.callback(false);
+                        }
+                    }
+                }
+            };
+            GdiSwalCompat.confirm(cfg);
+        }
+    }
+    catch (err) {
+        alert('[LibMessageConfirm] ' + err.message.toString());
+    }
+}
+
+/** Checklist / mensagem longa — LibMessageConfirm com width large. */
+function LibMessageConfirmChecklist(Title, msg, opcoes) {
+    var o = opcoes || {};
+    o.size = o.size || 'large';
+    if (!o.icon) { o.icon = 'question'; }
+    LibMessageConfirm(Title, msg, o);
+}
+
+/** Desativar anexo GED/pedido/financeiro — texto e ícone warning unificados. */
+function GdiConfirmDesativarAnexo(onConfirm) {
+    LibMessageConfirm('Confirmação',
+        'Deseja REALMENTE DESATIVAR esse arquivo anexo ?<br/><br/>' +
+        '<b>Atenção:</b> O Log dessa operação ficará armazenado no banco de dados para futuras auditorias!',
+        {
+            icon: 'warning',
+            onEscape: false,
+            backdrop: true,
+            confirmLabel: '<i class="fa-solid fa-save me-2" aria-hidden="true"></i>Confirmar',
+            onConfirm: onConfirm
+        });
+}
+
 /** Modal rico (footer HTML, vários botões) — repassa a GdiSwalCompat.dialog / SweetAlert2. */
 function LibMessageDialog(options) {
     try {
@@ -1378,6 +1448,536 @@ function GdiAjaxAntiForgeryHeaders(container) {
             console.error('[gdiAutoFocusModal] ' + err.message);
         }
     });
+}());
+
+/* ============================================================
+   G-PERF-20f — Lazy load de libs no #mainModal (hubs layout lite)
+   GdiLoadScriptOnce / GdiMainModalLoad + patch jQuery.fn.load
+   ============================================================ */
+(function gdiInstallMainModalLazyScripts() {
+    if (window._gdiMainModalLazyScriptsInstalled) {
+        return;
+    }
+    window._gdiMainModalLazyScriptsInstalled = true;
+
+    var FLAG = { core: 1, dataTables: 2, select2: 4, tempusDominus: 8, jstree: 16, bootstrapToggle: 32 };
+    var _scriptState = window._gdiLoadedScriptKeys || (window._gdiLoadedScriptKeys = {});
+    var _scriptWaiters = window._gdiLoadedScriptWaiters || (window._gdiLoadedScriptWaiters = {});
+
+    function gdiNormalizeScriptKey(src) {
+        return String(src || '').split('?')[0].toLowerCase();
+    }
+
+    function gdiRegistry() {
+        return window.GdiPageScriptRegistry || null;
+    }
+
+    function gdiFlagNames(missing) {
+        var names = [];
+        if (missing & FLAG.dataTables) { names.push('DataTables'); }
+        if (missing & FLAG.select2) { names.push('Select2'); }
+        if (missing & FLAG.tempusDominus) { names.push('Tempus'); }
+        if (missing & FLAG.jstree) { names.push('jstree'); }
+        if (missing & FLAG.bootstrapToggle) { names.push('Toggle'); }
+        return names;
+    }
+
+    function gdiHasDataTables() {
+        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.DataTable === 'function';
+    }
+
+    function gdiHasSelect2() {
+        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.select2 === 'function';
+    }
+
+    function gdiHasTempus() {
+        return typeof window.tempusDominus !== 'undefined' &&
+            typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.tempusDominus === 'function';
+    }
+
+    function gdiHasJstree() {
+        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.jstree === 'function';
+    }
+
+    function gdiHasBootstrapToggle() {
+        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.bootstrapToggle === 'function';
+    }
+
+    function gdiRuntimeMissingFlags(needed) {
+        var missing = 0;
+        if ((needed & FLAG.dataTables) && !gdiHasDataTables()) { missing |= FLAG.dataTables; }
+        if ((needed & FLAG.select2) && !gdiHasSelect2()) { missing |= FLAG.select2; }
+        if ((needed & FLAG.tempusDominus) && !gdiHasTempus()) { missing |= FLAG.tempusDominus; }
+        if ((needed & FLAG.jstree) && !gdiHasJstree()) { missing |= FLAG.jstree; }
+        if ((needed & FLAG.bootstrapToggle) && !gdiHasBootstrapToggle()) { missing |= FLAG.bootstrapToggle; }
+        return missing;
+    }
+
+    window.GdiDetectScriptFlagsFromHtml = function (html) {
+        if (!html || typeof html !== 'string') {
+            return FLAG.core;
+        }
+        var h = html.toLowerCase();
+        var flags = FLAG.core;
+        if (/\.datatable\s*\(|\.datatables\s*\(|bserverside\s*:\s*true|class\s*=\s*['"][^'"]*\bdisplay\b/.test(h)) {
+            flags |= FLAG.dataTables;
+        }
+        if (/select2|gdi-select2|data-gdi-lookup|gdiinitselect2modal/.test(h)) {
+            flags |= FLAG.select2;
+        }
+        if (/jsdatepicker|tempus-dominus|\.tempusdominus/.test(h)) {
+            flags |= FLAG.tempusDominus;
+        }
+        if (/\.jstree\s*\(|jstree\.|id\s*=\s*['"]tree['"]/.test(h)) {
+            flags |= FLAG.jstree;
+        }
+        /* Toggle (switch-success) já vem no layout Core; não lazy-load — evita falso positivo no modal ANP. */
+        var attrMatch = html.match(/data-gdi-require-scripts\s*=\s*['"](\d+)['"]/i);
+        if (attrMatch && attrMatch[1]) {
+            var extra = parseInt(attrMatch[1], 10);
+            if (!isNaN(extra)) {
+                flags |= extra;
+            }
+        }
+        return flags;
+    };
+
+    window.GdiLoadStylesOnce = function (hrefs, done) {
+        if (!hrefs || !hrefs.length) {
+            if (typeof done === 'function') { done(); }
+            return;
+        }
+        var pending = 0;
+        var failed = false;
+        function check() {
+            pending--;
+            if (pending <= 0 && typeof done === 'function') {
+                done(failed ? new Error('Falha ao carregar CSS do modal.') : null);
+            }
+        }
+        for (var i = 0; i < hrefs.length; i++) {
+            (function (href) {
+                var key = gdiNormalizeScriptKey(href);
+                var exists = false;
+                var links = document.getElementsByTagName('link');
+                for (var j = 0; j < links.length; j++) {
+                    if (gdiNormalizeScriptKey(links[j].href) === key) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) {
+                    return;
+                }
+                pending++;
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = href;
+                link.onload = function () { check(); };
+                link.onerror = function () { failed = true; check(); };
+                document.head.appendChild(link);
+            })(hrefs[i]);
+        }
+        if (pending === 0 && typeof done === 'function') {
+            done();
+        }
+    };
+
+    function gdiFindScriptElByKey(key) {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i++) {
+            var src = scripts[i].src || scripts[i].getAttribute('src') || '';
+            if (src && gdiNormalizeScriptKey(src) === key) {
+                return scripts[i];
+            }
+        }
+        return null;
+    }
+
+    function gdiScriptTagPresent(urlPart) {
+        var needle = String(urlPart || '').toLowerCase();
+        if (!needle) {
+            return null;
+        }
+        var scripts = document.getElementsByTagName('script');
+        for (var i = 0; i < scripts.length; i++) {
+            var src = (scripts[i].src || scripts[i].getAttribute('src') || '').toLowerCase();
+            if (src.indexOf(needle) >= 0) {
+                return scripts[i];
+            }
+        }
+        return null;
+    }
+
+    function gdiFlushScriptWaiters(key, err) {
+        var waiters = _scriptWaiters[key];
+        if (waiters && waiters.length) {
+            delete _scriptWaiters[key];
+            for (var w = 0; w < waiters.length; w++) {
+                if (typeof waiters[w] === 'function') {
+                    waiters[w](err || null);
+                }
+            }
+        }
+    }
+
+    function gdiBindExistingScriptEl(el, key, done) {
+        function finish(err) {
+            if (err) {
+                _scriptState[key] = false;
+            } else {
+                _scriptState[key] = true;
+            }
+            if (typeof done === 'function') {
+                done(err || null);
+            }
+            gdiFlushScriptWaiters(key, err || null);
+        }
+        if (_scriptState[key] === true) {
+            finish();
+            return true;
+        }
+        if (_scriptState[key] === 'loading') {
+            if (!_scriptWaiters[key]) {
+                _scriptWaiters[key] = [];
+            }
+            if (typeof done === 'function') {
+                _scriptWaiters[key].push(done);
+            }
+            return true;
+        }
+        _scriptState[key] = 'loading';
+        if (el.readyState === 'complete' || el.readyState === 'loaded') {
+            finish();
+            return true;
+        }
+        el.addEventListener('load', function () { finish(); }, { once: true });
+        el.addEventListener('error', function () {
+            finish(new Error('Falha ao carregar script: ' + (el.src || key)));
+        }, { once: true });
+        if (typeof done === 'function') {
+            if (!_scriptWaiters[key]) {
+                _scriptWaiters[key] = [];
+            }
+            _scriptWaiters[key].push(done);
+        }
+        return true;
+    }
+
+    function gdiWaitForLibrary(isReady, done, attempt, maxAttempts) {
+        attempt = attempt || 0;
+        maxAttempts = maxAttempts || 80;
+        if (isReady()) {
+            if (typeof done === 'function') {
+                done();
+            }
+            return;
+        }
+        if (attempt >= maxAttempts) {
+            if (typeof done === 'function') {
+                done(new Error('Timeout aguardando biblioteca do modal.'));
+            }
+            return;
+        }
+        setTimeout(function () {
+            gdiWaitForLibrary(isReady, done, attempt + 1, maxAttempts);
+        }, 50);
+    }
+
+    /** Evita lazy-load duplicado quando a view host já incluiu Tempus (defer). */
+    function gdiEnsureScriptFlagsForModal(needed, done) {
+        var missing = gdiRuntimeMissingFlags(needed);
+        if (!missing) {
+            if (typeof done === 'function') {
+                done();
+            }
+            return;
+        }
+        var waitHostTempus = (missing & FLAG.tempusDominus) && gdiScriptTagPresent('tempus-dominus');
+        if (!waitHostTempus) {
+            window.GdiEnsureScriptFlags(missing, done);
+            return;
+        }
+        gdiWaitForLibrary(gdiHasTempus, function (waitErr) {
+            if (waitErr) {
+                window.GdiEnsureScriptFlags(missing, done);
+                return;
+            }
+            var still = gdiRuntimeMissingFlags(needed);
+            window.GdiEnsureScriptFlags(still, done);
+        });
+    }
+
+    window.GdiLoadScriptOnce = function (src, done) {
+        var key = gdiNormalizeScriptKey(src);
+        if (_scriptState[key] === true) {
+            if (typeof done === 'function') { done(); }
+            return;
+        }
+        if (_scriptState[key] === 'loading') {
+            if (!_scriptWaiters[key]) {
+                _scriptWaiters[key] = [];
+            }
+            _scriptWaiters[key].push(done);
+            return;
+        }
+        var existingEl = gdiFindScriptElByKey(key);
+        if (existingEl && gdiBindExistingScriptEl(existingEl, key, done)) {
+            return;
+        }
+        _scriptState[key] = 'loading';
+        var script = document.createElement('script');
+        script.src = src;
+        script.async = false;
+        script.onload = function () {
+            _scriptState[key] = true;
+            if (typeof done === 'function') { done(); }
+            var waiters = _scriptWaiters[key];
+            if (waiters && waiters.length) {
+                delete _scriptWaiters[key];
+                for (var w = 0; w < waiters.length; w++) {
+                    if (typeof waiters[w] === 'function') { waiters[w](); }
+                }
+            }
+        };
+        script.onerror = function () {
+            _scriptState[key] = false;
+            var err = new Error('Falha ao carregar script: ' + src);
+            if (typeof done === 'function') { done(err); }
+            var waiters = _scriptWaiters[key];
+            if (waiters && waiters.length) {
+                delete _scriptWaiters[key];
+                for (var w2 = 0; w2 < waiters.length; w2++) {
+                    if (typeof waiters[w2] === 'function') { waiters[w2](err); }
+                }
+            }
+        };
+        document.head.appendChild(script);
+    };
+
+    function gdiLoadScriptsSequential(urls, done) {
+        var idx = 0;
+        function next(err) {
+            if (err) {
+                if (typeof done === 'function') { done(err); }
+                return;
+            }
+            if (idx >= urls.length) {
+                if (typeof done === 'function') { done(); }
+                return;
+            }
+            window.GdiLoadScriptOnce(urls[idx++], next);
+        }
+        next();
+    }
+
+    window.GdiEnsureScriptFlags = function (missing, done) {
+        if (!missing) {
+            if (typeof done === 'function') { done(); }
+            return;
+        }
+        var reg = gdiRegistry();
+        if (!reg || !reg.bundles) {
+            if (typeof done === 'function') {
+                done(new Error('GdiPageScriptRegistry não definido no layout.'));
+            }
+            return;
+        }
+        var css = [];
+        var js = [];
+        function appendBundle(name, flagBit) {
+            if (!(missing & flagBit)) {
+                return;
+            }
+            var bundle = reg.bundles[name];
+            if (!bundle) {
+                return;
+            }
+            if (bundle.css) {
+                css = css.concat(bundle.css);
+            }
+            if (bundle.js) {
+                js = js.concat(bundle.js);
+            }
+        }
+        appendBundle('dataTables', FLAG.dataTables);
+        appendBundle('select2', FLAG.select2);
+        appendBundle('tempusDominus', FLAG.tempusDominus);
+        appendBundle('jstree', FLAG.jstree);
+        appendBundle('bootstrapToggle', FLAG.bootstrapToggle);
+
+        window.GdiLoadStylesOnce(css, function (cssErr) {
+            if (cssErr) {
+                if (typeof done === 'function') { done(cssErr); }
+                return;
+            }
+            gdiLoadScriptsSequential(js, function (jsErr) {
+                if (jsErr) {
+                    if (typeof done === 'function') { done(jsErr); }
+                    return;
+                }
+                var still = gdiRuntimeMissingFlags(missing);
+                if (still && typeof done === 'function') {
+                    done(new Error('Bibliotecas não disponíveis após carregamento: ' + gdiFlagNames(still).join(', ')));
+                    return;
+                }
+                if (typeof done === 'function') { done(); }
+            });
+        });
+    };
+
+    /**
+     * Respostas Ajax com layout _Modal.cshtml (DOCTYPE/html/body): extrai só o corpo,
+     * como o jQuery.fn.load legado (.children() após parse), para #mainModal receber
+     * .modal-dialog como filho direto.
+     */
+    function gdiNormalizeModalAjaxHtml(html) {
+        if (!html || typeof html !== 'string') {
+            return html;
+        }
+        var trimmed = jQuery.trim(html);
+        if (!/<\s*!doctype/i.test(trimmed) && !/<\s*html[\s>]/i.test(trimmed)) {
+            return trimmed;
+        }
+        if (typeof DOMParser !== 'undefined') {
+            try {
+                var doc = new DOMParser().parseFromString(trimmed, 'text/html');
+                if (doc && doc.body && jQuery.trim(doc.body.innerHTML || '').length) {
+                    return doc.body.innerHTML;
+                }
+            } catch (eDom) { /* fallback jQuery */ }
+        }
+        var $wrap = jQuery('<div>').append(jQuery.parseHTML(trimmed, document, true));
+        var $body = $wrap.find('body').first();
+        if ($body.length) {
+            return $body.html() || '';
+        }
+        var $htmlRoot = $wrap.children('html').first();
+        if ($htmlRoot.length) {
+            var $bodyInHtml = $htmlRoot.find('body').first();
+            if ($bodyInHtml.length) {
+                return $bodyInHtml.html() || '';
+            }
+        }
+        return $wrap.children().map(function () {
+            var el = this;
+            return el.outerHTML || el.textContent || '';
+        }).get().join('');
+    }
+
+    /** Exibe #mainModal (BS5); usar no callback de $("#mainModal").load / GdiMainModalLoad. */
+    window.GdiMainModalShow = function () {
+        var el = document.getElementById('mainModal');
+        if (!el) {
+            return;
+        }
+        if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+            if (typeof LibMessageError === 'function') {
+                LibMessageError('Atenção', '[GdiMainModalShow] Bootstrap 5 JS não carregado nesta página.');
+            }
+            return;
+        }
+        var inst = bootstrap.Modal.getInstance(el);
+        if (inst) {
+            inst.dispose();
+        }
+        bootstrap.Modal.getOrCreateInstance(el).show();
+    };
+
+    /** Injeta HTML no #mainModal e executa <script> inline (paridade jQuery.fn.load). */
+    function gdiMainModalInsertHtml($modal, html) {
+        $modal.empty();
+        if (!html) {
+            return;
+        }
+        html = gdiNormalizeModalAjaxHtml(html);
+        if (!html) {
+            return;
+        }
+        var nodes = jQuery.parseHTML(html, document, true);
+        if (!nodes || !nodes.length) {
+            return;
+        }
+        var i;
+        for (i = 0; i < nodes.length; i++) {
+            $modal[0].appendChild(nodes[i]);
+        }
+        $modal.find('script').each(function () {
+            var el = this;
+            var src = el.src || el.getAttribute('src');
+            if (src) {
+                jQuery.ajax({ url: src, dataType: 'script', async: false, cache: true });
+            } else {
+                var code = el.text || el.textContent || '';
+                if (code && jQuery.trim(code).length && jQuery.globalEval) {
+                    jQuery.globalEval(code);
+                }
+            }
+        });
+    }
+
+    window.GdiMainModalLoad = function (url, data, complete) {
+        var $modal = jQuery('#mainModal');
+        if (!$modal.length) {
+            return jQuery('<div/>');
+        }
+        var ajaxOpts = {
+            url: url,
+            type: 'GET',
+            dataType: 'text',
+            cache: false
+        };
+        if (data !== undefined && data !== null) {
+            ajaxOpts.data = data;
+            if (typeof data === 'object' || typeof data === 'string') {
+                ajaxOpts.type = 'POST';
+            }
+        }
+        jQuery.ajax(ajaxOpts)
+            .done(function (html) {
+                var bodyHtml = gdiNormalizeModalAjaxHtml(html);
+                var needed = window.GdiDetectScriptFlagsFromHtml(bodyHtml || html);
+                gdiEnsureScriptFlagsForModal(needed, function (err) {
+                    if (err) {
+                        if (typeof LibMessageError === 'function') {
+                            LibMessageError('Atenção', '[GdiMainModalLoad] ' + (err.message || String(err)));
+                        }
+                        return;
+                    }
+                    gdiMainModalInsertHtml($modal, html);
+                    if (typeof complete === 'function') {
+                        complete.call($modal[0], html, 'success', null);
+                    } else if (typeof window.GdiMainModalShow === 'function') {
+                        window.GdiMainModalShow();
+                    }
+                });
+            })
+            .fail(function (xhr, status, err) {
+                if (typeof LibMessageError === 'function') {
+                    LibMessageError('Atenção', '[GdiMainModalLoad] ' + (err || status || 'Erro ao carregar modal.'));
+                }
+            });
+        return $modal;
+    };
+
+    if (typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.load && !jQuery.fn._gdiMainModalLoadPatched) {
+        var _gdiOrigFnLoad = jQuery.fn.load;
+        jQuery.fn.load = function (url, param2, param3) {
+            if (this.length === 1 && this[0] && this[0].id === 'mainModal' && typeof url === 'string') {
+                var data;
+                var complete;
+                if (typeof param2 === 'function') {
+                    complete = param2;
+                } else {
+                    data = param2;
+                    complete = param3;
+                }
+                return window.GdiMainModalLoad(url, data, complete);
+            }
+            return _gdiOrigFnLoad.apply(this, arguments);
+        };
+        jQuery.fn._gdiMainModalLoadPatched = true;
+    }
 }());
 
 /* ============================================================

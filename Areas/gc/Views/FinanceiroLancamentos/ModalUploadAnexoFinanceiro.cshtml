@@ -137,15 +137,16 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageSuccess("Confirmação", result.msg, {
+                                                LibMessageSuccess("Confirmação", result.msg, {
+                            backdrop: true,
                             callback: function ()
                             {
-                                LibMessageProcessando("");
-                                $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=' + $('#id_gc_financeiro').val().toString(), function () {
-                                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                                })
+                            LibMessageProcessando("");
+                            $("#mainModal").load('@Url.Action("ModalCreateEditLancamento", "FinanceiroLancamentos", new { area = "gc" })?IdLancamento=' + $('#id_gc_financeiro').val().toString(), function () {
+                            var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
+                            })
                             }
-                        })
+                        });
                     }
                     else
                     {

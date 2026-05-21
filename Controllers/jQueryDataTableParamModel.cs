@@ -27,9 +27,6 @@ namespace GdiPlataform.Controllers
 
         public string yesCustomIdPK { get; set; }
         public string yesFilterField { get; set; }
-        public string yesFilterOperador { get; set; }
-        public string yesFilterText { get; set; }
-        public string yesFilterAdvancedText { get; set; }
         public string yesFilterController { get; set; }
         public string yesFilterOnOff { get; set; }
 

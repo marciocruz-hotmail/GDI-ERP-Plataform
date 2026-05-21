@@ -15,7 +15,7 @@ using GdiPlataform.Lib;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Default")]
-    public class FiliaisController : Controller
+    public partial class FiliaisController : Controller
     {
         private GdiPlataformEntities db;
         private readonly String controllerName = "g_Filiais";
@@ -63,7 +63,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {
@@ -220,24 +220,6 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             return query.OrderBy(f => f.nome);
         }
-
-        #region PreencherLookupsCreateEdit
-        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate,g_Filiais_Actionupdate")]
-        public void PreencherLookupsCreateEdit()
-        {
-            var comboColigadas = new List<SelectListItem>();
-            try
-            {
-                IQueryable<g_coligadas> listaDbColigadas = db.g_coligadas.Select(p => p).OrderBy(p => p.razao_social);
-                foreach (g_coligadas item1 in listaDbColigadas)
-                {
-                    comboColigadas.Add(new SelectListItem { Value = item1.id_coligada.ToString(), Text = item1.razao_social.ToString() });
-                }
-            }
-            finally { }
-            ViewBag.comboColigadas = comboColigadas;
-        }
-        #endregion
 
         #region CreateEdit
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate")]

@@ -25,11 +25,17 @@
 
 | Local | Motivo |
 |-------|--------|
-| `Controllers/jQueryDataTableParamModel` | Contrato compartilhado; ainda usado em `qa/GedSGQ`, `gc/EstoqueInventario` |
-| `Lib/LibStringFormat.SentencaSQLFiltroGenerico` | Helper; pode ser usado por `LibDB` / módulos não migrados |
+| `Controllers/jQueryDataTableParamModel` | `yesFilterField`, `yesFilterController`, custom fields. **Removidos 2026-05-20:** `yesFilterAdvancedText`, `yesFilterOperador`, `yesFilterText`. |
+| `Lib/LibStringFormat.SentencaSQLFiltroGenerico` | `[Obsolete]` — não chamado após G-FLT-05 |
 | `Lib/LibDB.cs` | Persistência `g_filtros` (não remover sem revisão global) |
 
-## Próximo lote (opcional)
+## Concluído (2026-05-20)
 
-- `Areas/qa/Controllers/GedSGQController.cs` — vários `GetDados*` com `filterAdvanced`.
-- `Areas/gc/Controllers/EstoqueInventarioController.cs` — `yesFilterAdvancedText`.
+- FLT-1: `qa/GedSGQ`, `gc/EstoqueInventario` — ramos servidor `yesFilterAdvancedText` removidos.
+- Propriedade `yesFilterAdvancedText` removida de `jQueryDataTableParamModel.cs`.
+
+## Concluído (G-FLT-04…07, 2026-05-20)
+
+- `LibDB.getFilterByUser(param, controllerName, db)` — sem ramo SQL genérico.
+- `setFilterByUser(..., paramAdvanced, db)` — `paramAdvanced` grava `g_filtros.advanced` (filtros inline nas Index).
+- Detalhe TempData/login/flash: `.cursor/context/2026_05_20_tempdata-legado-filtro-login.md`.

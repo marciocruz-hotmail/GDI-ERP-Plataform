@@ -19,7 +19,7 @@ using GdiPlataform.Security;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
-    public class RelatoriosComerciaisController : Controller
+    public partial class RelatoriosComerciaisController : Controller
     {
         private GdiPlataformEntities db;
         private HSSFWorkbook _workbookCatalogo;
@@ -31,6 +31,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
         }
 
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutHubReport)]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatórios Comerciais";
@@ -677,38 +678,9 @@ namespace GdiPlataform.Areas.gc.Controllers
             CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = DataInicio;
             view_cstModalRelatorio.Field_Data_02 = DataFim;
-
-            var ComboVendedores = new List<SelectListItem>();
-            List<g_vendedores> AllVendedores = new List<g_vendedores>();
-
-            if (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_*") || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_Actionmanager")) // Gerencial
-            {
-                AllVendedores = db.g_vendedores.Where(p => p.ativo == true).OrderBy(p => p.nome).ToList();
-                ComboVendedores.Add(new SelectListItem { Value = "0", Text = "[ TODOS ]" });
-                foreach (g_vendedores RecordVendedor in AllVendedores)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                }
-                view_cstModalRelatorio.Field_Int_01 = 0;
-            }
-            else if (CachePersister.userIdentity.IdVendedor > 0)
-            {
-                g_vendedores RecordVendedor = db.g_vendedores.Where(p => p.id_vendedor == CachePersister.userIdentity.IdVendedor).FirstOrDefault();
-                if (RecordVendedor != null)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                    view_cstModalRelatorio.Field_Int_01 = RecordVendedor.id_vendedor;
-                }
-                else
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-                }
-            }
-            else
-            {
-                ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-            }
-            ViewBag.ComboVendedores = ComboVendedores;
+            bool gerencialPedidos = CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_*")
+                || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_Actionmanager");
+            PreencherComboVendedoresRelatorio(view_cstModalRelatorio, gerencialPedidos);
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Relatório de Vendedores - Pedidos";
             return View("ModalRelatorioVendedoresPedidos", view_cstModalRelatorio);
         }
@@ -914,37 +886,9 @@ namespace GdiPlataform.Areas.gc.Controllers
             CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
             view_cstModalRelatorio.Field_Data_01 = DataInicio;
             view_cstModalRelatorio.Field_Data_02 = DataFim;
-            var ComboVendedores = new List<SelectListItem>();
-            List<g_vendedores> AllVendedores = new List<g_vendedores>();
-
-            if (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_*") || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_Actionmanager")) // Gerencial
-            {
-                AllVendedores = db.g_vendedores.Where(p => p.ativo == true).OrderBy(p => p.nome).ToList();
-                ComboVendedores.Add(new SelectListItem { Value = "0", Text = "[ TODOS ]" });
-                foreach (g_vendedores RecordVendedor in AllVendedores)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                }
-                view_cstModalRelatorio.Field_Int_01 = 0;
-            }
-            else if (CachePersister.userIdentity.IdVendedor > 0)
-            {
-                g_vendedores RecordVendedor = db.g_vendedores.Where(p => p.id_vendedor == CachePersister.userIdentity.IdVendedor).FirstOrDefault();
-                if (RecordVendedor != null)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                    view_cstModalRelatorio.Field_Int_01 = RecordVendedor.id_vendedor;
-                }
-                else
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-                }
-            }
-            else
-            {
-                ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-            }
-            ViewBag.ComboVendedores = ComboVendedores;
+            bool gerencialComissoes = CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_*")
+                || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresComissoes_Actionmanager");
+            PreencherComboVendedoresRelatorio(view_cstModalRelatorio, gerencialComissoes);
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Arquivo Excel - Relatório de Vendedores - Comissões";
             return View("ModalRelatorioVendedoresComissoes", view_cstModalRelatorio);
         }
@@ -1575,37 +1519,9 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalRelatorioVendedoresCarteira(int? id)
         {
             CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
-            var ComboVendedores = new List<SelectListItem>();
-            List<g_vendedores> AllVendedores = new List<g_vendedores>();
-
-            if (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresCarteira_*") || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresCarteira_Actionmanager")) // Gerencial
-            {
-                AllVendedores = db.g_vendedores.Where(p => p.ativo == true).OrderBy(p => p.nome).ToList();
-                ComboVendedores.Add(new SelectListItem { Value = "0", Text = "[ TODOS ]" });
-                foreach (g_vendedores RecordVendedor in AllVendedores)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                }
-                view_cstModalRelatorio.Field_Int_01 = 0;
-            }
-            else if (CachePersister.userIdentity.IdVendedor > 0)
-            {
-                g_vendedores RecordVendedor = db.g_vendedores.Where(p => p.id_vendedor == CachePersister.userIdentity.IdVendedor).FirstOrDefault();
-                if (RecordVendedor != null)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                    view_cstModalRelatorio.Field_Int_01 = RecordVendedor.id_vendedor;
-                }
-                else
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-                }
-            }
-            else
-            {
-                ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-            }
-            ViewBag.ComboVendedores = ComboVendedores;
+            bool gerencialCarteira = CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresCarteira_*")
+                || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresCarteira_Actionmanager");
+            PreencherComboVendedoresRelatorio(view_cstModalRelatorio, gerencialCarteira);
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Arquivo Excel - Relatório de Vendedores - Carteira de Clientes";
             return View("ModalRelatorioVendedoresCarteira", view_cstModalRelatorio);
         }
@@ -1823,37 +1739,9 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
             CstModalRelatorio view_cstModalRelatorio = new CstModalRelatorio();
-            var ComboVendedores = new List<SelectListItem>();
-            List<g_vendedores> AllVendedores = new List<g_vendedores>();
-
-            if (CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresAtrasados_*") || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresAtrasados_Actionmanager")) // Gerencial
-            {
-                AllVendedores = db.g_vendedores.Where(p => p.ativo == true).OrderBy(p => p.nome).ToList();
-                ComboVendedores.Add(new SelectListItem { Value = "0", Text = "[ TODOS ]" });
-                foreach (g_vendedores RecordVendedor in AllVendedores)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                }
-                view_cstModalRelatorio.Field_Int_01 = 0;
-            }
-            else if (CachePersister.userIdentity.IdVendedor > 0)
-            {
-                g_vendedores RecordVendedor = db.g_vendedores.Where(p => p.id_vendedor == CachePersister.userIdentity.IdVendedor).FirstOrDefault();
-                if (RecordVendedor != null)
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = RecordVendedor.id_vendedor.EmptyIfNull().ToString(), Text = RecordVendedor.nome.EmptyIfNull().ToString() });
-                    view_cstModalRelatorio.Field_Int_01 = RecordVendedor.id_vendedor;
-                }
-                else
-                {
-                    ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-                }
-            }
-            else
-            {
-                ComboVendedores.Add(new SelectListItem { Value = "-1", Text = "[ VENDEDOR NÃO LOCALIZADO ]" });
-            }
-            ViewBag.ComboVendedores = ComboVendedores;
+            bool gerencialAtrasados = CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresAtrasados_*")
+                || CachePersister.userIdentity.Roles.Contains("gc_RelatoriosComerciais_VendedoresAtrasados_Actionmanager");
+            PreencherComboVendedoresRelatorio(view_cstModalRelatorio, gerencialAtrasados);
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-print", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Arquivo Excel - Relatório de Vendedores - Títulos Atrasados";
             return View("ModalRelatorioVendedoresAtrasados", view_cstModalRelatorio);
         }

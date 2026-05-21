@@ -64,7 +64,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {
@@ -267,7 +267,7 @@ namespace GdiPlataform.Areas.g.Controllers
             newRecord.anexo = false;
             newRecord.id_cliente = -1;
             newRecord.data_assinatura = DataHoraAtual.Date;
-            PreencherLookupsContratoCreateEdit();
+            PreencherLookupsContratoCreateEdit(newRecord.id_cliente);
             return View("CreateEdit", newRecord);
         }
 
@@ -353,7 +353,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
                 }
             }
-            PreencherLookupsContratoCreateEdit();
+            PreencherLookupsContratoCreateEdit(record_g_contratos_aviacao.id_cliente);
             return View("CreateEdit", record_g_contratos_aviacao);
         }
 
@@ -370,7 +370,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>" + LibStringFormat.GetTabHtml(1) + record_g_contratos_aviacao.id_contrato.EmptyIfNull().ToString() + " - " + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString();
-            PreencherLookupsContratoCreateEdit();
+            PreencherLookupsContratoCreateEdit(record_g_contratos_aviacao.id_cliente);
             return View("CreateEdit", record_g_contratos_aviacao);
         }
 
@@ -399,7 +399,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
             }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>" + LibStringFormat.GetTabHtml(1) + record_g_contratos_aviacao.id_contrato.EmptyIfNull().ToString() + " - " + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString();
-            PreencherLookupsContratoCreateEdit();
+            PreencherLookupsContratoCreateEdit(record_g_contratos_aviacao.id_cliente);
             return View("CreateEdit", record_g_contratos_aviacao);
         }
         #endregion

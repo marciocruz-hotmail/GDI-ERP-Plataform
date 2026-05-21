@@ -1,0 +1,234 @@
+{
+  "generated_at": "2026-05-20T19:46:40.298284+00:00",
+  "prod000_3": {
+    "total_hits": 26,
+    "excluded_module": "MovimentosCompras",
+    "by_method": {
+      "GetComboGcProdutosServicosTodos": 12,
+      "GetComboGcProdutosServicosImportados": 6,
+      "GetDatasetGcProdutosServicos": 5,
+      "GetComboGcProdutosPosicaoEstoqueIndex": 3
+    },
+    "p0_consumers": [
+      {
+        "file": "Areas/gc/Controllers/EstoqueController.Lookups.cs",
+        "line": 15,
+        "method": "GetComboGcProdutosPosicaoEstoqueIndex",
+        "snippet": "ViewBag.comboProdutosServicos = EstoqueLookups.GetComboGcProdutosPosicaoEstoqueIndex(db);",
+        "tier": "p0"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueInventarioController.Lookups.cs",
+        "line": 30,
+        "method": "GetComboGcProdutosServicosImportados",
+        "snippet": "var comboProdutos = InventarioLookups.GetComboGcProdutosServicosImportados(db);",
+        "tier": "p0"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueInventarioController.Lookups.cs",
+        "line": 60,
+        "method": "GetDatasetGcProdutosServicos",
+        "snippet": "return InventarioLookups.GetDatasetGcProdutosServicos(db);",
+        "tier": "p0"
+      },
+      {
+        "file": "Areas/gc/Controllers/MovimentosController.cs",
+        "line": 2508,
+        "method": "GetDatasetGcProdutosServicos",
+        "snippet": "List<CstDatasetProdutosServicos> ListaProdutosServicos = MovimentosLookups.GetDatasetGcProdutosServicos(db);",
+        "tier": "p0"
+      },
+      {
+        "file": "Areas/gc/Controllers/MovimentosController.cs",
+        "line": 2541,
+        "method": "GetDatasetGcProdutosServicos",
+        "snippet": "List<CstDatasetProdutosServicos> ListaProdutosServicos = MovimentosLookups.GetDatasetGcProdutosServicos(db);",
+        "tier": "p0"
+      }
+    ],
+    "p1_consumers": [
+      {
+        "file": "Lib/Lookups/ILookupQueryService.cs",
+        "line": 11,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "List<SelectListItem> GetComboGcProdutosServicosTodos(GdiPlataformEntities db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Lib/Lookups/ILookupQueryService.cs",
+        "line": 19,
+        "method": "GetComboGcProdutosServicosImportados",
+        "snippet": "List<SelectListItem> GetComboGcProdutosServicosImportados(GdiPlataformEntities db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Lib/Lookups/ILookupQueryService.cs",
+        "line": 34,
+        "method": "GetDatasetGcProdutosServicos",
+        "snippet": "List<CstDatasetProdutosServicos> GetDatasetGcProdutosServicos(GdiPlataformEntities db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Lib/Lookups/LookupQueryService.cs",
+        "line": 189,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "public List<SelectListItem> GetComboGcProdutosServicosTodos(GdiPlataformEntities db) =>",
+        "tier": "p1"
+      },
+      {
+        "file": "Lib/Lookups/LookupQueryService.cs",
+        "line": 197,
+        "method": "GetComboGcProdutosServicosImportados",
+        "snippet": "public List<SelectListItem> GetComboGcProdutosServicosImportados(GdiPlataformEntities db) =>",
+        "tier": "p1"
+      },
+      {
+        "file": "Lib/Lookups/LookupQueryService.cs",
+        "line": 257,
+        "method": "GetDatasetGcProdutosServicos",
+        "snippet": "public List<CstDatasetProdutosServicos> GetDatasetGcProdutosServicos(GdiPlataformEntities db) =>",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/ComexProdutosController.Lookups.cs",
+        "line": 14,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.comboProdutosServicos = ComexProdutosLookups.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueControleController.Lookups.cs",
+        "line": 14,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.comboProdutosServicos = EstoqueControleLookups.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueControleController.Lookups.cs",
+        "line": 20,
+        "method": "GetComboGcProdutosServicosImportados",
+        "snippet": "ViewBag.comboProdutosServicos = EstoqueControleLookups.GetComboGcProdutosServicosImportados(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueController.Lookups.cs",
+        "line": 20,
+        "method": "GetComboGcProdutosServicosImportados",
+        "snippet": "ViewBag.comboProdutosServicos = EstoqueLookups.GetComboGcProdutosServicosImportados(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueController.Lookups.cs",
+        "line": 26,
+        "method": "GetComboGcProdutosServicosImportados",
+        "snippet": "ViewBag.comboProdutosServicos = EstoqueLookups.GetComboGcProdutosServicosImportados(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueInventarioController.Lookups.cs",
+        "line": 44,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.comboProdutosServicos = InventarioLookups.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/EstoqueLotesController.Lookups.cs",
+        "line": 19,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.comboProdutos = EstoqueLotesLookups.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/MovimentosEntradasController.Lookups.cs",
+        "line": 11,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "/// <summary>Lookups NF entrada — frete via serviço; tipos fixos por modal; produtos nacional via GetComboGcProdutosServicosTodos.</summary>",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/MovimentosEntradasController.Lookups.cs",
+        "line": 45,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "/// <summary>Processar NF nacional — reutiliza GetComboGcProdutosServicosTodos (truncamento no serviço).</summary>",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/gc/Controllers/MovimentosEntradasController.Lookups.cs",
+        "line": 48,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "var combo = MovimentosEntradasLookups.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/g/Controllers/AtendimentosController.Lookups.cs",
+        "line": 39,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.ComboProdutosServicos = lk.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/g/Controllers/AtendimentosController.Lookups.cs",
+        "line": 51,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.ComboProdutosServicos = lk.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      },
+      {
+        "file": "Areas/g/Controllers/ProdutosController.Lookups.cs",
+        "line": 33,
+        "method": "GetComboGcProdutosServicosTodos",
+        "snippet": "ViewBag.comboProdutosServicos = ProdutosLookups.GetComboGcProdutosServicosTodos(db);",
+        "tier": "p1"
+      }
+    ],
+    "typeahead_ok": {
+      "ModalPedidoInsertEditItem": "GetProdutosLookup em view; PreencherLookupsPedidoItemModal = placeholder",
+      "ModalConsultaPedidos": "GetProdutosLookup; ComboFiltroProdutoConsultaPedidos"
+    },
+    "inventario_correcao": {
+      "FormInventarioItens_filtro": "GetComboGcProdutosServicosImportados (não Todos)",
+      "FormInventarioItens_grid": "GetDatasetGcProdutosServicos em GetDadosInventarioItem",
+      "ModalCreateEditInventarioItem": "GetComboGcProdutosServicosTodos"
+    }
+  },
+  "prod000_2": {
+    "fonte": "SQL homologação (script)",
+    "queries_equivalentes": {
+      "cenario_1_estoque_index": 13464,
+      "cenario_2_inventario_filtro": 8080,
+      "cenario_3_dataset": 13464
+    },
+    "catalog": "erp_gdi_homologacao",
+    "driver": "sqlcmd",
+    "produtos_ativos": 13464,
+    "produtos_importados_ativos": 8080,
+    "produtos_ativos_avg_nome_len": 82
+  },
+  "prod000_1": {
+    "nota": "Estimativa estática (DevTools real = medir no browser)",
+    "estoque_index_abrir": {
+      "option_count_estimado": 13466,
+      "html_select_kb_estimado": 2130.4
+    },
+    "inventario_form_filtro_importados": {
+      "option_count_estimado": 8081,
+      "html_select_kb_estimado": 1278.4
+    },
+    "controle_pedido_modal": {
+      "options_html_inicial": 1,
+      "ajax_lookup": "GetProdutosLookup?q="
+    },
+    "controle_consulta_pedidos": {
+      "options_html_inicial": 1,
+      "ajax_lookup": "GetProdutosLookup?q="
+    },
+    "movimentos_ajax_dataset": {
+      "actions": [
+        "AjaxDadosProduto",
+        "AjaxGetPrecoVendaProduto"
+      ],
+      "dataset_rows_carregadas": 13464,
+      "memorycache_key": "GcProdutosServicosDataset"
+    }
+  }
+}

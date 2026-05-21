@@ -9,15 +9,12 @@ namespace GdiPlataform.Lib.Lookups
     public partial interface ILookupQueryService
     {
         List<SelectListItem> GetComboGcProdutosServicosTodos(GdiPlataformEntities db);
-        List<SelectListItem> GetComboGClientesFornecedores(GdiPlataformEntities db);
-        List<SelectListItem> GetComboGClientesFornecedoresComDoc(GdiPlataformEntities db);
         List<SelectListItem> GetComboGcTransportadora(GdiPlataformEntities db);
         List<SelectListItem> GetComboGcLocaisEstoqueOrders(GdiPlataformEntities db);
         List<SelectListItem> GetComboGcClientesContatos(GdiPlataformEntities db, int idCliente);
         List<SelectListItem> GetComboGcClientesDestinatarios(GdiPlataformEntities db, int idCliente);
         List<SelectListItem> GetComboGVendedores(GdiPlataformEntities db);
         List<SelectListItem> GetComboGcCfop(GdiPlataformEntities db);
-        List<SelectListItem> GetComboSomenteGClientes(GdiPlataformEntities db);
         List<SelectListItem> GetComboGedArquivosTipos(GdiPlataformEntities db, int idTipo, int idTipoPai);
         List<SelectListItem> GetComboGcProdutosServicosImportados(GdiPlataformEntities db);
         /// <summary>Combo Index posição de estoque: [ TODOS OS PRODUTOS ], [ PRODUTOS COM SALDO ] e produtos ativos (truncamento por DisplayScreenWidth).</summary>
@@ -39,7 +36,6 @@ namespace GdiPlataform.Lib.Lookups
 
         // Onda 6a
         List<SelectListItem> GetComboGcTiposMovimentosVendas(GdiPlataformEntities db);
-        List<SelectListItem> GetComboGcTiposMovimentosCompras(GdiPlataformEntities db);
         List<SelectListItem> GetComboGcTiposMovimentosCreateEdit(GdiPlataformEntities db);
         List<SelectListItem> GetComboGcStatusMovimentos(GdiPlataformEntities db);
         List<SelectListItem> GetComboGMoedas(GdiPlataformEntities db);
@@ -72,5 +68,19 @@ namespace GdiPlataform.Lib.Lookups
         List<SelectListItem> GetComboGDepartamentos(GdiPlataformEntities db);
         List<SelectListItem> GetComboGAtendimentosStatus(GdiPlataformEntities db);
         List<SelectListItem> GetComboGAtendimentosCategorias(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGColigadas(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGRevendasVendedorForm(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGCidadesAtivas(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGUf(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGFinanceiroStatusTitulos(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGContasCaixasBoletoEmissao(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcIcmsCstNcm(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcTributosCstIpiEntrada(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcTributosCstIpiSaida(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcTributosCstPisEntrada(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcTributosCstPisSaida(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcTributosCstCofinsEntrada(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGcTributosCstCofinsSaida(GdiPlataformEntities db);
+        List<SelectListItem> GetComboGVendedoresRelatorioComercial(GdiPlataformEntities db, bool gerencial, int idVendedorUsuario, out int fieldInt01Default);
     }
 }

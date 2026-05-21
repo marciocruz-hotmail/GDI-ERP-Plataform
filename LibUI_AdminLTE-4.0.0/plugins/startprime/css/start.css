@@ -730,9 +730,8 @@ div.dataTables_wrapper > .row {
     margin-right: 0;
 }
 
-/* DataTables: evitar que conteúdo longo estoure a largura do container.
-   Usa table-layout: fixed + truncamento por padrão; colunas que precisam
-   quebrar podem receber a classe utilitária .dt-wrap */
+/* DataTables no host: table-layout fixed + quebra de linha por omissão (texto longo
+   permanece visível na célula). Colunas curtas (data, ícone, número) → .dt-nowrap. */
 .gdi-dt-scroll-host .scroll-body-horizontal table,
 .gdi-dt-scroll-host .scroll-body-horizontal table.dataTable,
 .gdi-dt-scroll-host .dataTables_wrapper table.dataTable {
@@ -745,16 +744,61 @@ div.dataTables_wrapper > .row {
 .gdi-dt-scroll-host .scroll-body-horizontal td,
 .gdi-dt-scroll-host .dataTables_wrapper table.dataTable th,
 .gdi-dt-scroll-host .dataTables_wrapper table.dataTable td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
-}
-
-/* Permite quebra de linha em colunas específicas quando necessário */
-.dt-wrap {
     white-space: normal;
     word-break: break-word;
+    overflow-wrap: anywhere;
+    overflow: visible;
+    text-overflow: clip;
+    min-width: 0;
+    vertical-align: top;
+}
+
+/* Uma linha + ellipsis (datas, badges, botões de ação) */
+.gdi-dt-scroll-host .scroll-body-horizontal th.dt-nowrap,
+.gdi-dt-scroll-host .scroll-body-horizontal td.dt-nowrap,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable th.dt-nowrap,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable td.dt-nowrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: normal;
+    overflow-wrap: normal;
+    vertical-align: middle;
+}
+
+/* Explícito em aoColumnDefs (equivalente ao padrão do host; mantém compatibilidade) */
+.gdi-dt-scroll-host .scroll-body-horizontal th.dt-wrap,
+.gdi-dt-scroll-host .scroll-body-horizontal td.dt-wrap,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable th.dt-wrap,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable td.dt-wrap {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    overflow: visible;
+    text-overflow: clip;
+    vertical-align: top;
+}
+
+/* Linha vazia (dt-empty): com table-layout:fixed o colspan fica só na col. 1 — usar auto quando vazio */
+.gdi-dt-scroll-host:has(table.dataTable tbody td.dt-empty) .scroll-body-horizontal table.dataTable,
+.gdi-dt-scroll-host:has(table.dataTable tbody td.dt-empty) .scroll-body-horizontal table.display,
+.gdi-dt-scroll-host:has(.dataTables_wrapper table.dataTable tbody td.dt-empty) .dataTables_wrapper table.dataTable {
+    table-layout: auto !important;
+    width: 100% !important;
+}
+
+/* Mensagem «Nenhum registro encontrado» numa linha, todas as colunas */
+.gdi-dt-scroll-host table.dataTable tbody td.dt-empty,
+.gdi-dt-scroll-host .dataTables_wrapper table.dataTable tbody td.dt-empty,
+table.dataTable tbody td.dt-empty {
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
+    overflow: visible;
+    text-overflow: clip;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.65rem 0.5rem;
 }
 
 .nav > li > a {

@@ -48,7 +48,7 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                         <div class="col-sm-10">
-                            @Html.DropDownListFor(model => model.Field_Int_04, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control" })
+                            @Html.DropDownListFor(model => model.Field_Int_04, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true", @data_select2_dropdown_parent = "#mainModal" })
                         </div>
                     </div>
                 </div>
@@ -111,25 +111,15 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                                        LibMessageHideAll();
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
+                            document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
+                            LibMessageHideAll();
                             }
-                        })
+                        });
                     }
                     else
                     {

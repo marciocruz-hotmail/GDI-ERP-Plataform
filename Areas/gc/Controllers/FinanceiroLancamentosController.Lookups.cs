@@ -10,22 +10,21 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         #region PreencherLookups — financeiro (Fase 4 P2)
 
-        /// <summary>Index — filtros da listagem de lançamentos.</summary>
+        /// <summary>Index — filtros da listagem de lançamentos (cliente typeahead — CACHE-2b).</summary>
         private void PreencherLookupsIndexFinanceiro()
         {
             var lk = FinanceiroLookups;
             ViewBag.comboContasCaixa = lk.GetComboGContasCaixas(db);
             ViewBag.comboContasCaixaGerencial = lk.GetComboGContasCaixasGerencial(db);
             ViewBag.comboFinanceiroFiltroStatus = lk.GetComboFiltroFinanceiroStatus(db);
-            ViewBag.comboClientes = lk.GetComboGClientesFornecedoresComDoc(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboClientes = LookupSearchQueries.ComboFiltroClienteFornecedorTodos();
         }
 
-        /// <summary>ModalCreateEditLancamento — combos comuns (novo/edição).</summary>
-        private void PreencherLookupsModalLancamento()
+        /// <summary>ModalCreateEditLancamento — cliente typeahead com documento (comDoc).</summary>
+        private void PreencherLookupsModalLancamento(int idCliente)
         {
             var lk = FinanceiroLookups;
-            ViewBag.comboClientes = lk.GetComboGClientesFornecedoresComDoc(db);
+            ViewBag.comboClientes = LookupSearchQueries.BuildComboClienteFornecedor(db, idCliente, comDoc: true);
             ViewBag.comboContasCaixa = lk.GetComboGContasCaixas(db);
             ViewBag.comboContasCaixaGerencial = lk.GetComboGContasCaixasGerencial(db);
             ViewBag.comboPagRecTipos = lk.GetComboPagRecTiposFaturaveis(db);

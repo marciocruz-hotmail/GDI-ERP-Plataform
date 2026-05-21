@@ -67,7 +67,7 @@
                         </div>
                         @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-5">
-                            @Html.DropDownListFor(model => model.ClientesIndex_id_cliente_lookup, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @id = "edit_id_cliente_lookup" })
+                            @Html.DropDownListFor(model => model.ClientesIndex_id_cliente_lookup, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @id = "edit_id_cliente_lookup", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2" })
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
@@ -383,38 +383,22 @@
             {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    LibMessageDialog({
-                        title: "Confirmação",
-                        closeButton: false,
-                        message: "Deseja REALMENTE atualizar os dados do Vendedor/Consultor do cliente?" + "<br/><br/>" + "ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
-                        centerVertical: true,
-                        onEscape: false,
-                        backdrop: true,
-                        buttons:
+                    LibMessageConfirm('Confirmação',
+                        'Deseja REALMENTE atualizar os dados do Vendedor/Consultor do cliente?' + '<br/><br/>' +
+                        'ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!',
                         {
-                            cancelar:
-                            {
-                                label: '<i class="fa fa-undo me-2"></i>Cancelar',
-                                className: 'btn-outline-warning',
-                                callback: function ()
-                                {
-                                    LibMessageHideAll();
-                                }
-                            },
-                            confirmar: {
-                                label: '<i class="fa-solid fa-save me-2"></i>Confirmar',
-                                className: 'btn-outline-success',
-                                callback: function ()
-                                {
-                                    LibMessageProcessando("");
-                                    $("#mainModal").load('@Url.Action("ModalAtualizarVendedorConsultor", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
-                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                                    });
-                                    LibMessageHideAll();
-                                }
+                            closeButton: false,
+                            onEscape: false,
+                            backdrop: true,
+                            confirmLabel: '<i class="fa-solid fa-save me-2"></i>Confirmar',
+                            onConfirm: function () {
+                                LibMessageProcessando('');
+                                $('#mainModal').load('@Url.Action("ModalAtualizarVendedorConsultor", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
+                                    var e = document.getElementById('mainModal'); if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+                                });
+                                LibMessageHideAll();
                             }
-                        }
-                    })
+                        });
                 }
                 else
                 {
@@ -439,38 +423,22 @@
             {
                 if (selectedIds.indexOf(',') == -1)
                 {
-                    LibMessageDialog({
-                        title: "Confirmação",
-                        closeButton: false,
-                        message: "Deseja REALMENTE atualizar o Limite de Crédito do cliente?" + "<br/><br/>" + "ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!",
-                        centerVertical: true,
-                        onEscape: false,
-                        backdrop: true,
-                        buttons:
+                    LibMessageConfirm('Confirmação',
+                        'Deseja REALMENTE atualizar o Limite de Crédito do cliente?' + '<br/><br/>' +
+                        'ATENÇÃO: O LOG dessa operação será gravado no Banco de Dados e ficará disponível para futuras consultas!',
                         {
-                            cancelar:
-                            {
-                                label: '<i class="fa fa-undo me-2"></i>Cancelar',
-                                className: 'btn-outline-warning',
-                                callback: function ()
-                                {
-                                    LibMessageHideAll();
-                                }
-                            },
-                            confirmar: {
-                                label: '<i class="fa-solid fa-save me-2"></i>Confirmar',
-                                className: 'btn-outline-success',
-                                callback: function ()
-                                {
-                                    LibMessageProcessando("");
-                                    $("#mainModal").load('@Url.Action("ModalAtualizarLimiteCredito", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
-                                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                                    });
-                                    LibMessageHideAll();
-                                }
+                            closeButton: false,
+                            onEscape: false,
+                            backdrop: true,
+                            confirmLabel: '<i class="fa-solid fa-save me-2"></i>Confirmar',
+                            onConfirm: function () {
+                                LibMessageProcessando('');
+                                $('#mainModal').load('@Url.Action("ModalAtualizarLimiteCredito", "Clientes", new { area = "g" })?idCliente=' + selectedIds, function () {
+                                    var e = document.getElementById('mainModal'); if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+                                });
+                                LibMessageHideAll();
                             }
-                        }
-                    })
+                        });
                 }
                 else
                 {

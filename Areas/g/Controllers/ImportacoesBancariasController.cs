@@ -18,7 +18,7 @@ using GdiPlataform.Security;
 namespace GdiPlataform.Areas.g.Controllers
 {
     [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ImportacoesBancarias_*,g_ImportacoesBancarias_Default")]
-    public class ImportacoesBancariasController : Controller
+    public partial class ImportacoesBancariasController : Controller
     {
         private GdiPlataformEntities db;
 
@@ -35,19 +35,6 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Importações - Bancárias";
             return View();
         }
-
-        #region PreencherLookupsImportacao
-        public void PreencherLookupsImportacao()
-        {
-            var comboContaCaixa = new List<SelectListItem>();
-            IQueryable<g_contas_caixas> listaDbContasCaixas = db.g_contas_caixas.Where(p => p.ativo == true && p.boleto_cnab_retorno == true && p.boleto_emissao == true).OrderBy(p => p.nome);
-            foreach (g_contas_caixas item1 in listaDbContasCaixas)
-            {
-                comboContaCaixa.Add(new SelectListItem { Value = item1.id_conta_caixa.ToString(), Text = item1.nome.ToString() });
-            }
-            ViewBag.comboContaCaixa = comboContaCaixa;
-        }
-        #endregion
 
         #region Importar Arquivo - CNAB Boletos
         public ActionResult ModalImportarCnabBoletos()

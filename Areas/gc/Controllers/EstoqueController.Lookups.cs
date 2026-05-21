@@ -9,10 +9,10 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         #region PreencherLookups — estoque (Fase 4 P3)
 
-        /// <summary>Index posição de estoque — combo com [ TODOS OS PRODUTOS ] / [ PRODUTOS COM SALDO ] (Opção A, sem cache por largura de ecrã).</summary>
+        /// <summary>Index posição de estoque — filtro produto: opções fixas + typeahead (PROD-002a).</summary>
         private void PreencherLookupsEstoque()
         {
-            ViewBag.comboProdutosServicos = EstoqueLookups.GetComboGcProdutosPosicaoEstoqueIndex(db);
+            ViewBag.comboProdutosServicos = LookupSearchQueries.ComboFiltroProdutoPosicaoEstoqueIndex();
         }
 
         private void PreencherLookupsProdutosImportados()

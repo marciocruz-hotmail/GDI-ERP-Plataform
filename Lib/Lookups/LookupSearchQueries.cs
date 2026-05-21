@@ -81,6 +81,71 @@ namespace GdiPlataform.Lib.Lookups
             };
         }
 
+        /// <summary>Clientes e fornecedores ativos (substitui GetComboGClientesFornecedores* no HTML).</summary>
+        public static List<LookupAjaxItemDto> SearchClientesFornecedores(GdiPlataformEntities db, string q, int? id, int limit, bool comDoc)
+        {
+            limit = NormalizeLimit(limit);
+            if (id.HasValue && id.Value > 0)
+            {
+                var one = GetClienteFornecedorItem(db, id.Value, comDoc);
+                return one != null ? new List<LookupAjaxItemDto> { one } : new List<LookupAjaxItemDto>();
+            }
+
+            var term = (q ?? string.Empty).Trim();
+            if (term.Length < 2)
+                return new List<LookupAjaxItemDto>();
+
+            var query = db.g_clientes.AsNoTracking().Where(c => c.ativo);
+            int idParsed;
+            if (int.TryParse(term, out idParsed) && idParsed > 0)
+            {
+                query = query.Where(c =>
+                    c.id_cliente == idParsed
+                    || c.nome.Contains(term)
+                    || c.cpf.Contains(term)
+                    || c.cnpj.Contains(term));
+            }
+            else
+            {
+                query = query.Where(c =>
+                    c.nome.Contains(term)
+                    || c.cpf.Contains(term)
+                    || c.cnpj.Contains(term));
+            }
+
+            int displayWidth = 0;
+            int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out displayWidth);
+
+            return query
+                .OrderBy(c => c.nome)
+                .Take(limit)
+                .Select(c => new { c.id_cliente, c.nome, c.cpf, c.cnpj })
+                .ToList()
+                .Select(c => new LookupAjaxItemDto
+                {
+                    id = c.id_cliente.ToString(),
+                    text = FormatClienteFornecedorText(c.nome, c.cpf, c.cnpj, c.id_cliente, displayWidth, comDoc)
+                })
+                .ToList();
+        }
+
+        public static LookupAjaxItemDto GetClienteFornecedorItem(GdiPlataformEntities db, int idCliente, bool comDoc)
+        {
+            if (idCliente <= 0) return null;
+            var c = db.g_clientes.AsNoTracking()
+                .Where(x => x.id_cliente == idCliente && x.ativo)
+                .Select(x => new { x.id_cliente, x.nome, x.cpf, x.cnpj })
+                .FirstOrDefault();
+            if (c == null) return null;
+            int displayWidth = 0;
+            int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out displayWidth);
+            return new LookupAjaxItemDto
+            {
+                id = c.id_cliente.ToString(),
+                text = FormatClienteFornecedorText(c.nome, c.cpf, c.cnpj, c.id_cliente, displayWidth, comDoc)
+            };
+        }
+
         public static List<LookupAjaxItemDto> SearchProdutos(GdiPlataformEntities db, string q, int? id, int limit)
         {
             limit = NormalizeLimit(limit);
@@ -146,12 +211,128 @@ namespace GdiPlataform.Lib.Lookups
             };
         }
 
+        /// <summary>Filtro Index/Painel pedidos — -1 = todos (sem GetComboSomenteGClientes no HTML).</summary>
+        public static List<SelectListItem> ComboFiltroClienteTodosAtivos()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]", Selected = true }
+            };
+        }
+
+        /// <summary>Modal consulta pedidos — -1 = ainda não escolheu cliente (ver GetRelatorioConsultaPedidos).</summary>
+        public static List<SelectListItem> ComboFiltroClienteSelecione()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "-1", Text = "[ SELECIONE O CLIENTE ]", Selected = true }
+            };
+        }
+
+        /// <summary>Atendimentos Create/Edit — 0 = não selecionado (validação param_id_cliente).</summary>
+        public static List<SelectListItem> ComboPlaceholderAtendimentoCliente()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ Selecione o Cliente ]", Selected = true }
+            };
+        }
+
+        /// <summary>Combo cliente atendimento: placeholder + item em edição (typeahead Ajax).</summary>
+        public static List<SelectListItem> BuildComboClienteAtendimento(GdiPlataformEntities db, int idCliente)
+        {
+            var combo = ComboPlaceholderAtendimentoCliente();
+            if (idCliente > 0)
+            {
+                var item = GetClienteItem(db, idCliente);
+                if (item != null)
+                    combo.Add(new SelectListItem { Value = item.id, Text = item.text, Selected = true });
+            }
+            return combo;
+        }
+
         public static List<SelectListItem> ComboPlaceholderProduto()
         {
             return new List<SelectListItem>
             {
                 new SelectListItem { Value = "-1", Text = "[ INFORME O PRODUTO ]" }
             };
+        }
+
+        /// <summary>Modal consulta pedidos — produto via Ajax (PERF/CACHE-2d).</summary>
+        public static List<SelectListItem> ComboFiltroProdutoConsultaPedidos()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "-1", Text = "[ SELECIONE O PRODUTO ]", Selected = true },
+                new SelectListItem { Value = "0", Text = "[ TODOS OS PRODUTOS ]" }
+            };
+        }
+
+        /// <summary>gc/Estoque/Index — opções fixas 0/-1 + typeahead Ajax (PROD-002a; sem GetComboGcProdutosPosicaoEstoqueIndex no HTML).</summary>
+        public static List<SelectListItem> ComboFiltroProdutoPosicaoEstoqueIndex()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ TODOS OS PRODUTOS ]", Selected = true },
+                new SelectListItem { Value = "-1", Text = "[ PRODUTOS COM SALDO ]" }
+            };
+        }
+
+        public static List<SelectListItem> ComboFiltroClienteFornecedorTodos()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]", Selected = true }
+            };
+        }
+
+        public static List<SelectListItem> ComboFiltroClienteFornecedorInforme()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "-1", Text = "[ INFORME O CLIENTE ]", Selected = true }
+            };
+        }
+
+        public static List<SelectListItem> ComboFiltroClienteFornecedorSelecione()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "-1", Text = "[ SELECIONE ]", Selected = true }
+            };
+        }
+
+        /// <summary>g/Financeiro Index — 0 = todos.</summary>
+        public static List<SelectListItem> ComboFiltroClienteFinanceiroTodos()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ TODOS ]", Selected = true }
+            };
+        }
+
+        /// <summary>g/Clientes Index — 0 = não selecionado.</summary>
+        public static List<SelectListItem> ComboFiltroClienteCadastroSelecione()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ SELECIONE O CLIENTE ]", Selected = true }
+            };
+        }
+
+        public static List<SelectListItem> BuildComboClienteFornecedor(GdiPlataformEntities db, int idCliente, bool comDoc)
+        {
+            var combo = comDoc
+                ? new List<SelectListItem> { new SelectListItem { Value = "-1", Text = "[ INFORME O CLIENTE ]", Selected = true } }
+                : ComboFiltroClienteFornecedorSelecione();
+            if (idCliente > 0)
+            {
+                var item = GetClienteFornecedorItem(db, idCliente, comDoc);
+                if (item != null)
+                    combo.Add(new SelectListItem { Value = item.id, Text = item.text, Selected = true });
+            }
+            return combo;
         }
 
         private static int NormalizeLimit(int limit)
@@ -162,9 +343,16 @@ namespace GdiPlataform.Lib.Lookups
 
         private static string FormatClienteText(string nome, string cpf, string cnpj, int idCliente, int displayWidth)
         {
+            return FormatClienteFornecedorText(nome, cpf, cnpj, idCliente, displayWidth, comDoc: false);
+        }
+
+        private static string FormatClienteFornecedorText(string nome, string cpf, string cnpj, int idCliente, int displayWidth, bool comDoc)
+        {
             var n = TruncateClienteNome(nome, displayWidth);
             var doc = cpf.EmptyIfNull().ToString().Trim();
             if (doc.Length == 0) doc = cnpj.EmptyIfNull().ToString().Trim();
+            if (comDoc)
+                return n + "\xA0\xA0\xA0\xA0\xA0" + (doc.Length > 0 ? "[ " + doc + " ]" : "[Id: " + idCliente + "]");
             return n + "\xA0\xA0\xA0\xA0\xA0" + "[Id: " + idCliente + "]" + (doc.Length > 0 ? " [ " + doc + " ]" : string.Empty);
         }
 

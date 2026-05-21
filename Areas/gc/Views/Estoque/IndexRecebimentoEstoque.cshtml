@@ -320,23 +320,13 @@
                             if (result.success == true)
                             {
                                 LibMessageProcessandoHide();
-                                LibMessageDialog({
-                                    title: "Confirmação",
-                                    closeButton: false,
-                                    message: result.msg,
-                                    centerVertical: true,
-                                    onEscape: false,
+                                                                LibMessageSuccess("Confirmação", result.msg, {
                                     backdrop: true,
-                                    buttons: {
-                                        confirmar: {
-                                            label: 'OK',
-                                            callback: function () {
-                                                $("#dtGcMovimentosIndexRecebimentoEstoque").DataTable().draw(false);
-                                                LibMessageHideAll();
-                                            }
-                                        }
+                                    callback: function () {
+                                    $("#dtGcMovimentosIndexRecebimentoEstoque").DataTable().draw(false);
+                                    LibMessageHideAll();
                                     }
-                                })
+                                });
                             }
                             else
                             {

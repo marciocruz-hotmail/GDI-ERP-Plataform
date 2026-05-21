@@ -73,7 +73,7 @@ namespace GdiPlataform.Areas.g.Controllers
             // Parâmetros
             bool filterDb = false;
             String SentencaSQL = string.Empty;
-            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, false, db);
+            g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, db);
             List<g_usuarios> allUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
             List<ged_arquivos_tipos> allArquivosTipos = db.ged_arquivos_tipos.Where(t => t.ativo == true).ToList();
             var allRecords = new List<Db.ged_arquivos>();

@@ -1,0 +1,10 @@
+@* G-PERF-20 Fase 3 — CSS opcional (ViewBag.GdiPageScripts); ordem: Toggle → DataTables → Select2 → jstree *@
+@using GdiPlataform.Lib
+@{
+    var gdiScripts = GdiPageScriptsView.GetFlags(ViewContext);
+}
+@if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.BootstrapToggle)) { Html.RenderPartial("~/Views/Shared/_LayoutHeadBootstrapToggle.cshtml"); }
+@if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.DataTables)) { Html.RenderPartial("~/Views/Shared/_LayoutHeadDataTables.cshtml"); }
+@if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.Select2)) { Html.RenderPartial("~/Views/Shared/_LayoutHeadSelect2.cshtml"); }
+@if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.Jstree)) { Html.RenderPartial("~/Views/Shared/_LayoutHeadJstree.cshtml"); }
+@if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.TempusDominus)) { Html.RenderPartial("~/Views/Shared/_LayoutHeadTempus.cshtml"); }

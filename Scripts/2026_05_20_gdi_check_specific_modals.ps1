@@ -14,7 +14,6 @@ $checks = @(
     @{ ctrl = "GedController.cs";                 actions = @("ModalDesativarGed") },
     @{ ctrl = "FinanceiroLancamentosController.cs"; actions = @("ModalCreateEditLancamento","ModalBaixarLancamentos","ModalCancelarLancamentos","ModalGerarBoletoLancamentoAvulso","ModalGerarFinanceiroMovimentos","ModalFinanceiroViewAnexos","ModalUploadAnexoFinanceiro","ModalFecharLancamentosAbertos","ModalFinalizarEdicaoTitulo","ModalCancelarMovimentoFinanceiro") },
     @{ ctrl = "MovimentosEntradasController.cs";  actions = @("ModalNFEntradaCancelar","ModalNFEntradaGerarNF") },
-    @{ ctrl = "MovimentosComprasController.cs";   actions = @("ModalInsertEditItemCompra","ModalCancelarPedido") },
     @{ ctrl = "FinanceiroFaturamentosController.cs"; actions = @("ModalAtualizarFaturamentoGestorFranquia","ModalImportarArquivoFaturamentoGestorFranquia","ModalEnviarEmailsClientes","ModalEnviarNFEmailCliente") }
 )
 

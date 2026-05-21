@@ -288,23 +288,12 @@
                 LibMessageProcessandoHide();
                 if (result.success == true)
                 {
-                    LibMessageDialog({
-                        title: "Confirmação",
-                        closeButton: false,
-                        message: result.msg,
-                        icon: 'success',
-                        centerVertical: true,
-                        onEscape: false,
+                                        LibMessageSuccess("Confirmação", result.msg, {
                         backdrop: true,
-                        buttons: {
-                            confirmar: {
-                                label: 'OK',
-                                callback: function () {
-                                    LibMessageHideAll();
-                                }
-                            }
+                        callback: function () {
+                        LibMessageHideAll();
                         }
-                    })
+                    });
                 }
                 else
                 {
@@ -348,25 +337,14 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            icon: 'success',
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        LibMessageHideAll();
-                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            LibMessageHideAll();
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -409,25 +387,14 @@
                     LibMessageProcessandoHide();
                     if (result.success == true)
                     {
-                        LibMessageDialog({
-                            title: "Confirmação",
-                            closeButton: false,
-                            message: result.msg,
-                            icon: 'success',
-                            centerVertical: true,
-                            onEscape: false,
+                                                LibMessageSuccess("Confirmação", result.msg, {
                             backdrop: true,
-                            buttons: {
-                                confirmar: {
-                                    label: 'OK',
-                                    callback: function ()
-                                    {
-                                        LibMessageHideAll();
-                                        window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
-                                    }
-                                }
+                            callback: function ()
+                            {
+                            LibMessageHideAll();
+                            window.location = '@Url.Action("AjaxGetFileProcessamento", "Global", new { Area = "g" })' + "?id=" + result.idProcessamento;
                             }
-                        })
+                        });
                     }
                     else
                     {
@@ -595,23 +562,12 @@
                 LibMessageProcessandoHide();
                 if (result.success == true)
                 {
-                    LibMessageDialog({
-                        title: "Confirmação",
-                        closeButton: false,
-                        message: result.msg,
-                        icon: 'success',
-                        centerVertical: true,
-                        onEscape: false,
+                                        LibMessageSuccess("Confirmação", result.msg, {
                         backdrop: true,
-                        buttons: {
-                            confirmar: {
-                                label: 'OK',
-                                callback: function () {
-                                    LibMessageHideAll();
-                                }
-                            }
+                        callback: function () {
+                        LibMessageHideAll();
                         }
-                    })
+                    });
                 }
                 else
                 {

@@ -33,7 +33,7 @@
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("Cliente/Fornecedor", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                 <div class="col-sm-6">
-                                    @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsSetDadosCliente();", @onblur = "jsSetDadosCliente();" })
+                                    @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsSetDadosCliente();", @onblur = "jsSetDadosCliente();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2" })
                                 </div>
                             </div>
                             <div class="form-group row text-sm-end m-0 pt-1">

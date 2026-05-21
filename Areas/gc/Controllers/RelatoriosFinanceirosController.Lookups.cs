@@ -13,8 +13,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         private void PreencherLookupsModalLancamentosFinanceiros()
         {
             var lk = RelatoriosFinanceirosLookups;
-            ViewBag.comboClientes = lk.GetComboGClientesFornecedores(db);
-            ViewBag.comboClientes.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS OS CLIENTES ]" });
+            ViewBag.comboClientes = LookupSearchQueries.ComboFiltroClienteFornecedorTodos();
             ViewBag.comboContasCaixas = lk.GetComboGContasCaixas(db);
             ViewBag.comboContasCaixas.Insert(0, new SelectListItem { Value = "-1", Text = "[ TODOS AS CONTAS ]" });
             ViewBag.comboTipoPagRec = lk.GetComboPagRecTiposFaturaveis(db);

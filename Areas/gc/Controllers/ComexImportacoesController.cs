@@ -339,25 +339,30 @@ namespace GdiPlataform.Areas.gc.Controllers
                 int IdImportacao = -1;
                 int.TryParse(param.yesCustomIdPK, out IdImportacao);
 
-                var allRecords = new List<Db.gc_comex_importacoes_itens>(); // Lista vazia - Inicialização
+                int start = param.iDisplayStart;
+                int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
 
-                allRecords = db.gc_comex_importacoes_itens.Where(i => (i.id_importacao_item > 0 && i.ativo == true && i.id_importacao == IdImportacao)).OrderBy(i => i.id_importacao_item).ToList();
-                var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-                Func<Db.gc_comex_importacoes_itens, string> orderingFunction = (i =>
-                                         param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(i.id_importacao_item) :
-                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? Convert.ToString(i.id_importacao_item) :
-                                         "");
-                if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-                else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+                var query = db.gc_comex_importacoes_itens.AsNoTracking()
+                    .Where(i => i.id_importacao_item > 0 && i.ativo == true && i.id_importacao == IdImportacao);
+
+                var agg = query.GroupBy(x => 1).Select(g => new
+                {
+                    QtdItens = g.Sum(x => (decimal?)x.quantidade) ?? 0m,
+                    QtdProdutos = g.Count(),
+                    ValorTotal = g.Sum(x => (decimal?)x.valor_total) ?? 0m
+                }).FirstOrDefault();
+                if (agg != null)
+                {
+                    QtdItensImportacao = (int)decimal.Truncate(agg.QtdItens);
+                    QtdProdutosImportacao = agg.QtdProdutos;
+                    ValorTotalImportacao = agg.ValorTotal;
+                }
+
+                int totalRecords = query.Count();
+                var pageList = query.OrderBy(i => i.id_importacao_item).Skip(start).Take(length).ToList();
 
                 List<string[]> list = new List<string[]>();
-                foreach (var itemImportacao in allRecords)
-                {
-                    QtdItensImportacao += int.Parse(itemImportacao.quantidade.ToString().Replace(",000", "").Replace(",00", ""));
-                    QtdProdutosImportacao += 1;
-                    ValorTotalImportacao += itemImportacao.valor_total;
-                }
-                foreach (var i in displayedRecords)
+                foreach (var i in pageList)
                 {
                     list.Add(new[] {
                                         i.quantidade.ToString().Replace(",000","").Replace(",00",""),
@@ -375,8 +380,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     yesDisplayField02 = QtdProdutosImportacao.ToString() + " Registros",
                     yesDisplayField03 = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", ValorTotalImportacao).Replace("R$ ", "").Replace("R$", "").Replace("$", ""),
                     sEcho = param.sEcho,
-                    iTotalRecords = allRecords.Count(),
-                    iTotalDisplayRecords = allRecords.Count(),
+                    iTotalRecords = totalRecords,
+                    iTotalDisplayRecords = totalRecords,
                     aaData = list
                 },
                 JsonRequestBehavior.AllowGet);
@@ -398,23 +403,28 @@ namespace GdiPlataform.Areas.gc.Controllers
             bool filterDb = false;
             bool filterAdvanced = false;
             String SentencaSQL = string.Empty;
-            List<g_usuarios> allUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
-            List<Db.ged_arquivos> allRecords = db.ged_arquivos.Where(g => g.ativo == true && g.id_comex_importacao == CachePersister.userIdentity.IdGcComexImportacaoAtiva).ToList();
+            int start = param.iDisplayStart;
+            int length = param.iDisplayLength <= 0 ? 20 : param.iDisplayLength;
+            int idImportacao = CachePersister.userIdentity.IdGcComexImportacaoAtiva;
+
+            var query = db.ged_arquivos.AsNoTracking()
+                .Where(g => g.ativo == true && g.id_comex_importacao == idImportacao);
+            int totalRecords = query.Count();
+            var pageList = query.OrderByDescending(g => g.id_arquivo).Skip(start).Take(length).ToList();
             List<string[]> list = new List<string[]>();
 
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.ged_arquivos, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+            var usuarioIds = pageList.Select(g => g.id_usuario_cadastro).Where(id => id > 0).Distinct().ToList();
+            var usuariosDict = usuarioIds.Count > 0
+                ? db.g_usuarios.AsNoTracking().Where(u => usuarioIds.Contains(u.id_usuario))
+                    .ToDictionary(u => u.id_usuario, u => u.login.EmptyIfNull().ToString())
+                : new Dictionary<int, string>();
 
-            foreach (var ged in displayedRecords)
+            foreach (var ged in pageList)
             {
                 String DataReferencia = String.Empty;
-                String NomeUsuario = allUsuarios.Where(u => u.id_usuario == ged.id_usuario_cadastro).FirstOrDefault().login.EmptyIfNull().ToString();
+                string login;
+                usuariosDict.TryGetValue(ged.id_usuario_cadastro.GetValueOrDefault(), out login);
+                String NomeUsuario = login ?? string.Empty;
                 if (ged.datahora_cadastro != null) { DataReferencia = ged.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); }; 
 
                 list.Add(new[] {
@@ -439,8 +449,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 stackTrace = "",
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
+                iTotalRecords = totalRecords,
+                iTotalDisplayRecords = totalRecords,
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);

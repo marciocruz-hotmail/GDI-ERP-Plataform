@@ -77,4 +77,5 @@ Executar em ambiente com gateway e-Notas configurado (`g_nfe_gateway`, `g_nfe_co
 
 - **Removido:** `PortalVendedorController`, view `PortalFinanceiro`.
 - **Mantido (não é o módulo):** roles `g_PortalVendedor_*` em `UsuariosController.ModalUsuarioTrocarSenha` / `AjaxUsuarioTrocarSenha` para logons com `TokenAcesso` iniciando em **`V`** (troca de senha vendedor).
-- **Produção:** desativar item de menu `/g/PortalVendedor/PortalFinanceiro` se ainda existir em `g_menu` / navbar.
+- **Produção:** executar `Scripts/2026_05_20_gdi_sql_deactivate_portal_vendedor_menu.sql` (desativa `a_sistemas_controllers` + `g_perfis_acessos` do controller removido).
+- **Código (2026-05-20):** troca de senha vendedor em `UsuariosController` usa roles `g_Vendedores_*` (não `g_PortalVendedor_*`).

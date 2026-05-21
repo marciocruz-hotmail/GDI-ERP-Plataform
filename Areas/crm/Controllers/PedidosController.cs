@@ -35,6 +35,7 @@ namespace GdiPlataform.Areas.crm.Controllers
             }
         }
         [OutputCache(Duration = 0, NoStore = true, VaryByParam = "*")]
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutPortalCliente)]
         public ActionResult Index()
         {
             var dataLimite = DateTime.Now.AddYears(-1);

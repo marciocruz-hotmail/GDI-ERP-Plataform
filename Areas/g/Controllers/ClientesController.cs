@@ -6,6 +6,7 @@ using GdiPlataform.Security;
 using GdiPlataform.Lib;
 using GdiPlataform.Controllers;
 using System.Net;
+using System.Web.Mvc.Filters;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System;
@@ -34,11 +35,22 @@ namespace GdiPlataform.Areas.g.Controllers
             }
         }
 
+        /// <summary>Perfil -800 (carteira vendedor / PortalVendedor removido) sem acesso ao módulo Clientes no ERP.</summary>
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            if (CachePersister.userIdentity != null && CachePersister.userIdentity.IdPerfil == -800)
+            {
+                filterContext.Result = new HttpStatusCodeResult(HttpStatusCode.Forbidden,
+                    "O cadastro de clientes no ERP não está disponível para o perfil de vendedor.");
+                return;
+            }
+            base.OnActionExecuting(filterContext);
+        }
+
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Clientes_*,g_Clientes_Actionread")]
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Clientes/Fornecedores";
-            if (CachePersister.userIdentity.IdPerfil == -800) { ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Clientes (Acesso Vendedor)"; }
             PreencherLookupsClientesIndex();
             var model = new CstClientesIndex
             {
@@ -67,22 +79,7 @@ namespace GdiPlataform.Areas.g.Controllers
 
         private void PreencherLookupsClientesIndex()
         {
-            var comboClientes = new List<SelectListItem>();
-            try
-            {
-                IQueryable<g_clientes> listaDbClientes = db.g_clientes.Where(p => p.ativo == true).OrderBy(p => p.nome);
-                comboClientes.Add(new SelectListItem { Value = "0", Text = "[ SELECIONE O CLIENTE ]" });
-                foreach (g_clientes item in listaDbClientes)
-                {
-                    comboClientes.Add(new SelectListItem
-                    {
-                        Value = item.id_cliente.ToString(),
-                        Text = item.id_cliente.ToString("0000") + " - " + item.nome.EmptyIfNull().ToString()
-                    });
-                }
-            }
-            finally { }
-            ViewBag.comboClientes = comboClientes;
+            ViewBag.comboClientes = GdiPlataform.Lib.Lookups.LookupSearchQueries.ComboFiltroClienteCadastroSelecione();
         }
 
         #region PreencherLookupsCreateEdit
@@ -259,7 +256,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 g_filtros recordFiltro;
                 if (listarTodosExplicito)
                 {
-                    recordFiltro = LibDB.getFilterByUser(param, controllerName, false, db);
+                    recordFiltro = LibDB.getFilterByUser(param, controllerName, db);
                 }
                 else
                 {
@@ -317,12 +314,6 @@ namespace GdiPlataform.Areas.g.Controllers
                 if (CachePersister.userIdentity.IdPerfil == 1)
                 {
                     // Admin vê tudo
-                }
-                else if (CachePersister.userIdentity.IdPerfil == -800)
-                {
-                    idVendedor = CachePersister.userIdentity.IdVendedor;
-                    idColigada = 1;
-                    idFilial = 1;
                 }
                 else
                 {
@@ -1033,7 +1024,6 @@ namespace GdiPlataform.Areas.g.Controllers
             newRecord.is_fornecedor = false;
             @ViewBag.PefinStatus = "";
             @ViewBag.MeProtejaStatus = "Em Homologação";
-            if (CachePersister.userIdentity.IdPerfil == -800) { newRecord.id_vendedor = CachePersister.userIdentity.IdVendedor; };
             @ViewBag.LabelIdentificador = "CHE";
             return View("CreateEdit", newRecord);
         }

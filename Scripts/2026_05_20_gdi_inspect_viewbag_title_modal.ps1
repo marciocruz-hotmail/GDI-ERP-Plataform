@@ -12,7 +12,6 @@ $controllers = @(
     "ComexImportacoesController.cs",
     "ComexInvoicesController.cs",
     "ClientesController.cs",
-    "MovimentosComprasController.cs",
     "EstoqueInventarioController.cs",
     "EstoqueLotesController.cs",
     "ComexFinanceiroController.cs",

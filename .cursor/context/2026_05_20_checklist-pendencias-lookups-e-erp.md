@@ -4,6 +4,8 @@
 **Data base:** 2026-05-20  
 **Estado de referência:** Fases 0–5 e Ondas **6a/6b** concluídas (`Lib/LibDataSets.cs` removido; lookups em `ILookupQueryService` + `LookupQueryServiceCache`).
 
+> **Pendências ativas (2026-05-20):** consolidadas em **`BACKLOG-DEV.md`** (IDs **G-PUB**, **G-SMK**, **G-LKP**, **G-DT**, etc.). Este ficheiro mantém o histórico detalhado dos grupos 1–2; marcar `[x]` aqui **e** no backlog quando fechar um item.
+
 **Como usar**
 
 - Marque `[x]` apenas quando o critério de aceite estiver cumprido.
@@ -69,7 +71,7 @@ Validar combos/datasets após deploy ou ambiente local com dados reais.
 | [x] **1.3.1** | Login / navbar | Menu, mensagens, tarefas; **novo login** se cache `contextoModel_*` antigo causar erro |
 | [x] **1.3.2** | Pedidos vendas | `Movimentos` — Index, `FormPedidoCreate`/Edit, trocar cliente → contatos/destinatários |
 | [x] **1.3.3** | Modais pedido | Item, aprovação, faturamento NF, painel, consulta pedidos |
-| [x] **1.3.4** | Compras | `MovimentosCompras` — Index, formulário, modal item |
+| [x] **1.3.4** | Compras | ~~`MovimentosCompras`~~ **módulo removido** 2026-05-20 |
 | [x] **1.3.5** | Financeiro gc | `FinanceiroLancamentos` — Index, modal lançamento, gerar financeiro do movimento |
 | [x] **1.3.6** | Inventário | `EstoqueInventario` — Index, itens, modal item, grelha Ajax |
 | [x] **1.3.7** | Produtos g | `Produtos` CreateEdit — tipos, NCM, ICMS, unidade, importações COMEX |
@@ -226,11 +228,12 @@ Validar combos/datasets após deploy ou ambiente local com dados reais.
 
 ### 2.6 Publish / IIS / Release
 
-- [ ] `Web.Release.config` — transformação sem `debug="true"`
-- [ ] `customErrors mode="On"` no servidor após publish
-- [ ] Comando local (se disponível): `MSBuild /t:TransformWebConfig /p:Configuration=Release`
-- [ ] Health check / rota de saúde existente no repo (ver `Global.asax.cs` / docs)
-- [ ] Após publish: incrementar `VersionERP` / `ControlVersion` para `start.js` e `start.css`
+- [x] `Web.Release.config` — transformação sem `debug="true"` (script `Scripts/2026_05_20_gdi_verify_web_release_transform.ps1`)
+- [x] `customErrors mode="On"` no Web.config transformado Release (validar no IIS após publish)
+- [x] `MSBuild /t:TransformWebConfig /p:Configuration=Release` — automatizado no script acima
+- [x] Health check — `GET /health` (`HealthController`); doc `.cursor/context/2026_05_20_health-endpoint-publish.md`
+- [x] `ControlVersion` **2026.51.03** (PUB-2 cache-bust); smoke `Scripts/2026_05_20_gdi_smoke_health_login.ps1`
+- [ ] Smoke manual pós-deploy homologação/produção (login/navbar no IIS remoto)
 
 ### 2.7 UI — tabelas MVC e layout
 
@@ -238,7 +241,7 @@ Validar combos/datasets após deploy ou ambiente local com dados reais.
 - [x] Corrigir views MVC: `FormProcessarProdutosPreNovos`, `FormProcessarProdutosPreAtualizar`, `FormProcessarNF*` → `gdi-form-table-scroll` / `gdi-form-table-fixed`
 - [x] Script inventário: `python Scripts/2026_05_20_gdi_inventory_scroll_body_form_tables.py` → **0** views MVC incorretas
 - [x] Sidebar portal: dropdown só «Sair»; faixa MS/AWS oculta; logo → `crm/Pedidos/Index`
-- [x] `ControlVersion` **2026.51.02** (`start.css` / `start.js` cache-bust no publish)
+- [x] `ControlVersion` **2026.51.03** (`start.css` / `start.js` cache-bust no publish; ver PUB-2)
 
 ### 2.8 Index cadastros — primeiro load da grelha
 
@@ -250,6 +253,7 @@ Validar combos/datasets após deploy ou ambiente local com dados reais.
 ### 2.9 Filtro genérico SQL (limpeza opcional)
 
 - [x] Revisar models/propriedades — sem `CstModalFiltro*` / `ModalFiltro*` no disco; `jQueryDataTableParamModel` mantido (qa/gc)
+- [x] **FLT-1 (2026-05-20):** `qa/GedSGQ` + `gc/EstoqueInventario` — removido ramo `yesFilterAdvancedText` nos `GetDados*`
 - [x] Remover ramos mortos em `Areas/g` + `ComexProdutos.GetDados` — doc `.cursor/context/2026_05_20_filtro-generico-legado-limpeza.md`
 - [ ] Lote futuro: `qa/GedSGQ`, `gc/EstoqueInventario` (ainda referenciam `yesFilterAdvancedText`)
 
