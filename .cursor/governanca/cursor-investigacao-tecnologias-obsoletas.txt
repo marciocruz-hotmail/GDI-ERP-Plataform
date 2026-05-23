@@ -1,0 +1,738 @@
+Você é um Arquiteto de Software Sênior especializado em sistemas legados ASP.NET MVC, .NET Framework, SQL Server, IIS, Bootstrap, JavaScript e modernização incremental de ERPs corporativos.
+
+Sua tarefa é realizar uma AVALIAÇÃO TÉCNICA PROFUNDA nos arquivos fonte do projeto abaixo.
+
+IMPORTANTE:
+- Esta tarefa é somente avaliação.
+- Não altere nenhum arquivo.
+- Não crie commits.
+- Não remova arquivos.
+- Não refatore código.
+- Não aplique correções.
+- Não execute publicação.
+- Não execute deploy.
+- Não altere configurações de ambiente.
+- Não instale pacotes.
+- Não atualize dependências.
+- Apenas analise, classifique, documente e recomende.
+
+# 1. Identidade do projeto
+
+Projeto: ERP GDI Aviação
+
+Domínio:
+ERP de importação, comercialização e distribuição de peças aeronáuticas, usado pela GDI Aviação, com matriz em Belo Horizonte, MG, e filial em São Paulo, SP.
+
+Stack principal:
+
+Backend:
+- ASP.NET MVC
+- .NET Framework 4.7.2
+
+Banco de dados:
+- SQL Server
+- O projeto deve manter um padrão por fluxo de dados: Entity Framework ou ADO.NET.
+- Não é desejável misturar Entity Framework e ADO.NET dentro do mesmo fluxo funcional, salvo justificativa técnica clara.
+
+UI:
+- Bootstrap 5
+- AdminLTE 4
+- Font Awesome 7.2.0
+
+JavaScript:
+- DataTables, datatables.net-bs5 2.3.2
+- SweetAlert2
+- Tempus Dominus 6.9.4
+
+Publicação:
+- Visual Studio Publish para IIS Windows.
+- O agente não deve publicar em ambiente remoto.
+
+# 2. Objetivo da avaliação
+
+Realizar uma investigação técnica profunda nos arquivos fonte do projeto, identificando:
+
+1. Tecnologias obsoletas, depreciadas ou com risco futuro.
+2. Dependências desatualizadas ou potencialmente incompatíveis.
+3. Possibilidades de melhoria técnica.
+4. Riscos técnicos, operacionais, de manutenção, segurança e performance.
+5. Arquivos mortos, ou seja, arquivos aparentemente não utilizados pelo ERP.
+6. Funções mortas em C#, JavaScript, arquivos .js e funções JavaScript dentro de arquivos .cshtml.
+7. Duplicidade de lógica.
+8. Mistura indevida de padrões de acesso a dados.
+9. Pontos de acoplamento excessivo.
+10. Fragilidades de arquitetura.
+11. Oportunidades de modernização incremental sem reescrita total.
+12. Itens que impactam a manutenibilidade, estabilidade e evolução do sistema.
+
+# 3. Escopo da análise
+
+Analise todos os arquivos relevantes do projeto, incluindo, quando existirem:
+
+- .cs
+- .cshtml
+- .js
+- .css
+- .config
+- .csproj
+- packages.config
+- Web.config
+- BundleConfig.cs
+- RouteConfig.cs
+- FilterConfig.cs
+- Global.asax
+- arquivos de ViewModels
+- Models
+- Controllers
+- Services
+- Repositories
+- Helpers
+- Extensions
+- Scripts
+- Content
+- App_Start
+- App_Data, se existir
+- arquivos de configuração de publicação, apenas para avaliação
+- arquivos de documentação técnica existentes
+
+Não analise como problema arquivos gerados automaticamente, temporários ou de build, salvo se estiverem indevidamente versionados.
+
+Considere como fora do escopo:
+- Alterar código.
+- Corrigir código.
+- Remover código.
+- Publicar aplicação.
+- Alterar banco de dados.
+- Criar migrations.
+- Alterar arquivos de produção.
+- Fazer suposições sobre infraestrutura que não estejam evidenciadas no código.
+
+# 4. Critérios de avaliação
+
+## 4.1 Tecnologias obsoletas ou com risco
+
+Identifique:
+
+- Uso de versões antigas de bibliotecas NuGet.
+- Uso de bibliotecas JavaScript antigas.
+- Uso de APIs depreciadas do .NET Framework.
+- Código dependente de recursos antigos do ASP.NET MVC.
+- Dependências sem manutenção evidente.
+- Uso de bibliotecas duplicadas para a mesma finalidade.
+- Mistura de Bootstrap antigo com Bootstrap 5.
+- Uso de jQuery ou plugins legados onde houver risco técnico.
+- Uso de scripts inline em excesso nos .cshtml.
+- Uso de Web.config com configurações sensíveis ou frágeis.
+- Uso de pacotes que possam ter vulnerabilidades conhecidas, quando identificável pelo nome e versão.
+
+Para cada item encontrado, informe:
+- Tecnologia ou componente.
+- Arquivo onde foi identificado.
+- Evidência encontrada.
+- Risco associado.
+- Gravidade.
+- Recomendação.
+
+## 4.2 Acesso a dados
+
+Avalie se o projeto mistura Entity Framework e ADO.NET de forma inadequada.
+
+Identifique:
+
+- Fluxos onde Controller usa EF diretamente.
+- Fluxos onde Controller usa ADO.NET diretamente.
+- Fluxos onde Repository usa EF e ADO.NET misturados.
+- Queries SQL montadas por concatenação de string.
+- Queries com risco de SQL Injection.
+- Falta de parametrização.
+- Uso excessivo de DataTable, DataSet, SqlDataReader ou SqlCommand diretamente em camadas inadequadas.
+- Falta de separação entre regra de negócio e acesso a dados.
+- Uso inconsistente de transações.
+- Consultas repetidas ou duplicadas.
+- Consultas potencialmente pesadas para telas do ERP.
+- Ausência de paginação em consultas usadas por DataTables.
+
+Classifique cada ocorrência por:
+- Fluxo funcional.
+- Arquivos envolvidos.
+- Padrão usado.
+- Problema identificado.
+- Risco.
+- Recomendação.
+
+## 4.3 Arquivos mortos
+
+Identifique arquivos aparentemente não utilizados pelo ERP.
+
+Considere como possível arquivo morto:
+
+- Arquivo .cs sem referência em outros arquivos.
+- Controller sem rota, sem referência ou sem views associadas.
+- View .cshtml sem Action correspondente.
+- ViewModel não referenciado.
+- Model não referenciado.
+- Helper não referenciado.
+- Service não referenciado.
+- Repository não referenciado.
+- Arquivo .js não incluído em BundleConfig, Layout, View ou referência direta.
+- Arquivo .css não incluído em BundleConfig, Layout ou View.
+- Imagem, plugin ou asset não referenciado.
+- Arquivo duplicado ou versão antiga mantida no projeto.
+- Arquivo de backup, teste, cópia ou temporário dentro do projeto.
+
+Para cada arquivo suspeito, classifique como:
+
+- Morto provável: não há referência encontrada.
+- Morto possível: há indícios de não uso, mas precisa de confirmação manual.
+- Legado preservado: parece antigo, mas pode estar vinculado a fluxo específico.
+- Não classificado: evidência insuficiente.
+
+Não recomende exclusão automática.
+Recomende validação manual antes de remover qualquer arquivo.
+
+Para cada arquivo suspeito, informe:
+- Caminho completo do arquivo.
+- Tipo do arquivo.
+- Evidência de não uso.
+- Impacto potencial se removido indevidamente.
+- Nível de confiança.
+- Recomendação.
+
+## 4.4 Funções mortas em C#
+
+Identifique métodos, classes e propriedades aparentemente não utilizados.
+
+Avalie:
+
+- Métodos privados sem chamada.
+- Métodos públicos sem referência interna.
+- Classes sem instanciação ou injeção.
+- Services não utilizados.
+- Helpers não utilizados.
+- Extensions não utilizadas.
+- Actions de Controllers sem View, rota ou chamada conhecida.
+- Métodos duplicados com nomes diferentes.
+- Métodos comentados ou versões antigas preservadas.
+- Código comentado em excesso.
+- Regiões antigas ou blocos desativados.
+
+Classifique cada item como:
+
+- Função morta provável.
+- Função morta possível.
+- Código legado com uso incerto.
+- Código duplicado.
+- Código comentado obsoleto.
+
+Para cada ocorrência, informe:
+- Arquivo.
+- Classe.
+- Método ou função.
+- Evidência.
+- Chamadas encontradas ou ausência de chamadas.
+- Risco de remoção.
+- Nível de confiança.
+- Recomendação.
+
+## 4.5 Funções mortas em JavaScript
+
+Analise arquivos .js e scripts dentro de .cshtml.
+
+Identifique:
+
+- Funções JavaScript sem chamada.
+- Eventos não associados a elementos existentes.
+- Seletores jQuery que não encontram elementos prováveis.
+- Funções duplicadas em múltiplas views.
+- Scripts inline repetidos em views.
+- Plugins inicializados sem referência de HTML compatível.
+- Inicializações duplicadas de DataTables.
+- Funções antigas substituídas por outras.
+- Código comentado.
+- Variáveis globais sem uso.
+- Dependências JS carregadas mas não utilizadas.
+
+Para cada ocorrência, informe:
+- Arquivo.
+- Nome da função.
+- Tipo: arquivo .js ou script inline em .cshtml.
+- Evidência.
+- Chamadas encontradas ou ausência de chamadas.
+- Risco.
+- Nível de confiança.
+- Recomendação.
+
+## 4.6 Arquitetura e organização
+
+Avalie:
+
+- Controllers grandes demais.
+- Controllers com regra de negócio excessiva.
+- Views com lógica de negócio.
+- Views com SQL, regras ou manipulação indevida.
+- Services ausentes onde deveriam existir.
+- Helpers usados como depósito genérico de lógica.
+- Alto acoplamento entre UI, Controller e banco.
+- Ausência de ViewModels adequados.
+- Models sendo usados diretamente em telas complexas.
+- Duplicidade de código entre Controllers.
+- Falta de padronização de nomes.
+- Falta de organização de namespaces.
+- Pastas com responsabilidade confusa.
+- Configurações sensíveis no repositório.
+- Falta de tratamento centralizado de erro.
+- Falta de logs estruturados.
+- Uso inconsistente de async/await, caso exista.
+- Possíveis gargalos de performance.
+
+## 4.7 Segurança
+
+Avalie possíveis riscos como:
+
+- SQL Injection.
+- XSS em views Razor.
+- Uso indevido de Html.Raw.
+- Falta de validação server-side.
+- Falta de validação de autorização.
+- Actions sensíveis sem atributo de autorização.
+- Upload de arquivos sem validação adequada.
+- Dados sensíveis em Web.config ou arquivos versionados.
+- Chaves, tokens, secrets, senhas ou connection strings expostas.
+- Falta de proteção CSRF em formulários.
+- Falta de ValidateAntiForgeryToken em POSTs relevantes.
+- Tratamento inseguro de exceções.
+- Exposição excessiva de mensagens técnicas ao usuário.
+
+Para cada item:
+- Informe evidência.
+- Arquivo.
+- Risco.
+- Gravidade.
+- Probabilidade.
+- Impacto.
+- Recomendação.
+
+## 4.8 Performance
+
+Avalie possíveis pontos de lentidão percebida pelo usuário:
+
+- Consultas sem paginação.
+- DataTables carregando volume grande no client-side.
+- Loops com consultas ao banco.
+- N+1 queries.
+- Falta de cache em dados estáticos.
+- Reprocessamento desnecessário.
+- Scripts carregados globalmente sem necessidade.
+- CSS e JS duplicados.
+- Bundles mal organizados.
+- Views muito pesadas.
+- Uso excessivo de ViewBag/ViewData.
+- Falta de compressão ou minificação.
+- Chamadas síncronas desnecessárias.
+- Operações pesadas dentro de Controllers.
+- Carregamento desnecessário de dados para combos, filtros e tabelas.
+
+# 5. Classificação de riscos
+
+Classifique cada risco usando a matriz abaixo.
+
+Gravidade:
+- Crítica: pode causar falha grave, indisponibilidade, vazamento de dados, perda de dados ou bloqueio operacional.
+- Alta: pode causar erro relevante, lentidão importante, vulnerabilidade ou alto custo de manutenção.
+- Média: prejudica evolução, manutenção ou experiência do usuário, mas sem impacto imediato grave.
+- Baixa: melhoria técnica desejável, organização ou redução de dívida técnica.
+
+Probabilidade:
+- Alta: forte evidência no código ou uso frequente.
+- Média: evidência parcial ou depende do fluxo de uso.
+- Baixa: possibilidade técnica, mas sem evidência de uso frequente.
+
+Impacto:
+- Operacional.
+- Segurança.
+- Performance.
+- Manutenção.
+- Evolução.
+- Usabilidade.
+- Publicação.
+- Banco de dados.
+
+Prioridade:
+- P0: corrigir com urgência.
+- P1: corrigir no curto prazo.
+- P2: planejar correção.
+- P3: melhoria futura.
+- P4: apenas monitorar ou validar.
+
+# 6. Agrupamento das melhorias
+
+Agrupe as melhorias nos seguintes tipos:
+
+1. Segurança.
+2. Performance.
+3. Arquitetura.
+4. Acesso a dados.
+5. UI e front-end.
+6. JavaScript.
+7. Dependências e tecnologias obsoletas.
+8. Código morto.
+9. Padronização.
+10. Observabilidade, logs e tratamento de erros.
+11. Publicação e configuração.
+12. Manutenibilidade geral.
+
+# 7. Formato obrigatório da saída
+
+Gere um relatório técnico em Markdown com a estrutura abaixo.
+
+## 1. Sumário executivo
+
+Explique de forma objetiva:
+- Estado geral do projeto.
+- Principais riscos.
+- Principais oportunidades de melhoria.
+- Riscos críticos, se existirem.
+- Recomendações prioritárias.
+
+## 2. Escopo analisado
+
+Liste:
+- Pastas analisadas.
+- Tipos de arquivos analisados.
+- Itens fora do escopo.
+- Limitações da análise.
+
+## 3. Mapa geral de achados
+
+Crie uma tabela com as colunas:
+
+| ID | Categoria | Achado | Gravidade | Probabilidade | Impacto | Prioridade | Arquivos envolvidos |
+
+## 4. Tecnologias obsoletas ou com risco
+
+Tabela:
+
+| ID | Tecnologia / Dependência | Versão identificada | Arquivo | Evidência | Risco | Gravidade | Recomendação |
+
+## 5. Riscos de segurança
+
+Tabela:
+
+| ID | Risco | Arquivo | Evidência | Gravidade | Probabilidade | Impacto | Recomendação |
+
+## 6. Riscos de performance
+
+Tabela:
+
+| ID | Problema | Arquivo | Evidência | Gravidade | Probabilidade | Impacto | Recomendação |
+
+## 7. Avaliação de acesso a dados
+
+Tabela:
+
+| ID | Fluxo / Área | Arquivos | Padrão encontrado | Problema | Risco | Recomendação |
+
+Também indique:
+- Onde há Entity Framework.
+- Onde há ADO.NET.
+- Onde há mistura dos dois.
+- Onde há SQL por concatenação.
+- Onde há ausência de parametrização.
+- Onde há consultas candidatas a otimização.
+
+## 8. Arquivos mortos ou possivelmente não utilizados
+
+Tabela:
+
+| ID | Arquivo | Tipo | Classificação | Evidência | Confiança | Risco de remoção | Recomendação |
+
+Classificações permitidas:
+- Morto provável.
+- Morto possível.
+- Legado preservado.
+- Não classificado.
+
+## 9. Funções mortas ou possivelmente não utilizadas em C#
+
+Tabela:
+
+| ID | Arquivo | Classe | Método / Função | Classificação | Evidência | Confiança | Risco de remoção | Recomendação |
+
+## 10. Funções mortas ou possivelmente não utilizadas em JavaScript
+
+Tabela:
+
+| ID | Arquivo | Função / Bloco | Local | Classificação | Evidência | Confiança | Risco de remoção | Recomendação |
+
+Local:
+- Arquivo .js.
+- Script inline em .cshtml.
+- Bundle.
+- Layout.
+- View específica.
+
+## 11. Duplicidades e inconsistências
+
+Tabela:
+
+| ID | Tipo | Arquivos envolvidos | Evidência | Risco | Recomendação |
+
+Tipos:
+- Código duplicado.
+- Lógica duplicada.
+- Query duplicada.
+- Script duplicado.
+- View duplicada.
+- Helper genérico demais.
+- Controller com responsabilidade excessiva.
+
+## 12. Avaliação de arquitetura
+
+Inclua:
+- Principais pontos fortes.
+- Principais fragilidades.
+- Onde há acoplamento excessivo.
+- Onde há regra de negócio em local inadequado.
+- Onde há oportunidade de criar Services, Repositories ou ViewModels.
+- Onde a estrutura atual dificulta testes.
+- Onde a estrutura atual dificulta migração futura para ASP.NET Core.
+
+## 13. Melhorias agrupadas por tipo
+
+Crie uma tabela:
+
+| Tipo de melhoria | Descrição | Benefício esperado | Risco se não fizer | Prioridade | Esforço estimado |
+
+Tipos:
+- Segurança.
+- Performance.
+- Arquitetura.
+- Acesso a dados.
+- UI e front-end.
+- JavaScript.
+- Dependências e tecnologias obsoletas.
+- Código morto.
+- Padronização.
+- Observabilidade.
+- Publicação e configuração.
+- Manutenibilidade geral.
+
+Esforço estimado:
+- Baixo.
+- Médio.
+- Alto.
+
+## 14. Roadmap recomendado
+
+Organize as recomendações em fases:
+
+### Fase 1: Segurança e estabilidade
+Itens P0 e P1.
+
+### Fase 2: Performance e acesso a dados
+Itens que melhoram velocidade percebida pelo usuário e reduzem risco no banco.
+
+### Fase 3: Código morto e padronização
+Itens de limpeza controlada, sempre com validação manual.
+
+### Fase 4: Arquitetura e modernização incremental
+Itens para preparar evolução futura, incluindo possível migração gradual para ASP.NET Core.
+
+### Fase 5: Observabilidade e governança técnica
+Logs, tratamento de erros, documentação técnica e critérios de qualidade.
+
+## 15. Plano de validação manual antes de remover código morto
+
+Crie um checklist objetivo para validar arquivos e funções mortas antes de qualquer remoção:
+
+- Buscar referência textual no projeto.
+- Buscar referência em rotas.
+- Buscar referência em views.
+- Buscar referência em bundles.
+- Buscar referência em JavaScript.
+- Buscar referência em menus.
+- Buscar referência em permissões.
+- Buscar referência em chamadas AJAX.
+- Buscar referência em configuração.
+- Buscar referência em banco de dados, quando aplicável.
+- Executar fluxo funcional relacionado.
+- Validar com usuário-chave.
+- Criar backup ou branch antes da remoção.
+- Remover em lote pequeno.
+- Testar regressão.
+- Registrar no CHANGELOG-DEV.md.
+
+## 16. Recomendações finais
+
+Liste:
+- Top 10 ações recomendadas.
+- Top 5 riscos mais graves.
+- Top 5 ganhos rápidos.
+- Itens que não devem ser alterados sem validação funcional.
+- Itens que exigem decisão de arquitetura.
+
+# 8. Regras importantes da análise
+
+Siga obrigatoriamente estas regras:
+
+1. Não altere nenhum arquivo.
+2. Não faça correções automáticas.
+3. Não remova código.
+4. Não execute comandos destrutivos.
+5. Não publique em ambiente remoto.
+6. Não atualize pacotes.
+7. Não instale dependências.
+8. Não mude Web.config.
+9. Não mude .csproj.
+10. Não mude packages.config.
+11. Não gere migrations.
+12. Não altere banco de dados.
+13. Não trate ausência de referência como prova absoluta de código morto.
+14. Sempre classifique código morto com nível de confiança.
+15. Sempre recomende validação manual antes de remoção.
+16. Sempre informe evidência concreta: arquivo, classe, método, trecho ou referência.
+17. Quando não houver evidência suficiente, marque como “Não classificado” ou “Uso incerto”.
+18. Separe achados confirmados de hipóteses.
+19. Não invente dependências, versões ou arquivos.
+20. Não assuma comportamento de produção se não houver evidência no código.
+
+# 9. Modo de execução no Cursor
+
+Execute esta avaliação em modo somente leitura.
+
+Durante a análise:
+- Não altere arquivos fonte.
+- Não altere arquivos de configuração.
+- Não altere arquivos de projeto.
+- Não altere arquivos JavaScript, CSS, Razor ou C#.
+- Não execute correções automáticas.
+- Não aplique sugestões automaticamente.
+- Não remova arquivos.
+- Não mova arquivos.
+- Não renomeie arquivos.
+- Não crie commits.
+- Não publique a aplicação.
+- Não execute deploy.
+- Não altere banco de dados.
+- Não instale dependências.
+- Não atualize pacotes.
+- Não execute comandos destrutivos.
+
+Após concluir toda a avaliação, gere o relatório final em um arquivo Markdown separado, sem modificar o código fonte do ERP.
+
+Nome sugerido do arquivo de saída:
+
+docs/AVALIACAO-TECNICA-ERP-GDI.md
+
+Caso a pasta docs não exista, apenas informe no relatório que ela precisa ser criada manualmente ou peça confirmação antes de criar a pasta.
+
+O relatório deve ser gerado somente depois da análise completa, consolidando os achados, riscos, evidências e recomendações.
+
+O arquivo de relatório deve conter apenas a documentação da avaliação. Ele não deve conter correções aplicadas, patches, diffs ou alterações automáticas no código.
+
+Antes de gerar o relatório, confirme internamente que:
+- A análise foi concluída.
+- Os achados foram classificados.
+- As evidências foram citadas.
+- Os riscos foram priorizados.
+- Os itens de código morto foram marcados com nível de confiança.
+- Os itens incertos foram separados dos itens confirmados.
+- As recomendações não dependem de suposições sem evidência.
+
+
+# 10. Estratégia de investigação sugerida
+
+Execute a avaliação nesta ordem:
+
+1. Mapear estrutura geral do projeto.
+2. Identificar tipo de projeto, versão do .NET Framework e pacotes.
+3. Ler .csproj, packages.config e Web.config.
+4. Mapear Controllers, Views, Models, ViewModels, Services, Repositories e Helpers.
+5. Mapear scripts e bundles.
+6. Mapear rotas e menus.
+7. Identificar padrões de acesso a dados.
+8. Procurar SQL inline, concatenação e uso de parâmetros.
+9. Procurar Actions POST sem proteção antiforgery.
+10. Procurar Html.Raw e renderização potencialmente insegura.
+11. Procurar arquivos .js não referenciados.
+12. Procurar funções JS não chamadas.
+13. Procurar métodos C# sem referência.
+14. Procurar arquivos .cshtml sem Action correspondente.
+15. Procurar Controllers sem uso aparente.
+16. Procurar duplicidade de lógica.
+17. Classificar riscos.
+18. Agrupar melhorias.
+19. Criar roadmap.
+20. Gerar relatório final em Markdown.
+
+# 11. Saída adicional obrigatória
+
+Ao final, gere também uma seção chamada:
+
+## Apêndice A: Lista de evidências por arquivo
+
+Formato:
+
+| Arquivo | Evidências encontradas | Categorias relacionadas | Severidade máxima |
+
+E uma seção chamada:
+
+## Apêndice B: Itens que precisam de confirmação humana
+
+Formato:
+
+| Item | Motivo da dúvida | Quem deve confirmar | Risco de decisão incorreta |
+
+Quem deve confirmar pode ser:
+- Desenvolvedor responsável.
+- Usuário-chave.
+- Analista funcional.
+- Gestor do ERP.
+- Responsável por infraestrutura.
+- Responsável por segurança.
+
+# 12. Critério de qualidade da resposta
+
+A resposta deve ser técnica, objetiva e auditável.
+
+Evite generalidades.
+Evite recomendações vagas.
+Sempre que possível, cite o caminho do arquivo.
+Sempre que possível, cite o nome da classe, método, função ou view.
+Sempre que possível, explique a consequência prática do problema.
+Sempre que possível, separe “problema confirmado” de “suspeita técnica”.
+
+Não diga apenas “atualizar dependências”.
+Diga:
+- Qual dependência.
+- Onde está declarada.
+- Qual risco.
+- Por que avaliar atualização.
+- Qual cuidado antes de atualizar.
+
+Não diga apenas “remover código morto”.
+Diga:
+- Qual arquivo ou função.
+- Por que parece morto.
+- Qual evidência.
+- Qual risco de remoção.
+- Como validar antes de remover.
+
+# 13. Resultado esperado
+
+Entregue um único relatório em Markdown, estruturado, com tabelas, classificações e recomendações práticas.
+
+O relatório deve servir como base para:
+- Planejamento técnico.
+- Priorização de melhorias.
+- Redução de dívida técnica.
+- Preparação para modernização incremental.
+- Limpeza segura de código morto.
+- Melhoria de performance.
+- Melhoria de segurança.
+- Governança técnica do ERP GDI Aviação.
+
+
+
+
+
