@@ -7178,7 +7178,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 " left join gc_comex_importacoes ComexImportacoes on (ComexImportacoes.id_importacao = ItemInvoice.id_importacao) " +
                                 " left join gc_comex_invoices ComexInvoices on (ComexInvoices.id_invoice = ItemInvoice.id_invoice) " +
                                 " left join gc_comex_produtos ComexProduto on (ComexProduto.id_comex_produto = ItemInvoice.id_comex_produto) " +
-                                " where (ItemInvoice.ativo = 1) and (ItemInvoice.id_comex_produto > 0) and (ItemImportacao.ativo = true) and (ComexImportacoes.ativo = true) and (ComexInvoices.ativo = true) " +
+                                " where (ItemInvoice.ativo = 1) and (ItemInvoice.id_comex_produto > 0) and (ItemImportacao.ativo = 1) and (ComexImportacoes.ativo = 1) and (ComexInvoices.ativo = 1) " +
                                 " and ComexImportacoes.data_registro >= '" + DataHoraAtual.AddDays(-60).ToString("yyyy-MM-dd") + " 00:00:00" + "'";
                 if (param.yesCustomField01.EmptyIfNull().ToString().Length > 1) { SentencaSQL += " and (ItemInvoice.customer = '" + param.yesCustomField01.EmptyIfNull().ToString() + "') "; }
                 if (param.yesCustomField02.EmptyIfNull().ToString().Length > 1) { SentencaSQL += " and (ItemInvoice.note = '" + param.yesCustomField02.EmptyIfNull().ToString() + "') "; }
@@ -7250,7 +7250,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             " left join gc_comex_importacoes ComexImportacoes on (ComexImportacoes.id_importacao = ItemInvoice.id_importacao and ItemImportacao.id_importacao = ItemInvoice.id_importacao) " +
                             " left join gc_comex_invoices ComexInvoices on (ComexInvoices.id_invoice = ItemInvoice.id_invoice) " +
                             " left join gc_comex_produtos ComexProduto on (ComexProduto.id_comex_produto = ItemInvoice.id_comex_produto) " +
-                            " where (ItemInvoice.ativo = 1) and (ItemInvoice.id_comex_produto > 0) and (ItemImportacao.ativo = true) and (ComexImportacoes.ativo = true) and (ComexInvoices.ativo = true) " +
+                            " where (ItemInvoice.ativo = 1) and (ItemInvoice.id_comex_produto > 0) and (ItemImportacao.ativo = 1) and (ComexImportacoes.ativo = 1) and (ComexInvoices.ativo = 1) " +
                             " and ComexImportacoes.data_registro >= '" + DataHoraAtual.AddDays(-60).ToString("yyyy-MM-dd") + " 00:00:00" + "'" +
                             " order by ItemInvoice.note ";
             DataTable TableNotes = LibDB.GetDataTable(SentencaSQL, db);

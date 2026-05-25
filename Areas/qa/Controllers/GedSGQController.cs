@@ -110,7 +110,7 @@ namespace GdiPlataform.Areas.qa.Controllers
                         {
                             if ((param.yesCustomField02.EmptyIfNull().ToString().Trim().Length > 0) && (param.yesCustomField03.EmptyIfNull().ToString().Trim().Length > 0))
                             {
-                                sentencaSql += " and ((ged.data_referencia between '" + DataField02.ToString("yyyy-MM-dd") + "' and '" + DataField03.ToString("yyyy-MM-dd") + " ') or (ged.controla_data_referencia = false))";
+                                sentencaSql += " and ((ged.data_referencia between '" + DataField02.ToString("yyyy-MM-dd") + "' and '" + DataField03.ToString("yyyy-MM-dd") + " ') or (ged.controla_data_referencia = 0))";
                             }
                         }
                     }

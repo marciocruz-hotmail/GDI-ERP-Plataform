@@ -9,16 +9,17 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.27 - 21/05/2026";
+            return "2026.51.28 - 25/05/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.27";
+            return "2026.51.28";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.51.28 - 25/05/2026 - Atualização Enotas
 // 2026.51.24 - 21/05/2026 - G-PERF-20: TempusDominus no layout por flag; rotas jsDatepicker; Parametros DT; IndexPops jstree
 // 2026.51.23 - 20/05/2026 - LibMessageConfirm/Checklist + GdiConfirmDesativarAnexo; migração 17 LibMessageDialog (2 botões) em views
 // 2026.51.22 - 20/05/2026 - gdi-datatables-defaults: restaura $.fn.DataTable().api() (corrige .draw em Limpar/Pesquisar)

@@ -409,7 +409,7 @@ namespace GdiPlataform.Robos.ENotas
                 db.gc_movimentos_nf.Add(record_gc_movimento_nf);
                 db.SaveChanges();
 
-                string urlAuth = "https://api.enotasgw.com.br/v2/empresas/" + key2 + "/nf-e";
+                string urlAuth = "https://api.notagateway.com.br/v2/empresas/" + key2 + "/nf-e";       // NFe - Produtos
 
                 ServicePointManager.Expect100Continue = false;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -530,7 +530,6 @@ namespace GdiPlataform.Robos.ENotas
             }
         }
         #endregion
-
 
         #region Gerar Nota Fiscal Produtos - Venda
         public bool GerarNFPVendaByMovimentoNF(gc_movimentos_nf record_gc_movimento_nf) 
@@ -1370,7 +1369,7 @@ namespace GdiPlataform.Robos.ENotas
                         id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
                     };
                     db.g_nfe_logs.Add(record_g_nfe_logs1);
-                    string URLAuth = "https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e";
+                    string URLAuth = "https://api.notagateway.com.br/v2/empresas/" + Key2 + "/nf-e";           // NFe de Produtos
 
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -1730,8 +1729,7 @@ namespace GdiPlataform.Robos.ENotas
                         id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
                     };
                     db.g_nfe_logs.Add(record_g_nfe_logs1);
-                    // NFS-e: documentação eNotas (POST emissão) usa /v1/empresas/{id}/nfes — /v2/.../nfes pode responder 404.
-                    string URLAuth = "https://api.enotasgw.com.br/v1/empresas/" + Key2 + "/nfes";
+                    string URLAuth = "https://api.notagateway.com.br/v1/empresas/" + Key2 + "/nfes";       // NFe de Serviços - Emissão
 
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -1882,13 +1880,13 @@ namespace GdiPlataform.Robos.ENotas
                 bool consultaNfseServicoV1 = IsJsonEnvioNfseServico(record_gc_movimento_nf.xml_erp);
                 if (consultaNfseServicoV1)
                 {
-                    dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/porIdExterno/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                    dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
                 }
                 else
                 {
                     dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/" + record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim();
                 }
-                URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
+                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;  // Atualizar Status
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -2190,6 +2188,7 @@ namespace GdiPlataform.Robos.ENotas
             if (RecordNfeGateway.producao == true) { AmbienteEmissaoNFE = "Producao"; } else { AmbienteEmissaoNFE = "Homologacao"; };
             String Key1 = RecordNfeGateway.key1.EmptyIfNull().ToString(); // Api Key
             String Key2 = RecordNfeGateway.key2.EmptyIfNull().ToString(); // Empresa ID
+            String UrlEnotas = String.Empty; 
             bool ParametroCalcularDifal = RecordNfeGateway.calcular_difal;
             bool ServidorContingencia = RecordNfeGateway.contingencia;
 
@@ -2198,7 +2197,18 @@ namespace GdiPlataform.Robos.ENotas
                 System.Net.ServicePointManager.Expect100Continue = true;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-                var options = new RestClientOptions("https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e/" + record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+
+                bool consultaNfseServicoV1 = IsJsonEnvioNfseServico(record_gc_movimento_nf.xml_erp);
+                if (consultaNfseServicoV1)
+                {
+                    UrlEnotas = "https://api.notagateway.com.br/v1/empresas/" + Key2 + "/nfes/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                }
+                else
+                {
+                    UrlEnotas = "https://api.notagateway.com.br/v2/empresas/" + Key2 + "/nf-e/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                }
+
+                var options = new RestClientOptions(UrlEnotas);
                 var client = new RestClient(options);
                 var request = new RestRequest("");
                 request.AddHeader("Accept", "application/json");
@@ -2346,103 +2356,7 @@ namespace GdiPlataform.Robos.ENotas
         {
             bool sucesso = false;
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            g_nfe record_g_nfe = db.g_nfe.Find(id_nfe);
-            if (record_g_nfe == null)
-            {
-                throw new Exception("g_nfe não encontrada (id " + id_nfe + ").");
-            }
-            if (string.IsNullOrWhiteSpace(record_g_nfe.nfe_key))
-            {
-                throw new Exception("g_nfe sem nfe_key (identificador e-Notas).");
-            }
-
-            g_nfe_gateway RecordNfeGateway = db.g_nfe_gateway.Find(record_g_nfe.id_filial);
-            if (RecordNfeGateway != null) { } else { RecordNfeGateway = db.g_nfe_gateway.Find(1); }
-            if (RecordNfeGateway.producao == true) { AmbienteEmissaoNFE = "Producao"; } else { AmbienteEmissaoNFE = "Homologacao"; }
-            String Key1 = RecordNfeGateway.key1.EmptyIfNull().ToString();
-            String Key2 = RecordNfeGateway.key2.EmptyIfNull().ToString();
-
-            try
-            {
-                string dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/" + record_g_nfe.nfe_key.EmptyIfNull().ToString().Trim();
-                string URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
-
-                ServicePointManager.Expect100Continue = false;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-
-                HttpWebRequest webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;
-                webRequest.Method = "GET";
-                webRequest.ContentType = "application/json";
-                webRequest.Headers.Add("Authorization", "Basic " + Key1);
-                HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
-                string responseData;
-                using (StreamReader responseReader = new StreamReader(webResponse.GetResponseStream()))
-                {
-                    responseData = responseReader.ReadToEnd();
-                }
-                webResponse.Close();
-
-                if (webResponse.StatusCode == HttpStatusCode.OK)
-                {
-                    responseData = responseData.Replace(@"\""", "'");
-                    responseData = responseData.Replace("\"numeroRps\":null", "\"numeroRps\":-1");
-                    responseData = responseData.Replace("\"numero\":null", "\"numero\":0");
-                    responseData = responseData.Replace("\"serie\":null", "\"serie\":0");
-                    NFPResponse dadosNfe = JsonConvert.DeserializeObject<NFPResponse>(responseData);
-
-                    var allRecordsNfeStatus = db.g_nfe_status.ToList();
-                    g_nfe_status record_g_nfe_status = allRecordsNfeStatus.Find(e => e.descricao_provedor == dadosNfe.status);
-                    if (record_g_nfe_status != null)
-                    {
-                        record_g_nfe.id_nfe_status = record_g_nfe_status.id_nfe_status;
-                    }
-                    record_g_nfe.url_pdf = dadosNfe.linkDanfe.EmptyIfNull().ToString();
-                    record_g_nfe.url_xml = dadosNfe.linkDownloadXML.EmptyIfNull().ToString();
-                    record_g_nfe.data_retorno_registro = DataHoraAtual;
-                    record_g_nfe.datahora_alteracao = DataHoraAtual;
-                    record_g_nfe.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
-                    db.Entry(record_g_nfe).State = EntityState.Modified;
-
-                    string statusNota = dadosNfe.status.EmptyIfNull().ToString().Trim() + " " + dadosNfe.motivoStatus.EmptyIfNull().ToString().Trim();
-                    if (statusNota.Length > 250) { statusNota = statusNota.Substring(0, 250); }
-
-                    g_nfe_logs record_g_nfe_logs = new g_nfe_logs
-                    {
-                        ativo = true,
-                        id_nfe = record_g_nfe.id_nfe,
-                        id_nfe_gateway = RecordNfeGateway.id_nfe_gateway,
-                        id_movimento = 0,
-                        id_movimento_nf = 0,
-                        id_cliente = record_g_nfe.id_cliente,
-                        envio = false,
-                        retorno = true,
-                        identificador_nfe = record_g_nfe.nfe_key.EmptyIfNull().ToString(),
-                        log = statusNota,
-                        id_coligada = record_g_nfe.id_coligada,
-                        id_filial = record_g_nfe.id_filial,
-                        datahora_cadastro = DataHoraAtual,
-                        id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
-                    };
-                    db.g_nfe_logs.Add(record_g_nfe_logs);
-                    db.SaveChanges();
-                    sucesso = true;
-                }
-            }
-            catch (WebException ex)
-            {
-                if (ex.Response == null) { throw; }
-                string MsgWebException = string.Empty;
-                using (var stream = ex.Response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    MsgWebException = reader.ReadToEnd();
-                }
-                MsgWebException = MsgWebException.Replace("[", "").Replace("]", "").Replace("{", "").Replace("}", "").Replace(",", " - ");
-                MsgWebException = "Erro [ " + MsgWebException + "]";
-                if (MsgWebException.Length > 250) { MsgWebException = MsgWebException.Substring(0, 250); }
-                throw new Exception(MsgWebException);
-            }
+            String UrlEnotas = string.Empty;
             return sucesso;
         }
 
@@ -2451,78 +2365,6 @@ namespace GdiPlataform.Robos.ENotas
         {
             bool sucesso = false;
             DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            g_nfe nfe = db.g_nfe.Find(id_nfe);
-            if (nfe == null)
-            {
-                throw new Exception("g_nfe não encontrada (id " + id_nfe + ").");
-            }
-            if (string.IsNullOrWhiteSpace(nfe.nfe_key))
-            {
-                throw new Exception("g_nfe sem nfe_key; cancelamento via gateway exige identificador.");
-            }
-
-            g_nfe_gateway RecordNfeGateway = db.g_nfe_gateway.Find(nfe.id_filial);
-            if (RecordNfeGateway != null) { } else { RecordNfeGateway = db.g_nfe_gateway.Find(1); }
-            if (RecordNfeGateway.producao == true) { AmbienteEmissaoNFE = "Producao"; } else { AmbienteEmissaoNFE = "Homologacao"; }
-            String Key1 = RecordNfeGateway.key1.EmptyIfNull().ToString();
-            String Key2 = RecordNfeGateway.key2.EmptyIfNull().ToString();
-
-            try
-            {
-                System.Net.ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-                var options = new RestClientOptions("https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e/" + nfe.nfe_key.EmptyIfNull().ToString().Trim());
-                var client = new RestClient(options);
-                var request = new RestRequest("");
-                request.AddHeader("Accept", "application/json");
-                request.AddHeader("Authorization", "Basic " + Key1);
-                var response = client.Delete(request);
-
-                if (response.ResponseStatus == ResponseStatus.Completed && (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.NoContent))
-                {
-                    nfe.id_nfe_status = 12;
-                    nfe.motivo_cancelamento = motivo.EmptyIfNull().ToString().Trim();
-                    nfe.id_usuario_cancelamento = CachePersister.userIdentity.IdUsuario;
-                    nfe.data_envio_cancelamento = DataHoraAtual;
-                    nfe.datahora_alteracao = DataHoraAtual;
-                    nfe.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
-                    db.Entry(nfe).State = EntityState.Modified;
-
-                    g_nfe_logs record_g_nfe_logs = new g_nfe_logs
-                    {
-                        ativo = true,
-                        id_nfe = nfe.id_nfe,
-                        id_nfe_gateway = RecordNfeGateway.id_nfe_gateway,
-                        id_movimento = 0,
-                        id_movimento_nf = 0,
-                        id_cliente = nfe.id_cliente,
-                        envio = false,
-                        retorno = true,
-                        identificador_nfe = nfe.nfe_key.EmptyIfNull().ToString(),
-                        log = "Cancelamento da NF (g_nfe) solicitado na API.",
-                        id_coligada = nfe.id_coligada,
-                        id_filial = nfe.id_filial,
-                        datahora_cadastro = DataHoraAtual,
-                        id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
-                    };
-                    db.g_nfe_logs.Add(record_g_nfe_logs);
-                    db.SaveChanges();
-                    sucesso = true;
-                }
-                else
-                {
-                    String msgErro = "ERRO: StatusCode: " + response.StatusCode.EmptyIfNull().ToString() + " | " + response.ErrorMessage.EmptyIfNull().ToString();
-                    if (msgErro.Length > 250) { msgErro = msgErro.Substring(0, 250); }
-                    throw new Exception(msgErro);
-                }
-            }
-            catch (Exception ex)
-            {
-                String msgErro = "Erro [ " + ex.Message.EmptyIfNull().ToString().Trim() + "]";
-                if (msgErro.Length > 250) { msgErro = msgErro.Substring(0, 250); }
-                throw new Exception(msgErro);
-            }
             return sucesso;
         }
 
@@ -2562,7 +2404,7 @@ namespace GdiPlataform.Robos.ENotas
                 // Teste objeto programação
                 var strJson = JsonConvert.SerializeObject(record_CartaCorrecao);
                 var strContent = new StringContent(strJson, Encoding.UTF8, "application/json");
-                string URLAuth = "https://api.enotasgw.com.br/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/";
+                string URLAuth = "https://api.notagateway.com.br/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/";
 
                 ServicePointManager.Expect100Continue = false;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -2648,7 +2490,7 @@ namespace GdiPlataform.Robos.ENotas
                 string responseData;
                 string dadosEnviar = String.Empty;
                 dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/" + record_g_nfe_carta_correcao.identificador.EmptyIfNull().ToString().Trim();
-                URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
+                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -2741,7 +2583,7 @@ namespace GdiPlataform.Robos.ENotas
                 string responseData;
                 string dadosEnviar = String.Empty;
                 dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/" + record_g_nfe_carta_correcao.identificador.EmptyIfNull().ToString().Trim();
-                URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
+                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -2845,7 +2687,7 @@ namespace GdiPlataform.Robos.ENotas
                 string responseData;
                 string dadosEnviar = String.Empty;
                 dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/porIdExterno/" + record_gc_movimentos_nf.nf_identificador.EmptyIfNull().Trim() + "/xml";
-                URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
+                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
