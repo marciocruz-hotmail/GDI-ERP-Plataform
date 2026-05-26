@@ -464,6 +464,7 @@
     <Compile Include="Areas\gc\Controllers\MovimentosController.LookupAjax.cs" />
     <Compile Include="Areas\gc\Controllers\MovimentosEntradasController.cs" />
     <Compile Include="Areas\gc\Controllers\MovimentosEntradasController.Lookups.cs" />
+    <Compile Include="Areas\gc\Controllers\MovimentosEntradasController.LookupAjax.cs" />
     <Compile Include="Areas\gc\Controllers\ParametrosController.cs" />
     <Compile Include="Areas\gc\Controllers\RelatoriosCadastraisController.cs" />
     <Compile Include="Areas\gc\Controllers\RelatoriosComerciaisController.cs" />

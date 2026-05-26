@@ -259,6 +259,25 @@ namespace GdiPlataform.Lib.Lookups
             };
         }
 
+        /// <summary>NF entrada nacional — linha da tabela MVC: placeholder + produto pré-vinculado (typeahead Ajax por linha).</summary>
+        public static List<SelectListItem> BuildComboProdutoEntradaNacionalLinha(int idProduto, string nomeProduto)
+        {
+            var combo = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ SELECIONE ]", Selected = idProduto <= 0 }
+            };
+            if (idProduto > 0)
+            {
+                var text = (nomeProduto ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(text))
+                    text = idProduto.ToString();
+                else
+                    text = TruncateNome(text, ResolveSizeNomeProduto());
+                combo.Add(new SelectListItem { Value = idProduto.ToString(), Text = text, Selected = true });
+            }
+            return combo;
+        }
+
         /// <summary>Modal consulta pedidos — produto via Ajax (PERF/CACHE-2d).</summary>
         public static List<SelectListItem> ComboFiltroProdutoConsultaPedidos()
         {

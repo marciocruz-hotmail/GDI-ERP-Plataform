@@ -34,7 +34,7 @@ namespace GdiPlataform.Areas.g.Controllers
         private static readonly HashSet<string> _extensoesGedPermitidas =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                ".pdf", ".docx", ".doc", ".xlsx", ".xls",
+                ".pdf", ".docx", ".doc", ".xlsx", ".xls", ".csv",
                 ".jpg", ".jpeg", ".png", ".gif",
                 ".txt", ".xml", ".zip", ".p7s"
             };
@@ -253,7 +253,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     else if (!_extensoesGedPermitidas.Contains(FileExtension))
                     {
                         QtdErros += 1;
-                        MsgErro += " - Tipo de arquivo não permitido [" + FileExtension + "]. Tipos aceitos: PDF, DOC(X), XLS(X), JPG, PNG, GIF, TXT, XML, ZIP, P7S.<br/>";
+                        MsgErro += " - Tipo de arquivo não permitido [" + FileExtension + "]. Tipos aceitos: PDF, DOC(X), XLS(X), CSV, JPG, PNG, GIF, TXT, XML, ZIP, P7S.<br/>";
                     }
                     else if (_mimeTypesBloqueados.Contains(record_cstUploadGed.filesource.ContentType))
                     {

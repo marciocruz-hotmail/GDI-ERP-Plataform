@@ -1912,11 +1912,14 @@ namespace GdiPlataform.Areas.gc.Controllers
                     String PNCuringaOH = PNAuxiliar.EmptyIfNull().ToString().Replace("0", "O");
                     String PNCuringaZERO = PNAuxiliar.EmptyIfNull().ToString().Replace("O", "0");
                     g_produtos RecordProdutoDefault = db.g_produtos.Where(c => (c.codigo == PNOficial || c.codigo_auxiliar == PNAuxiliar || c.codigo_variacao1 == PNCuringaOH || c.codigo_variacao2 == PNCuringaZERO)).FirstOrDefault();
-                    if (RecordProdutoDefault != null) { record_cstMovimentoEntradaNFItem.id_produto = RecordProdutoDefault.id_produto; };
+                    if (RecordProdutoDefault != null)
+                    {
+                        record_cstMovimentoEntradaNFItem.id_produto = RecordProdutoDefault.id_produto;
+                        record_cstMovimentoEntradaNFItem.nome_produto = RecordProdutoDefault.nome.EmptyIfNull().ToString();
+                    }
 
                     record_cstMovimentoEntradaNF.allItens.Add(record_cstMovimentoEntradaNFItem);
                 }
-                PreencherLookupsComboProdutosEntradaNacional();
             }
             else
             {
@@ -1930,7 +1933,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     record_cstMovimentoEntradaNF.movimento_permitido = false;
                     record_cstMovimentoEntradaNF.msg_erro = "Movimento já foi Processado anteriormente!";
                 }
-                ViewBag.comboProdutos = new List<SelectListItem>();
             }
             return View(record_cstMovimentoEntradaNF);
         }

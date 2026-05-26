@@ -1,4 +1,5 @@
 @model GdiPlataform.Areas.gc.Models.CstMovimentoEntradaNF
+@using GdiPlataform.Lib.Lookups
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "GcMovimentosFormProcessarNFCompraNacional" }))
@@ -38,12 +39,15 @@
                                             var produtoExterno = string.Format("{0} - {1}",
                                                 (Model.allItens[i].produto_externo_codigo ?? string.Empty).ToString().Trim(),
                                                 (Model.allItens[i].produto_externo_nome ?? string.Empty).ToString().Trim()).Trim(' ', '-');
+                                            var comboProdutoLinha = LookupSearchQueries.BuildComboProdutoEntradaNacionalLinha(
+                                                Model.allItens[i].id_produto,
+                                                Model.allItens[i].nome_produto);
                                             <tr>
                                                 @Html.HiddenFor(model => model.allItens[i].id_movimento_item)
                                                 @Html.HiddenFor(model => model.allItens[i].produto_externo_codigo)
                                                 @Html.HiddenFor(model => model.allItens[i].produto_externo_nome)
                                                 <td class="gdi-col-qtd text-center">@Model.allItens[i].quantidade_geral</td>
-                                                <td class="text-center">@Html.DropDownListFor(model => model.allItens[i].id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = "form-control" })</td>
+                                                <td class="text-center">@Html.DropDownListFor(model => model.allItens[i].id_produto, comboProdutoLinha, new { @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "MovimentosEntradas", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_container = "body" })</td>
                                                 <td class="gdi-col-produto text-start">@(string.IsNullOrWhiteSpace(produtoExterno) ? "—" : produtoExterno)</td>
                                                 <td class="gdi-col-qtd text-end">@Model.allItens[i].valor_total_formatado</td>
                                             </tr>

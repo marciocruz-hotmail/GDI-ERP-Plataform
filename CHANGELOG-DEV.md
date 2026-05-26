@@ -63,6 +63,21 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 
 ## Últimas alterações relevantes
 
+### 2026-05-25 — Cartas de Correção: COUNT DataTables com coluna duplicada
+
+- **Causa:** `GetDadosCartaCorrecao` usava `SELECT *` com `JOIN gc_movimentos_nf` — ambas tabelas expõem `id_movimento_nf`; `LibDataTableSqlPaging.SqlCount` envolve em subquery `_cnt` e o SQL Server falha.
+- **Correção:** `SELECT cr.*` (filtro por `nf.id_movimento` mantido no JOIN).
+
+### 2026-05-25 — NF entrada nacional: lookup produto por linha (typeahead Ajax)
+
+- **Causa:** `FormProcessarNFCompraNacional` repetia `GetComboGcProdutosServicosTodos` em cada linha da tabela MVC — Select2 estático com milhares de opções impedia seleção (performance/overflow).
+- **Correção:** combo mínimo por linha (`BuildComboProdutoEntradaNacionalLinha`) + `GetProdutosLookup` em `MovimentosEntradasController.LookupAjax.cs` (roles `gc_MovimentosEntradas_*`); `nome_produto` ao auto-match por código externo.
+
+### 2026-05-25 — GED upload: extensão `.csv` permitida em anexos
+
+- **Causa:** `ServiceUploadFileGed` validava extensão via `_extensoesGedPermitidas` sem `.csv` — upload rejeitado antes do S3 em todos os modais que usam `AjaxUploadFileGed` (pedidos, financeiro, atendimentos, COMEX, etc.).
+- **Correção:** inclusão de `.csv` na whitelist e mensagem de erro alinhada.
+
 ### 2026-05-21 — Lookup Ajax: sem modal em pedido abortado (digitação)
 
 - **Causa:** ao digitar no Select2, o GET anterior é cancelado (`textStatus: abort`); `gdi-select2.js` tratava como erro e exibia *Não foi possível carregar os resultados do lookup* mesmo com o pedido seguinte OK (ex.: FinanceiroLancamentos Cli./For.).

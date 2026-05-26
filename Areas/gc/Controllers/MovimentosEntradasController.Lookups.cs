@@ -8,7 +8,7 @@ using GdiPlataform.Lib.Lookups;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
-    /// <summary>Lookups NF entrada — frete via serviço; tipos fixos por modal; produtos nacional via GetComboGcProdutosServicosTodos.</summary>
+    /// <summary>Lookups NF entrada — frete via serviço; tipos fixos por modal; produtos nacional via typeahead Ajax por linha.</summary>
     public partial class MovimentosEntradasController
     {
         private ILookupQueryService MovimentosEntradasLookups => LookupQueryServiceAccessor.Current;
@@ -40,22 +40,6 @@ namespace GdiPlataform.Areas.gc.Controllers
         private void PreencherLookupsModalImportarImportacao()
         {
             PreencherLookupsComboMovimentoTipoFixo("6", "1.1.2 - Entrada - Fornecedor - Exterior");
-        }
-
-        /// <summary>Processar NF nacional — reutiliza GetComboGcProdutosServicosTodos (truncamento no serviço).</summary>
-        private void PreencherLookupsComboProdutosEntradaNacional()
-        {
-            var combo = MovimentosEntradasLookups.GetComboGcProdutosServicosTodos(db);
-            var result = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "0", Text = "[ SELECIONE ]" }
-            };
-            foreach (var item in combo)
-            {
-                if (item.Value != "-1" && !string.IsNullOrWhiteSpace(item.Value))
-                    result.Add(item);
-            }
-            ViewBag.comboProdutos = result;
         }
 
         /// <summary>Processar NF devolução — itens do movimento de referência (lógica específica; sem Get* equivalente).</summary>

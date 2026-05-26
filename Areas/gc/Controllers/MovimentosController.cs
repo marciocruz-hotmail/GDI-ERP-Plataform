@@ -5217,7 +5217,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             var allRecordsCfop = db.gc_cfop.Select(c => new { c.id_cfop, c.numero }).ToList();
             String SentencaSQL = string.Empty;
 
-            SentencaSQL = " select * from g_nfe_carta_correcao cr ";
+            SentencaSQL = " select cr.* from g_nfe_carta_correcao cr ";
             SentencaSQL += " left join gc_movimentos_nf nf on (nf.id_movimento_nf = cr.id_movimento_nf) ";
 
             if ((param.yesCustomField01.EmptyIfNull().ToString().Trim().Length > 0) && (param.yesCustomField01.EmptyIfNull().ToString().Trim() != "-1"))
