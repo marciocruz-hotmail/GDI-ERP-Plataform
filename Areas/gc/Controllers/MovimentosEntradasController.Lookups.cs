@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
+using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
 using GdiPlataform.Lib.Lookups;
@@ -40,6 +41,17 @@ namespace GdiPlataform.Areas.gc.Controllers
         private void PreencherLookupsModalImportarImportacao()
         {
             PreencherLookupsComboMovimentoTipoFixo("6", "1.1.2 - Entrada - Fornecedor - Exterior");
+        }
+
+        /// <summary>Processar NF nacional — combo mínimo por linha (typeahead Ajax; montado no controller — LookupSearchQueries é internal).</summary>
+        private void PreencherLookupsComboProdutosEntradaNacionalPorLinha(IList<CstMovimentoEntradaNFItem> itens)
+        {
+            var combos = new List<List<SelectListItem>>();
+            foreach (var item in itens)
+            {
+                combos.Add(LookupSearchQueries.BuildComboProdutoEntradaNacionalLinha(item.id_produto, item.nome_produto));
+            }
+            ViewBag.comboProdutosPorLinha = combos;
         }
 
         /// <summary>Processar NF devolução — itens do movimento de referência (lógica específica; sem Get* equivalente).</summary>

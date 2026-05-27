@@ -43,7 +43,9 @@
                                 {
                                     <div class="form-group row text-sm-end m-0 mt-0 p-0">
                                         @Html.Label("difal", "Difal", htmlAttributes: new { @class = "col-sm-2 col-form-label", @style = "margin-top:0px;" })
-                                        @Html.Raw(ViewBag.MsgInfoDifal)
+                                        <div class="col-sm-10 d-flex align-items-left text-sm-start">
+                                            @Html.Raw(ViewBag.MsgInfoDifal)
+                                        </div>
                                     </div>
                                 }
                                 @if (Model.id_cfop > 0)

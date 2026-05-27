@@ -15,7 +15,7 @@ Pendências técnicas do **GDI-ERP-Plataform**. Atualizar quando itens forem con
 |----|------|-------------------|------------|
 | PUB-1 | Publish / IIS Release (§2.6) | `Web.Release.config` sem debug; `customErrors On` em produção; health check validado | Checklist §2.6 |
 | PUB-2 | Pós-publish | Incrementar `VersionERP` se `start.js`/`start.css` alterados; smoke breve login/navbar | `ControlVersion.cs` |
-| SMK-1 | Smoke NFe e-Notas (§2.2.4) | Gerar/atualizar/cancelar/sincronizar em ambiente com gateway real | `.cursor/context/2026_05_20_nfe-enotas-arquitetura.md` |
+| SMK-1 | Smoke NFe e-Notas (§2.2.4) | Gerar/atualizar/cancelar/sincronizar em ambiente com gateway real | `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md` |
 | SMK-2 | Smoke transversal pós-publish (§2.3) | Identidade/portal, financeiro g/gc, COMEX, comercial, GED | Checklist §2.3 |
 
 ---

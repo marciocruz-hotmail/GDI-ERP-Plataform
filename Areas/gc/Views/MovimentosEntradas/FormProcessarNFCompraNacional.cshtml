@@ -1,7 +1,24 @@
 @model GdiPlataform.Areas.gc.Models.CstMovimentoEntradaNF
-@using GdiPlataform.Lib.Lookups
+@using System.Collections.Generic
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    var combosProdutoPorLinha = ViewBag.comboProdutosPorLinha as List<List<SelectListItem>> ?? new List<List<SelectListItem>>();
+}
+<style>
+    /* Form NF entrada nacional — tabela MVC + Select2 Ajax por linha (sem scroll horizontal residual). */
+    #gdiProcessarNfCompraNacionalTableWrap {
+        overflow-x: hidden;
+    }
+
+    #gdiProcessarNfCompraNacionalTableWrap .gdi-col-produto-erp {
+        width: 32%;
+    }
+
+    #gdiProcessarNfCompraNacionalTableWrap .gdi-col-produto-ext {
+        width: 48%;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "GcMovimentosFormProcessarNFCompraNacional" }))
 {
     <div class="row">
@@ -15,7 +32,7 @@
                 </div>
                 <div class="card-body m-0 p-1 min-w-0">
                     <div class="form-horizontal m-0 p-0">
-                        <div class="table-responsive gdi-form-table-scroll">
+                        <div class="gdi-form-table-scroll" id="gdiProcessarNfCompraNacionalTableWrap">
                             @if (Model.movimento_permitido == false)
                             {
                                 <div class="alert alert-danger" role="alert">
@@ -28,8 +45,8 @@
                                     <thead>
                                         <tr>
                                             <th class="gdi-col-qtd text-center">Qtd</th>
-                                            <th class="gdi-col-produto text-center">Produto ERP</th>
-                                            <th class="gdi-col-produto text-start">Produto EXTERNO</th>
+                                            <th class="gdi-col-produto gdi-col-produto-erp text-center">Produto ERP</th>
+                                            <th class="gdi-col-produto gdi-col-produto-ext text-start">Produto EXTERNO</th>
                                             <th class="gdi-col-qtd text-end">R$ Total</th>
                                         </tr>
                                     </thead>
@@ -39,16 +56,16 @@
                                             var produtoExterno = string.Format("{0} - {1}",
                                                 (Model.allItens[i].produto_externo_codigo ?? string.Empty).ToString().Trim(),
                                                 (Model.allItens[i].produto_externo_nome ?? string.Empty).ToString().Trim()).Trim(' ', '-');
-                                            var comboProdutoLinha = LookupSearchQueries.BuildComboProdutoEntradaNacionalLinha(
-                                                Model.allItens[i].id_produto,
-                                                Model.allItens[i].nome_produto);
+                                            var comboProdutoLinha = (i < combosProdutoPorLinha.Count)
+                                                ? combosProdutoPorLinha[i]
+                                                : new List<SelectListItem> { new SelectListItem { Value = "", Text = "[ SELECIONE ]" } };
                                             <tr>
                                                 @Html.HiddenFor(model => model.allItens[i].id_movimento_item)
                                                 @Html.HiddenFor(model => model.allItens[i].produto_externo_codigo)
                                                 @Html.HiddenFor(model => model.allItens[i].produto_externo_nome)
                                                 <td class="gdi-col-qtd text-center">@Model.allItens[i].quantidade_geral</td>
-                                                <td class="text-center">@Html.DropDownListFor(model => model.allItens[i].id_produto, comboProdutoLinha, new { @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "MovimentosEntradas", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_container = "body" })</td>
-                                                <td class="gdi-col-produto text-start">@(string.IsNullOrWhiteSpace(produtoExterno) ? "—" : produtoExterno)</td>
+                                                <td class="gdi-col-produto gdi-col-produto-erp text-center">@Html.DropDownListFor(model => model.allItens[i].id_produto, comboProdutoLinha, new { @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "MovimentosEntradas", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })</td>
+                                                <td class="gdi-col-produto gdi-col-produto-ext text-start">@(string.IsNullOrWhiteSpace(produtoExterno) ? "—" : produtoExterno)</td>
                                                 <td class="gdi-col-qtd text-end">@Model.allItens[i].valor_total_formatado</td>
                                             </tr>
                                         }
@@ -76,6 +93,9 @@
         try
         {
             jsInitForm();
+            if (typeof gdiInitSelect2OnCollection === 'function') {
+                gdiInitSelect2OnCollection('#GcMovimentosFormProcessarNFCompraNacional select', $(document.body));
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {

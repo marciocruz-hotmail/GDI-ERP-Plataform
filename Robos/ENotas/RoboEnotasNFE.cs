@@ -24,6 +24,9 @@ namespace GdiPlataform.Robos.ENotas
 {
     public class RoboEnotasNFE
     {
+        /// <summary>URL base da API eNotas / Nota Gateway (homologação e produção).</summary>
+        public const string EnotasApiBaseUrl = "https://api.notagateway.com.br";
+
         private readonly GdiPlataformEntities db;
         Boolean SucessoRobo;
         String AmbienteEmissaoNFE = String.Empty;
@@ -409,7 +412,7 @@ namespace GdiPlataform.Robos.ENotas
                 db.gc_movimentos_nf.Add(record_gc_movimento_nf);
                 db.SaveChanges();
 
-                string urlAuth = "https://api.notagateway.com.br/v2/empresas/" + key2 + "/nf-e";       // NFe - Produtos
+                string urlAuth = EnotasApiBaseUrl + "/v2/empresas/" + key2 + "/nf-e";       // NFe - Produtos
 
                 ServicePointManager.Expect100Continue = false;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -1369,7 +1372,7 @@ namespace GdiPlataform.Robos.ENotas
                         id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
                     };
                     db.g_nfe_logs.Add(record_g_nfe_logs1);
-                    string URLAuth = "https://api.notagateway.com.br/v2/empresas/" + Key2 + "/nf-e";           // NFe de Produtos
+                    string URLAuth = EnotasApiBaseUrl + "/v2/empresas/" + Key2 + "/nf-e";           // NFe de Produtos
 
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -1729,7 +1732,7 @@ namespace GdiPlataform.Robos.ENotas
                         id_usuario_cadastro = CachePersister.userIdentity.IdUsuario
                     };
                     db.g_nfe_logs.Add(record_g_nfe_logs1);
-                    string URLAuth = "https://api.notagateway.com.br/v1/empresas/" + Key2 + "/nfes";       // NFe de Serviços - Emissão
+                    string URLAuth = EnotasApiBaseUrl + "/v1/empresas/" + Key2 + "/nfes";       // NFe de Serviços - Emissão
 
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -1880,13 +1883,13 @@ namespace GdiPlataform.Robos.ENotas
                 bool consultaNfseServicoV1 = IsJsonEnvioNfseServico(record_gc_movimento_nf.xml_erp);
                 if (consultaNfseServicoV1)
                 {
-                    dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                    dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/porIdExterno/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
                 }
                 else
                 {
                     dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/" + record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim();
                 }
-                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;  // Atualizar Status
+                URLAuth = EnotasApiBaseUrl + dadosEnviar;  // Atualizar Status
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -2201,11 +2204,11 @@ namespace GdiPlataform.Robos.ENotas
                 bool consultaNfseServicoV1 = IsJsonEnvioNfseServico(record_gc_movimento_nf.xml_erp);
                 if (consultaNfseServicoV1)
                 {
-                    UrlEnotas = "https://api.notagateway.com.br/v1/empresas/" + Key2 + "/nfes/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                    UrlEnotas = EnotasApiBaseUrl + "/v1/empresas/" + Key2 + "/nfes/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
                 }
                 else
                 {
-                    UrlEnotas = "https://api.notagateway.com.br/v2/empresas/" + Key2 + "/nf-e/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
+                    UrlEnotas = EnotasApiBaseUrl + "/v2/empresas/" + Key2 + "/nf-e/" + Uri.EscapeDataString(record_gc_movimento_nf.nf_identificador.EmptyIfNull().ToString().Trim());
                 }
 
                 var options = new RestClientOptions(UrlEnotas);
@@ -2404,7 +2407,7 @@ namespace GdiPlataform.Robos.ENotas
                 // Teste objeto programação
                 var strJson = JsonConvert.SerializeObject(record_CartaCorrecao);
                 var strContent = new StringContent(strJson, Encoding.UTF8, "application/json");
-                string URLAuth = "https://api.notagateway.com.br/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/";
+                string URLAuth = EnotasApiBaseUrl + "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/";
 
                 ServicePointManager.Expect100Continue = false;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -2490,7 +2493,7 @@ namespace GdiPlataform.Robos.ENotas
                 string responseData;
                 string dadosEnviar = String.Empty;
                 dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/" + record_g_nfe_carta_correcao.identificador.EmptyIfNull().ToString().Trim();
-                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;
+                URLAuth = EnotasApiBaseUrl + dadosEnviar;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -2583,7 +2586,7 @@ namespace GdiPlataform.Robos.ENotas
                 string responseData;
                 string dadosEnviar = String.Empty;
                 dadosEnviar = "/v2/empresas/" + Key2 + "/nf-e/cartaCorrecao/" + record_g_nfe_carta_correcao.identificador.EmptyIfNull().ToString().Trim();
-                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;
+                URLAuth = EnotasApiBaseUrl + dadosEnviar;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -2687,7 +2690,7 @@ namespace GdiPlataform.Robos.ENotas
                 string responseData;
                 string dadosEnviar = String.Empty;
                 dadosEnviar = "/v1/empresas/" + Key2 + "/nfes/porIdExterno/" + record_gc_movimentos_nf.nf_identificador.EmptyIfNull().Trim() + "/xml";
-                URLAuth = "https://api.notagateway.com.br" + dadosEnviar;
+                URLAuth = EnotasApiBaseUrl + dadosEnviar;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;

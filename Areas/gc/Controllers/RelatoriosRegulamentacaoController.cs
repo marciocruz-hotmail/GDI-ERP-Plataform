@@ -15,6 +15,7 @@ using System.Web.Mvc;
 using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
+using GdiPlataform.Robos.ENotas;
 using GdiPlataform.Security;
 
 namespace GdiPlataform.Areas.gc.Controllers
@@ -311,7 +312,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     string responseData;
                                     string dadosEnviar = String.Empty;
                                     dadosEnviar = "/v2/empresas/" + TextBoxEmpresaID + "/nfc-e/" + NotaFiscalIdentificador.Trim() + "/xmlCancelamento";
-                                    URLAuth = "https://api.enotasgw.com.br" + dadosEnviar;
+                                    URLAuth = RoboEnotasNFE.EnotasApiBaseUrl + dadosEnviar;
 
                                     System.Net.ServicePointManager.Expect100Continue = false;
                                     webRequest = WebRequest.Create(URLAuth) as HttpWebRequest;

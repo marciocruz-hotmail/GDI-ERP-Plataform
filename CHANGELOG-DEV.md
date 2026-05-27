@@ -63,6 +63,17 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 
 ## Últimas alterações relevantes
 
+### 2026-05-25 — NF entrada nacional: Select2 ausente (LayoutLite) + scroll horizontal
+
+- **Lookups vazios:** `FormProcessarNFCompraNacional` estava em `LayoutLiteActionsByController` (G-PERF-20) — **Select2 não carregava**; combos ficavam `<select>` nativo só com `[ SELECIONE ]`.
+- **Correção:** `[GdiPageScripts(... | Select2)]` na action; placeholder vazio no combo (contrato Ajax); `gdi-select2.js` placeholder explícito; layout tabela sem `table-responsive` duplicado.
+- **VersionERP:** `2026.51.29`.
+
+### 2026-05-25 — NF entrada nacional: CS0122 LookupSearchQueries na view
+
+- **Causa:** `FormProcessarNFCompraNacional.cshtml` chamava `LookupSearchQueries` (`internal`) — views Razor compilam em assembly separado.
+- **Correção:** combos por linha montados no controller (`PreencherLookupsComboProdutosEntradaNacionalPorLinha` → `ViewBag.comboProdutosPorLinha`).
+
 ### 2026-05-25 — Cartas de Correção: COUNT DataTables com coluna duplicada
 
 - **Causa:** `GetDadosCartaCorrecao` usava `SELECT *` com `JOIN gc_movimentos_nf` — ambas tabelas expõem `id_movimento_nf`; `LibDataTableSqlPaging.SqlCount` envolve em subquery `_cnt` e o SQL Server falha.

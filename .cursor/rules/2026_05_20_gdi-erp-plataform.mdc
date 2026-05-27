@@ -121,20 +121,27 @@ Salvo pedido **explícito e inequívoco** do utilizador numa mensagem dedicada:
 
 ### 4.5 Nomes de ficheiros em `.cursor/context`, `.cursor/rules` e `Scripts`
 
-Ao **criar** ou **renomear** ficheiros nestas pastas, prefixar com **`AAAA_MM_DD_`** (ano, mês e dia da **criação** do ficheiro, separados por **sublinhado**, com `_` final), seguido do nome descritivo:
+Ao **criar** ficheiros nestas pastas, prefixar com **`AAAA_MM_DD_`** (ano, mês e dia da **data atual**, separados por **sublinhado**, com `_` final), seguido do nome descritivo.
 
-| Pasta | Exemplo |
-|-------|---------|
-| `.cursor/context/` | `2026_05_20_tabelas-datatables-vs-mvc.md` |
-| `.cursor/rules/` | `2026_05_20_gdi-erp-plataform.mdc` |
-| `Scripts/` (ferramentas) | `2026_05_20_gdi_verify_csproj_gdi_helpers.py`, `2026_05_20_gdi_check_specific_modals.ps1` |
+**Data do prefixo (obrigatório ao criar):**
+
+- Usar a **data do dia da sessão** — campo *Today's date* do ambiente do agente (ex.: `2026-05-26` → prefixo `2026_05_26_`).
+- **Não** copiar datas de exemplos, de ficheiros já existentes no repo nem de outras sessões (ex.: `2026_05_20_` só é válido para ficheiros criados nesse dia).
+- Formato: `AAAA_MM_DD_` + nome (`nfe-enotas-arquitetura.md`, `gdi_verify_csproj_gdi_helpers.py`, …).
+
+| Pasta | Exemplo (se hoje for 2026-05-26) |
+|-------|----------------------------------|
+| `.cursor/context/` | `2026_05_26_nfe-enotas-arquitetura.md` |
+| `.cursor/rules/` | `2026_05_26_nome-da-regra.mdc` (regras novas; regras antigas mantêm o prefixo da criação) |
+| `Scripts/` (ferramentas) | `2026_05_26_gdi_verify_csproj_gdi_helpers.py` |
 
 **`Scripts/` — âmbito:** aplicar a **todos** os ficheiros de **ferramenta de repositório** criados pelo agente/Cursor (`*.py`, `*.ps1`, etc. — tipicamente prefixo `gdi_`, `fix_`, `patch_`, `gen_`, `strip_`). **Não** renomear assets de **runtime/publicação** já referenciados no site ou no `.csproj` como `Content`, por exemplo: `bootstrap*.js`, `jquery.validate*`, `sessionInactivity.js`, `jsFileInputChange.js`, `gdi-session-handler.js`, ficheiros `.map`.
 
-- Obter a data com `CreationTime` do ficheiro (ou data real de criação no repo). **Não** usar a máscara antiga `2026-05-` (só ano-mês).
-- Se o ficheiro **já** tiver prefixo `AAAA_MM_DD_`, não duplicar (`2026_05_20_2026_05_20_…` é inválido).
+- Ao **renomear** só quando o prefixo estiver errado (criado com data incorreta); ficheiros legítimos de outro dia **não** mudam de nome por causa de uma sessão nova.
+- Se o ficheiro **já** tiver prefixo `AAAA_MM_DD_`, não duplicar (`2026_05_26_2026_05_26_…` é inválido).
+- **Não** usar a máscara antiga `2026-05-` (só ano-mês).
 - Ficheiros fora destas pastas (controllers, views, `Lib/`, etc.) **não** usam esta máscara.
-- Atualizar referências em `CLAUDE.md`, `CHANGELOG-DEV.md`, `.claude/commands/` e scripts que apontem para caminhos antigos.
+- Atualizar referências em `CLAUDE.md`, `CHANGELOG-DEV.md`, `BACKLOG-DEV.md`, `.claude/commands/` e scripts que apontem para caminhos antigos.
 
 ### 4.6 Qualidade antes de concluir
 

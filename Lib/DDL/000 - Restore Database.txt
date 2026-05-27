@@ -1,3 +1,22 @@
+/* ========== BACKUP DATABASE PRODUÇÃO ========== */
+USE [master];
+GO
+
+BACKUP DATABASE [erp_gdi_producao]
+TO DISK = N'C:\BackupSQL\erp_gdi_producao.bak'
+WITH 
+    INIT,
+    COMPRESSION,
+    CHECKSUM,
+    STATS = 10;
+GO
+/* =============================================== */
+
+
+
+
+
+
 
 /* ========== RESTORE DATABASE HOMOLOGACAO ========== */
 USE master;
@@ -9,7 +28,7 @@ WITH ROLLBACK IMMEDIATE;
 GO
 
 RESTORE DATABASE [erp_gdi_homologacao]
-FROM DISK = 'C:\BackupSQL\erp_gdi_producao_20260315_180002_FULL.bak'
+FROM DISK = 'C:\BackupSQL\erp_gdi_producao.bak'
 WITH 
     MOVE 'erp_gdi_producao' TO 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\erp_gdi_homologacao.mdf',
     MOVE 'erp_gdi_producao_log' TO 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\erp_gdi_homologacao_log.ldf',
@@ -22,3 +41,8 @@ ALTER DATABASE [erp_gdi_homologacao]
 SET MULTI_USER;
 GO
 /* ========== RESTORE DATABASE HOMOLOGACAO ========== */
+
+
+
+UPDATE [erp_gdi_homologacao].[dbo].[g_nfe_gateway] set producao = 0;
+UPDATE [erp_gdi_homologacao].[dbo].[g_usuarios] set ativo = 0 where id_usuario > 1;

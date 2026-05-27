@@ -1,9 +1,34 @@
 # NFe (área `g`) — arquitetura Ajax + e-Notas
 
-**Data:** 2026-05-20  
+**Data:** 2026-05-26  
 **Controller:** `Areas/g/Controllers/NfeController.cs`  
 **Robô:** `Robos/ENotas/RoboEnotasNFE.cs`  
 **Portal Vendedor:** módulo **removido** (2026-05-19); este documento **não** cobre `PortalVendedorController`.
+
+---
+
+## API eNotas (Nota Gateway)
+
+| Item | Valor |
+|------|--------|
+| **URL base** | `https://api.notagateway.com.br` |
+| **Constante C#** | `RoboEnotasNFE.EnotasApiBaseUrl` |
+| **Autenticação** | Header `Authorization: Basic {key1}` (`g_nfe_gateway.key1` = API Key) |
+| **Empresa** | `g_nfe_gateway.key2` = ID da empresa no gateway |
+
+**Paths usados pelo robô:**
+
+| Operação | Método | Path |
+|----------|--------|------|
+| NF-e produto — emissão | POST | `/v2/empresas/{empresaId}/nf-e` |
+| NF-e produto — consulta status | GET | `/v2/empresas/{empresaId}/nf-e/{identificador}` |
+| NF-e produto — cancelamento | DELETE | `/v2/empresas/{empresaId}/nf-e/{identificador}` |
+| NF-e produto — carta correção | POST/GET | `/v2/empresas/{empresaId}/nf-e/cartaCorrecao/` … |
+| NFS-e — emissão | POST | `/v1/empresas/{empresaId}/nfes` |
+| NFS-e — consulta status | GET | `/v1/empresas/{empresaId}/nfes/porIdExterno/{idExterno}` |
+| NFS-e — XML | GET | `/v1/empresas/{empresaId}/nfes/porIdExterno/{idExterno}/xml` |
+
+> Domínio legado `api.enotasgw.com.br` **não** deve ser usado. Toda chamada HTTP deve partir de `EnotasApiBaseUrl`.
 
 ---
 

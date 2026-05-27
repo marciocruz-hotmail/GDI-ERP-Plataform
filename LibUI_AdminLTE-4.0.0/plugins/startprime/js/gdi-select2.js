@@ -135,6 +135,11 @@ function gdiSelect2BuildAjaxOptions($el, dropdownParentResolved, extraOpts) {
     }
     var opts = gdiSelect2BuildOptions($el, dropdownParentResolved, extraOpts);
     opts.minimumInputLength = minLen;
+    var $ph = $el.find('option:first');
+    if ($ph.length && String($ph.val()) === '') {
+        opts.placeholder = ($ph.text() || '').trim() || 'Selecione…';
+        opts.allowClear = true;
+    }
     opts.ajax = {
         url: url,
         dataType: 'json',

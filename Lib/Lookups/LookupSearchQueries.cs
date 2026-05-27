@@ -259,12 +259,12 @@ namespace GdiPlataform.Lib.Lookups
             };
         }
 
-        /// <summary>NF entrada nacional — linha da tabela MVC: placeholder + produto pré-vinculado (typeahead Ajax por linha).</summary>
+        /// <summary>NF entrada nacional — linha da tabela MVC: placeholder vazio (Select2 Ajax) + produto pré-vinculado.</summary>
         public static List<SelectListItem> BuildComboProdutoEntradaNacionalLinha(int idProduto, string nomeProduto)
         {
             var combo = new List<SelectListItem>
             {
-                new SelectListItem { Value = "0", Text = "[ SELECIONE ]", Selected = idProduto <= 0 }
+                new SelectListItem { Value = "", Text = "[ SELECIONE ]", Selected = idProduto <= 0 }
             };
             if (idProduto > 0)
             {

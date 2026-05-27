@@ -9,4 +9,4 @@ A regra ativa do projeto está em **`2026_05_20_gdi-erp-plataform.mdc`** (mesma 
 
 **Documentação na raiz (IA):** `AI-CONTEXT.md`, `CHANGELOG-DEV.md`, `BACKLOG-DEV.md` — ver §2 do ficheiro acima.
 
-Convenção de nomes: prefixo `AAAA_MM_DD_` em `.cursor/context/*.md`, `.cursor/rules/*.mdc` e ferramentas em `Scripts/*.*` — ver §4.5 do ficheiro acima.
+Convenção de nomes: prefixo `AAAA_MM_DD_` com a **data do dia** (*Today's date*) ao **criar** ficheiros em `.cursor/context/*.md`, `.cursor/rules/*.mdc` e ferramentas em `Scripts/*.*` — ver §4.5 do ficheiro acima.

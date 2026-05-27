@@ -702,6 +702,16 @@ td.BoletoSubTotal {
     font-size: 0.875rem;
 }
 
+.gdi-form-table-fixed td .select2-container {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.gdi-form-table-fixed td .select2-selection--single {
+    overflow: hidden;
+}
+
 /* Contém DataTable dentro de card/col sem estourar o viewport (flex + gutters BS5) */
 .gdi-dt-scroll-host {
     max-width: 100%;

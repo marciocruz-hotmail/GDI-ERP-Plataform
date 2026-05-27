@@ -17,7 +17,7 @@ Pendências **ativas** do **GDI-ERP-Plataform**, consolidadas a partir de `.curs
 | PERF-007 lote 3 | `.cursor/context/2026_05_20_perf007-lote2-inventario.md` |
 | IIS / gzip / 304 | `.cursor/context/2026_05_20_perf012-iis-static-compression-cache.md` |
 | IsTableUpdate TTL | `.cursor/context/2026_05_20_perf015-is-table-update-ttl.md` |
-| NFe e-Notas | `.cursor/context/2026_05_20_nfe-enotas-arquitetura.md` |
+| NFe e-Notas | `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md` |
 | Migração 4.8.1 | `.cursor/context/2026_05_20_migracao-472-481.md` |
 | Monitorização lookups pós-publish | `.cursor/context/2026_05_20_lookups-monitorizacao-pos-publish.md` |
 | Health + PUB-1/PUB-2 | `.cursor/context/2026_05_20_health-endpoint-publish.md` |
@@ -81,7 +81,7 @@ python Scripts/2026_05_20_gdi_inventory_utf8_bom.py --fail
 
 | Ordem | ID | Item | Crit. | Instruções | Aceite |
 |------:|-----|------|-------|-----------|--------|
-| 1 | **G-SMK-01** | NFe e-Notas (gateway real) | Alta | Seguir secção «Smoke manual» em `.cursor/context/2026_05_20_nfe-enotas-arquitetura.md`: gerar, atualizar, cancelar, sincronizar em homologação. | Fluxos críticos NFe sem regressão |
+| 1 | **G-SMK-01** | NFe e-Notas (gateway real) | Alta | Seguir secção «Smoke manual» em `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md`: gerar, atualizar, cancelar, sincronizar em homologação. | Fluxos críticos NFe sem regressão |
 | 2 | **G-SMK-02** | Smoke transversal pós-publish | Alta | Tabela abaixo (sub-itens 2.3.1–2.3.6 do checklist pendências). Novo login se cache `contextoModel_*` legado. | Cada área: fluxo principal OK ou defeito registado |
 | 3 | **G-SMK-03** | Financeiro gc — cancelamento / senhas | Média | Exclusão faturamento (`AjaxFinanceiroCancelamento`); troca senha interno, portal, vendedor (`UsuariosController`). | POSTs respondem JSON esperado |
 | 4 | **G-SMK-04** | Index cadastros — filtro inline | Média | Filiais (ou outro piloto): Enter, Limpar, paginação com filtro. Ver `2026_05_20_index-cadastros-primeiro-load.md`. | Grid não carrega dataset inteiro sem critério |

@@ -3065,13 +3065,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     int IdMovimento = int.Parse(view_gc_cfop_operacoes.tag1);
                     gc_movimentos record_gc_movimento = db.gc_movimentos.Find(IdMovimento);
                     g_clientes record_g_cliente = db.g_clientes.Find(record_gc_movimento.id_cliente);
+
                     
+
                     String TagAeronavePrefixo = string.Empty;
                     if (record_gc_movimento.aeronave_prefixo.EmptyIfNull().ToString().Length > 0) { TagAeronavePrefixo += " da Aeronave Prefixo: " + record_gc_movimento.aeronave_prefixo.EmptyIfNull().ToString() + ", "; }
-                    else if (record_g_cliente.identificador.EmptyIfNull().ToString().Length > 0) { TagAeronavePrefixo += " de Aeronaves Prefixo: " + record_g_cliente.identificador.EmptyIfNull().ToString() + ", "; }
-                    else { TagAeronavePrefixo += " de Aeronaves, "; }
+                    if (record_g_cliente.identificador.EmptyIfNull().ToString().Length > 0) { TagAeronavePrefixo += " Identificador: " + record_g_cliente.identificador.EmptyIfNull().ToString() + ", "; }
+                    if ((record_gc_movimento.aeronave_prefixo.EmptyIfNull().ToString().Length == 0) && (record_g_cliente.identificador.EmptyIfNull().ToString().Length == 0)) { TagAeronavePrefixo += " de Aeronaves, "; }
                     InformacoesComplementares = InformacoesComplementares.Replace("[aeronave_prefixo]", TagAeronavePrefixo);
-                    InformacoesComplementares = InformacoesComplementares.Replace("[prefixo]", TagAeronavePrefixo);
+                    InformacoesComplementares = InformacoesComplementares.Replace("[prefixo]", string.Empty);
 
                     String TagAeronaveModelo = string.Empty;
                     if (record_gc_movimento.aeronave_modelo.EmptyIfNull().ToString().Length > 0) { TagAeronaveModelo += " Modelo: " + record_gc_movimento.aeronave_modelo.EmptyIfNull().ToString() + ", "; }

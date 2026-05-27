@@ -1862,6 +1862,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             return View("ModalNFEntradaImportar", record_cstImportacaoNFEntrada);
         }
 
+        [GdiPageScripts(GdiPageScriptsFlags.Core | GdiPageScriptsFlags.BootstrapToggle | GdiPageScriptsFlags.Select2)]
         public ActionResult FormProcessarNFCompraNacional(int? id)
         {
             CstMovimentoEntradaNF record_cstMovimentoEntradaNF = new CstMovimentoEntradaNF();
@@ -1920,6 +1921,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     record_cstMovimentoEntradaNF.allItens.Add(record_cstMovimentoEntradaNFItem);
                 }
+                PreencherLookupsComboProdutosEntradaNacionalPorLinha(record_cstMovimentoEntradaNF.allItens);
             }
             else
             {

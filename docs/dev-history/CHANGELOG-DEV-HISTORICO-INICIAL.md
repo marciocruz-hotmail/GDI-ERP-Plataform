@@ -126,7 +126,7 @@
 ### [2026-05-20] — Grupo 2.2: NFe / e-Notas — revisão Fase 17, arquitetura, Portal Vendedor N/A
 **Tipo:** Análise | Documentação | Correção pontual
 **Arquivos tocados:**
-- `.cursor/context/2026_05_20_nfe-enotas-arquitetura.md` (novo) — fluxo `g_nfe`↔`gc_movimentos_nf`, mapa Ajax↔`RoboEnotasNFE`, smoke 2.2.4
+- `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md` (novo; antes `2026_05_20_*` com prefixo incorreto) — fluxo `g_nfe`↔`gc_movimentos_nf`, mapa Ajax↔`RoboEnotasNFE`, smoke 2.2.4
 - `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — §2.2.1–2.2.3 concluídos; 2.2.4 smoke pendente homologação
 - `Areas/g/Controllers/NfeController.cs` — view export: nome alinhado ao ficheiro `modalExportarDadosNfePDF.cshtml`
 - `GDI-ERP-Plataform.csproj` — `Content Include` export PDF (casing disco)
@@ -1672,7 +1672,7 @@ Ao atualizar status de **NF de serviços** (`GetNotaFiscalPedido` → `Atualizar
 
 **O que foi feito:**
 - Deteção de payload NFS-e: `xml_erp` JSON com **`servico`** na raiz e sem **`itens`** (`IsJsonEnvioNfseServico`).
-- Nesse caso: **GET** `https://api.enotasgw.com.br/v1/empresas/{Key2}/nfes/porIdExterno/{Uri.EscapeDataString(nf_identificador)}` (alinhado ao Yes-ERP-Cloud e ao download XML já existente no robô).
+- Nesse caso: **GET** `https://api.notagateway.com.br/v1/empresas/{Key2}/nfes/porIdExterno/{Uri.EscapeDataString(nf_identificador)}` (alinhado ao download XML já existente no robô).
 - Deserialização com **`DataNFSe`**: PDF via **`linkDownloadPDF`**, demais campos mapeados para as mesmas variáveis usadas na atualização do `gc_movimentos_nf` (fluxo unificado com NF-e produto).
 - **`NFSe`**: propriedades opcionais para resposta da consulta (`numero`, `dataCompetenciaRps`, `chaveAcesso`, datas em string).
 - **`catch (WebException)`** neste método: uso de **`LibExceptions.getWebException`** (evita NRE se `Response` for nulo).
@@ -1698,7 +1698,7 @@ Ao atualizar status de **NF de serviços** (`GetNotaFiscalPedido` → `Atualizar
 `GerarNFServicoByMovimentoNF` chamava `POST .../v2/empresas/{id}/nfes`; em ambiente real surgiu **404 Não Localizado**, `WebException` e o modal (`AjaxModalPedidoNotaFiscal`) não recebia JSON útil se `getWebException` falhasse com `Response` nulo.
 
 **O que foi feito:**
-- URL de emissão NFS-e alinhada à documentação oficial da eNotas (**POST** `https://api.enotasgw.com.br/v1/empresas/{empresaId}/nfes`), coerente com o próprio projeto (`/v1/.../nfes/porIdExterno/.../xml`).
+- URL de emissão NFS-e alinhada à API Nota Gateway (**POST** `https://api.notagateway.com.br/v1/empresas/{empresaId}/nfes`), coerente com o próprio projeto (`/v1/.../nfes/porIdExterno/.../xml`).
 - `LibExceptions.getWebException`: guardas para `ex`/`Response` nulos e corpo vazio → devolve `ex.Message` em vez de lançar.
 
 **O que foi evitado e por quê:**

@@ -190,10 +190,10 @@ Validar combos/datasets após deploy ou ambiente local com dados reais.
 
 ### 2.2 NFe (Fase 16 / 17) — Portal Vendedor **fora de escopo** (módulo removido)
 
-- [x] **2.2.1** Revisar `NfeController` + `RoboEnotasNFE` — Fase 17 concluída; mapa em `.cursor/context/2026_05_20_nfe-enotas-arquitetura.md`
+- [x] **2.2.1** Revisar `NfeController` + `RoboEnotasNFE` — Fase 17 concluída; mapa em `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md`
 - [x] **2.2.2** Roles `g_PortalVendedor_*` — **N/A** módulo Portal Vendedor; roles mantidas só em troca de senha (`TokenAcesso` **V**) em `UsuariosController`; desativar menu legado em produção
 - [x] **2.2.3** `Nfe.GetDados` / `GetDadosNfeLogs` — `param` nulo + `JsonDataTableException` + views `xhr.dt` com `return`
-- [ ] **2.2.4** Smoke manual — checklist na secção «Smoke manual» de `2026_05_20_nfe-enotas-arquitetura.md` (homologação e-Notas real)
+- [ ] **2.2.4** Smoke manual — checklist na secção «Smoke manual» de `2026_05_26_nfe-enotas-arquitetura.md` (homologação e-Notas real)
 
 ### 2.3 Smoke transversal (pós-publish)
 
