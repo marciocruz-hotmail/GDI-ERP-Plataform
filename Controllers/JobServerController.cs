@@ -1,11 +1,13 @@
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
+using GdiPlataform.Robos.Whatsapp;
 using GdiPlataform.Security;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Configuration;
 using System.Data.Entity;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web;
@@ -48,9 +50,9 @@ namespace GdiPlataform.Controllers
             if (index < 0) { host = host.Trim(); }
             else { host = host.Substring(0, index); };
 
-            if (host.Equals("localhost")) { database = "GdiPlataformEntities_localhost"; }
-            else if (host.Equals("gdidigital")) { database = "GdiPlataformEntities_gdi_producao"; }
-            else if (host.Equals("gdidigitalhomologacao")) { database = "GdiPlataformEntities_gdi_homologaca"; };
+            var tenant = UserIdentityController.SetTenants()
+                .FirstOrDefault(t => t.subDominio.Equals(host, StringComparison.OrdinalIgnoreCase));
+            if (tenant != null) database = tenant.database;
 
             if (request == null)
                 return BadRequest("Corpo da requisição inválido.");
@@ -105,6 +107,10 @@ namespace GdiPlataform.Controllers
             {
                 case "GerarRelatorioPosicaoEstoqueAtual":
                     GerarRelatorioPosicaoEstoqueAtual(jobId, parameters, cancellationToken, database);
+                    break;
+
+                case "EnviarResumoGerencialWhatsApp":
+                    RoboWhatsAppGerencial.EnviarResumoGerencial(jobId, parameters, cancellationToken, database);
                     break;
 
                 default:

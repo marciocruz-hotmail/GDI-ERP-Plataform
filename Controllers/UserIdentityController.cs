@@ -272,7 +272,6 @@ namespace GdiPlataform.Controllers
 
                 string _ImgLogoSubdominio = string.Empty;
                 string _database = string.Empty;
-                string _DbConnectionString = string.Empty;
 
                 if (string.IsNullOrEmpty(avm.userIdentity.Acesso) || string.IsNullOrEmpty(avm.userIdentity.Password))
                 {
@@ -341,10 +340,7 @@ namespace GdiPlataform.Controllers
                         // Base de Dados
                         CachePersister.dataBase = _database;
 
-                        _DbConnectionString = ConfigurationManager.ConnectionStrings[_database].ConnectionString;
-                        if (_DbConnectionString.IndexOf("homologacao") > 0) { userIdentity.AmbienteDatabase = "Homologação"; }
-                        else if (_DbConnectionString.IndexOf("producao") > 0) { userIdentity.AmbienteDatabase = "Produção"; }
-                        else { userIdentity.AmbienteDatabase = "Desconhecido"; }
+                        userIdentity.AmbienteDatabase = currentTenant.ambiente ?? "Desconhecido";
 
 
                         // Identificação do Usuário
@@ -767,56 +763,62 @@ namespace GdiPlataform.Controllers
         }
 
         #region setTenants
-        public List<CstTenant> SetTenants()
+        public static List<CstTenant> SetTenants()
         {
             var allTenants = new List<CstTenant>();
 
             CstTenant tenant1 = new CstTenant
             {
-                subDominio = "localhost",
+                subDominio        = "localhost",
                 ImgLogoSubdominio = "logoMicrosoft.png",
-                database = "GdiPlataformEntities_localhost",
+                database          = "GdiPlataformEntities_localhost",
+                ambiente          = "Desenvolvimento",
             };
             allTenants.Add(tenant1);
 
             CstTenant tenant2 = new CstTenant
             {
-                subDominio = "gdidigital",
+                subDominio        = "gdidigital",
                 ImgLogoSubdominio = "logoGdi.png",
-                database = "GdiPlataformEntities_gdi_producao",
+                database          = "GdiPlataformEntities_gdi_producao",
+                ambiente          = "Produção",
             };
             allTenants.Add(tenant2);
 
             CstTenant tenant3 = new CstTenant
             {
-                subDominio = "gdidigitalhomologacao",
+                subDominio        = "gdidigitalhomologacao",
                 ImgLogoSubdominio = "logoGdi.png",
-                database = "GdiPlataformEntities_gdi_homologacao",
+                database          = "GdiPlataformEntities_gdi_homologacao",
+                ambiente          = "Homologação",
             };
             allTenants.Add(tenant3);
 
             CstTenant tenant4 = new CstTenant
             {
-                subDominio = "aeroflightx",
+                subDominio        = "aeroflightx",
                 ImgLogoSubdominio = "logoGdi.png",
-                database = "GdiPlataformEntities_gdi_producao",
+                database          = "GdiPlataformEntities_gdi_producao",
+                ambiente          = "Produção",
             };
             allTenants.Add(tenant4);
 
             CstTenant tenant5 = new CstTenant
             {
-                subDominio = "homologacao",
+                subDominio        = "homologacao",
                 ImgLogoSubdominio = "logoGdi.png",
-                database = "GdiPlataformEntities_gdi_homologacao",
+                database          = "GdiPlataformEntities_gdi_homologacao",
+                ambiente          = "Homologação",
             };
             allTenants.Add(tenant5);
 
             // Portal do cliente: DNS público (app = este ERP monólito; legado GDI-PortalCliente-Plataform descontinuado)
             CstTenant tenantPortalCliente = new CstTenant
             {
-                subDominio = "portalflightx",
+                subDominio        = "portalflightx",
                 ImgLogoSubdominio = "logoGdi.png",
-                database = "GdiPlataformEntities_gdi_producao",
+                database          = "GdiPlataformEntities_gdi_producao",
+                ambiente          = "Produção",
             };
             allTenants.Add(tenantPortalCliente);
 
@@ -859,10 +861,7 @@ namespace GdiPlataform.Controllers
                 PerfilNome = "Portal do Cliente"
             };
 
-            string connStr = ConfigurationManager.ConnectionStrings[currentTenant.database].ConnectionString;
-            if (connStr.IndexOf("homologacao", StringComparison.OrdinalIgnoreCase) >= 0) userIdentity.AmbienteDatabase = "Homologação";
-            else if (connStr.IndexOf("producao", StringComparison.OrdinalIgnoreCase) >= 0) userIdentity.AmbienteDatabase = "Produção";
-            else userIdentity.AmbienteDatabase = "Desconhecido";
+            userIdentity.AmbienteDatabase = currentTenant.ambiente ?? "Desconhecido";
 
             CachePersister.dataBase = currentTenant.database;
 

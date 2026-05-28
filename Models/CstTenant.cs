@@ -11,5 +11,6 @@ namespace GdiPlataform.Models
         public string subDominio { get; set; }
         public string ImgLogoSubdominio { get; set; }
         public string database { get; set; }
+        public string ambiente { get; set; }
     }
 }

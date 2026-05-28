@@ -4,7 +4,66 @@
 > **Histórico integral (187 entradas, ~2900 linhas):** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`  
 > **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md`
 
-**Última atualização:** 2026-05-20 (PUB-1/PUB-2 health + Release)
+**Última atualização:** 2026-05-28 — Relatório Gerencial WhatsApp (Z-API) + limpeza de referências hardcoded de ambiente
+
+---
+
+### [2026-05-28] — Remoção de referências hardcoded de ambiente (producao/homologacao) no código C#
+**Tipo:** Correção / Refatoração cirúrgica
+**Arquivos tocados:**
+- `Models/CstTenant.cs`
+- `Controllers/UserIdentityController.cs`
+- `Controllers/JobServerController.cs`
+
+**Problema / Demanda:**
+Strings de ambiente ("Homologação"/"Produção") e nomes de connection string estavam hardcoded em lógica C# fora do único ponto legítimo de configuração (SetTenants). O `JobServerController` duplicava o mapeamento host→database de `SetTenants` com um typo (`gdi_homologaca`). O `UserIdentityController` determinava `AmbienteDatabase` por sniff de substring na connection string.
+
+**O que foi feito:**
+1. `CstTenant` recebeu o campo `ambiente` (ex.: "Produção", "Homologação", "Desenvolvimento").
+2. `SetTenants()` tornou-se `public static` e cada tenant recebeu seu `ambiente` declarado.
+3. Os dois pontos de sniff (`_DbConnectionString.IndexOf("homologacao")`) foram substituídos por `currentTenant.ambiente ?? "Desconhecido"` — eliminando variável `_DbConnectionString` que existia só para esse fim.
+4. `JobServerController` passou a usar `UserIdentityController.SetTenants().FirstOrDefault(...)` — eliminando o mapeamento duplicado e o typo `gdi_homologaca`.
+
+**O que NÃO foi alterado:**
+- `RoboEnotasNFE.cs` — os strings "Producao"/"Homologacao" ali são valores do envelope da API e-Notas/SEFAZ, determinados por flag do banco (`recordNfeGateway.producao`). Conceito distinto do ambiente de aplicação.
+
+**Impactos conhecidos:**
+- Nenhuma view alterada. Comportamento externo idêntico.
+- Novo tenant adicionado no futuro: apenas um lugar para editar (SetTenants).
+
+---
+
+### [2026-05-28] — Relatório Gerencial Diário via WhatsApp
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Robos/WhatsApp/RoboWhatsAppGerencial.cs` *(novo)*
+- `Controllers/JobServerController.cs`
+- `GDI-ERP-Plataform.csproj`
+
+**Problema / Demanda:**
+Diretoria precisa receber diariamente, às 18h, um resumo gerencial com pedidos do dia, pedidos do mês e breakdown por vendedor — sem precisar acessar o ERP.
+
+**O que foi feito:**
+Criado `RoboWhatsAppGerencial` (classe estática) que executa as mesmas queries SQL de `GerencialController.IndexPainelComercialGerencial` (pedidos hoje + pedidos mês por vendedor) e envia a mensagem formatada via Z-API para `+5531973001808`. Adicionado `case "EnviarResumoGerencialWhatsApp"` no switch do `JobServerController`. O agendamento é feito pelo **Windows Task Scheduler** do servidor IIS: `POST /api/JobServer/Run` `{"Key":"...","JobName":"EnviarResumoGerencialWhatsApp"}` às 18h, Seg–Sex.
+
+**Decisões técnicas relevantes:**
+- `RoboWhatsAppGerencial` é estático e sem dependência de `CachePersister` / `HttpContext` — compatível com background jobs do IIS.
+- `JsonConvert.SerializeObject` usado para serializar o body Z-API, garantindo escape correto de `\n` na mensagem.
+- Registro de execução em `g_jobserver` (padrão já adotado no projeto).
+- Erros HTTP da Z-API lançam exceção — o `JobServerController` captura e grava em `LibLogger`.
+
+**O que foi evitado e por quê:**
+- Não foi alterado `GerencialController` — as queries foram duplicadas no novo robô para evitar acoplamento entre o fluxo MVC (com ViewBag/View) e o job background.
+- Não foi usado `RoboWhatsApp.EnviarTextoSimplesWhatsApp` — ele depende de `CachePersister.userIdentity.IdUsuario` (sessão HTTP), que não existe em background jobs.
+
+**Impactos conhecidos:**
+- `JobServerController` inalterado em comportamento existente; novo `case` é additive.
+- Nenhuma view alterada.
+
+**Atenção para próximas intervenções:**
+- Configurar o **Windows Task Scheduler** no servidor IIS para disparar o job (instruções abaixo).
+- Verificar idle timeout do App Pool (configurar para 0 se necessário).
+- Instruções de configuração do Task Scheduler: `schtasks /create /tn "GDI-RelatorioGerencialWhatsApp" /tr "powershell -Command \"Invoke-WebRequest -Uri 'https://DOMINIO/api/JobServer/Run' -Method POST -ContentType 'application/json' -Body '{\"Key\":\"CHAVE\",\"JobName\":\"EnviarResumoGerencialWhatsApp\"}'\"" /sc WEEKLY /d MON,TUE,WED,THU,FRI /st 18:00`
 
 ---
 
@@ -62,6 +121,11 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-25 — WhatsApp gerencial: vendedores por seção (hoje/mês) em ordem alfabética
+
+- **Pedidos Hoje / Pedidos Mês:** linhas por vendedor (`Nome qtd | R$ valor`), separador `**********`, totais GDI / SC / Total; ordem alfabética pt-BR; secção «Pedidos Vendedor» removida (incorporada).
+- **Arquivo:** `Robos/WhatsApp/RoboWhatsAppGerencial.cs`.
 
 ### 2026-05-25 — NF entrada nacional: Select2 ausente (LayoutLite) + scroll horizontal
 
