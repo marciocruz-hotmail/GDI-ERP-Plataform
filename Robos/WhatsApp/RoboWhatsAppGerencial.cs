@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Entity;
 using System.Globalization;
@@ -16,7 +17,7 @@ namespace GdiPlataform.Robos.Whatsapp
     // Executado em background pelo JobServerController — sem dependência de HttpContext/CachePersister.
     public static class RoboWhatsAppGerencial
     {
-        private const string DESTINATARIO   = "5531985113025";
+        private const string ConfigDestinatarios = "WhatsAppGerencial:Destinatarios";
         private const string INSTANCE_ID    = "3D933D08BC343053ACA9CE82F470C0C7";
         private const string INSTANCE_TOKEN = "ACE6A8DDC0AF992D50FDD712";
         private const string CLIENT_TOKEN   = "F473838c008c242fc9ae05bf7b4727c37S";
@@ -63,10 +64,13 @@ namespace GdiPlataform.Robos.Whatsapp
                 {
                     if (cancellationToken.IsCancellationRequested) return;
 
-                    string mensagem = MontarMensagem(db);
-                    EnviarZApi(DESTINATARIO, mensagem);
+                    var destinatarios = ObterDestinatariosWhatsAppGerencial();
+                    LibLogger.Info($"[JobServer] EnviarResumoGerencialWhatsApp | destinatários configurados: {destinatarios.Count}");
 
-                    recordJob.qtd_rows_sucesso = 1;
+                    string mensagem = MontarMensagem(db);
+                    EnviarRelatorioParaDestinatarios(destinatarios, mensagem);
+
+                    recordJob.qtd_rows_sucesso = destinatarios.Count;
                     recordJob.concluido        = true;
                     recordJob.datahora_fim     = DateTime.Now;
                     db.Entry(recordJob).State  = EntityState.Modified;
@@ -229,6 +233,70 @@ namespace GdiPlataform.Robos.Whatsapp
             sb.Append("SC    " + qtdSC + " | R$ " + valorSC.ToString("N2", PtBR) + "\n");
             sb.Append("Total " + (qtdGDI + qtdSC) + " | R$ " + (valorGDI + valorSC).ToString("N2", PtBR) + "\n");
             sb.Append("\n");
+        }
+
+        /// <summary>Lê App_Data\Secrets\appSettings.local.config — chave WhatsAppGerencial:Destinatarios (N celulares separados por ;).</summary>
+        private static IList<string> ObterDestinatariosWhatsAppGerencial()
+        {
+            string raw = ConfigurationManager.AppSettings[ConfigDestinatarios];
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                throw new InvalidOperationException(
+                    "Configure a chave \"" + ConfigDestinatarios + "\" em App_Data\\Secrets\\appSettings.local.config " +
+                    "(copie de appSettings.local.config.example).");
+            }
+
+            var numeros = new List<string>();
+            var vistos = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string parte in raw.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string normalizado = LibStringFormat.NormalizarTelefoneWhatsAppBrasil(parte);
+                if (string.IsNullOrWhiteSpace(normalizado) || normalizado.Length < 12)
+                    continue;
+                if (vistos.Add(normalizado))
+                    numeros.Add(normalizado);
+            }
+
+            if (numeros.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Nenhum celular válido em \"" + ConfigDestinatarios + "\". Use DDI 55 e separe múltiplos números por ;.");
+            }
+
+            return numeros;
+        }
+
+        private static void EnviarRelatorioParaDestinatarios(IList<string> destinatarios, string mensagem)
+        {
+            var falhas = new List<string>();
+            int enviados = 0;
+
+            foreach (string celular in destinatarios)
+            {
+                try
+                {
+                    EnviarZApi(celular, mensagem);
+                    enviados++;
+                }
+                catch (Exception ex)
+                {
+                    falhas.Add(MascararCelularLog(celular) + ": " + LibExceptions.getExceptionShortMessage(ex));
+                }
+            }
+
+            if (falhas.Count > 0)
+            {
+                throw new Exception(
+                    "Relatório gerencial WhatsApp: " + enviados + " enviado(s), " + falhas.Count + " falha(s). " +
+                    string.Join(" | ", falhas));
+            }
+        }
+
+        private static string MascararCelularLog(string celular)
+        {
+            if (string.IsNullOrEmpty(celular) || celular.Length <= 4)
+                return "****";
+            return "****" + celular.Substring(celular.Length - 4);
         }
 
         private static void EnviarZApi(string celular, string mensagem)

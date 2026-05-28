@@ -122,6 +122,11 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 
 ## Últimas alterações relevantes
 
+### 2026-05-25 — WhatsApp gerencial: destinatários em appSettings.local.config (N números)
+
+- **Secrets:** removido `DESTINATARIO` hardcoded; chave `WhatsAppGerencial:Destinatarios` em `App_Data\Secrets\appSettings.local.config` (modelo `.example`).
+- **Multi-destino:** valores separados por `;` — relatório enviado a todos; normalização DDI 55 (`LibStringFormat.NormalizarTelefoneWhatsAppBrasil`); falha se algum envio Z-API falhar.
+
 ### 2026-05-25 — WhatsApp gerencial: vendedores por seção (hoje/mês) em ordem alfabética
 
 - **Pedidos Hoje / Pedidos Mês:** linhas por vendedor (`Nome qtd | R$ valor`), separador `**********`, totais GDI / SC / Total; ordem alfabética pt-BR; secção «Pedidos Vendedor» removida (incorporada).
