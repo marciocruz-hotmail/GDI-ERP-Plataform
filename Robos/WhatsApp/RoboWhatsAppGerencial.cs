@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -6,8 +7,11 @@ using System.Configuration;
 using System.Data;
 using System.Data.Entity;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web.Hosting;
+using System.Xml;
 using GdiPlataform.Db;
 using GdiPlataform.Lib;
 
@@ -64,7 +68,7 @@ namespace GdiPlataform.Robos.Whatsapp
                 {
                     if (cancellationToken.IsCancellationRequested) return;
 
-                    var destinatarios = ObterDestinatariosWhatsAppGerencial();
+                    var destinatarios = ObterDestinatariosWhatsAppGerencial(parameters);
                     LibLogger.Info($"[JobServer] EnviarResumoGerencialWhatsApp | destinatários configurados: {destinatarios.Count}");
 
                     string mensagem = MontarMensagem(db);
@@ -80,11 +84,12 @@ namespace GdiPlataform.Robos.Whatsapp
                 }
                 catch (Exception ex)
                 {
-                    LibLogger.Error($"[JobServer] EnviarResumoGerencialWhatsApp erro | JobId: {jobId}", ex);
+                    LibLogger.Error($"[JobServer] EnviarResumoGerencialWhatsApp erro | JobId: {jobId} | {LibExceptions.getExceptionShortMessage(ex)}", ex);
 
                     try
                     {
                         recordJob.concluido       = false;
+                        recordJob.qtd_rows_erro   = 1;
                         recordJob.datahora_fim    = DateTime.Now;
                         db.Entry(recordJob).State = EntityState.Modified;
                         db.SaveChanges();
@@ -235,34 +240,81 @@ namespace GdiPlataform.Robos.Whatsapp
             sb.Append("\n");
         }
 
-        /// <summary>Lê App_Data\Secrets\appSettings.local.config — chave WhatsAppGerencial:Destinatarios (N celulares separados por ;).</summary>
-        private static IList<string> ObterDestinatariosWhatsAppGerencial()
+        /// <summary>
+        /// Lê destinatários: AppSettings → ficheiro secrets → Parameters do job (fallback operacional).
+        /// Chave: WhatsAppGerencial:Destinatarios (N celulares separados por ; ou ,).
+        /// </summary>
+        private static IList<string> ObterDestinatariosWhatsAppGerencial(string jobParametersFallback)
         {
-            string raw = ConfigurationManager.AppSettings[ConfigDestinatarios];
+            string raw = LerChaveConfiguracao(ConfigDestinatarios);
+            if (string.IsNullOrWhiteSpace(raw) && !string.IsNullOrWhiteSpace(jobParametersFallback))
+            {
+                raw = jobParametersFallback.Trim();
+                LibLogger.Info("[JobServer] EnviarResumoGerencialWhatsApp usando Parameters do job como fallback de destinatários.");
+            }
+
             if (string.IsNullOrWhiteSpace(raw))
             {
                 throw new InvalidOperationException(
-                    "Configure a chave \"" + ConfigDestinatarios + "\" em App_Data\\Secrets\\appSettings.local.config " +
-                    "(copie de appSettings.local.config.example).");
+                    "Destinatários WhatsApp não configurados. Adicione a chave \"" + ConfigDestinatarios + "\" em " +
+                    "App_Data\\Secrets\\appSettings.local.config (copie de appSettings.local.config.example) " +
+                    "ou informe celulares no campo Parameters do JobServer (separados por ;).");
             }
 
-            var numeros = new List<string>();
-            var vistos = new HashSet<string>(StringComparer.Ordinal);
-            foreach (string parte in raw.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                string normalizado = LibStringFormat.NormalizarTelefoneWhatsAppBrasil(parte);
-                if (string.IsNullOrWhiteSpace(normalizado) || normalizado.Length < 12)
-                    continue;
-                if (vistos.Add(normalizado))
-                    numeros.Add(normalizado);
-            }
-
+            var numeros = ParseListaDestinatarios(raw);
             if (numeros.Count == 0)
             {
                 throw new InvalidOperationException(
                     "Nenhum celular válido em \"" + ConfigDestinatarios + "\". Use DDI 55 e separe múltiplos números por ;.");
             }
 
+            return numeros;
+        }
+
+        private static string LerChaveConfiguracao(string key)
+        {
+            string value = ConfigurationManager.AppSettings[key];
+            if (!string.IsNullOrWhiteSpace(value))
+                return value.Trim();
+
+            return LerChaveDoFicheiroSecrets(key);
+        }
+
+        /// <summary>Fallback quando AppSettings não expõe chave nova (ex.: appSettings.local.config no IIS desatualizado).</summary>
+        private static string LerChaveDoFicheiroSecrets(string key)
+        {
+            try
+            {
+                string path = HostingEnvironment.MapPath("~/App_Data/Secrets/appSettings.local.config");
+                if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                    return null;
+
+                var doc = new XmlDocument();
+                doc.Load(path);
+                XmlNode node = doc.SelectSingleNode("/appSettings/add[@key='" + key + "']/@value");
+                return node?.Value?.Trim();
+            }
+            catch (Exception ex)
+            {
+                LibLogger.Error("[JobServer] Falha ao ler appSettings.local.config para " + key, ex);
+                return null;
+            }
+        }
+
+        private static List<string> ParseListaDestinatarios(string raw)
+        {
+            var numeros = new List<string>();
+            var vistos = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string parte in raw.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string normalizado = LibStringFormat.NormalizarTelefoneWhatsAppBrasil(parte.Trim());
+                if (string.IsNullOrWhiteSpace(normalizado) || normalizado.Length < 12 || normalizado.Length > 13)
+                    continue;
+                if (!normalizado.StartsWith("55", StringComparison.Ordinal))
+                    continue;
+                if (vistos.Add(normalizado))
+                    numeros.Add(normalizado);
+            }
             return numeros;
         }
 
@@ -315,6 +367,33 @@ namespace GdiPlataform.Robos.Whatsapp
 
             if (!response.IsSuccessful)
                 throw new Exception($"Z-API retornou erro HTTP {(int)response.StatusCode}: {response.Content}");
+
+            ValidarRespostaZApi(response.Content);
+        }
+
+        private static void ValidarRespostaZApi(string responseContent)
+        {
+            if (string.IsNullOrWhiteSpace(responseContent))
+                return;
+
+            JObject json;
+            try
+            {
+                json = JObject.Parse(responseContent);
+            }
+            catch (JsonReaderException)
+            {
+                return;
+            }
+
+            if (json["error"] != null && !string.IsNullOrWhiteSpace(json["error"].ToString()))
+                throw new Exception("Z-API rejeitou o envio: " + json["error"]);
+
+            if (json["success"] != null && json["success"].Type == JTokenType.Boolean && !json["success"].Value<bool>())
+            {
+                string msg = json["message"]?.ToString();
+                throw new Exception("Z-API rejeitou o envio: " + (string.IsNullOrWhiteSpace(msg) ? responseContent : msg));
+            }
         }
     }
 }

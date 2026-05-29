@@ -592,6 +592,8 @@
     <Compile Include="Areas\g\Models\CstViewVendedoresTabelasModel.cs" />
     <Compile Include="Areas\qa\Controllers\GedSGQController.cs" />
     <Compile Include="Areas\qa\Controllers\GedSGQController.Lookups.cs" />
+    <Compile Include="Areas\qa\Controllers\IndicadoresQualidadeController.cs" />
+    <Compile Include="Areas\qa\Controllers\IndicadoresQualidadePosVendaController.cs" />
     <Compile Include="Areas\qa\Controllers\LmsEvidenceController.cs" />
     <Compile Include="Areas\qa\Controllers\TreinamentosController.cs" />
     <Compile Include="Areas\qa\Models\EvidenceEventDto.cs" />
@@ -1672,6 +1674,8 @@
     <Content Include="Areas\g\Views\Vendedores\Index.cshtml" />
     <Content Include="Areas\g\Views\web.config" />
     <Content Include="Areas\g\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\qa\Views\IndicadoresQualidade\Index.cshtml" />
+    <Content Include="Areas\qa\Views\IndicadoresQualidadePosVenda\Index.cshtml" />
     <Content Include="Areas\qa\Views\GedSGQ\IndexAtasReunioes.cshtml" />
     <Content Include="Areas\qa\Views\GedSGQ\IndexComunicados.cshtml" />
     <Content Include="Areas\qa\Views\GedSGQ\IndexDocsSGQ.cshtml" />

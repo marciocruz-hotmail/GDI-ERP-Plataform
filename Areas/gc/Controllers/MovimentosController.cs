@@ -1788,6 +1788,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 record_pedido_gc_movimento.movimento_posvenda = true;
                 record_pedido_gc_movimento.datahora_posvenda = DataHoraAtual;
                 record_pedido_gc_movimento.id_usuario_posvenda = CachePersister.userIdentity.IdUsuario;
+                if (record_pedido_gc_movimento.posvenda_pedido_nao_conforme == true) { record_pedido_gc_movimento.id_movimento_posicao = 7; } else { record_pedido_gc_movimento.id_movimento_posicao = 8; };
                 db.Entry(record_pedido_gc_movimento).State = EntityState.Modified;
                 db.SaveChanges();
 

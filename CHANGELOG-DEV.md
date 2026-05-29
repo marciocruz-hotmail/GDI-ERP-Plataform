@@ -4,7 +4,49 @@
 > **Histórico integral (187 entradas, ~2900 linhas):** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`  
 > **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md`
 
-**Última atualização:** 2026-05-28 — Relatório Gerencial WhatsApp (Z-API) + limpeza de referências hardcoded de ambiente
+**Última atualização:** 2026-05-29 — Painel de Indicadores da Qualidade Pós-Venda (ISO 9001) — Fases 1-3
+
+---
+
+### [2026-05-29] — Painel de Indicadores da Qualidade Pós-Venda (ISO 9001) — Fases 1–3
+**Tipo:** Implementação
+**Arquivos tocados:**
+- `Areas/qa/Controllers/IndicadoresQualidadeController.cs`
+- `Areas/qa/Controllers/IndicadoresQualidadePosVendaController.cs` *(novo)*
+- `Areas/qa/Views/IndicadoresQualidade/Index.cshtml`
+- `Areas/qa/Views/IndicadoresQualidadePosVenda/Index.cshtml` *(novo)*
+- `GDI-ERP-Plataform.csproj` *(Content Include das duas novas views)*
+
+**Problema / Demanda:**
+Implantação da gestão da qualidade ISO 9001. Necessidade de painel consolidado de indicadores com navegação por grupos, iniciando pelo grupo Pós-Venda (avaliação do cliente após entrega do pedido).
+
+**O que foi feito:**
+1. **Painel Geral** (`qa/IndicadoresQualidade/Index`): hub de navegação com filtro trimestre+ano, card-resumo do grupo Pós-Venda (ISG, TNC, TRC com semáforo Bootstrap) e estrutura pronta para receber novos grupos de indicadores.
+2. **Painel Pós-Venda** (`qa/IndicadoresQualidadePosVenda/Index`): view completa com 9 KPIs ISO 9001 organizados em 3 grupos (satisfação escala 1–5, conformidade %, não conformidade/resposta), gráfico de tendência Flot (ISG + TNC por trimestre), tabela DataTables server-side com detalhe por pedido e exportação Excel (ClosedXML — 2 abas: Resumo KPIs + Avaliações).
+3. **`IndicadoresQualidadeController`**: `Index()` + `GetKpisPosVendaResumo()` (JSON resumo para o card).
+4. **`IndicadoresQualidadePosVendaController`**: `Index()`, `GetDadosKpi()`, `GetDadosGraficoTendencia()`, `GetDadosRelatorio()` (DataTables), `ExportarExcel()` (ClosedXML MemoryStream).
+
+**Decisões técnicas relevantes:**
+- Pedido entregue = `id_movimento_posicao >= 6` (conforme definição do produto).
+- Escala de notas 1–5 (metas: ISG/ISA/ISI ≥ 4,0 | ISP ≥ 3,8 | conformidades ≥ 95–98% | TNC ≤ 3% | TRC ≥ 60%).
+- Semáforo: `success` / `warning` / `danger` via Bootstrap color tokens.
+- Gráfico seguindo exatamente o padrão `FinanceiroController.GetDadosGrafico` + `DadosConsolidados.cshtml` (Flot, eixo duplo).
+- Excel via `ClosedXML` com `MemoryStream` (sem arquivo temp em disco) — padrão mais limpo que o template-file usado em outros controllers.
+- Sem roles de acesso — conforme definição do produto.
+- ADO.NET direto via `LibDB.GetDataTable` para todas as queries analíticas.
+
+**O que foi evitado e por quê:**
+- `Chart.js` → projeto usa Flot via AdminLTE 4; sem nova lib.
+- Arquivo temporário em disco para Excel → MemoryStream é suficiente e mais limpo.
+- Roles → não requeridas para este módulo neste momento.
+
+**Impactos conhecidos:**
+- Nenhum controller ou view existente foi alterado.
+- Arquitetura do painel geral está preparada para receber novos grupos de indicadores (Qualidade, Atendimento, Logística, etc.) sem refatoração.
+
+**Atenção para próximas intervenções:**
+- Novos grupos de indicadores: adicionar card no `IndicadoresQualidade/Index.cshtml` + criar controller/view específico seguindo o mesmo padrão.
+- Para exportação com templates `.xlsx` pré-formatados (logo, cores GDI): substituir `new XLWorkbook()` por `new XLWorkbook(templatePath)` conforme padrão de outros controllers.
 
 ---
 
@@ -121,6 +163,11 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-28 — WhatsApp gerencial: correção envio silencioso pós-migração destinatários
+
+- **Causa:** após mover `DESTINATARIO` para `WhatsAppGerencial:Destinatarios`, o IIS sem a chave no `appSettings.local.config` falhava o job em background (202 Accepted, sem WhatsApp).
+- **Correção:** leitura em camadas (AppSettings → XML secrets → Parameters do job); `qtd_rows_erro` + log com mensagem; validação JSON Z-API; stub vazio em `Web.config`.
 
 ### 2026-05-25 — WhatsApp gerencial: destinatários em appSettings.local.config (N números)
 

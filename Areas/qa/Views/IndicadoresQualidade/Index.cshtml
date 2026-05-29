@@ -1,0 +1,127 @@
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+            <div class="card-title m-0 p-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h5 class="m-0">@Html.Raw(ViewBag.Title)</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="mb-0 text-sm">Período:</label>
+                    <select id="selTrimestre" class="form-select form-select-sm" style="width:auto">
+                        @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Trimestres)
+                        {
+                            <option value="@item.Value" @(item.Value == ViewBag.TrimestreAtual ? "selected" : "")>@item.Text</option>
+                        }
+                    </select>
+                    <select id="selAno" class="form-select form-select-sm" style="width:auto">
+                        @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Anos)
+                        {
+                            <option value="@item.Value" @(item.Value == ViewBag.AnoAtual ? "selected" : "")>@item.Text</option>
+                        }
+                    </select>
+                    <button id="btnFiltrar" class="btn btn-sm btn-primary">
+                        <i class="fa-solid fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body m-0 p-2">
+                <div class="row g-3" id="rowGruposIndicadores">
+
+                    <!-- Card Grupo: Pós-Venda -->
+                    <div class="col-xl-3 col-md-4 col-sm-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-success text-white py-2 d-flex align-items-center justify-content-between">
+                                <span><i class="fa-solid fa-star me-1"></i> Pós-Venda</span>
+                                <span id="pvSpinner" class="spinner-border spinner-border-sm" role="status"></span>
+                            </div>
+                            <div class="card-body py-2 px-3" id="pvCardBody">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">Satisfação Geral (ISG)</small>
+                                    <span id="pvIsg" class="badge bg-secondary">—</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">Não Conformidades (TNC)</small>
+                                    <span id="pvTnc" class="badge bg-secondary">—</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">Taxa de Resposta (TRC)</small>
+                                    <span id="pvTrc" class="badge bg-secondary">—</span>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted" id="pvTotal">—</small>
+                                    <a href="@Url.Action("Index", "IndicadoresQualidadePosVenda", new { Area = "qa" })"
+                                       class="btn btn-xs btn-outline-success btn-sm py-0 px-2">
+                                        <i class="fa-solid fa-arrow-right"></i> Detalhes
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder para grupos futuros -->
+                    <div class="col-xl-3 col-md-4 col-sm-6 d-none" id="cardPlaceholder">
+                        <div class="card border-0 shadow-sm h-100 border-dashed">
+                            <div class="card-header bg-light text-muted py-2">
+                                <i class="fa-solid fa-plus-circle me-1"></i> Novo Grupo
+                            </div>
+                            <div class="card-body py-2 px-3 text-muted text-sm">
+                                Em desenvolvimento
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        try {
+            carregarKpis();
+            $('#btnFiltrar').on('click', function () { carregarKpis(); });
+        } catch (err) {
+            LibMessageError("Atenção", "[Indicadores] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function carregarKpis() {
+        var trimestre = $('#selTrimestre').val();
+        var ano = $('#selAno').val();
+
+        $('#pvSpinner').show();
+        $('#pvIsg, #pvTnc, #pvTrc').addClass('bg-secondary').removeClass('bg-success bg-warning bg-danger').text('—');
+        $('#pvTotal').text('carregando...');
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetKpisPosVendaResumo", "IndicadoresQualidade", new { Area = "qa" })',
+            data: { trimestre: trimestre, ano: ano },
+            dataType: 'json',
+            success: function (r) {
+                $('#pvSpinner').hide();
+                if (r.errorMessage) {
+                    GdiAjaxNotifyInconsistencias(r.errorMessage, { title: 'Indicadores Pós-Venda', severity: r.severity });
+                    return;
+                }
+                $('#pvIsg').text(r.isg.toFixed(1) + ' / 5,0')
+                    .removeClass('bg-secondary bg-success bg-warning bg-danger')
+                    .addClass('bg-' + r.corIsg);
+                $('#pvTnc').text(r.tnc.toFixed(1) + '%')
+                    .removeClass('bg-secondary bg-success bg-warning bg-danger')
+                    .addClass('bg-' + r.corTnc);
+                $('#pvTrc').text(r.trc.toFixed(1) + '%')
+                    .removeClass('bg-secondary bg-success bg-warning bg-danger')
+                    .addClass('bg-' + r.corTrc);
+                $('#pvTotal').text(r.totalAvaliacoes + ' avaliações / ' + r.totalEntregues + ' entregas');
+            },
+            error: function () {
+                $('#pvSpinner').hide();
+                LibMessageAlert("Atenção", "Falha ao carregar indicadores de Pós-Venda.");
+            }
+        });
+    }
+</script>

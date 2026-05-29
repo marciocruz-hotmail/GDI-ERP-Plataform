@@ -1,0 +1,320 @@
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<div class="row">
+    <div class="col-lg-12 m-0 p-0">
+        <div class="card m-0 p-0">
+
+            @*Cabeçalho + filtros*@
+            <div class="card-title m-0 p-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <a href="@Url.Action("Index", "IndicadoresQualidade", new { Area = "qa" })"
+                       class="btn btn-sm btn-outline-secondary" title="Voltar ao painel geral">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <h5 class="m-0">@Html.Raw(ViewBag.Title)</h5>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <select id="selTrimestre" class="form-select form-select-sm" style="width:auto">
+                        @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Trimestres)
+                        {
+                            <option value="@item.Value" @(item.Value == ViewBag.TrimestreAtual ? "selected" : "")>@item.Text</option>
+                        }
+                    </select>
+                    <select id="selAno" class="form-select form-select-sm" style="width:auto">
+                        @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Anos)
+                        {
+                            <option value="@item.Value" @(item.Value == ViewBag.AnoAtual ? "selected" : "")>@item.Text</option>
+                        }
+                    </select>
+                    <select id="selResultado" class="form-select form-select-sm" style="width:auto">
+                        <option value="">Todos</option>
+                        <option value="C">Somente Conformes</option>
+                        <option value="NC">Somente Não Conformes</option>
+                    </select>
+                    <button id="btnFiltrar" class="btn btn-sm btn-primary">
+                        <i class="fa-solid fa-filter"></i> Filtrar
+                    </button>
+                    <button id="btnExportar" class="btn btn-sm btn-success">
+                        <i class="fa-solid fa-file-excel"></i> Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body m-0 p-2">
+
+                @*Linha 1: 9 cards KPI*@
+                <div class="row g-2 mb-3" id="rowKpis">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="fw-semibold text-sm text-muted">Satisfação do Cliente</span>
+                            <span class="badge bg-light text-muted border text-xs">escala 1–5</span>
+                        </div>
+                        <div class="row g-2 mb-2" id="rowKpisNota"></div>
+                    </div>
+                    <div class="col-12">
+                        <span class="fw-semibold text-sm text-muted">Conformidade de Entrega</span>
+                        <div class="row g-2 mb-2 mt-1" id="rowKpisConf"></div>
+                    </div>
+                    <div class="col-12">
+                        <span class="fw-semibold text-sm text-muted">Não Conformidade &amp; Resposta</span>
+                        <div class="row g-2 mb-2 mt-1" id="rowKpisNc"></div>
+                    </div>
+                </div>
+
+                @*Linha 2: tendência por trimestre*@
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-header py-1 bg-light d-flex align-items-center justify-content-between">
+                        <span class="fw-semibold text-sm">Tendência por Trimestre</span>
+                        <span class="text-xs text-muted">últimos 8 trimestres com avaliações</span>
+                    </div>
+                    <div class="card-body p-2">
+                        <div id="tblTendenciaWrapper" class="table-responsive">
+                            <div class="text-center text-muted py-3">
+                                <span class="spinner-border spinner-border-sm"></span> Carregando...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*Linha 3: tabela DataTables*@
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header py-1 bg-light">
+                        <span class="fw-semibold text-sm">Avaliações — Detalhe por Pedido</span>
+                    </div>
+                    <div class="card-body p-1">
+                        <div class="table-responsive scroll-body-horizontal">
+                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact"
+                                   style="width:100%" id="dtPosVenda">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>OC Cliente</th>
+                                        <th>Cliente</th>
+                                        <th>Data Contato</th>
+                                        <th>Geral</th>
+                                        <th>Prazo</th>
+                                        <th>Atend.</th>
+                                        <th>Info.</th>
+                                        <th>Conforme?</th>
+                                        <th>NC?</th>
+                                        <th>Sugestão?</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>@*card-body*@
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var oDtPosVenda;
+
+    $(function () {
+        try {
+            jsInicializar();
+        } catch (err) {
+            LibMessageError("Atenção", "[PosVenda] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsInicializar() {
+        criarTabela();
+        carregarKpis();
+        carregarTendencia();
+
+        $('#btnFiltrar').on('click', function () {
+            carregarKpis();
+            carregarTendencia();
+            oDtPosVenda.ajax.reload();
+        });
+
+        $('#btnExportar').on('click', function () {
+            var url = '@Url.Action("ExportarExcel", "IndicadoresQualidadePosVenda", new { Area = "qa" })'
+                + '?trimestre=' + $('#selTrimestre').val()
+                + '&ano=' + $('#selAno').val()
+                + '&idCliente=0'
+                + '&resultado=' + encodeURIComponent($('#selResultado').val());
+            window.location = url;
+        });
+    }
+
+    // ── KPI cards ─────────────────────────────────────────────────────────────
+
+    function criarCardKpi(containerId, sigla, titulo, valor, cor, sufixo) {
+        var html = '<div class="col-xl-3 col-md-4 col-sm-6">'
+            + '<div class="card border-start border-4 border-' + cor + ' shadow-sm">'
+            + '<div class="card-body py-2 px-3">'
+            + '<div class="d-flex justify-content-between align-items-center">'
+            + '<div>'
+            + '<div class="text-xs text-muted fw-semibold text-uppercase">' + sigla + '</div>'
+            + '<div class="h5 mb-0 fw-bold text-' + cor + '">' + valor + sufixo + '</div>'
+            + '<div class="text-xs text-muted">' + titulo + '</div>'
+            + '</div>'
+            + '<i class="fa-solid fa-gauge fa-2x text-' + cor + ' opacity-25"></i>'
+            + '</div>'
+            + '</div>'
+            + '</div>'
+            + '</div>';
+        $('#' + containerId).append(html);
+    }
+
+    function carregarKpis() {
+        $('#rowKpisNota, #rowKpisConf, #rowKpisNc').html(
+            '<div class="col-12 text-center text-muted py-2"><span class="spinner-border spinner-border-sm"></span> Carregando...</div>'
+        );
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetDadosKpi", "IndicadoresQualidadePosVenda", new { Area = "qa" })',
+            data: {
+                trimestre: $('#selTrimestre').val(),
+                ano:       $('#selAno').val(),
+                idCliente: 0,
+                resultado: $('#selResultado').val()
+            },
+            dataType: 'json',
+            success: function (r) {
+                if (r.errorMessage) {
+                    GdiAjaxNotifyInconsistencias(r.errorMessage, { title: 'KPIs Pós-Venda', severity: r.severity });
+                    $('#rowKpisNota, #rowKpisConf, #rowKpisNc').html('');
+                    return;
+                }
+                $('#rowKpisNota').html('');
+                criarCardKpi('rowKpisNota', 'ISG', 'Satisfação Geral',       r.isg.toFixed(1), r.corIsg,  ' / 5');
+                criarCardKpi('rowKpisNota', 'ISA', 'Atendimento',             r.isa.toFixed(1), r.corIsa,  ' / 5');
+                criarCardKpi('rowKpisNota', 'ISP', 'Prazo de Entrega',        r.isp.toFixed(1), r.corIsp,  ' / 5');
+                criarCardKpi('rowKpisNota', 'ISI', 'Clareza das Informações', r.isi.toFixed(1), r.corIsi,  ' / 5');
+
+                $('#rowKpisConf').html('');
+                criarCardKpi('rowKpisConf', 'TCE',  'Conformidade na Entrega', r.tce.toFixed(1),  r.corTce,  '%');
+                criarCardKpi('rowKpisConf', 'TEFI', 'Integridade Física',      r.tefi.toFixed(1), r.corTefi, '%');
+                criarCardKpi('rowKpisConf', 'TCI',  'Conformidade de Itens',   r.tci.toFixed(1),  r.corTci,  '%');
+
+                $('#rowKpisNc').html('');
+                criarCardKpi('rowKpisNc', 'TNC', 'Não Conformidade',  r.tnc.toFixed(1), r.corTnc, '%');
+                criarCardKpi('rowKpisNc', 'TRC', 'Taxa de Resposta', r.trc.toFixed(1), r.corTrc, '%');
+            },
+            error: function () {
+                $('#rowKpisNota, #rowKpisConf, #rowKpisNc').html('');
+                LibMessageAlert("Atenção", "Falha ao carregar os KPIs.");
+            }
+        });
+    }
+
+    // ── Tendência por trimestre (tabela) ──────────────────────────────────────
+
+    function carregarTendencia() {
+        $('#tblTendenciaWrapper').html(
+            '<div class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm"></span> Carregando...</div>'
+        );
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Action("GetDadosGraficoTendencia", "IndicadoresQualidadePosVenda", new { Area = "qa" })',
+            data: { trimestre: $('#selTrimestre').val(), ano: $('#selAno').val() },
+            dataType: 'json',
+            success: function (r) {
+                if (r.errorMessage) {
+                    GdiAjaxNotifyInconsistencias(r.errorMessage, { title: 'Tendência', severity: r.severity });
+                    $('#tblTendenciaWrapper').html('<div class="text-center text-muted py-2">Não foi possível carregar os dados de tendência.</div>');
+                    return;
+                }
+                if (!r.dataTicks || r.dataTicks.length === 0) {
+                    $('#tblTendenciaWrapper').html('<div class="text-center text-muted py-3">Sem dados históricos disponíveis.</div>');
+                    return;
+                }
+                var html = '<table class="table table-sm table-hover text-sm mb-0">'
+                    + '<thead><tr>'
+                    + '<th class="text-center">Período</th>'
+                    + '<th class="text-center">ISG <small class="text-muted">(nota 1–5)</small></th>'
+                    + '<th class="text-center">Meta ISG</th>'
+                    + '<th class="text-center">TNC <small class="text-muted">(%)</small></th>'
+                    + '<th class="text-center">Meta TNC</th>'
+                    + '</tr></thead><tbody>';
+
+                for (var i = 0; i < r.dataTicks.length; i++) {
+                    var periodo = r.dataTicks[i][1];
+                    var isgVal  = parseFloat(r.dataIsg[i][1]);
+                    var tncVal  = parseFloat(r.dataTnc[i][1]);
+                    var corIsg  = isgVal >= 4.0 ? 'success' : (isgVal >= 3.6 ? 'warning' : 'danger');
+                    var corTnc  = tncVal <= 3.0 ? 'success' : (tncVal <= 5.0 ? 'warning' : 'danger');
+                    html += '<tr>'
+                        + '<td class="text-center fw-semibold">' + periodo + '</td>'
+                        + '<td class="text-center"><span class="badge bg-' + corIsg + '">' + isgVal.toFixed(1) + '</span></td>'
+                        + '<td class="text-center text-muted">≥ 4,0</td>'
+                        + '<td class="text-center"><span class="badge bg-' + corTnc + '">' + tncVal.toFixed(1) + '%</span></td>'
+                        + '<td class="text-center text-muted">≤ 3%</td>'
+                        + '</tr>';
+                }
+                html += '</tbody></table>';
+                $('#tblTendenciaWrapper').html(html);
+            },
+            error: function () {
+                $('#tblTendenciaWrapper').html('<div class="text-center text-muted py-2">Falha ao carregar tendência.</div>');
+            }
+        });
+    }
+
+    // ── DataTables ────────────────────────────────────────────────────────────
+
+    function criarTabela() {
+        try {
+            $.fn.dataTable.ext.errMode = 'none';
+            oDtPosVenda = $('#dtPosVenda')
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('xhr.dt',   function (e, settings, json, xhr)         { GdiDtNotifyJsonErrorMessage(json); })
+                .DataTable({
+                    processing:   true,
+                    bServerSide:  true,
+                    ajax: {
+                        url:         '@Url.Action("GetDadosRelatorio", "IndicadoresQualidadePosVenda", new { Area = "qa" })',
+                        type:        'POST',
+                        contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                        dataType:    'json',
+                        cache:       false,
+                        data: function (d) {
+                            return {
+                                sEcho:          d.draw,
+                                iDisplayStart:  d.start,
+                                iDisplayLength: d.length,
+                                yesCustomField01: $('#selTrimestre').val(),
+                                yesCustomField02: $('#selAno').val(),
+                                yesCustomField03: '0',
+                                yesCustomField04: $('#selResultado').val()
+                            };
+                        },
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    },
+                    responsive:      true,
+                    bFilter:         false,
+                    bLengthChange:   false,
+                    pageLength:      100,
+                    scrollX:         false,
+                    bAutoWidth:      false,
+                    pagingType:      'full_numbers',
+                    aoColumnDefs: [
+                        { orderable: false, targets: '_all' },
+                        { className: 'text-sm-center', targets: [4, 5, 6, 7, 8, 9, 10] }
+                    ],
+                    order: [],
+                    language: {
+                        sEmptyTable:     'Nenhuma avaliação encontrada',
+                        sInfo:           'Mostrando de _START_ até _END_ [ _TOTAL_ registros ]',
+                        sInfoEmpty:      'Mostrando 0 até 0 de 0 registros',
+                        sInfoFiltered:   '(Filtrado de _MAX_ registros)',
+                        sInfoThousands:  '.',
+                        sLengthMenu:     '',
+                        sZeroRecords:    'Nenhuma avaliação encontrada',
+                        sSearch:         'Pesquisar',
+                        oPaginate:       { sNext: '>', sPrevious: '<', sFirst: '<<', sLast: '>>' }
+                    }
+                });
+        } catch (err) {
+            LibMessageError("Atenção", "[criarTabela] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+</script>
