@@ -164,6 +164,27 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 
 ## Últimas alterações relevantes
 
+### 2026-06-01 — Script WhatsApp gerencial: URL produção aeroflightx.com
+
+- **`Scripts/2026_05_28_gdi_relatorio_gerencial_whatsapp.ps1`:** `-Url` padrão `https://aeroflightx.com/api/JobServer/Run` (domínio atual; substitui `gdidigital.com.br`). Re-deploy do script em `C:\Scripts\GDI\` no servidor IIS.
+
+### 2026-06-01 — Painel comercial gerencial + WhatsApp: EXISTS / OUTER APPLY (totais sem duplicata NF)
+
+- **`GerencialController.IndexPainelComercialGerencial`:** pedidos diário/mês/entregues — `INNER JOIN gc_movimentos_nf` substituído por `EXISTS`; grelha em processamento — `OUTER APPLY TOP 1` NF mais recente (1 linha por movimento); removido `using DocumentFormat.OpenXml.Drawing.Charts` (CS0104 `DataTable`).
+- **`RoboWhatsAppGerencial`:** mesmas queries diário/mês alinhadas (`EXISTS`), para totais WhatsApp = painel web.
+
+### 2026-06-01 — Relatórios Regulamentação: CROSS APPLY / EXISTS (item × NF sem duplicata)
+
+- **`RelatoriosRegulamentacaoController`:** ANP/IBAMA/PF/Jogue Limpo Excel — `CROSS APPLY TOP 1` NF elegível por item; ANP ZIP — `EXISTS` itens regulados (1 NF = 1 download); PF — removida deduplicação por movimento (1 linha por item).
+
+### 2026-06-01 — Relatório Itens Comercializados: EXISTS em vez de JOIN NF (SUM sem duplicata)
+
+- **`AjaxModalRelatorioItensComercializados`:** removido `JOIN gc_movimentos_nf` que duplicava itens quando o pedido tinha várias NFs; critérios preservados (status 8/17, período `nf_data_geracao`, `operacao.is_venda = 1`).
+
+### 2026-06-01 — Relatório Vendedores Pedidos: performance consultas SQL (batch NF)
+
+- **`AjaxModalRelatorioVendedoresPedidos`:** eliminado padrão N+1 (1 query de NFs em lote); query de movimentos com `EXISTS` (alias `m` corrigido, sem duplicatas por JOIN); lookups de clientes/vendedores restritos aos IDs do resultado; filtro `comissao1_vendedor` preservado (um vendedor ou todos).
+
 ### 2026-05-28 — WhatsApp gerencial: correção envio silencioso pós-migração destinatários
 
 - **Causa:** após mover `DESTINATARIO` para `WhatsAppGerencial:Destinatarios`, o IIS sem a chave no `appSettings.local.config` falhava o job em background (202 Accepted, sem WhatsApp).

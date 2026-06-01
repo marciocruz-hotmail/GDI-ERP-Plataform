@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Drawing.Charts;
 using GdiPlataform.Areas.g.Models;
 using GdiPlataform.Areas.gc.Models;
 using GdiPlataform.Db;
@@ -100,7 +99,13 @@ namespace GdiPlataform.Areas.gc.Controllers
             SentencaSQL += " JOIN gc_locais_estoque AS le ON le.id_local_estoque = m.id_local_estoque ";
             SentencaSQL += " LEFT JOIN g_clientes AS c ON m.id_cliente = c.id_cliente ";
             SentencaSQL += " LEFT JOIN g_vendedores AS v ON m.id_vendedor = v.id_vendedor ";
-            SentencaSQL += " LEFT JOIN gc_movimentos_nf AS mnf ON mnf.id_movimento = m.id_movimento AND mnf.id_nfe_status IN(8, 17, 22) ";
+            SentencaSQL += " OUTER APPLY ( ";
+            SentencaSQL += "     SELECT TOP 1 mnf_inner.nf_numero ";
+            SentencaSQL += "     FROM gc_movimentos_nf AS mnf_inner ";
+            SentencaSQL += "     WHERE mnf_inner.id_movimento = m.id_movimento ";
+            SentencaSQL += "       AND mnf_inner.id_nfe_status IN (8, 17, 22) ";
+            SentencaSQL += "     ORDER BY mnf_inner.id_movimento_nf DESC ";
+            SentencaSQL += " ) AS mnf ";
             SentencaSQL += " JOIN gc_cfop_operacoes AS co ON co.id_cfop_operacao = m.id_cfop_operacao ";
             SentencaSQL += " WHERE m.id_movimento_status = 2 ";
             SentencaSQL += " AND m.movimento_aprovado = 1 ";
@@ -186,9 +191,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             sentencaSqlDiario += "     COUNT(*) AS qtd_diario, ";
             sentencaSqlDiario += "     SUM(gc_movimentos.valor_total_bruto) AS valor_total_bruto ";
             sentencaSqlDiario += " FROM gc_movimentos ";
-            sentencaSqlDiario += " INNER JOIN gc_movimentos_nf ";
-            sentencaSqlDiario += "     ON gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento ";
-            sentencaSqlDiario += "     AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22) ";
             sentencaSqlDiario += " INNER JOIN g_vendedores ";
             sentencaSqlDiario += "     ON gc_movimentos.id_vendedor = g_vendedores.id_vendedor ";
             sentencaSqlDiario += " INNER JOIN gc_cfop_operacoes ";
@@ -198,6 +200,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             sentencaSqlDiario += "       '" + DataHoraAtual.ToString("yyyy-MM-dd 00:00:00") + "' ";
             sentencaSqlDiario += "       AND '" + DataHoraAtual.ToString("yyyy-MM-dd 23:59:59") + "' ";
             sentencaSqlDiario += "   AND gc_cfop_operacoes.is_venda = 1 ";
+            sentencaSqlDiario += "   AND EXISTS ( ";
+            sentencaSqlDiario += "       SELECT 1 FROM gc_movimentos_nf ";
+            sentencaSqlDiario += "       WHERE gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento ";
+            sentencaSqlDiario += "         AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22) ";
+            sentencaSqlDiario += "   ) ";
             sentencaSqlDiario += " GROUP BY ";
             sentencaSqlDiario += "     g_vendedores.id_vendedor, ";
             sentencaSqlDiario += "     g_vendedores.nome ";
@@ -243,9 +250,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             sentencaSqlMes += "     COUNT(*) AS qtd_mes, ";
             sentencaSqlMes += "     SUM(gc_movimentos.valor_total_bruto) AS valor_total_bruto ";
             sentencaSqlMes += " FROM gc_movimentos ";
-            sentencaSqlMes += " INNER JOIN gc_movimentos_nf ";
-            sentencaSqlMes += "     ON gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento ";
-            sentencaSqlMes += "     AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22) ";
             sentencaSqlMes += " INNER JOIN g_vendedores ";
             sentencaSqlMes += "     ON gc_movimentos.id_vendedor = g_vendedores.id_vendedor ";
             sentencaSqlMes += " INNER JOIN gc_cfop_operacoes ";
@@ -255,6 +259,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             sentencaSqlMes += "       '" + LibDateTime.getPrimeiroDiaMesAtual().ToString("yyyy-MM-dd 00:00:00") + "' ";
             sentencaSqlMes += "       AND '" + LibDateTime.getUltimoDiaMesAtual().ToString("yyyy-MM-dd 23:59:59") + "' ";
             sentencaSqlMes += "   AND gc_cfop_operacoes.is_venda = 1 ";
+            sentencaSqlMes += "   AND EXISTS ( ";
+            sentencaSqlMes += "       SELECT 1 FROM gc_movimentos_nf ";
+            sentencaSqlMes += "       WHERE gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento ";
+            sentencaSqlMes += "         AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22) ";
+            sentencaSqlMes += "   ) ";
             sentencaSqlMes += " GROUP BY ";
             sentencaSqlMes += "     g_vendedores.id_vendedor, ";
             sentencaSqlMes += "     g_vendedores.nome ";
@@ -337,9 +346,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             sentencaSqlPedidosEntregues += " SELECT ";
             sentencaSqlPedidosEntregues += "     COUNT(*) AS qtd_entregues ";
             sentencaSqlPedidosEntregues += " FROM gc_movimentos ";
-            sentencaSqlPedidosEntregues += " INNER JOIN gc_movimentos_nf ";
-            sentencaSqlPedidosEntregues += "     ON gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento ";
-            sentencaSqlPedidosEntregues += "     AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22) ";
             sentencaSqlPedidosEntregues += " INNER JOIN gc_cfop_operacoes ";
             sentencaSqlPedidosEntregues += "     ON gc_cfop_operacoes.id_cfop_operacao = gc_movimentos.id_cfop_operacao ";
             sentencaSqlPedidosEntregues += " WHERE gc_movimentos.movimento_aprovado = 1 ";
@@ -348,6 +354,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             sentencaSqlPedidosEntregues += "       '" + LibDateTime.getPrimeiroDiaMesAtual().ToString("yyyy-MM-dd 00:00:00") + "' ";
             sentencaSqlPedidosEntregues += "       AND '" + LibDateTime.getUltimoDiaMesAtual().ToString("yyyy-MM-dd 23:59:59") + "' ";
             sentencaSqlPedidosEntregues += "   AND gc_cfop_operacoes.is_venda = 1 ";
+            sentencaSqlPedidosEntregues += "   AND EXISTS ( ";
+            sentencaSqlPedidosEntregues += "       SELECT 1 FROM gc_movimentos_nf ";
+            sentencaSqlPedidosEntregues += "       WHERE gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento ";
+            sentencaSqlPedidosEntregues += "         AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22) ";
+            sentencaSqlPedidosEntregues += "   ) ";
             System.Data.DataTable TablePedidosEntregues = LibDB.GetDataTable(sentencaSqlPedidosEntregues, db);
             List<DataRow> AllPedidosEntregues = TablePedidosEntregues.AsEnumerable().ToList();
             foreach (var dsRowPedidosEntregues in AllPedidosEntregues)

@@ -8,11 +8,11 @@
 # =============================================================================
 
 param(
-    [string]$Url    = "https://gdidigital.com.br/api/JobServer/Run",
+    [string]$Url    = "https://aeroflightx.com/api/JobServer/Run",
     [string]$JobKey = "72b7c8d74d61ac3457795c57bb9be"
 )
 
-$LogDir  = "C:\Logs\GDI"
+$LogDir  = "C:\Scripts\GDI"
 $LogFile = "$LogDir\relatorio-gerencial-whatsapp.log"
 
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir -Force | Out-Null }

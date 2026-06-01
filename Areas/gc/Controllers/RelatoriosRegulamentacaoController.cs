@@ -81,15 +81,20 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     " FROM gc_movimentos_itens itens  " +
                                     " left join gc_movimentos movimentos on (movimentos.id_movimento = itens.id_movimento)  " +
                                     " left join gc_movimentos_tipos tiposmov on (tiposmov.id_movimento_tipo = movimentos.id_movimento_tipo)  " +
-                                    " left join gc_movimentos_nf nf on (nf.id_movimento = itens.id_movimento)  " +
+                                    " cross apply ( " +
+                                    "   select top 1 nf_inner.nf_numero, nf_inner.nf_data_geracao, nf_inner.id_cfop, nf_inner.id_nfe_status, nf_inner.id_movimento_nf " +
+                                    "   from gc_movimentos_nf nf_inner " +
+                                    "   where nf_inner.id_movimento = itens.id_movimento " +
+                                    "     and ((nf_inner.id_nfe_status = 8) or (nf_inner.id_nfe_status = 17)) " +
+                                    "     and (nf_inner.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "') " +
+                                    "   order by nf_inner.id_movimento_nf desc " +
+                                    " ) nf " +
                                     " left join g_nfe_status nfstatus on (nf.id_nfe_status = nfstatus.id_nfe_status)  " +
                                     " left join gc_cfop cfop on (cfop.id_cfop = nf.id_cfop)  " +
                                     " left join g_produtos produtos on (produtos.id_produto = itens.id_produto)  " +
                                     " left join g_clientes clientes on (clientes.id_cliente = movimentos.id_cliente)  " +
-                                    " where (nf.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "')  " +
-                                    " and ((nf.id_nfe_status = 8) or(nf.id_nfe_status = 17))  " +
-                                    " and (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_anp = 1)) " +
-                                    " and itens.quantidade > 0 order by id_movimento_nf;  ";
+                                    " where (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_anp = 1)) " +
+                                    " and itens.quantidade > 0 order by nf.id_movimento_nf;  ";
 
                     DataTable tableRegistro = LibDB.GetDataTable(TextSQL, db);
                     List<DataRow> allRecordsNotas = tableRegistro.AsEnumerable().ToList();
@@ -209,14 +214,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     SentencaSQLNotasFiscais += " left join g_nfe_status nfstatus on(nf.id_nfe_status = nfstatus.id_nfe_status) ";
                     SentencaSQLNotasFiscais += " left join gc_cfop cfop on(cfop.id_cfop = nf.id_cfop) ";
                     SentencaSQLNotasFiscais += " left join gc_movimentos movimento on(nf.id_movimento = movimento.id_movimento) ";
-                    SentencaSQLNotasFiscais += " left join gc_movimentos_itens itens on(itens.id_movimento = movimento.id_movimento) ";
                     SentencaSQLNotasFiscais += " left join g_vendedores vendedor on(vendedor.id_vendedor = movimento.id_vendedor) ";
-                    SentencaSQLNotasFiscais += " left join gc_movimentos_tipos tiposmov on (tiposmov.id_movimento_tipo = movimento.id_movimento_tipo) ";
-                    SentencaSQLNotasFiscais += " left join g_produtos produtos on (produtos.id_produto = itens.id_produto) ";
                     SentencaSQLNotasFiscais += " where nf.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "' ";
                     SentencaSQLNotasFiscais += " and ((nf.id_nfe_status = 8) or(nf.id_nfe_status = 17)) ";
-                    SentencaSQLNotasFiscais += " and (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_anp = 1)) ";
-                    SentencaSQLNotasFiscais += " and itens.quantidade > 0 ";
+                    SentencaSQLNotasFiscais += " and exists ( ";
+                    SentencaSQLNotasFiscais += "   select 1 from gc_movimentos_itens itens ";
+                    SentencaSQLNotasFiscais += "   where itens.id_movimento = movimento.id_movimento ";
+                    SentencaSQLNotasFiscais += "   and (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_anp = 1)) ";
+                    SentencaSQLNotasFiscais += "   and itens.quantidade > 0 ";
+                    SentencaSQLNotasFiscais += " ) ";
                     SentencaSQLNotasFiscais += " order by nf.id_movimento_nf ";
                     DataTable TableNotasFiscais = LibDB.GetDataTable(SentencaSQLNotasFiscais, db);
                     List<DataRow> AllNotasFiscais = TableNotasFiscais.AsEnumerable().ToList();
@@ -478,15 +484,20 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 " FROM gc_movimentos_itens itens  " +
                                 " left join gc_movimentos movimentos on (movimentos.id_movimento = itens.id_movimento)  " +
                                 " left join gc_movimentos_tipos tiposmov on (tiposmov.id_movimento_tipo = movimentos.id_movimento_tipo)  " +
-                                " left join gc_movimentos_nf nf on (nf.id_movimento = itens.id_movimento)  " +
+                                " cross apply ( " +
+                                "   select top 1 nf_inner.nf_numero, nf_inner.nf_data_geracao, nf_inner.id_cfop, nf_inner.id_nfe_status, nf_inner.id_movimento_nf " +
+                                "   from gc_movimentos_nf nf_inner " +
+                                "   where nf_inner.id_movimento = itens.id_movimento " +
+                                "     and ((nf_inner.id_nfe_status = 8) or (nf_inner.id_nfe_status = 17)) " +
+                                "     and (nf_inner.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "') " +
+                                "   order by nf_inner.id_movimento_nf desc " +
+                                " ) nf " +
                                 " left join g_nfe_status nfstatus on (nf.id_nfe_status = nfstatus.id_nfe_status)  " +
                                 " left join gc_cfop cfop on (cfop.id_cfop = nf.id_cfop)  " +
                                 " left join g_produtos produtos on (produtos.id_produto = itens.id_produto)  " +
                                 " left join g_clientes clientes on (clientes.id_cliente = movimentos.id_cliente)  " +
-                                " where (nf.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "')  " +
-                                " and ((nf.id_nfe_status = 8) or(nf.id_nfe_status = 17))  " +
-                                " and (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_ibama = 1)) " +
-                                " and itens.quantidade > 0 order by id_movimento_nf;  ";
+                                " where (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_ibama = 1)) " +
+                                " and itens.quantidade > 0 order by nf.id_movimento_nf;  ";
 
                 DataTable tableRegistro = LibDB.GetDataTable(TextSQL, db);
                 List<DataRow> allRecordsNotas = tableRegistro.AsEnumerable().ToList();
@@ -611,8 +622,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             String FileNameDestino = String.Empty;
             String FileNameExportacao = String.Empty;
             String IdProcessamentoGravado = "0";
-            String IdMovimentoAnterior = String.Empty;
-            String IdMovimentoAtual = String.Empty;
             DateTime DataInicial = new DateTime();
             DateTime DataFinal = new DateTime();
             DateTime.TryParse(view_cstModalRelatorio.Field_Data_01.EmptyIfNull().ToString().Trim(), new CultureInfo("pt-BR"), DateTimeStyles.None, out DataInicial);
@@ -629,18 +638,23 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 " clientes.cnpj, clientes.cpf, itens.quantidade,   " +
                                 " replace(replace(produtos.descricao, ';', ''), ',', '') as 'descricao',   " +
                                 " cfop.numero as 'cfop_numero', cfop.descricao as 'cfop_descricao', nfstatus.descricao_resumida as 'status',  " +
-                                " tiposmov.is_entrada, tiposmov.is_saida, movimentos.id_movimento  " +
+                                " tiposmov.is_entrada, tiposmov.is_saida  " +
                                 " FROM gc_movimentos_itens itens  " +
                                 " left join gc_movimentos movimentos on (movimentos.id_movimento = itens.id_movimento)  " +
                                 " left join gc_movimentos_tipos tiposmov on (tiposmov.id_movimento_tipo = movimentos.id_movimento_tipo)  " +
-                                " left join gc_movimentos_nf nf on (nf.id_movimento = itens.id_movimento)  " +
+                                " cross apply ( " +
+                                "   select top 1 nf_inner.nf_numero, nf_inner.nf_data_geracao, nf_inner.id_cfop, nf_inner.id_nfe_status, nf_inner.id_movimento_nf " +
+                                "   from gc_movimentos_nf nf_inner " +
+                                "   where nf_inner.id_movimento = itens.id_movimento " +
+                                "     and ((nf_inner.id_nfe_status = 8) or (nf_inner.id_nfe_status = 17)) " +
+                                "     and (nf_inner.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "') " +
+                                "   order by nf_inner.id_movimento_nf desc " +
+                                " ) nf " +
                                 " left join g_nfe_status nfstatus on (nf.id_nfe_status = nfstatus.id_nfe_status)  " +
                                 " left join gc_cfop cfop on (cfop.id_cfop = nf.id_cfop)  " +
                                 " left join g_produtos produtos on (produtos.id_produto = itens.id_produto)  " +
                                 " left join g_clientes clientes on (clientes.id_cliente = movimentos.id_cliente)  " +
-                                " where (nf.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "')  " +
-                                " and ((nf.id_nfe_status = 8) or (nf.id_nfe_status = 17))  " +
-                                " and (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_pf = 1)) " +
+                                " where (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_pf = 1)) " +
                                 " and itens.quantidade > 0 order by movimentos.id_movimento, nf.id_movimento_nf;  ";
 
                 DataTable tableRegistro = LibDB.GetDataTable(TextSQL, db);
@@ -658,35 +672,30 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     foreach (var RowNota in allRecordsNotas)
                     {
-                        IdMovimentoAtual = RowNota["id_movimento"].EmptyIfNull().ToString().Trim();
-                        if (IdMovimentoAtual != IdMovimentoAnterior)
+                        IndexLinha += 1;
+                        bool IsEntrada = Convert.ToBoolean(RowNota["is_entrada"].EmptyIfNull().ToString().Trim());
+                        bool IsSaida = Convert.ToBoolean(RowNota["is_saida"].EmptyIfNull().ToString().Trim());
+                        WorkSheet.Cell(IndexLinha, 1).Value = int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
+                        WorkSheet.Cell(IndexLinha, 2).Value = Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm");
+                        WorkSheet.Cell(IndexLinha, 3).Value = RowNota["razao_social"].EmptyIfNull().ToString().Trim();
+                        if (RowNota["cnpj"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("J", RowNota["cnpj"].EmptyIfNull().ToString().Trim()); }
+                        else if (RowNota["cpf"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("F", RowNota["cpf"].EmptyIfNull().ToString().Trim()); }
+                        ;
+                        if (IsEntrada == true)
                         {
-                            IndexLinha += 1;
-                            bool IsEntrada = Convert.ToBoolean(RowNota["is_entrada"].EmptyIfNull().ToString().Trim());
-                            bool IsSaida = Convert.ToBoolean(RowNota["is_saida"].EmptyIfNull().ToString().Trim());
-                            WorkSheet.Cell(IndexLinha, 1).Value = int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
-                            WorkSheet.Cell(IndexLinha, 2).Value = Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm");
-                            WorkSheet.Cell(IndexLinha, 3).Value = RowNota["razao_social"].EmptyIfNull().ToString().Trim();
-                            if (RowNota["cnpj"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("J", RowNota["cnpj"].EmptyIfNull().ToString().Trim()); }
-                            else if (RowNota["cpf"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("F", RowNota["cpf"].EmptyIfNull().ToString().Trim()); }
-                            ;
-                            if (IsEntrada == true)
-                            {
-                                WorkSheet.Cell(IndexLinha, 5).Value = double.Parse(RowNota["quantidade"].EmptyIfNull().ToString().Trim());
-                                WorkSheet.Cell(IndexLinha, 5).Style.Fill.BackgroundColor = XLColor.LightBlue;
-                            }
-                            else if (IsSaida == true)
-                            {
-                                WorkSheet.Cell(IndexLinha, 6).Value = double.Parse(RowNota["quantidade"].EmptyIfNull().ToString().Trim());
-                                WorkSheet.Cell(IndexLinha, 6).Style.Fill.BackgroundColor = XLColor.Yellow;
-                            }
-
-                            WorkSheet.Cell(IndexLinha, 7).Value = RowNota["descricao"].EmptyIfNull().ToString().Trim();
-                            WorkSheet.Cell(IndexLinha, 8).Value = RowNota["cfop_numero"].EmptyIfNull().ToString().Trim() + " - " + RowNota["cfop_descricao"].EmptyIfNull().ToString().Trim();
-                            WorkSheet.Cell(IndexLinha, 9).Value = RowNota["status"].EmptyIfNull().ToString().Trim();
-                            NumeroRegistrosExportados += 1;
+                            WorkSheet.Cell(IndexLinha, 5).Value = double.Parse(RowNota["quantidade"].EmptyIfNull().ToString().Trim());
+                            WorkSheet.Cell(IndexLinha, 5).Style.Fill.BackgroundColor = XLColor.LightBlue;
                         }
-                        IdMovimentoAnterior = IdMovimentoAtual;
+                        else if (IsSaida == true)
+                        {
+                            WorkSheet.Cell(IndexLinha, 6).Value = double.Parse(RowNota["quantidade"].EmptyIfNull().ToString().Trim());
+                            WorkSheet.Cell(IndexLinha, 6).Style.Fill.BackgroundColor = XLColor.Yellow;
+                        }
+
+                        WorkSheet.Cell(IndexLinha, 7).Value = RowNota["descricao"].EmptyIfNull().ToString().Trim();
+                        WorkSheet.Cell(IndexLinha, 8).Value = RowNota["cfop_numero"].EmptyIfNull().ToString().Trim() + " - " + RowNota["cfop_descricao"].EmptyIfNull().ToString().Trim();
+                        WorkSheet.Cell(IndexLinha, 9).Value = RowNota["status"].EmptyIfNull().ToString().Trim();
+                        NumeroRegistrosExportados += 1;
                     }
 
                     // Salvar o arquivo em disco
@@ -791,15 +800,20 @@ namespace GdiPlataform.Areas.gc.Controllers
                                 " FROM gc_movimentos_itens itens  " +
                                 " left join gc_movimentos movimentos on (movimentos.id_movimento = itens.id_movimento)  " +
                                 " left join gc_movimentos_tipos tiposmov on (tiposmov.id_movimento_tipo = movimentos.id_movimento_tipo)  " +
-                                " left join gc_movimentos_nf nf on (nf.id_movimento = itens.id_movimento)  " +
+                                " cross apply ( " +
+                                "   select top 1 nf_inner.nf_numero, nf_inner.nf_data_geracao, nf_inner.id_cfop, nf_inner.id_nfe_status, nf_inner.id_movimento_nf " +
+                                "   from gc_movimentos_nf nf_inner " +
+                                "   where nf_inner.id_movimento = itens.id_movimento " +
+                                "     and ((nf_inner.id_nfe_status = 8) or (nf_inner.id_nfe_status = 17)) " +
+                                "     and (nf_inner.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "') " +
+                                "   order by nf_inner.id_movimento_nf desc " +
+                                " ) nf " +
                                 " left join g_nfe_status nfstatus on (nf.id_nfe_status = nfstatus.id_nfe_status)  " +
                                 " left join gc_cfop cfop on (cfop.id_cfop = nf.id_cfop)  " +
                                 " left join g_produtos produtos on (produtos.id_produto = itens.id_produto)  " +
                                 " left join g_clientes clientes on (clientes.id_cliente = movimentos.id_cliente)  " +
-                                " where (nf.nf_data_geracao between '" + DataInicialSQL + "' and '" + DataFinalSQL + "')  " +
-                                " and ((nf.id_nfe_status = 8) or(nf.id_nfe_status = 17))  " +
-                                " and (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_joguelimpo = 1)) " +
-                                " and itens.quantidade > 0 order by id_movimento_nf;  ";
+                                " where (itens.id_produto in (select distinct(id_produto) from g_produtos where item_regulado_joguelimpo = 1)) " +
+                                " and itens.quantidade > 0 order by nf.id_movimento_nf;  ";
 
                 DataTable tableRegistro = LibDB.GetDataTable(TextSQL, db);
                 List<DataRow> allRecordsNotas = tableRegistro.AsEnumerable().ToList();

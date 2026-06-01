@@ -110,9 +110,6 @@ namespace GdiPlataform.Robos.Whatsapp
                 "        COUNT(*) AS qtd," +
                 "        SUM(gc_movimentos.valor_total_bruto) AS valor" +
                 " FROM gc_movimentos" +
-                " INNER JOIN gc_movimentos_nf" +
-                "         ON gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento" +
-                "        AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22)" +
                 " INNER JOIN g_vendedores" +
                 "         ON gc_movimentos.id_vendedor = g_vendedores.id_vendedor" +
                 " INNER JOIN gc_cfop_operacoes" +
@@ -122,6 +119,11 @@ namespace GdiPlataform.Robos.Whatsapp
                 "       '" + dataHora.ToString("yyyy-MM-dd 00:00:00") + "'" +
                 "       AND '" + dataHora.ToString("yyyy-MM-dd 23:59:59") + "'" +
                 "   AND gc_cfop_operacoes.is_venda = 1" +
+                "   AND EXISTS (" +
+                "       SELECT 1 FROM gc_movimentos_nf" +
+                "       WHERE gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento" +
+                "         AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22)" +
+                "   )" +
                 " GROUP BY g_vendedores.id_vendedor, g_vendedores.nome";
 
             AgregarPedidosPorVendedor(LibDB.GetDataTable(sqlDiario, db),
@@ -133,9 +135,6 @@ namespace GdiPlataform.Robos.Whatsapp
                 "        COUNT(*) AS qtd," +
                 "        SUM(gc_movimentos.valor_total_bruto) AS valor" +
                 " FROM gc_movimentos" +
-                " INNER JOIN gc_movimentos_nf" +
-                "         ON gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento" +
-                "        AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22)" +
                 " INNER JOIN g_vendedores" +
                 "         ON gc_movimentos.id_vendedor = g_vendedores.id_vendedor" +
                 " INNER JOIN gc_cfop_operacoes" +
@@ -145,6 +144,11 @@ namespace GdiPlataform.Robos.Whatsapp
                 "       '" + LibDateTime.getPrimeiroDiaMesAtual().ToString("yyyy-MM-dd 00:00:00") + "'" +
                 "       AND '" + LibDateTime.getUltimoDiaMesAtual().ToString("yyyy-MM-dd 23:59:59") + "'" +
                 "   AND gc_cfop_operacoes.is_venda = 1" +
+                "   AND EXISTS (" +
+                "       SELECT 1 FROM gc_movimentos_nf" +
+                "       WHERE gc_movimentos_nf.id_movimento = gc_movimentos.id_movimento" +
+                "         AND gc_movimentos_nf.id_nfe_status IN (8, 17, 22)" +
+                "   )" +
                 " GROUP BY g_vendedores.id_vendedor, g_vendedores.nome";
 
             AgregarPedidosPorVendedor(LibDB.GetDataTable(sqlMes, db),

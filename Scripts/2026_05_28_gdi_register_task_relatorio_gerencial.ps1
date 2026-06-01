@@ -4,6 +4,7 @@
 #
 # Pre-requisito: copiar 2026_05_28_gdi_relatorio_gerencial_whatsapp.ps1
 #                para C:\Scripts\GDI\ no servidor de producao.
+# URL de producao (param -Url do script de disparo): https://aeroflightx.com/api/JobServer/Run
 # =============================================================================
 
 $TaskFolder  = "GDI"

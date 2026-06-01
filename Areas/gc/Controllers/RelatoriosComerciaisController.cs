@@ -1,6 +1,12 @@
 using ClosedXML.Excel;
+using GdiPlataform.Areas.gc.Models;
+using GdiPlataform.Db;
+using GdiPlataform.Lib;
+using GdiPlataform.Security;
 using NPOI.HSSF.UserModel;
+using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,10 +18,7 @@ using System.Linq;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
-using GdiPlataform.Areas.gc.Models;
-using GdiPlataform.Db;
-using GdiPlataform.Lib;
-using GdiPlataform.Security;
+using System.Windows.Forms;
 
 namespace GdiPlataform.Areas.gc.Controllers
 {
@@ -245,17 +248,17 @@ namespace GdiPlataform.Areas.gc.Controllers
                     " FROM gc_movimentos_itens item " +
                     " JOIN gc_movimentos mov " +
                     "        ON mov.id_movimento = item.id_movimento " +
-                    " JOIN gc_movimentos_nf nf " +
-                    "        ON nf.id_movimento = mov.id_movimento " +
-                    " JOIN gc_cfop cfop " +
-                    "        ON cfop.id_cfop = nf.id_cfop " +
-                    " LEFT JOIN gc_cfop_operacoes operacao " +
-                    "        ON operacao.id_cfop_operacao = nf.id_cfop_operacao " +
                     " LEFT JOIN g_produtos prod " +
                     "        ON prod.id_produto = item.id_produto " +
-                    " WHERE nf.id_nfe_status IN (8, 17) " +
-                    "   AND nf.nf_data_geracao BETWEEN '" + DataInicialSQL + "' AND '" + DataFinalSQL + "' " +
-                    "   AND operacao.is_venda = 1 " +
+                    " WHERE EXISTS ( " +
+                    "   SELECT 1 FROM gc_movimentos_nf nf " +
+                    "   INNER JOIN gc_cfop_operacoes operacao " +
+                    "           ON operacao.id_cfop_operacao = nf.id_cfop_operacao " +
+                    "   WHERE nf.id_movimento = mov.id_movimento " +
+                    "     AND nf.id_nfe_status IN (8, 17) " +
+                    "     AND nf.nf_data_geracao BETWEEN '" + DataInicialSQL + "' AND '" + DataFinalSQL + "' " +
+                    "     AND operacao.is_venda = 1 " +
+                    " ) " +
                     " GROUP BY item.id_produto, prod.nome " +
                     " ORDER BY qtd;";
 
@@ -692,14 +695,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             int IndexLinha = 0;
             int NumeroRegistrosExportados = 0;
             String MsgRetorno = String.Empty;
-            String ArquivoSaida = String.Empty;
-            String FileNameDestino = String.Empty;
             String FileNameExportacao = String.Empty;
             String DirTempFiles = String.Empty;
             String IdProcessamentoGravado = "0";
             int IdVendedor = view_cstModalRelatorio.Field_Int_01;
             String SQLMovimentos = String.Empty;
-            String SQLMovimentosNF = String.Empty;
             String NumerosNotasFiscais = String.Empty;
             String NomeCliente = String.Empty;
             String DescricaoOperacao = String.Empty;
@@ -716,53 +716,49 @@ namespace GdiPlataform.Areas.gc.Controllers
             List<Db.gc_movimentos> AllMovimentos = new List<Db.gc_movimentos>();
             List<Db.gc_movimentos_nf> AllMovimentosNF = new List<Db.gc_movimentos_nf>();
             List<Db.gc_movimentos_nf> NotasFiscaisMovimento = new List<Db.gc_movimentos_nf>();
-            List<Db.gc_financeiro_lancamentos> AllFinanceiroLancamentos = new List<Db.gc_financeiro_lancamentos>();
-            var AllClientes = db.g_clientes.Select(c => new { c.id_cliente, c.nome }).ToList();
-            var AllVendedores = db.g_vendedores.Select(v => new { v.id_vendedor, v.nome }).ToList();
-            var AllOperacao = db.gc_cfop_operacoes.Select(o => new { o.id_cfop_operacao, o.descricao }).ToList();
 
             try
             {
-                List<CstModelRelatorioComissaoVendedores> ListaTotalizadores = new List<CstModelRelatorioComissaoVendedores>();
-                CstModelRelatorioComissaoVendedores Totalizador1 = new CstModelRelatorioComissaoVendedores(1);
-                CstModelRelatorioComissaoVendedores Totalizador2 = new CstModelRelatorioComissaoVendedores(2);
-                CstModelRelatorioComissaoVendedores Totalizador3 = new CstModelRelatorioComissaoVendedores(3);
-                CstModelRelatorioComissaoVendedores Totalizador4 = new CstModelRelatorioComissaoVendedores(4);
-                CstModelRelatorioComissaoVendedores Totalizador5 = new CstModelRelatorioComissaoVendedores(5);
-                CstModelRelatorioComissaoVendedores Totalizador6 = new CstModelRelatorioComissaoVendedores(6);
-                CstModelRelatorioComissaoVendedores Totalizador7 = new CstModelRelatorioComissaoVendedores(7);
-                CstModelRelatorioComissaoVendedores Totalizador8 = new CstModelRelatorioComissaoVendedores(8);
-                ListaTotalizadores.Add(Totalizador1);
-                ListaTotalizadores.Add(Totalizador2);
-                ListaTotalizadores.Add(Totalizador3);
-                ListaTotalizadores.Add(Totalizador4);
-                ListaTotalizadores.Add(Totalizador5);
-                ListaTotalizadores.Add(Totalizador6);
-                ListaTotalizadores.Add(Totalizador7);
-                ListaTotalizadores.Add(Totalizador8);
-
-                SQLMovimentos = " SELECT movimentos.* ";
-                SQLMovimentos += " FROM gc_movimentos movimentos ";
-                SQLMovimentos += " where movimentos.movimento_aprovado = 1 ";
-                SQLMovimentos += " and (movimentos.datahora_aprovacao between  '" + DataInicialSQL + "' and '" + DataFinalSQL + "') ";
-                if (IdVendedor > 0) { SQLMovimentos += " and movimentos.comissao1_vendedor = " + IdVendedor.ToString() + " "; };
-                SQLMovimentos += " order by movimentos.datahora_aprovacao ";
+                SQLMovimentos = " SELECT m.* ";
+                SQLMovimentos += " FROM gc_movimentos m ";
+                SQLMovimentos += " JOIN gc_cfop_operacoes cf ON cf.id_cfop_operacao = m.id_cfop_operacao ";
+                SQLMovimentos += " JOIN g_vendedores v ON m.id_vendedor = v.id_vendedor ";
+                SQLMovimentos += " WHERE m.movimento_aprovado = 1 ";
+                SQLMovimentos += " AND (m.datahora_aprovacao BETWEEN '" + DataInicialSQL + "' AND '" + DataFinalSQL + "') ";
+                if (IdVendedor > 0) { SQLMovimentos += " AND m.comissao1_vendedor = " + IdVendedor.ToString() + " "; }
+                SQLMovimentos += " AND cf.is_venda = 1 ";
+                SQLMovimentos += " AND EXISTS ( ";
+                SQLMovimentos += "   SELECT 1 FROM gc_movimentos_nf nf ";
+                SQLMovimentos += "   INNER JOIN gc_cfop_operacoes operacao ON operacao.id_cfop_operacao = nf.id_cfop_operacao ";
+                SQLMovimentos += "   WHERE nf.id_movimento = m.id_movimento ";
+                SQLMovimentos += "   AND nf.id_nfe_status IN (8, 17, 22) ";
+                SQLMovimentos += "   AND operacao.is_venda = 1 ";
+                SQLMovimentos += " ) ";
+                SQLMovimentos += " ORDER BY m.datahora_aprovacao ";
                 AllMovimentos = db.gc_movimentos.SqlQuery(SQLMovimentos).ToList();
 
-                SQLMovimentosNF = " SELECT nf.* ";
-                SQLMovimentosNF += " from gc_movimentos_nf nf ";
-                SQLMovimentosNF += " left join gc_cfop_operacoes operacao on (operacao.id_cfop_operacao = nf.id_cfop_operacao) ";
-                SQLMovimentosNF += " where ((operacao.is_venda = 1) and (nf.id_nfe_status = 8))  ";
-                SQLMovimentosNF += " and (nf.nf_data_geracao >= '" + DataInicialSQL + "') ";
-                AllMovimentosNF = db.gc_movimentos_nf.SqlQuery(SQLMovimentosNF).ToList();
-
                 IndexLinha = 3;
-                FileStream FileTemplate = new FileStream(FileNameTemplate, FileMode.Open, FileAccess.Read);
                 XLWorkbook WorkBook = new XLWorkbook(FileNameTemplate);
                 IXLWorksheet WorkSheet = WorkBook.Worksheet(1);
 
                 if (AllMovimentos.Count > 0)
                 {
+                    List<int> ListaIdsMovimentos = AllMovimentos.Select(m => m.id_movimento).ToList();
+                    var idsClientes = AllMovimentos.Select(m => m.id_cliente).Distinct().ToList();
+                    var idsVendedoresComissao = AllMovimentos.Where(m => m.comissao1_vendedor > 0).Select(m => m.comissao1_vendedor).Distinct().ToList();
+                    var AllClientes = db.g_clientes.Where(c => idsClientes.Contains(c.id_cliente)).Select(c => new { c.id_cliente, c.nome }).ToList();
+                    var AllVendedores = db.g_vendedores.Where(v => idsVendedoresComissao.Contains(v.id_vendedor)).Select(v => new { v.id_vendedor, v.nome }).ToList();
+                    var AllOperacao = db.gc_cfop_operacoes.Select(o => new { o.id_cfop_operacao, o.descricao, o.is_venda }).ToList();
+                    var idsOperacaoVenda = AllOperacao.Where(o => o.is_venda).Select(o => o.id_cfop_operacao).ToList();
+
+                    AllMovimentosNF = db.gc_movimentos_nf.Where(n => ListaIdsMovimentos.Contains(n.id_movimento)
+                        && (n.id_nfe_status == 8 || n.id_nfe_status == 17 || n.id_nfe_status == 22)
+                        && idsOperacaoVenda.Contains(n.id_cfop_operacao)).ToList();
+
+                    var clientesPorId = AllClientes.ToDictionary(c => c.id_cliente, c => c.nome);
+                    var vendedoresPorId = AllVendedores.ToDictionary(v => v.id_vendedor, v => v.nome);
+                    var operacaoPorId = AllOperacao.ToDictionary(o => o.id_cfop_operacao, o => o.descricao);
+
                     foreach (gc_movimentos RecordMovimento in AllMovimentos)
                     {
                         NumerosNotasFiscais = String.Empty;
@@ -771,6 +767,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         PedidoNumero = RecordMovimento.id_movimento.EmptyIfNull().ToString();
 
                         NotasFiscaisMovimento = AllMovimentosNF.Where(n => n.id_movimento == RecordMovimento.id_movimento).ToList();
+
                         if (NotasFiscaisMovimento.Count > 0)
                         {
                             foreach (gc_movimentos_nf RecordNotasFiscais in NotasFiscaisMovimento)
@@ -780,19 +777,19 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     if (NumerosNotasFiscais.Trim().Length > 0) { NumerosNotasFiscais += " | "; };
                                     NumerosNotasFiscais += RecordNotasFiscais.nf_numero.EmptyIfNull().ToString();
 
-                                    var RecordOperacao = AllOperacao.Find(o => o.id_cfop_operacao == RecordNotasFiscais.id_cfop_operacao);
-                                    if (RecordOperacao != null)
+                                    String descricaoOperacaoNf;
+                                    if (operacaoPorId.TryGetValue(RecordNotasFiscais.id_cfop_operacao, out descricaoOperacaoNf))
                                     {
                                         if (DescricaoOperacao.Trim().Length > 0) { DescricaoOperacao += "\r\n"; };
-                                        DescricaoOperacao = RecordOperacao.descricao.EmptyIfNull().ToString();
+                                        DescricaoOperacao += descricaoOperacaoNf.EmptyIfNull().ToString();
                                     };
-                                    
+
                                     if (RecordMovimento.id_movimento_status == 1) { PedidoNumero += " (Aberto)"; }
                                     else if (RecordMovimento.id_movimento_status == 3) { PedidoNumero += " (Cancelado)"; };
                                 }
                             }
-                            var RecordCliente = AllClientes.Find(c => c.id_cliente == RecordMovimento.id_cliente);
-                            if (RecordCliente != null) { NomeCliente = RecordCliente.nome.EmptyIfNull().ToString();};
+                            String nomeClienteLookup;
+                            if (clientesPorId.TryGetValue(RecordMovimento.id_cliente, out nomeClienteLookup)) { NomeCliente = nomeClienteLookup.EmptyIfNull().ToString(); };
 
                             IndexLinha += 1;
                             WorkSheet.Cell(IndexLinha, 1).Value = PedidoNumero;
@@ -804,7 +801,14 @@ namespace GdiPlataform.Areas.gc.Controllers
                             WorkSheet.Cell(IndexLinha, 7).Value = Double.Parse(string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", RecordMovimento.frete_valor).Replace("R$ ", "").Replace("R$", "").Replace("$", ""));
                             WorkSheet.Cell(IndexLinha, 8).Value = Double.Parse(string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", RecordMovimento.frete_gerencial).Replace("R$ ", "").Replace("R$", "").Replace("$", ""));
                             WorkSheet.Cell(IndexLinha, 9).Value = Double.Parse(string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", (RecordMovimento.valor_total_bruto - RecordMovimento.frete_valor - RecordMovimento.frete_gerencial)).Replace("R$ ", "").Replace("R$", "").Replace("$", ""));
-                            if (RecordMovimento.comissao1_vendedor > 0) { WorkSheet.Cell(IndexLinha, 10).Value = AllVendedores.Where(v => v.id_vendedor == RecordMovimento.comissao1_vendedor).FirstOrDefault().nome.EmptyIfNull().ToString(); };
+                            if (RecordMovimento.comissao1_vendedor > 0)
+                            {
+                                String nomeVendedorComissao;
+                                if (vendedoresPorId.TryGetValue(RecordMovimento.comissao1_vendedor, out nomeVendedorComissao))
+                                {
+                                    WorkSheet.Cell(IndexLinha, 10).Value = nomeVendedorComissao.EmptyIfNull().ToString();
+                                }
+                            }
                             NumeroRegistrosExportados += 1;
                         }
                     }
