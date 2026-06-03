@@ -71,7 +71,13 @@ namespace GdiPlataform.Areas.g.Controllers
             if (param.yesCustomField04 != String.Empty && param.yesCustomField04 != "0") { sentencaSql += " and responsavel_id_departamento = " + param.yesCustomField04; }
             if (param.yesCustomField05 != String.Empty && param.yesCustomField05 != "0") { sentencaSql += " and responsavel_id_usuario = " + param.yesCustomField05; }
 
-            filterOnOff = "1";
+            bool filtroAtendimentoAplicado =
+                (param.yesCustomField01 != String.Empty && param.yesCustomField01 != "0") ||
+                (param.yesCustomField02 != String.Empty && param.yesCustomField02 != "0") ||
+                (param.yesCustomField03 != String.Empty && param.yesCustomField03 != "0") ||
+                (param.yesCustomField04 != String.Empty && param.yesCustomField04 != "0") ||
+                (param.yesCustomField05 != String.Empty && param.yesCustomField05 != "0");
+            if (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && filtroAtendimentoAplicado) { filterOnOff = "1"; }
             LibDB.setFilterByUser(sentencaSql, controllerName, true, db);
             string sqlData = sentencaSql + " order by id_atendimento desc";
             int totalRecords = LibDataTableSqlPaging.SqlCount(db, sqlData);

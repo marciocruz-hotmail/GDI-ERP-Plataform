@@ -86,6 +86,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroContasCaixas('0');
             gdiAplicarFoco('#edit_id_conta_caixa', true);
@@ -169,7 +173,6 @@
                     jsAtualizarIndicadorFiltroContasCaixas(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {

@@ -42,6 +42,7 @@
                         </div>
                         <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pagamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarComexFinanceiro()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroComexFinanceiro" name="btnLimparFiltroComexFinanceiro" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroComexFinanceiro()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                         <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
                             @Html.Label("label_saldo", "R$", htmlAttributes: new { @id = "label_saldo" })
@@ -75,6 +76,7 @@
 
 <script type="text/javascript">
     var OTableDtGcComexFinanceiroIndex;
+    var _gcComexFinSuprimirPesquisaAuto = false;
 
     $(function ()
     {
@@ -82,6 +84,7 @@
         {
             jsInitForm();
             jsCreateTableDtGcComexFinanceiroIndex();
+            jsAtualizarIndicadorFiltroComexFinanceiro('0');
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err)
@@ -99,7 +102,10 @@
                 $.fn.dataTable.ext.errMode = 'none';
                 OTableDtGcComexFinanceiroIndex = $('#DtGcComexFinanceiroIndex')
                     .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                    .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+                    .on('xhr.dt', function (e, settings, json, xhr) {
+                        if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                        jsUpdateDataViewComexFinanceiro(json);
+                    }).DataTable({
                 "drawCallback": function (settings) { LibMessageProcessandoHide(); },
                 processing: true,
                 bServerSide: true,
@@ -216,16 +222,65 @@
         }
     }
 
+    function jsAtualizarIndicadorFiltroComexFinanceiro(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroComexFinanceiro',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar importação/invoice'
+        });
+    }
+
+    function jsUpdateDataViewComexFinanceiro(json)
+    {
+        try
+        {
+            if (json && json.yesDisplayField01 !== undefined) {
+                jsViewSaldoContaImportacao(json);
+            }
+            if (json && json.yesFilterOnOff !== undefined) {
+                jsAtualizarIndicadorFiltroComexFinanceiro(json.yesFilterOnOff);
+            }
+        }
+        catch (err)
+        {
+            LibMessageError("Atenção", err && err.message ? String(err.message) : String(err));
+        }
+    }
+
     function jsAjaxPesquisarComexFinanceiro()
     {
         try
         {
+            if (_gcComexFinSuprimirPesquisaAuto) { return; }
             LibMessageProcessando('Pesquisando Lançamentos. . .');
             document.getElementById("yesFilterField").value = "*";
             $("#DtGcComexFinanceiroIndex").DataTable().draw(false);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxPesquisarComexFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroComexFinanceiro()
+    {
+        try
+        {
+            _gcComexFinSuprimirPesquisaAuto = true;
+            $('#edit_importacao').val('0').trigger('change');
+            $('#edit_invoice').val('0').trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#DtGcComexFinanceiroIndex").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroComexFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcComexFinSuprimirPesquisaAuto = false;
         }
     }
 

@@ -125,15 +125,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 int start = param.iDisplayStart;
                 int length = (param.iDisplayLength <= 0 ? 100 : param.iDisplayLength);
 
-                // Ativa "filtro ligado" se qualquer filtro real vier preenchido
-                if (!string.IsNullOrWhiteSpace(filtroDescricao) ||
-                    !string.IsNullOrWhiteSpace(filtroIdLancamento) ||
-                    !string.IsNullOrWhiteSpace(filtroNumeroDocumento) ||
-                    !string.IsNullOrWhiteSpace(filtroValor) ||
-                    (!string.IsNullOrWhiteSpace(filtroCliFor) && filtroCliFor != "0" && filtroCliFor != "-1") ||
-                    (!string.IsNullOrWhiteSpace(filtroHideGerencial)) ||
-                    (filtroCustom01 != "0") ||
-                    (idContaCaixa < 999))
+                // Indicador Limpar (Padrão B): amarelo só após Pesquisar / onchange (yesFilterField = "*")
+                if (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*")
                 {
                     filterOnOff = "1";
                 }

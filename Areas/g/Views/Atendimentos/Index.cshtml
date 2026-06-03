@@ -31,25 +31,26 @@
                             </div>
                             @Html.Label("Solicitante", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                             <div class="col-sm-2">
-                                @Html.DropDownListFor(model => model.solicitacao_id_usuario, ViewBag.ComboUsuariosAtendimentoSolicitante as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                                @Html.DropDownListFor(model => model.solicitacao_id_usuario, ViewBag.ComboUsuariosAtendimentoSolicitante as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroAtendimentos();" })
                             </div>
                             @Html.Label("Status", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                             <div class="col-sm-2">
-                                @Html.DropDownListFor(model => model.id_status, ViewBag.ComboGAtendimentosStatus as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                                @Html.DropDownListFor(model => model.id_status, ViewBag.ComboGAtendimentosStatus as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroAtendimentos();" })
                             </div>
                         </div>
                         <div class="form-group row text-sm-end m-0 pt-1">
                             @Html.Label("Departamento", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                             <div class="col-sm-3">
-                                @Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                                @Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroAtendimentos();" })
                             </div>
 
                             @Html.Label("id_responsavel", "Responsável", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                             <div class="col-sm-3">
-                                @Html.DropDownListFor(model => model.responsavel_id_usuario, ViewBag.ComboUsuariosAtendimentoResponsavel as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarAtendimentos();" })
+                                @Html.DropDownListFor(model => model.responsavel_id_usuario, ViewBag.ComboUsuariosAtendimentoResponsavel as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroAtendimentos();" })
                             </div>
-                            <div class="col-sm-1 text-sm-start" style="margin-bottom:2px">
+                            <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                                 <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Atendimentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarAtendimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                                <button type="button" id="btnLimparFiltroAtendimentos" name="btnLimparFiltroAtendimentos" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroAtendimentos()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                             </div>
                         </div>
                     </div>
@@ -85,13 +86,17 @@
 <script type="text/javascript">
 
     var TableAtendimentos;
+    var _gAtendSuprimirPesquisaAuto = false;
 
     $(function ()
     {
         try
         {
+            _gAtendSuprimirPesquisaAuto = true;
             jsInitForm();
             jsCreateoTableAtendimentos();
+            jsAtualizarIndicadorFiltroAtendimentos('0');
+            _gAtendSuprimirPesquisaAuto = false;
             gdiAplicarFoco('#id_atendimento', true);
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
@@ -109,6 +114,21 @@
         }
     }
 
+    function jsOnChangeFiltroAtendimentos()
+    {
+        if (_gAtendSuprimirPesquisaAuto) { return; }
+        jsAjaxPesquisarAtendimentos();
+    }
+
+    function jsAtualizarIndicadorFiltroAtendimentos(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroAtendimentos',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+        });
+    }
+
     function jsAjaxPesquisarAtendimentos()
     {
         try
@@ -122,6 +142,31 @@
         }
     }
 
+    function jsLimparFiltroAtendimentos()
+    {
+        try
+        {
+            _gAtendSuprimirPesquisaAuto = true;
+            $('#id_atendimento').val('');
+            $('#solicitacao_id_usuario').val('0').trigger('change');
+            $('#id_status').val('0').trigger('change');
+            $('#responsavel_id_departamento').val('0').trigger('change');
+            $('#responsavel_id_usuario').val('0').trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGAtendimentos").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroAtendimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gAtendSuprimirPesquisaAuto = false;
+        }
+    }
+
 
     function jsCreateoTableAtendimentos()
     {
@@ -129,7 +174,7 @@
         {
             var form = $('#FormIndexGAtendimentos');
             $.fn.dataTable.ext.errMode = 'none';
-            TableAtendimentos = $('#dtGAtendimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+            TableAtendimentos = $('#dtGAtendimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroAtendimentos(json.yesFilterOnOff); } }).DataTable({
                 "footerCallback": function (row, data, start, end, display)
                 {
                     LibMessageProcessandoHide();

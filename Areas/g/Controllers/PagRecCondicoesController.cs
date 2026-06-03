@@ -220,7 +220,7 @@ namespace GdiPlataform.Areas.g.Controllers
                     return asc ? query.OrderBy(p => p.id_pagrec_condicao) : query.OrderByDescending(p => p.id_pagrec_condicao);
                 }
             }
-            return query.OrderBy(p => p.id_pagrec_condicao);
+            return query.OrderBy(p => p.descricao);
         }
         #endregion
 

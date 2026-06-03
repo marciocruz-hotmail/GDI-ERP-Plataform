@@ -33,9 +33,9 @@
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
-                        @Html.Label("Descrição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
-                        <div class="col-sm-5">
-                            @Html.TextBoxFor(model => model.CfopIndex_descricao, new { @class = "form-control", @id = "edit_descricao_cfop", @placeholder = "Descrição", @onkeypress = "keypressedCfop(event);" })
+                        @Html.Label("Número", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(model => model.CfopIndex_numero, new { @class = "form-control", @id = "edit_numero_cfop", @placeholder = "Número CFOP", @onkeypress = "keypressedCfop(event);" })
                         </div>
                         <div class="col-sm-3 text-sm-start">
                             <button type="button" id="btnPesquisarCfop" title="Pesquisar CFOP" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarCfop()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
@@ -81,6 +81,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroCfop('0');
             gdiAplicarFoco('#edit_id_cfop', true);
@@ -106,7 +110,7 @@
 
     function jsCfopTemCriterioFiltro()
     {
-        return !isEmpty($('#edit_id_cfop').val()) || !isEmpty($('#edit_descricao_cfop').val());
+        return !isEmpty($('#edit_id_cfop').val()) || !isEmpty($('#edit_numero_cfop').val());
     }
 
     function jsAtualizarIndicadorFiltroCfop(yesFilterOnOff)
@@ -124,7 +128,7 @@
         {
             if (!jsCfopTemCriterioFiltro())
             {
-                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Descrição).");
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id. ou Número CFOP).");
                 return;
             }
             LibMessageProcessando('Pesquisando CFOP...');
@@ -142,7 +146,7 @@
         try
         {
             $('#edit_id_cfop').val('');
-            $('#edit_descricao_cfop').val('');
+            $('#edit_numero_cfop').val('');
             document.getElementById("yesFilterField").value = "*";
             LibMessageProcessando('Atualizando lista...');
             $("#dtGcCfop").DataTable().draw(false);
@@ -164,7 +168,6 @@
                     jsAtualizarIndicadorFiltroCfop(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -181,7 +184,7 @@
                         yesFilterField: $('#yesFilterField').val().toString(),
                         yesFilterController: $('#yesFilterController').val().toString(),
                         yesCustomField01: emptyIfNull($('#edit_id_cfop').val()).toString(),
-                        yesCustomField02: emptyIfNull($('#edit_descricao_cfop').val()).toString()
+                        yesCustomField02: emptyIfNull($('#edit_numero_cfop').val()).toString()
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -200,7 +203,7 @@
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                 { "width": "6%", orderable: true, className: 'text-sm-center', targets: [1] },
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
+                { "width": "10%", orderable: true, className: 'text-sm-center', targets: [3] },
                 { "width": "58%", orderable: false, className: 'text-sm-start', targets: [4] },
                 { "width": "10%", orderable: false, className: 'text-sm-end', targets: [5] },
                 { "width": "10%", orderable: false, className: 'text-sm-end', targets: [6] }
@@ -219,7 +222,7 @@
                 selector: 'td:not(.dt-no-row-select)',
                 headerCheckbox: true
             },
-            order: [[1, 'asc']],
+            order: [[3, 'asc']],
             drawCallback: function (settings) {
                 document.querySelectorAll('#dtGcCfop [data-bs-toggle="tooltip"]').forEach(function (el) {
                     bootstrap.Tooltip.getOrCreateInstance(el);
@@ -228,7 +231,7 @@
             },
                 language:
                 {
-                    sEmptyTable: 'Informe Id. ou Descrição e clique em Pesquisar (ou Limpar para listar todos).',
+                    sEmptyTable: 'Informe Id. ou Número CFOP e clique em Pesquisar (ou Limpar para listar todos).',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',

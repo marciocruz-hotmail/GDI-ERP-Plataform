@@ -26,6 +26,7 @@
                         </div>
                         <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarEstoque()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroEstoque" name="btnLimparFiltroEstoque" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroEstoque()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -66,13 +67,17 @@
 
 <script type="text/javascript">
     var oTableEstoque;
+    var _gcEstoqueSuprimirPesquisaAuto = false;
 
     $(function ()
     {
         try
         {
+            _gcEstoqueSuprimirPesquisaAuto = true;
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroEstoque('0');
+            _gcEstoqueSuprimirPesquisaAuto = false;
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -91,7 +96,10 @@
                 {
                     document.getElementById("label_Valor_estoque_bh").innerHTML = json.yesDisplayField01;
                     document.getElementById("label_Valor_estoque_sp").innerHTML = json.yesDisplayField02;
-                    GdiDtNotifyJsonErrorMessage(json); 
+                    if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                    if (json && json.yesFilterOnOff !== undefined) {
+                        jsAtualizarIndicadorFiltroEstoque(json.yesFilterOnOff);
+                    }
                 })
                 .DataTable({
                 "drawCallback": function (settings) {
@@ -188,13 +196,45 @@
         }
     };
 
+    function jsAtualizarIndicadorFiltroEstoque(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroEstoque',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar item selecionado'
+        });
+    }
+
     function jsAjaxPesquisarEstoque() {
         try {
+            if (_gcEstoqueSuprimirPesquisaAuto) { return; }
             LibMessageProcessando('Pesquisando Itens . . .');
+            document.getElementById("yesFilterField").value = "*";
             $("#dtEstoque").DataTable().draw(false);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxPesquisarEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroEstoque()
+    {
+        try
+        {
+            _gcEstoqueSuprimirPesquisaAuto = true;
+            $('#id_produto_servico').val('0').trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtEstoque").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcEstoqueSuprimirPesquisaAuto = false;
         }
     }
 

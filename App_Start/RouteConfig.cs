@@ -12,6 +12,7 @@ namespace GDI_ERP_Plataform
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            routes.IgnoreRoute("api/{*pathInfo}");
 
             routes.MapRoute(
                 name: "Health",

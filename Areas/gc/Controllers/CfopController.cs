@@ -36,16 +36,16 @@ namespace GdiPlataform.Areas.gc.Controllers
             var model = new CstCfopIndex
             {
                 CfopIndex_id = String.Empty,
-                CfopIndex_descricao = String.Empty
+                CfopIndex_numero = String.Empty
             };
             ViewBag.RestoreFilterAutoSearch = false;
             g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
-            string idRestore, descRestore;
-            if (TryParseFiltroCfopSemicolon(filtroPersistido.sql_filtro, out idRestore, out descRestore))
+            string idRestore, numeroRestore;
+            if (TryParseFiltroCfopSemicolon(filtroPersistido.sql_filtro, out idRestore, out numeroRestore))
             {
                 model.CfopIndex_id = idRestore;
-                model.CfopIndex_descricao = descRestore;
-                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(descRestore);
+                model.CfopIndex_numero = numeroRestore;
+                ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore) || !String.IsNullOrEmpty(numeroRestore);
             }
             return View(model);
         }
@@ -76,13 +76,13 @@ namespace GdiPlataform.Areas.gc.Controllers
                 int totalRecords = baseQuery.Count();
 
                 string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
-                string descStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
-                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(descStr);
+                string numeroStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                bool hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(numeroStr);
 
                 if (!hasInline && !listarTodosExplicito)
                 {
-                    TryParseFiltroCfopSemicolon(recordFiltro.sql_filtro, out idStr, out descStr);
-                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(descStr);
+                    TryParseFiltroCfopSemicolon(recordFiltro.sql_filtro, out idStr, out numeroStr);
+                    hasInline = !String.IsNullOrEmpty(idStr) || !String.IsNullOrEmpty(numeroStr);
                 }
 
                 if (!listarTodosExplicito && !hasInline)
@@ -103,8 +103,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (hasInline && !listarTodosExplicito)
                 {
                     filterApplied = true;
-                    query = AplicarFiltroCfopNaQuery(query, idStr, descStr);
-                    LibDB.setFilterByUser(MontarFiltroCfopPersistido(idStr, descStr), controllerName, true, db);
+                    query = AplicarFiltroCfopNaQuery(query, idStr, numeroStr);
+                    LibDB.setFilterByUser(MontarFiltroCfopPersistido(idStr, numeroStr), controllerName, true, db);
                 }
 
                 int totalDisplayRecords = query.Count();
@@ -168,38 +168,31 @@ namespace GdiPlataform.Areas.gc.Controllers
             return filtro ?? new g_filtros();
         }
 
-        private static bool TryParseFiltroCfopSemicolon(string raw, out string id, out string descricao)
+        private static bool TryParseFiltroCfopSemicolon(string raw, out string id, out string numero)
         {
-            id = descricao = String.Empty;
+            id = numero = String.Empty;
             if (String.IsNullOrWhiteSpace(raw)) return false;
             string[] campos = raw.Split(';');
             if (campos.Length < 2) return false;
             id = campos[0].EmptyIfNull().ToString().Trim();
-            descricao = campos[1].EmptyIfNull().ToString().Trim();
-            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(descricao);
+            numero = campos[1].EmptyIfNull().ToString().Trim();
+            return !String.IsNullOrEmpty(id) || !String.IsNullOrEmpty(numero);
         }
 
-        private static string MontarFiltroCfopPersistido(string id, string descricao)
+        private static string MontarFiltroCfopPersistido(string id, string numero)
         {
-            return (id ?? String.Empty) + ";" + (descricao ?? String.Empty);
+            return (id ?? String.Empty) + ";" + (numero ?? String.Empty);
         }
 
-        private static IQueryable<Db.gc_cfop> AplicarFiltroCfopNaQuery(IQueryable<Db.gc_cfop> query, string idStr, string descStr)
+        private static IQueryable<Db.gc_cfop> AplicarFiltroCfopNaQuery(IQueryable<Db.gc_cfop> query, string idStr, string numeroStr)
         {
             if (!String.IsNullOrEmpty(idStr) && idStr != "0" && int.TryParse(idStr, out int idCfop))
             {
                 query = query.Where(c => c.id_cfop == idCfop);
             }
-            if (LibStringFormat.TryMontarPadraoLikeContemTexto(descStr, out string padraoDesc))
+            if (LibStringFormat.TryMontarPadraoLikeContemTexto(numeroStr, out string padraoNumero))
             {
-                if (int.TryParse(descStr, out _))
-                {
-                    query = query.Where(c => (c.descricao != null && DbFunctions.Like(c.descricao, padraoDesc)) || c.numero == descStr);
-                }
-                else
-                {
-                    query = query.Where(c => c.descricao != null && DbFunctions.Like(c.descricao, padraoDesc));
-                }
+                query = query.Where(c => c.numero != null && DbFunctions.Like(c.numero, padraoNumero));
             }
             return query;
         }
@@ -209,10 +202,6 @@ namespace GdiPlataform.Areas.gc.Controllers
             bool asc = param.sSortDir_0.EmptyIfNull().ToString().Trim().ToLowerInvariant() != "desc";
             if (param.iSortingCols > 0)
             {
-                if (param.iSortCol_0 == 4)
-                {
-                    return asc ? query.OrderBy(c => c.descricao) : query.OrderByDescending(c => c.descricao);
-                }
                 if (param.iSortCol_0 == 3)
                 {
                     return asc ? query.OrderBy(c => c.numero) : query.OrderByDescending(c => c.numero);
@@ -222,7 +211,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     return asc ? query.OrderBy(c => c.id_cfop) : query.OrderByDescending(c => c.id_cfop);
                 }
             }
-            return query.OrderBy(c => c.descricao);
+            return query.OrderBy(c => c.numero);
         }
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)

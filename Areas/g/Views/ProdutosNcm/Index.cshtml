@@ -89,6 +89,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroProdutosNcm('0');
             gdiAplicarFoco('#edit_id_produto_ncm', true);
@@ -172,7 +176,6 @@
                     jsAtualizarIndicadorFiltroProdutosNcm(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -208,7 +211,7 @@
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                 { "width": "6%", orderable: true, className: 'text-sm-center', targets: [1] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "78%", orderable: true, targets: [3] }
+                { "width": "78%", orderable: true, className: 'text-sm-start', targets: [3] }
                 @if (podeEditarProdutosNcm)
                 {
                 <text>,

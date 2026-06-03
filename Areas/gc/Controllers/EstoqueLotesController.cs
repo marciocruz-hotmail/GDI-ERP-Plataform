@@ -133,8 +133,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                 };
             }).ToList();
 
-            string yesFilterOnOff = (!string.IsNullOrWhiteSpace(filtroCodigoLote) || !string.IsNullOrWhiteSpace(filtroSerialLote) ||
-                !string.IsNullOrWhiteSpace(filtroProduto) || !string.IsNullOrWhiteSpace(filtroImportacao)) ? "1" : "0";
+            bool filtroAplicado = !string.IsNullOrWhiteSpace(filtroCodigoLote) || !string.IsNullOrWhiteSpace(filtroSerialLote)
+                || (int.TryParse(filtroProduto, out int idProdutoFiltro) && idProdutoFiltro > 0)
+                || (int.TryParse(filtroImportacao, out int idImportacaoFiltro) && idImportacaoFiltro > 0);
+            string yesFilterOnOff = (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && filtroAplicado) ? "1" : "0";
 
             return Json(new
             {

@@ -77,6 +77,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroFiliais('0');
             gdiAplicarFoco('#edit_id_filial', true);
@@ -163,7 +167,6 @@
                 }
                 LibMessageProcessandoHide();
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {

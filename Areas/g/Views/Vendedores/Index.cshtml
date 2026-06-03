@@ -60,7 +60,6 @@
                                     <th>Id.</th>
                                     <th>Ativo</th>
                                     <th>Nome</th>
-                                    <th>Revenda</th>
                                     <th>E-mail</th>
                                     @if (podeEditarVendedores)
                                     {
@@ -85,6 +84,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroVendedores('0');
             gdiAplicarFoco('#edit_id_vendedor', true);
@@ -168,7 +171,6 @@
                     jsAtualizarIndicadorFiltroVendedores(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -204,13 +206,12 @@
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
                 { "width": "6%", orderable: true, className: 'text-sm-center', targets: [1] },
                 { "width": "8%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "24%", orderable: true, targets: [3] },
-                { "width": "30%", orderable: false, className: 'text-sm-center', targets: [4] },
-                { "width": "28%", orderable: false, className: 'text-sm-center', targets: [5] }
+                { "width": "38%", orderable: true, targets: [3] },
+                { "width": "40%", orderable: false, className: 'text-sm-start', targets: [4] }
                 @if (podeEditarVendedores)
                 {
                 <text>,
-                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [6], data: null, defaultContent: "",
+                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [5], data: null, defaultContent: "",
                     render: function (data, type, row) {
                         return '<button type="button" title="Editar vendedor Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGVendedoresEditRow d-inline-flex align-items-center" onclick="jsGVendedoresEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
                     }

@@ -39,6 +39,7 @@
                             </div>
                             <div class="col-sm-4 text-sm-start" style="margin-bottom:2px">
                                 <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarInventarios()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                                <button type="button" id="btnLimparFiltroInventarios" name="btnLimparFiltroInventarios" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroInventarios()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                             </div>
                         </div>
                     </div>
@@ -74,13 +75,17 @@
 
 <script type="text/javascript">
     var TableGcInventario;
+    var _gcInventarioSuprimirPesquisaAuto = false;
 
     $(function ()
     {
         try
         {
+            _gcInventarioSuprimirPesquisaAuto = true;
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroInventarios('0');
+            _gcInventarioSuprimirPesquisaAuto = false;
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
             document.forms["FormIndex_GcEstoqueInventario"]["id_local_estoque_index"].value = "-1";
         }
@@ -97,7 +102,12 @@
             $.fn.dataTable.ext.errMode = 'none';
             TableGcInventario = $('#dtGcInventario')
                 .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; })
+                .on('xhr.dt', function (e, settings, json, xhr) {
+                    if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                    if (json && json.yesFilterOnOff !== undefined) {
+                        jsAtualizarIndicadorFiltroInventarios(json.yesFilterOnOff);
+                    }
+                })
                 .DataTable({
             "drawCallback": function (settings) {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
@@ -119,7 +129,7 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesCustomField01: emptyIfNull($('#id_local_estoque_index').val()).toString(),
+                        yesCustomField01: emptyIfNull($('#id_local_estoque').val()).toString(),
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -210,14 +220,45 @@
         }
     }
 
+    function jsAtualizarIndicadorFiltroInventarios(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroInventarios',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar local de estoque'
+        });
+    }
+
     function jsAjaxPesquisarInventarios()
     {
         try {
+            if (_gcInventarioSuprimirPesquisaAuto) { return; }
             LibMessageProcessando('Pesquisando Inventários . . .');
             $("#dtGcInventario").DataTable().draw(false);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxPesquisarInventarios] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroInventarios()
+    {
+        try
+        {
+            _gcInventarioSuprimirPesquisaAuto = true;
+            $('#id_local_estoque').val('-1').trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGcInventario").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroInventarios] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcInventarioSuprimirPesquisaAuto = false;
         }
     }
 

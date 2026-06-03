@@ -457,6 +457,7 @@
     <Compile Include="Areas\gc\Controllers\FinanceiroLancamentosController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\FinanceiroParametroDifalController.cs" />
     <Compile Include="Areas\gc\Controllers\FretesController.cs" />
+    <Compile Include="Areas\gc\Controllers\FretesController.GetDados.cs" />
     <Compile Include="Areas\gc\Controllers\FretesController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\GerencialController.cs" />
     <Compile Include="Areas\gc\Controllers\MovimentosController.cs" />
@@ -547,6 +548,7 @@
     <Compile Include="Areas\g\Controllers\PerfisController.cs" />
     <Compile Include="Areas\g\Controllers\ProdutosController.cs" />
     <Compile Include="Areas\g\Controllers\ProdutosController.Lookups.cs" />
+    <Compile Include="Areas\g\Controllers\ProdutosController.LookupAjax.cs" />
     <Compile Include="Areas\g\Controllers\ProdutosNcmController.cs" />
     <Compile Include="Areas\g\Controllers\ProdutosNcmController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\UFController.cs" />
@@ -605,6 +607,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobRunRequest.cs" />
     <Compile Include="Controllers\JobServerController.cs" />
+    <Compile Include="Controllers\LoteDocumentoPublicoController.cs" />
     <Compile Include="Controllers\IAuthenticationManager.cs" />
     <Compile Include="Controllers\jQueryDataTableParamModel.cs" />
     <Compile Include="Controllers\JQueryDataTablesModel.cs" />
@@ -612,6 +615,7 @@
     <Compile Include="Controllers\ClientesLookupController.cs" />
     <Compile Include="Controllers\NavbarController.cs" />
     <Compile Include="Controllers\UserIdentityController.cs" />
+    <Compile Include="Services\LotePublicDocumentUrlService.cs" />
     <Compile Include="ControlVersion.cs" />
     <Compile Include="Db\a_parametros.cs">
       <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>

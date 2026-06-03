@@ -81,6 +81,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroPagRecTipos('0');
             gdiAplicarFoco('#edit_id_pagrec_tipo', true);
@@ -164,7 +168,6 @@
                     jsAtualizarIndicadorFiltroPagRecTipos(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {

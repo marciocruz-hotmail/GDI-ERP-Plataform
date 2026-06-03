@@ -72,6 +72,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroCfopParametros('0');
             gdiAplicarFoco('#edit_id_cfop_parametro', true);
@@ -155,7 +159,6 @@
                     jsAtualizarIndicadorFiltroCfopParametros(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {

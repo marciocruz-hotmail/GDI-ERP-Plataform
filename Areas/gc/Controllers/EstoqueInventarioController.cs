@@ -56,7 +56,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                 // ----------------------------
                 g_filtros record_g_filtro = LibDB.getFilterByUser(param, controllerName, db);
                 bool filterDb = record_g_filtro.sql_filtro.EmptyIfNull().ToString().Trim().Length > 0;
-                if (filterDb) filterOnOff = "1";
 
                 // ----------------------------
                 // 2) Filtro Local de Estoque
@@ -76,8 +75,11 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 if (idLocalEstoque > 0)
                 {
-                    filterOnOff = "1";
                     query = query.Where(i => i.id_local_estoque == idLocalEstoque);
+                    if (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*")
+                    {
+                        filterOnOff = "1";
+                    }
                 }
 
                 // Se você ainda quiser aplicar filtro persistido no DB (sql_filtro) aqui,

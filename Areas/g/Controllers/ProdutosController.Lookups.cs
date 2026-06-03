@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Web.Mvc;
 using GdiPlataform.Lib.Lookups;
 
@@ -7,6 +8,20 @@ namespace GdiPlataform.Areas.g.Controllers
     public partial class ProdutosController
     {
         private ILookupQueryService ProdutosLookups => LookupQueryServiceAccessor.Current;
+
+        private void PreencherLookupsIndexProdutos(int? idProdutoLookupSelecionado = null)
+        {
+            var combo = LookupSearchQueries.ComboFiltroProdutoCadastroIndex();
+            if (idProdutoLookupSelecionado.HasValue && idProdutoLookupSelecionado.Value > 0)
+            {
+                var item = LookupSearchQueries.GetProdutoItem(db, idProdutoLookupSelecionado.Value);
+                if (item != null)
+                {
+                    combo.Add(new SelectListItem { Value = item.id, Text = item.text, Selected = true });
+                }
+            }
+            ViewBag.comboProdutosLookup = combo;
+        }
 
         private void PreencherLookupsProdutoCreateEdit()
         {

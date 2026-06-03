@@ -135,7 +135,7 @@
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", "Cli./For.", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
-                        <div class="col-sm-6">
+                        <div class="col-sm-5">
                             @Html.DropDownListFor(model => model.Field_Text_07, comboClientes, new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
                         @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-1" })
@@ -144,6 +144,7 @@
                         </div>
                         <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFinanceiroLancamentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroFinanceiroLancamentos" name="btnLimparFiltroFinanceiroLancamentos" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroFinanceiroLancamentos()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -210,6 +211,8 @@
 
 <script type="text/javascript">
     var OTableGcFinanceiroLancamentosIndex;
+    var _gcFinLancDefaultContaCaixa = '';
+    var _gcFinLancSuprimirPesquisaAuto = false;
 
     $(function ()
     {
@@ -218,7 +221,9 @@
             jsInitForm();
             jsDatepickerFirstDayMonth('#ig_gc_fin_lancamentos_idx_d1');
             jsDatepickerLastDayMonth('#ig_gc_fin_lancamentos_idx_d2');
+            _gcFinLancDefaultContaCaixa = ($('#Field_Text_01 option:first').val() || '').toString();
             jsCreateTableGcFinanceiroLancamentosIndex();
+            jsAtualizarIndicadorFiltroFinanceiroLancamentos('0');
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err)
@@ -403,16 +408,57 @@
         }
     }
 
+    function jsAtualizarIndicadorFiltroFinanceiroLancamentos(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroFinanceiroLancamentos',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar e restaurar filtros padrão'
+        });
+    }
+
     function jsAjaxPesquisarFinanceiroLancamentos()
     {
         try
         {
+            if (_gcFinLancSuprimirPesquisaAuto) { return; }
             LibMessageProcessando("");
             document.getElementById("yesFilterField").value = "*";
             $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxPesquisarFinanceiroLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroFinanceiroLancamentos()
+    {
+        try
+        {
+            _gcFinLancSuprimirPesquisaAuto = true;
+            $('#Field_Text_01').val(_gcFinLancDefaultContaCaixa).trigger('change');
+            $('#Field_Text_02').val('0').trigger('change');
+            $('#Field_Text_03').val('');
+            $('#Field_Text_04').val('');
+            $('#Field_Text_05').val('');
+            $('#Field_Text_06').val('');
+            $('#Field_Text_07').val('-1').trigger('change');
+            $('#Field_Text_08').val('0').trigger('change');
+            $('#hide_gerencial').prop('checked', false);
+            jsDatepickerFirstDayMonth('#ig_gc_fin_lancamentos_idx_d1');
+            jsDatepickerLastDayMonth('#ig_gc_fin_lancamentos_idx_d2');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#DtGcFinanceiroLancamentosIndex").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroFinanceiroLancamentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcFinLancSuprimirPesquisaAuto = false;
         }
     }
 
@@ -536,6 +582,9 @@
         try
         {
             jsViewSaldoContaCaixa(yesDisplayField01);
+            if (yesFilterOnOff !== undefined) {
+                jsAtualizarIndicadorFiltroFinanceiroLancamentos(yesFilterOnOff);
+            }
         }
         catch (err)
         {

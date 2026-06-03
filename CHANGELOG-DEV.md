@@ -164,6 +164,145 @@ A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibD
 
 ## Últimas alterações relevantes
 
+### 2026-06-01 — API pública lote-documento migrada do Portal Cliente (portalflightx.com)
+- **Problema:** `GET /api/public/lote-documento?idLote=` existia só em `GDI-PortalCliente-Plataform` — após migração do portal para o monólito ERP, o endpoint retornava 404 em produção.
+- **Migração:** `LoteDocumentoPublicoController` + `LotePublicDocumentUrlService` — redireciona para `ged_arquivos.public_url` do lote ou PDF fallback S3; tenant por `Host` (ex. `portalflightx` → `GdiPlataformEntities_gdi_producao`); `RouteConfig` ignora `api/*` no MVC.
+- **Config:** `PublicApi:LoteDocumentoFallbackUrl` em `Web.config`; `PublicApi:EntityConnectionName` opcional no secrets.
+
+### 2026-06-01 — gc/RelatoriosCadastrais, Financeiros, Regulamentacao: botões alinhados ao padrão Comerciais
+- **Causa:** layout legado (`col-6`, `align-items-center`, classes conflitantes `d-block` + `d-inline-flex` + `mx-auto`) — botões desalinhados ou com ícone/texto quebrado.
+- **Correção:** `col-8 mx-auto`, `align-items-left`, grelha `form-group row text-sm-end` + `col-sm-6`, botões `btn-lg w-100 left-block d-inline-flex align-items-center gap-2` (igual `RelatoriosComerciais/Index`); Regulamentação em grelha 2×2; `btnRelatorio4` e mensagem de erro corrigidos em Jogue Limpo.
+
+### 2026-06-01 — Botão Limpar amarelo indevido: lote EstoqueLotes + views relacionadas (yesFilterOnOff)
+- **`gc/EstoqueLotes/Index`:** seletor Ajax/Limpar corrigido (`#codigo_serial` em vez de `#edit_codigo_serial`); `SuprimirPesquisaAuto` na carga inicial evita `onchange` dos combos marcar filtro antes do primeiro draw.
+- **Views (init cinza):** `gc/Estoque`, `gc/EstoqueInventario`, `g/Atendimentos`, `g/Ged`, `qa/GedSGQ` (DocsSGQ, Comunicados, AtasReunioes) — flag `*SuprimirPesquisaAuto` antes de `jsInitForm()`.
+- **Servidor:** `AtendimentosController.getDadosAtendimentos` — amarelo só com critério real; `MovimentosController.GetDadosPedidos` / `GetDadosPainelPedidos` — não sobrescrever `filterOnOff` só por `yesFilterField="*"`; `EstoqueController.GetDadosRecebimentoItensImportacao` — amarelo só com OS selecionada; `EstoqueInventarioController.GetDadosInventario` — removido `filterDb` na carga; amarelo só com local > 0 após Pesquisar; `GedController` / `GedSGQController` — `filterDb` só conta após Pesquisar.
+
+### 2026-06-01 — gc/Estoque Index: botão Limpar cinza na carga inicial (yesFilterOnOff)
+
+- **`EstoqueController.GetDadosEstoque`:** `yesFilterOnOff = "1"` apenas com `yesFilterField="*"` **e** `idProduto > 0` — evita amarelo quando Select2/`Pesquisar` disparam sem item selecionado.
+
+### 2026-06-01 — gc/Fretes Index: DataTable alinhado (8 colunas + GetDadosFretes)
+
+- **Causa:** init copiado de `IndexPedido` (15 colunas / `GetDadosPedidos`) com `<thead>` de fretes (8 colunas) — valores deslocados na grelha.
+- **`FretesController.GetDados.cs`:** action `GetDadosFretes` — Id, NF, cliente, transportadora, rastreio, data; filtros id/NF, período, transportadora, valor.
+- **`Fretes/Index.cshtml`:** `#dtGcFretes`, `aoColumnDefs` 8 colunas, Ajax `GetDadosFretes`, `#edit_transportadora` em `yesCustomField04`; edit → `Movimentos/EditPedido`.
+- **`GDI-ERP-Plataform.csproj`:** include do partial.
+
+### 2026-06-01 — g/PagRecCondicoes Index: ordenação alfabética por Descrição
+
+- **`PagRecCondicoesController.GetDados`:** fallback `AplicarOrdenacaoPagRecCondicoesNaQuery` → `OrderBy(descricao)` ascendente.
+- **`PagRecCondicoes/Index.cshtml`:** DataTables `order: [[3,'asc']]` (coluna Descrição).
+
+### 2026-06-01 — gc/Cfop Index: ordenação por número CFOP; filtro Id + Número
+
+- **`CfopController.GetDados`:** ordenação padrão e por coluna 3 em `numero` ascendente; filtro `yesCustomField02` por número CFOP (`LIKE`), removido filtro por descrição.
+- **`CstCfopIndex`:** `CfopIndex_descricao` → `CfopIndex_numero`.
+- **`Cfop/Index.cshtml`:** campo filtro Número CFOP; DataTables `order: [[3,'asc']]`; mensagens e persistência de filtro alinhadas.
+
+### 2026-06-01 — g/ClassificacaoFinanceira Index: árvore jstree carrega registos (raiz id=1)
+
+- **`ClassificacaoFinanceiraController.GetTreeViewClassificacaoFinanceira`:** nível 1 inclui filhos com `pai = 1` (registo sistema oculto em `getDados` com `id > 1`), além de `pai = 0` exceto `id = 1`; guard `db == null`; `[CustomAuthorize Actionread]`.
+- **`ClassificacaoFinanceira/Index.cshtml`:** `GdiEnsureScriptFlags(16)` antes do init jstree (defer) + handler `error.jstree`.
+
+### 2026-06-01 — g/Vendedores Index: remove coluna Revenda; E-mail alinhado à esquerda
+
+- **`Areas/g/Views/Vendedores/Index.cshtml`:** `<th>Revenda</th>` removido; `aoColumnDefs` reindexado; E-mail com `text-sm-start`.
+- **`VendedoresController.GetDados`:** `aaData` sem revenda; lookup `g_revendas` removido; ordenação e-mail coluna 4.
+
+### 2026-06-01 — g/ProdutosNcm Index: coluna Código NCM alinhada à esquerda
+
+- **`Areas/g/Views/ProdutosNcm/Index.cshtml`:** `aoColumnDefs` coluna índice 3 — `className: 'text-sm-start'`.
+
+### 2026-06-01 — Select2 pesquisa local: listas estáticas (global) + GedSGQ Index
+
+- **`gdi-select2.js`:** combos **sem** `data-gdi-lookup-url` passam a usar Select2 com filtro local quando há **2+** `<option>` (antes só >5 ou `data-gdi-select2-search="true"`). Exceções: `data-gdi-no-select2` ou ≤1 option. Lookups Ajax inalterados.
+- **`VersionERP`:** `2026.51.31` (`ControlVersion.cs`) — cache bust de `gdi-select2.js`.
+- **`qa/GedSGQ` Index (Atas, Comunicados, DocsSGQ):** `jsInitForm()` + `data-gdi-select2-search="true"` em `#edit_arquivo_tipo` (paridade com `g/Ged/Index`).
+- **Script auditoria:** `Scripts/2026_06_01_gdi_audit_select2_local_search.py`.
+
+### 2026-06-01 — g/Ged Index: combo Tipo com Select2 pesquisa local (opções já carregadas)
+
+- **`Areas/g/Views/Ged/Index.cshtml`:** `jsInitForm()` (substitui `jsInitModal()` na carga da página) + `data-gdi-select2-search="true"` em `#edit_arquivo_tipo` — pesquisa local nas opções de `ComboGedTiposFiltro` via `gdi-select2.js` (sem `data-gdi-lookup-url` / sem Ajax na tabela).
+
+### 2026-06-01 — Indicador botão Limpar: auditoria 35 views + correção yesFilterOnOff (servidor)
+
+- **Auditoria estática:** `Scripts/2026_06_01_gdi_audit_indicador_limpar_completo.py` — **35/35** views com Pesquisar+Limpar OK (`GdiAtualizarIndicadorFiltro`, `xhr.dt` + `yesFilterOnOff`, init cinza `'0'`).
+- **Contrato:** Padrão A (cadastros) — cinza sem critério / amarelo com `filterApplied`; Padrão B (operacionais) — cinza `yesFilterField=""` / amarelo após Pesquisar (`yesFilterField="*"`).
+- **Correções servidor** (carga inicial amarela indevida): `FinanceiroLancamentosController.GetDadosLancamentos` (removido `idContaCaixa < 999` como filtro UI); `ComexFinanceiroController.GetDadosPagamentos` e `EstoqueLotesController.GetDados` — `yesFilterOnOff` só com `yesFilterField="*"` e critério real.
+- **Comportamento intencional preservado:** `g/Financeiro` auto-pesquisa mês corrente (amarelo ao abrir); cadastros com carga inicial `yesFilterField="*"` permanecem cinza até critério inline.
+
+### 2026-06-01 — Cadastros: carga inicial automática (Grupo 6 — exceto Produtos/Clientes)
+
+- **Política:** grid vazia ao abrir + **Pesquisar** obrigatório só em **`g/Produtos`** e **`g/Clientes`** (`deferLoading: true` mantido).
+- **Demais cadastros** (UF, Filiais, Cidades, Perfis, Usuários, Vendedores, ContasCaixas, PagRec*, ContratosAviacao, ProdutosNcm, CFOP*, EstoqueControle): `yesFilterField = "*"` no init (salvo `RestoreFilterAutoSearch`) e remoção de `deferLoading` — listagem completa ao carregar a view.
+- **Script:** `Scripts/2026_06_01_gdi_cadastro_carga_inicial_todos.py`.
+
+### 2026-06-01 — gc/Movimentos IndexEstoque: action + filtros + colunas alinhadas a GetDadosEstoque
+
+- **`MovimentosController.IndexEstoque`:** action órfã criada; lookups via `PreencherLookupsIndexEstoque` (typeahead produto, mesmo contrato de `Estoque/Index`).
+- **`Areas/gc/Views/Movimentos/IndexEstoque.cshtml`:** combo Select2 **Item**; removido filtro **Local** (não suportado por `GetDadosEstoque`); colunas/tfoot alinhadas ao JSON de `GetDadosEstoque`; `SuprimirPesquisaAuto` no Limpar; totais BH/SP no rodapé via `yesDisplayField01/02`.
+
+### 2026-06-01 — g/Financeiro Index: yesFilterField Padrão B (Limpar → "")
+
+- **`Areas/g/Views/Financeiro/Index.cshtml`:** `jsLimparFiltroFinanceiro` passa a definir `yesFilterField = ""` (antes `"*"`), alinhado a Lancamentos/Pedidos — botão Limpar cinza após limpar.
+- **`FinanceiroController.GetDados`:** `yesFilterOnOff = "1"` quando `yesFilterField == "*"` e consulta executada (Pesquisar); `"0"` quando Limpar ou sem pesquisa ativa.
+
+### 2026-06-01 — RestoreFilterAutoSearch: repesquisa automática Cidades e Difal
+
+- **`Areas/g/Views/Cidades/Index.cshtml`** e **`Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml`:** bloco `@if (ViewBag.RestoreFilterAutoSearch == true)` com repesquisa automática ao retornar de CreateEdit (controller já restaurava campos via `g_filtros`; faltava `jsAjaxPesquisar*` na view).
+- **Auditoria Grupo 2:** demais cadastros com `MontarFiltro*Persistido` + `TryParseFiltro*Semicolon` já tinham par controller/view completo (18 módulos).
+
+### 2026-06-01 — gc/Movimentos IndexEstoque: botão Limpar + indicador amarelo
+
+- **`Areas/gc/Views/Movimentos/IndexEstoque.cshtml`:** botão **Limpar**, `GdiAtualizarIndicadorFiltro`, `xhr.dt` + init cinza; funções renomeadas (`jsAjaxPesquisarMovimentosEstoque` / `jsLimparFiltroMovimentosEstoque`); correção `$Table` → `oTableMovimentosEstoque`; `yesCustomField01` alinhado ao contrato de `GetDadosEstoque`.
+- **`EstoqueController.GetDadosEstoque`:** `yesFilterOnOff` derivado de `yesFilterField == "*"` (Pesquisar amarelo, Limpar cinza).
+- **`Areas/gc/Views/Estoque/Index.cshtml`:** Pesquisar define `yesFilterField = "*"` (indicador coerente após ajuste server-side).
+
+### 2026-06-01 — Indicador amarelo botão Limpar: yesFilterOnOff alinhado ao padrão Produtos
+
+- **Cliente:** `GdiAtualizarIndicadorFiltro` em `start.js` — amarelo (`btn-outline-warning`) quando `yesFilterOnOff === '1'`, cinza após Limpar.
+- **Servidor:** `AtendimentosController.getDadosAtendimentos` — `filterOnOff` só com `yesFilterField == "*"` (antes sempre `"1"`). `GedController.GetDados` e `GedSGQController.JsonGedSgqArquivosDataTable` — indicador com filtro inline (tipo/datas) além de `g_filtros`. `FinanceiroController.GetDados` — amarelo só com cliente ou status ≠ 0 (Limpar repõe cinza). `MovimentosController.GetDadosPedidos` / `GetDadosPainelPedidos` — `filterOnOff` ligado a `yesFilterField` (Limpar envia `""`). `EstoqueController.GetDadosRecebimentoItensImportacao` — idem.
+- **Views:** `ContratosAviacao/Index` — init `jsAtualizarIndicadorFiltroContratos('0')`. `FormRecebimentoItensImportacao` — Pesquisar define `yesFilterField = "*"`.
+
+### 2026-06-01 — g/Produtos Index: filtro Nome → lookup Ajax Select2
+
+- **`Areas/g/Views/Produtos/Index.cshtml`:** campo texto «Nome» substituído por combo pesquisável (`GetProdutosLookup`, padrão Estoque/Clientes).
+- **`ProdutosController.LookupAjax.cs`:** endpoint GET `GetProdutosLookup` (roles `g_Produtos_*`).
+- **`ProdutosController.Lookups.cs`:** `PreencherLookupsIndexProdutos` + `ComboFiltroProdutoCadastroIndex`.
+- **`ProdutosController.GetDados`:** `yesCustomField03` aceita id do produto (lookup) ou texto legado (filtro persistido).
+- **`LookupSearchQueries.ComboFiltroProdutoCadastroIndex`:** placeholder Index cadastro produtos.
+
+### 2026-06-01 — g/Cidades Index: carregar todos os registros ao abrir
+
+- **`Areas/g/Views/Cidades/Index.cshtml`:** removido `deferLoading`; na abertura padrão (sem filtro persistido) define `yesFilterField = "*"` antes de criar o DataTable — lista todas as cidades sem exigir Pesquisar/Limpar. Retorno de CreateEdit com filtro persistido mantém repesquisa pelos campos Id./Nome.
+
+### 2026-06-01 — gc/FinanceiroParametroDifal Index: carregar todos os registros ao abrir
+
+- **`Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml`:** removido `deferLoading`; na abertura padrão (sem filtro persistido) define `yesFilterField = "*"` antes de criar o DataTable — lista todos os parâmetros (`id > 1`) sem exigir Pesquisar/Limpar. Retorno de CreateEdit com filtro persistido mantém repesquisa automática pelos campos Id./Sigla.
+
+### 2026-06-01 — g / gc / qa: botão Limpar filtro em 10 views restantes (padrão Cidades)
+
+- **g:** `Atendimentos/Index`, `Ged/Index`, `Financeiro/Index` — botão **Limpar** + `GdiAtualizarIndicadorFiltro` via `yesFilterOnOff`; reset ao padrão da página; flag `*SuprimirPesquisaAuto` nos combos com pesquisa automática.
+- **gc:** `Movimentos/IndexPedido`, `Movimentos/PainelPedidos`, `EstoqueInventario/FormInventarioItens`, `Estoque/FormRecebimentoItensImportacao` — mesmo padrão.
+- **qa:** `GedSGQ/IndexDocsSGQ`, `IndexAtasReunioes`, `IndexComunicados` — mesmo padrão GED; `IndexAtasReunioes` e `IndexComunicados` passam a incluir `jsAjaxPesquisarGedArquivos` (referenciado no HTML mas ausente).
+- **`PainelPedidos`:** ajax `yesCustomField03` corrigido de `#edit_cliente` para `#id_cliente`.
+
+### 2026-06-01 — gc: botão Limpar filtro em 5 Index (ComexFinanceiro, Estoque, EstoqueInventario, EstoqueLotes, Fretes)
+
+- **Views:** `ComexFinanceiro`, `Estoque`, `EstoqueInventario`, `EstoqueLotes`, `Fretes` — botão **Limpar** + `GdiAtualizarIndicadorFiltro` via `yesFilterOnOff`; reset dos campos ao padrão da página; flag `_gc*SuprimirPesquisaAuto` evita múltiplos `draw` nos `onchange` dos combos.
+- **`ComexFinanceiroController.GetDadosPagamentos`:** passa a devolver `yesFilterOnOff` (importação/invoice > 0).
+- **`EstoqueInventario/Index`:** ajax `yesCustomField01` corrigido para `#id_local_estoque` (id real do combo).
+- **`Fretes/Index`:** inclusão de `jsCreateOtableGCIndexPedido()` no init (tabela não era criada ao abrir a view).
+
+### 2026-06-01 — gc/FinanceiroLancamentos Index: botão Limpar filtro (padrão Cidades)
+
+- **`Areas/gc/Views/FinanceiroLancamentos/Index.cshtml`:** botão **Limpar** ao lado de Pesquisar; `GdiAtualizarIndicadorFiltro` (outline-secondary ↔ outline-warning via `yesFilterOnOff` do servidor); `jsLimparFiltroFinanceiroLancamentos` restaura conta caixa padrão, datas do mês, status/tipo [Todos], Cli./For. `-1`, textos vazios, flag gerencial desmarcada e repesquisa a grelha.
+
+### 2026-06-01 — gdi-select2: botão X (allowClear) em lookups Ajax de filtro
+
+- **`gdi-select2.js`:** Select2 exige `<option value="">` + placeholder para allowClear; combos com sentinela `-1`/`0` ([TODOS]) só tinham `data-gdi-select2-allow-clear` — o X aparecia mas não limpava nem disparava pesquisa. Correção: `gdiSelect2PrepareAllowClear` + `select2:clear` → `change`. Afeta FinanceiroLancamentos Cli./For., IndexPedido, Estoque, etc. **VersionERP:** `2026.51.30`.
+
 ### 2026-06-01 — Script WhatsApp gerencial: URL produção aeroflightx.com
 
 - **`Scripts/2026_05_28_gdi_relatorio_gerencial_whatsapp.ps1`:** `-Url` padrão `https://aeroflightx.com/api/JobServer/Run` (domínio atual; substitui `gdidigital.com.br`). Re-deploy do script em `C:\Scripts\GDI\` no servidor IIS.

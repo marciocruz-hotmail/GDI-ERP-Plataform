@@ -78,6 +78,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroEstoqueControle('0');
             gdiAplicarFoco('#edit_id_estoquecontrole', true);
@@ -161,7 +165,6 @@
                     jsAtualizarIndicadorFiltroEstoqueControle(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {

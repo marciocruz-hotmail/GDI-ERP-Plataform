@@ -1,7 +1,7 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
-@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoExpedicao" }))
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoExpedicaoAtualizacao" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
         <div class="modal-content">
@@ -19,42 +19,13 @@
                         <div class="card-body m-0 p-0" style="height: 100%">
                             @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
                         <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0" style="height:100%;">
-
                             <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Dados da Expedição</div>
-
-                            <div class="form-group row text-sm-end m-0 pt-1">
-                                @Html.Label("movimento_expedido", "Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                <div class="col-sm-3 text-sm-start" style="margin-top:5px;">
-                                    <div class="form-check form-switch form-switch-lg">
-                                        @Html.CheckBoxFor(model => model.movimento_expedido, htmlAttributes: new { @class = "form-check-input switch-success", @id = "movimento_expedido", role = "switch" })
-                                        <label class="form-check-label" for="movimento_expedido" id="label_movimento_expedido">Não Expedido / Expedido</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group row text-sm-end m-0 pt-1">
-                                @Html.Label("datahora_expedicao", "Expedição", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                <div class="col-sm-3">
-                                    @* id do .input-group distinto do input para Tempus Dominus *@
-                                    <div class='input-group date' id='ig_gc_mov_modal_ped_exped'>
-                                        @Html.EditorFor(model => model.datahora_expedicao, new { htmlAttributes = new { @class = "form-control", type = "text" } })
-                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
-                                    </div>
-                                </div>
-                                @Html.Label("datahora_entrega_previsao", "Entrega", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                <div class="col-sm-3">
-                                    <div class='input-group date' id='ig_gc_mov_modal_ped_entrega_prev'>
-                                        @Html.EditorFor(model => model.datahora_entrega_previsao, new { htmlAttributes = new { @class = "form-control", type = "text" } })
-                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("obs_expedicao", "Obs", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                 <div class="col-sm-10">
                                     @Html.TextAreaFor(model => model.obs_expedicao, new { @class = "form-control", @id = "obs", @rows = "3", @title = "Informações adicionais da expedição", @placeholder = "Informações adicionais da expedição", data_autofocus = "true" })
                                 </div>
                             </div>
-
                             <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Frete Principal</div>
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("frete1_transportadora", "Transp.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
@@ -76,7 +47,6 @@
                                     @Html.EditorFor(model => model.frete1_custo, new { htmlAttributes = new { @class = "form-control", @title = "Valor do Frete" } })
                                 </div>
                             </div>
-
                             <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Frete Complementar</div>
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("frete2_transportadora", "Transp.", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
@@ -222,7 +192,7 @@
             var form = $('#FormModalPedidoExpedicao');
             $.ajax({
                 type: "POST",
-                url: '@Url.Action("AjaxModalPedidoExpedicao", "Movimentos", new { area = "gc" })',
+                url: '@Url.Action("AjaxModalPedidoExpedicaoAtualizacao", "Movimentos", new { area = "gc" })',
                 data: form.serialize(),
                 success: function (result)
                 {

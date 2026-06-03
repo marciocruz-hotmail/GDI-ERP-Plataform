@@ -120,43 +120,20 @@ namespace GdiPlataform.Areas.g.Controllers
                 var page = query
                     .Skip(start)
                     .Take(length)
-                    .Select(v => new { v.id_vendedor, v.ativo, v.nome, v.id_revenda, v.email })
+                    .Select(v => new { v.id_vendedor, v.ativo, v.nome, v.email })
                     .ToList();
-
-                var revendaIds = page
-                    .Where(v => v.id_revenda.HasValue && v.id_revenda.Value > 0)
-                    .Select(v => v.id_revenda.Value)
-                    .Distinct()
-                    .ToList();
-                var revendasPorId = revendaIds.Count == 0
-                    ? new Dictionary<int, string>()
-                    : db.g_revendas.AsNoTracking()
-                        .Where(r => revendaIds.Contains(r.id_revenda))
-                        .Select(r => new { r.id_revenda, r.nome })
-                        .ToList()
-                        .ToDictionary(r => r.id_revenda, r => r.nome ?? String.Empty);
 
                 var list = page.Select(v =>
                 {
                     string _ativo = v.ativo == true
                         ? LibIcons.getIcon("fa-solid fa-circle-check", "Ativo", "green", "")
                         : LibIcons.getIcon("fa-solid fa-circle-xmark", "Inativo", "red", "");
-                    string nomeRevenda = String.Empty;
-                    if (v.id_revenda.HasValue && v.id_revenda.Value > 0)
-                    {
-                        string nome;
-                        if (revendasPorId.TryGetValue(v.id_revenda.Value, out nome))
-                        {
-                            nomeRevenda = nome;
-                        }
-                    }
                     return new[]
                     {
                         "",
                         v.id_vendedor.ToString(),
                         _ativo,
                         v.nome ?? "",
-                        nomeRevenda,
                         v.email ?? ""
                     };
                 }).ToList();
@@ -231,7 +208,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     return asc ? query.OrderBy(v => v.nome) : query.OrderByDescending(v => v.nome);
                 }
-                if (param.iSortCol_0 == 5)
+                if (param.iSortCol_0 == 4)
                 {
                     return asc ? query.OrderBy(v => v.email) : query.OrderByDescending(v => v.email);
                 }

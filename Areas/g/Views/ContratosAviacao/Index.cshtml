@@ -89,6 +89,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             @if (ViewBag.RestoreFilterAutoSearch == true) { <text>if ($('#edit_id_contrato').val() || $('#edit_descricao_contrato').val()) { jsAjaxPesquisarContratos(); }</text> }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
@@ -125,7 +129,6 @@
                 if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 else if (json && json.yesFilterOnOff !== undefined) { jsAtualizarIndicadorFiltroContratos(json.yesFilterOnOff); }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -225,6 +228,7 @@
                 var data = otableGContratos.row($(this).closest('tr')).data();
                 if (data) { jsGContratosEditRow(data[1]); }
             });
+            jsAtualizarIndicadorFiltroContratos('0');
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCreateTable] " + (err && err.message ? err.message.toString() : String(err)));

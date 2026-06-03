@@ -172,17 +172,17 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-8 min-w-0">
-                            @Html.DropDownList("Cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "edit_cliente", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
+                            @Html.DropDownList("Cliente", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = "edit_cliente", @onchange = "jsOnChangeFiltroIndexPedido();", @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Posição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-2">
-                            @Html.DropDownList("Posicao", ViewBag.comboMovimentosPosicao as List<SelectListItem>, htmlAttributes: new { @id = "edit_posicao", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                            @Html.DropDownList("Posicao", ViewBag.comboMovimentosPosicao as List<SelectListItem>, htmlAttributes: new { @id = "edit_posicao", @onchange = "jsOnChangeFiltroIndexPedido();", @class = "form-control" })
                         </div>
                         @Html.Label("Status", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-2">
-                            @Html.DropDownList("Status", ViewBag.comboStatusMovimentos as List<SelectListItem>, htmlAttributes: new { @id = "edit_status", @onchange = "jsAjaxPesquisarMovimentos();", @class = "form-control" })
+                            @Html.DropDownList("Status", ViewBag.comboStatusMovimentos as List<SelectListItem>, htmlAttributes: new { @id = "edit_status", @onchange = "jsOnChangeFiltroIndexPedido();", @class = "form-control" })
                         </div>
                         @Html.Label("R$ Valor", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                         <div class="col-sm-2">
@@ -190,6 +190,7 @@
                         </div>
                         <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroIndexPedido" name="btnLimparFiltroIndexPedido" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroIndexPedido()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -246,6 +247,7 @@
 <script type="text/javascript">
 
     var otableGCIndexPedido;
+    var _gcIndexPedidoSuprimirPesquisaAuto = false;
 
     $(function ()
     {
@@ -255,6 +257,7 @@
             jsDatepickerFirstDayMonth('#ig_gc_pedido_idx_d1');
             jsDatepickerToday('#ig_gc_pedido_idx_d2');
             jsCreateOtableGCIndexPedido();
+            jsAtualizarIndicadorFiltroIndexPedido('0');
             gdiAplicarFoco('#edit_numero_cotacao', true);
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
@@ -282,6 +285,7 @@
                 })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                    if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroIndexPedido(json.yesFilterOnOff); }
                 })
                 .DataTable({
                     "drawCallback": function (settings) {
@@ -408,6 +412,21 @@
     }
 
 
+    function jsOnChangeFiltroIndexPedido()
+    {
+        if (_gcIndexPedidoSuprimirPesquisaAuto) { return; }
+        jsAjaxPesquisarMovimentos();
+    }
+
+    function jsAtualizarIndicadorFiltroIndexPedido(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroIndexPedido',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+        });
+    }
+
     function jsAjaxPesquisarMovimentos()
     {
         try
@@ -419,6 +438,33 @@
         catch (err)
         {
             LibMessageError("Atenção", "[jsAjaxPesquisarMovimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroIndexPedido()
+    {
+        try
+        {
+            _gcIndexPedidoSuprimirPesquisaAuto = true;
+            $('#edit_numero_cotacao').val('');
+            $('#edit_valor').val('');
+            $('#edit_cliente').val('-1').trigger('change');
+            $('#edit_posicao').val('-1').trigger('change');
+            $('#edit_status').val('-1').trigger('change');
+            jsDatepickerFirstDayMonth('#ig_gc_pedido_idx_d1');
+            jsDatepickerToday('#ig_gc_pedido_idx_d2');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dataTableGCIndexPedido").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroIndexPedido] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcIndexPedidoSuprimirPesquisaAuto = false;
         }
     }
 

@@ -1,0 +1,1547 @@
+{
+  "total_views": 41,
+  "with_limpar": 34,
+  "common_all_views": [],
+  "common_among_limpar_views": [
+    "btn_limpar",
+    "yes_filter_field",
+    "indicador_fn",
+    "indicador_init",
+    "xhr_yes_filter",
+    "error_dt",
+    "b_server_side"
+  ],
+  "views": [
+    {
+      "view": "Areas/g/Views/Atendimentos/Edit.cshtml",
+      "datatable_ids": [
+        "dtGAtendimentoAtividades",
+        "dtGAtendimentosGed",
+        "dtGAtendimentosLogs"
+      ],
+      "ajax_actions": [
+        "AjaxCreateEditAtendimento",
+        "AjaxDownloadFileS3",
+        "AjaxGetLookupCategorias",
+        "GetDadosGedAtendimento",
+        "getDadosAtendimentosLogs",
+        "getDadosAtividades"
+      ],
+      "controllers": [
+        "Atendimentos",
+        "Ged"
+      ],
+      "fn_pesquisar": [],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": null,
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": false,
+      "btn_limpar": false,
+      "yes_filter_field": false,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": false,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "datatable_ids": [
+        "dtGAtendimentos"
+      ],
+      "ajax_actions": [
+        "getDadosAtendimentos"
+      ],
+      "controllers": [
+        "Atendimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarAtendimentos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroAtendimentos"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroAtendimentos"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Cidades/Index.cshtml",
+      "datatable_ids": [
+        "dtGCidades"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Cidades"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarCidades"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroCidades"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroCidades"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Clientes/Index.cshtml",
+      "datatable_ids": [
+        "dtGClientes"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Clientes"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarClientes"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroClientes"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroClientes"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": true,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/ContasCaixas/Index.cshtml",
+      "datatable_ids": [
+        "dtGContasCaixas"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "ContasCaixas"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarContasCaixas"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroContasCaixas"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroContasCaixas"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/ContratosAviacao/Index.cshtml",
+      "datatable_ids": [
+        "dtGContratos"
+      ],
+      "ajax_actions": [
+        "AjaxDownloadContratoAviacaoPDF",
+        "AjaxDownloadGedContrato",
+        "GetDados"
+      ],
+      "controllers": [
+        "ContratosAviacao",
+        "Ged",
+        "Global"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarContratos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroContratos"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroContratos"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Filiais/Index.cshtml",
+      "datatable_ids": [
+        "dtGFiliais"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Filiais"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarFiliais"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroFiliais"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroFiliais"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Financeiro/Index.cshtml",
+      "datatable_ids": [
+        "dtGFinanceiro"
+      ],
+      "ajax_actions": [
+        "GetDados",
+        "ajaxEnviarBoletosEmail"
+      ],
+      "controllers": [
+        "Financeiro"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarFinanceiro"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroFinanceiro"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroFinanceiro"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/g/Views/Financeiro/ModalGerarRemessaBoletosBancarios.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxGerarRemessaBoletosBancarios"
+      ],
+      "controllers": [
+        "Financeiro",
+        "Global"
+      ],
+      "fn_pesquisar": [],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": null,
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": false,
+      "btn_limpar": false,
+      "yes_filter_field": false,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": false,
+      "error_dt": false,
+      "defer_loading": false,
+      "b_server_side": false,
+      "auto_pesquisa_change": false,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Ged/Index.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxDownloadFileS3",
+        "GetDados"
+      ],
+      "controllers": [
+        "Ged",
+        "Movimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarGedArquivos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroGed"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroGed"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/g/Views/PagRecCondicoes/Index.cshtml",
+      "datatable_ids": [
+        "dtGPagRecCondicoes"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "PagRecCondicoes"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarPagRecCondicoes"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroPagRecCondicoes"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroPagRecCondicoes"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/PagRecTipos/Index.cshtml",
+      "datatable_ids": [
+        "dtGPagRecTipos"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "PagRecTipos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarPagRecTipos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroPagRecTipos"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroPagRecTipos"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Perfis/Index.cshtml",
+      "datatable_ids": [
+        "dtGPerfis"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Perfis"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarPerfis"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroPerfis"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroPerfis"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Produtos/Index.cshtml",
+      "datatable_ids": [
+        "dtGProdutos"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Produtos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarProdutos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroProdutos"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroProdutos"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": true,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/ProdutosNcm/Index.cshtml",
+      "datatable_ids": [
+        "dtGProdutosNcm"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "ProdutosNcm"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarProdutosNcm"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroProdutosNcm"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroProdutosNcm"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/UF/Index.cshtml",
+      "datatable_ids": [
+        "dtGUF"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "UF"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarUf"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroUf"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroUf"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Usuarios/Index.cshtml",
+      "datatable_ids": [
+        "dtGUsuarios"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Usuarios"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarUsuarios"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroUsuarios"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroUsuarios"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/g/Views/Vendedores/Index.cshtml",
+      "datatable_ids": [
+        "dtGVendedores"
+      ],
+      "ajax_actions": [
+        "AjaxExportarPrecosTabelasVendedores",
+        "GetDados"
+      ],
+      "controllers": [
+        "Global",
+        "Vendedores"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarVendedores"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroVendedores"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroVendedores"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/Cfop/Index.cshtml",
+      "datatable_ids": [
+        "dtGcCfop"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "Cfop"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarCfop"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroCfop"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroCfop"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/CfopOperacoes/Index.cshtml",
+      "datatable_ids": [
+        "dtGcCfopOperacoes"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "CfopOperacoes"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarCfopOperacoes"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroCfopOperacoes"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroCfopOperacoes"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/CfopParametros/Index.cshtml",
+      "datatable_ids": [
+        "dtGcCfopParametros"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "CfopParametros"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarCfopParametros"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroCfopParametros"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroCfopParametros"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/ComexFinanceiro/Index.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "GetDadosPagamentos"
+      ],
+      "controllers": [
+        "ComexFinanceiro"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarComexFinanceiro"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroComexFinanceiro"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroComexFinanceiro"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/Estoque/FormRecebimentoItensImportacao.cshtml",
+      "datatable_ids": [
+        "dtGcRecebimentoImportacao"
+      ],
+      "ajax_actions": [
+        "GetDadosRecebimentoItensImportacao"
+      ],
+      "controllers": [
+        "Estoque"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarRecebimentoItens"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroRecebimentoItens"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroRecebimentoItens"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/Estoque/Index.cshtml",
+      "datatable_ids": [
+        "dtEstoque"
+      ],
+      "ajax_actions": [
+        "AjaxFinanceiroInfo",
+        "AjaxRelatorioPosicaoEstoque",
+        "GetDadosEstoque"
+      ],
+      "controllers": [
+        "Estoque",
+        "Financeiro",
+        "Global",
+        "Produtos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarEstoque"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroEstoque"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroEstoque"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueControle/Index.cshtml",
+      "datatable_ids": [
+        "dtGcProdutosControle"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "EstoqueControle"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarEstoqueControle"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroEstoqueControle"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroEstoqueControle"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": true,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "datatable_ids": [
+        "dtGcInventarioItem"
+      ],
+      "ajax_actions": [
+        "GetDadosInventarioItem"
+      ],
+      "controllers": [
+        "EstoqueInventario"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarInventarioItens"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroInventarioItens"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroInventarioItens"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueInventario/Index.cshtml",
+      "datatable_ids": [
+        "dtGcInventario"
+      ],
+      "ajax_actions": [
+        "AjaxRelatorioEstoqueInventario",
+        "GetDadosInventario"
+      ],
+      "controllers": [
+        "EstoqueInventario",
+        "Global"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarInventarios"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroInventarios"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroInventarios"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueLotes/Index.cshtml",
+      "datatable_ids": [
+        "dtGcEstoqueLotes"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "EstoqueLotes"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarLotes"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroEstoqueLotes"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroEstoqueLotes"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/FinanceiroLancamentos/Index.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxExportarLancamentosExcel",
+        "AjaxFinanceiroBoletoGCPDF",
+        "AjaxPosicaoAtualContaCaixa",
+        "AjaxRoboItau",
+        "GetDadosLancamentos"
+      ],
+      "controllers": [
+        "FinanceiroLancamentos",
+        "Global"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarFinanceiroLancamentos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroFinanceiroLancamentos"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroFinanceiroLancamentos"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/gc/Views/FinanceiroLancamentos/ModalViewFinanceiroMovimentos.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxFinanceiroBoletoGCPDF",
+        "GetDadosLancamentosByMovimento"
+      ],
+      "controllers": [
+        "FinanceiroLancamentos",
+        "Global"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarLancamentos"
+      ],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": false,
+      "btn_limpar": false,
+      "yes_filter_field": true,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": false,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml",
+      "datatable_ids": [
+        "dtGcFinanceiroParametrosDifal"
+      ],
+      "ajax_actions": [
+        "GetDados"
+      ],
+      "controllers": [
+        "FinanceiroParametroDifal"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarDifal"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroDifal"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroDifal"
+      ],
+      "yesFilterField_pesquisar": "",
+      "yesFilterField_limpar": "*",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": true,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/Fretes/Index.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "GetDadosPedidos"
+      ],
+      "controllers": [
+        "Movimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarMovimentos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroFretes"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroFretes"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/gc/Views/Gerencial/IndexPainelComercialGerencial.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "GetDadosLancamentos"
+      ],
+      "controllers": [
+        "FinanceiroLancamentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarFinanceiroLancamentos"
+      ],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": false,
+      "btn_limpar": false,
+      "yes_filter_field": true,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/IndexEstoque.cshtml",
+      "datatable_ids": [
+        "dtMovimentosEstoque"
+      ],
+      "ajax_actions": [
+        "GetDadosEstoque"
+      ],
+      "controllers": [
+        "Estoque"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarEstoque"
+      ],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": true,
+      "btn_limpar": false,
+      "yes_filter_field": true,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": false,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/IndexPedido.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxReportInvoicePDF",
+        "GetDadosPedidos"
+      ],
+      "controllers": [
+        "FinanceiroLancamentos",
+        "Global",
+        "Movimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarMovimentos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroIndexPedido"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroIndexPedido"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/ModalConsultaPedidos.cshtml",
+      "datatable_ids": [
+        "dtGcModalPedidosHistorico"
+      ],
+      "ajax_actions": [
+        "GetRelatorioConsultaPedidos"
+      ],
+      "controllers": [
+        "Movimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarPedidos"
+      ],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": null,
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": true,
+      "btn_limpar": false,
+      "yes_filter_field": false,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": false,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": false,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/ModalInvoicesItensEspelhoDigital.cshtml",
+      "datatable_ids": [
+        "dtGcComexImportacoesModalInvoicesItensEspelhoDigital",
+        "dtGcMovimentosCreatePedido"
+      ],
+      "ajax_actions": [
+        "AjaxCarregarItensImportacao",
+        "GetDadosInvoicesItensEspelhoDigital"
+      ],
+      "controllers": [
+        "Movimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarItens"
+      ],
+      "fn_limpar": [],
+      "fn_indicador": [],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": null,
+      "btn_pesquisar": true,
+      "btn_limpar": false,
+      "yes_filter_field": true,
+      "indicador_fn": false,
+      "indicador_init": false,
+      "xhr_yes_filter": false,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/PainelPedidos.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxReportInvoicePDF",
+        "GetDadosPainelPedidos"
+      ],
+      "controllers": [
+        "FinanceiroLancamentos",
+        "Global",
+        "Movimentos"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarMovimentos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroPainelPedidos"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroPainelPedidos"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": true,
+      "restore_filter": false,
+      "select2_lookup": true,
+      "datepicker_filtro": false
+    },
+    {
+      "view": "Areas/qa/Views/GedSGQ/IndexAtasReunioes.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxDownloadFileS3",
+        "GetDadosAtasReunioes"
+      ],
+      "controllers": [
+        "Ged",
+        "GedSGQ"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarGedArquivos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroGedAtasReunioes"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroGedAtasReunioes"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/qa/Views/GedSGQ/IndexComunicados.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxDownloadFileS3",
+        "GetDadosComunicados"
+      ],
+      "controllers": [
+        "Ged",
+        "GedSGQ"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarGedArquivos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroGedComunicados"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroGedComunicados"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": true
+    },
+    {
+      "view": "Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml",
+      "datatable_ids": [
+        "(não detectado)"
+      ],
+      "ajax_actions": [
+        "AjaxDownloadFileS3",
+        "GetDadosDocsSGQ"
+      ],
+      "controllers": [
+        "Ged",
+        "GedSGQ"
+      ],
+      "fn_pesquisar": [
+        "jsAjaxPesquisarGedArquivos"
+      ],
+      "fn_limpar": [
+        "jsLimparFiltroGedDocsSGQ"
+      ],
+      "fn_indicador": [
+        "jsAtualizarIndicadorFiltroGedDocsSGQ"
+      ],
+      "yesFilterField_pesquisar": "*",
+      "yesFilterField_limpar": "",
+      "btn_pesquisar": true,
+      "btn_limpar": true,
+      "yes_filter_field": true,
+      "indicador_fn": true,
+      "indicador_init": true,
+      "xhr_yes_filter": true,
+      "error_dt": true,
+      "defer_loading": false,
+      "b_server_side": true,
+      "auto_pesquisa_change": true,
+      "keypress_enter": false,
+      "restore_filter": false,
+      "select2_lookup": false,
+      "datepicker_filtro": true
+    }
+  ]
+}

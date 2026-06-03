@@ -151,7 +151,15 @@ namespace GdiPlataform.Areas.qa.Controllers
                     });
                 }
 
-                if (filterDb) { filterOnOff = "1"; }
+                if (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*")
+                {
+                    if (filterDb) { filterOnOff = "1"; }
+                    else
+                    {
+                        string tipoArquivo = param.yesCustomField01.EmptyIfNull().ToString().Trim();
+                        if (tipoArquivo.Length > 0 && tipoArquivo != "-1" && tipoArquivo != "0") { filterOnOff = "1"; }
+                    }
+                }
 
                 return Json(new
                 {

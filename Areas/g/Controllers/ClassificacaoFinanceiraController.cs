@@ -159,8 +159,23 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region GetTreeViewClassificacaoFinanceira
+        /// <summary>Registo sistema oculto na listagem (<c>getDados</c> usa <c>id &gt; 1</c>); filhos reais usam <c>pai = 1</c>.</summary>
+        private const int IdRegistroRaizSistemaClassificacaoFinanceira = 1;
+
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ClassificacaoFinanceira_*,g_ClassificacaoFinanceira_Actionread")]
         public JsonResult GetTreeViewClassificacaoFinanceira()
         {
+            if (db == null)
+            {
+                return Json(new JsTree3Node
+                {
+                    id = "-1",
+                    text = "Árvore - Classificação Financeira (sessão inválida)",
+                    state = new State(true, false, false),
+                    children = new List<JsTree3Node>()
+                }, JsonRequestBehavior.AllowGet);
+            }
+
             var root = new JsTree3Node() // Create our root node and ensure it is opened
             {
                 id = "-1",
@@ -176,8 +191,16 @@ namespace GdiPlataform.Areas.g.Controllers
                                                 where _c1.id_classificacao_financeira > 0
                                                 select new { g_classificacao_financeira = _c1 }).ToList();
 
-            // Nível 1
-            var listaClassificacaoFinanceiraN1 = listaClassificacaoFinanceira.Where(N1 => N1.g_classificacao_financeira.id_classificacao_financeira_pai == 0).OrderBy(N1 => N1.g_classificacao_financeira.codigo).ToList();
+            // Nível 1 — raiz visível: pai=0 (exceto registo sistema id=1) ou filhos diretos de id=1 (legado BD)
+            var listaClassificacaoFinanceiraN1 = listaClassificacaoFinanceira
+                .Where(N1 =>
+                {
+                    var cf = N1.g_classificacao_financeira;
+                    var pai = cf.id_classificacao_financeira_pai;
+                    var id = cf.id_classificacao_financeira;
+                    return (pai == 0 && id != IdRegistroRaizSistemaClassificacaoFinanceira) || pai == IdRegistroRaizSistemaClassificacaoFinanceira;
+                })
+                .OrderBy(N1 => N1.g_classificacao_financeira.codigo).ToList();
             foreach (var ClassificacaoFinanceiraN1 in listaClassificacaoFinanceiraN1)
             {
                 var nodeN1 = JsTree3Node.NewNode(ClassificacaoFinanceiraN1.g_classificacao_financeira.codigo.ToString() + " - " + ClassificacaoFinanceiraN1.g_classificacao_financeira.nome.ToString());

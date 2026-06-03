@@ -87,14 +87,10 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 if (idProduto > 0)
                 {
-                    filterOnOff = "1";
                     query = query.Where(p => p.id_produto == idProduto);
                 }
-                else
-                {
-                    // no seu original você ligava sempre "1" por ter sempre select com saldo >0
-                    filterOnOff = "1";
-                }
+
+                filterOnOff = param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && idProduto > 0 ? "1" : "0";
 
                 // ----------------------------
                 // 3) Totais DataTables
@@ -649,6 +645,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 "" // botão editar
             });
                 }
+
+                filterOnOff = param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && filtrarPorOS ? "1" : "0";
 
                 return Json(new
                 {

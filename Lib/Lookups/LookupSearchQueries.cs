@@ -288,6 +288,15 @@ namespace GdiPlataform.Lib.Lookups
             };
         }
 
+        /// <summary>g/Produtos Index — placeholder + typeahead Ajax (sem combo completo no HTML).</summary>
+        public static List<SelectListItem> ComboFiltroProdutoCadastroIndex()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = "[ SELECIONE O PRODUTO ]", Selected = true }
+            };
+        }
+
         /// <summary>gc/Estoque/Index — opções fixas 0/-1 + typeahead Ajax (PROD-002a; sem GetComboGcProdutosPosicaoEstoqueIndex no HTML).</summary>
         public static List<SelectListItem> ComboFiltroProdutoPosicaoEstoqueIndex()
         {

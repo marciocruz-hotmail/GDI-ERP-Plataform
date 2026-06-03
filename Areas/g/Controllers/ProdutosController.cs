@@ -41,8 +41,8 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Produtos/Serviços";
             ViewBag.RestoreFilterId = String.Empty;
             ViewBag.RestoreFilterPn = String.Empty;
-            ViewBag.RestoreFilterNome = String.Empty;
             ViewBag.RestoreFilterAutoSearch = false;
+            int? idProdutoLookupRestore = null;
 
             g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
             string idRestore, pnRestore, auxRestore, nomeRestore, descRestore;
@@ -50,11 +50,17 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 ViewBag.RestoreFilterId = idRestore;
                 ViewBag.RestoreFilterPn = pnRestore;
-                ViewBag.RestoreFilterNome = nomeRestore;
+                int idLookup;
+                if (int.TryParse(nomeRestore, out idLookup) && idLookup > 0)
+                {
+                    idProdutoLookupRestore = idLookup;
+                }
                 ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore)
                     || !String.IsNullOrEmpty(pnRestore)
-                    || !String.IsNullOrEmpty(nomeRestore);
+                    || idProdutoLookupRestore.HasValue
+                    || (!String.IsNullOrEmpty(nomeRestore) && !idProdutoLookupRestore.HasValue);
             }
+            PreencherLookupsIndexProdutos(idProdutoLookupRestore);
             return View();
         }
 
@@ -251,9 +257,17 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 query = query.Where(p => p.codigo_auxiliar != null && DbFunctions.Like(p.codigo_auxiliar, padraoAux));
             }
-            if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
+            if (!String.IsNullOrEmpty(nomeStr))
             {
-                query = query.Where(p => p.nome != null && DbFunctions.Like(p.nome, padraoNome));
+                int idProdutoLookup;
+                if (int.TryParse(nomeStr, out idProdutoLookup) && idProdutoLookup > 0)
+                {
+                    query = query.Where(p => p.id_produto == idProdutoLookup);
+                }
+                else if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
+                {
+                    query = query.Where(p => p.nome != null && DbFunctions.Like(p.nome, padraoNome));
+                }
             }
             if (LibStringFormat.TryMontarPadraoLikeContemTexto(descStr, out string padraoDesc))
             {

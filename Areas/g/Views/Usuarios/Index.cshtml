@@ -80,6 +80,10 @@
     $(function () {
         try {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroUsuarios('0');
             gdiAplicarFoco('#edit_id_usuario', true);
@@ -146,8 +150,7 @@
                 if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 else if (json && json.yesFilterOnOff !== undefined) { jsAtualizarIndicadorFiltroUsuarios(json.yesFilterOnOff); }
             }).DataTable({
-                deferLoading: true,
-                processing: true,
+            processing: true,
                 bServerSide: true,
                 ajax: {
                     url: '@Url.Action("GetDados","Usuarios",new { Area = "g" })',

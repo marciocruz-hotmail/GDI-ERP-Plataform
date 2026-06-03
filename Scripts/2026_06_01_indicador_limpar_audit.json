@@ -1,0 +1,357 @@
+{
+  "total": 35,
+  "ok": 35,
+  "with_issues": [],
+  "all": [
+    {
+      "view": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Cidades/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Clientes/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": true,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/ContasCaixas/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/ContratosAviacao/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Filiais/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Financeiro/Index.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Ged/Index.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/PagRecCondicoes/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/PagRecTipos/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Perfis/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Produtos/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": true,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/ProdutosNcm/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/UF/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Usuarios/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/g/Views/Vendedores/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Cfop/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/CfopOperacoes/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/CfopParametros/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/ComexFinanceiro/Index.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Estoque/FormRecebimentoItensImportacao.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Estoque/Index.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueControle/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueInventario/Index.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/EstoqueLotes/Index.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/FinanceiroLancamentos/Index.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml",
+      "padrao": "misto_p=None_l=*",
+      "init": "0",
+      "init_star_abrir": true,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "*",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Fretes/Index.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/IndexEstoque.cshtml",
+      "padrao": "?",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": null,
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/IndexPedido.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/gc/Views/Movimentos/PainelPedidos.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/qa/Views/GedSGQ/IndexAtasReunioes.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/qa/Views/GedSGQ/IndexComunicados.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    },
+    {
+      "view": "Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml",
+      "padrao": "B_operacional",
+      "init": "0",
+      "init_star_abrir": false,
+      "defer_loading": false,
+      "yes_pesquisar": "*",
+      "yes_limpar": "",
+      "issues": []
+    }
+  ]
+}

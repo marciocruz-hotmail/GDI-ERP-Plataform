@@ -82,7 +82,8 @@
                         <div class="col-sm-6">
                             @Html.DropDownListFor(model => model.FinanceiroIndex_id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
-                        <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFinanceiro()">Pesquisar</button>
+                        <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarFinanceiro()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        <button type="button" id="btnLimparFiltroFinanceiro" name="btnLimparFiltroFinanceiro" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroFinanceiro()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
 
@@ -153,6 +154,7 @@
             jsDatepicker('#ig_g_financeiro_idx_d2');
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroFinanceiro('0');
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -176,7 +178,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroFinanceiro(json.yesFilterOnOff); } }).DataTable({
                 "footerCallback": function (row, data, start, end, display) {
                     var api = this.api(), data;
                     var intVal = function (i) {
@@ -320,6 +322,15 @@
         }
     };
 
+    function jsAtualizarIndicadorFiltroFinanceiro(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroFinanceiro',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+        });
+    }
+
     function jsAjaxPesquisarFinanceiro()
     {
         try
@@ -330,6 +341,25 @@
         }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxPesquisarFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroFinanceiro()
+    {
+        try
+        {
+            $('#FinanceiroIndex_id_cliente').val('0').trigger('change');
+            jsDatepickerFirstDayMonth('#ig_g_financeiro_idx_d1');
+            jsDatepickerLastDayMonth('#ig_g_financeiro_idx_d2');
+            $('#FinanceiroIndex_id_financeiro_status').val('0');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGFinanceiro").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroFinanceiro] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 

@@ -46,6 +46,7 @@
                         </div>
                         <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarLotes()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroEstoqueLotes" name="btnLimparFiltroEstoqueLotes" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroEstoqueLotes()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -82,11 +83,15 @@
 
 <script type="text/javascript">
     var dtGcEstoqueLotes;
+    var _gcEstoqueLotesSuprimirPesquisaAuto = false;
 
     $(function () {
         try {
+            _gcEstoqueLotesSuprimirPesquisaAuto = true;
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroEstoqueLotes('0');
+            _gcEstoqueLotesSuprimirPesquisaAuto = false;
             gdiAplicarFoco('#edit_codigo_lote', true);
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary() == null) ? "" : @Html.ValidationSummary().ToHtmlString()))));
         }
@@ -113,6 +118,9 @@
                 })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                    if (json && json.yesFilterOnOff !== undefined) {
+                        jsAtualizarIndicadorFiltroEstoqueLotes(json.yesFilterOnOff);
+                    }
                 })
                 .DataTable({
                 "footerCallback": function (row, data, start, end, display) {
@@ -134,7 +142,7 @@
                             iDisplayLength: d.length,
                             yesFilterField: $('#yesFilterField').val().toString(),
                             yesCustomField01: emptyIfNull($('#edit_codigo_lote').val()).toString(),
-                            yesCustomField02: emptyIfNull($('#edit_codigo_serial').val()).toString(),
+                            yesCustomField02: emptyIfNull($('#codigo_serial').val()).toString(),
                             yesCustomField03: emptyIfNull($('#edit_produto').val()).toString(),
                             yesCustomField04: emptyIfNull($('#edit_importacao').val()).toString(),
                         };
@@ -235,16 +243,50 @@
         }
     }
 
+    function jsAtualizarIndicadorFiltroEstoqueLotes(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroEstoqueLotes',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar lote/serial/produto/importação'
+        });
+    }
+
     function jsAjaxPesquisarLotes()
     {
         try
         {
+            if (_gcEstoqueLotesSuprimirPesquisaAuto) { return; }
             LibMessageProcessando('Pesquisando Lotes . . .');
             document.getElementById("yesFilterField").value = "*";
             $("#dtGcEstoqueLotes").DataTable().draw(false);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxPesquisarLotes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroEstoqueLotes()
+    {
+        try
+        {
+            _gcEstoqueLotesSuprimirPesquisaAuto = true;
+            $('#edit_codigo_lote').val('');
+            $('#codigo_serial').val('');
+            $('#edit_produto').val('-1').trigger('change');
+            $('#edit_importacao').val('0').trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGcEstoqueLotes").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroEstoqueLotes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcEstoqueLotesSuprimirPesquisaAuto = false;
         }
     }
 

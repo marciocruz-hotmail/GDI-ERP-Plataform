@@ -124,6 +124,56 @@ function gdiSelect2IsLookupAjaxAbort(jqXHR, textStatus, errorThrown) {
 }
 
 /**
+ * Select2 allowClear exige placeholder + opção value="" (documentação Select2 4.x).
+ * Combos de filtro GDI usam sentinela (-1, 0) na 1ª option — injeta option vazia e define placeholder.
+ *
+ * @param {jQuery} $el `<select>`
+ * @param {Object} opts opções Select2 já construídas (allowClear deve estar true)
+ * @returns {Object}
+ */
+function gdiSelect2PrepareAllowClear($el, opts) {
+    if (!opts || !opts.allowClear) {
+        return opts;
+    }
+    var hasEmptyOption = false;
+    $el.find('option').each(function () {
+        if (String($(this).val()) === '') {
+            hasEmptyOption = true;
+            return false;
+        }
+    });
+    if (!hasEmptyOption) {
+        var $first = $el.find('option:first');
+        var label = $first.length ? String($first.text() || '').trim() : '';
+        if (!opts.placeholder) {
+            opts.placeholder = label || 'Selecione…';
+        }
+        $el.prepend($('<option></option>').val('').text(''));
+    } else if (!opts.placeholder) {
+        var phText = String($el.find('option').filter(function () {
+            return String($(this).val()) === '';
+        }).first().text() || '').trim();
+        opts.placeholder = phText || 'Selecione…';
+    }
+    return opts;
+}
+
+/**
+ * Dispara change após limpar Select2 — garante onchange inline das views (ex.: pesquisa DataTables).
+ * @param {jQuery} $el `<select>` já inicializado com Select2
+ */
+function gdiSelect2BindAllowClearChange($el) {
+    $el.off('select2:clear.gdiAllowClear').on('select2:clear.gdiAllowClear', function () {
+        var el = this;
+        window.setTimeout(function () {
+            try {
+                $(el).trigger('change');
+            } catch (ex) { /* ignore */ }
+        }, 0);
+    });
+}
+
+/**
  * Select2 com Ajax (contrato servidor: { items: [{ id, text }] } — ver GetClientesLookup / GetProdutosLookup).
  * Atributos no &lt;select&gt;: data-gdi-lookup-url (obrig.), data-gdi-lookup-min-length (opc., default 2).
  */
@@ -378,10 +428,14 @@ function gdiInitSelect2OnCollection(selector, dropdownParent, extraOpts) {
         }
         var lookupUrl = ($el.attr('data-gdi-lookup-url') || '').trim();
         var nOpts = gdiSelect2StaticOptionCount($el);
-        if (!lookupUrl && nOpts <= 5 && $el.attr('data-gdi-select2-search') !== 'true') {
+        var forceLocalSearch = $el.attr('data-gdi-select2-search') === 'true';
+        /* Lista estática (sem Ajax): Select2 + pesquisa local para 2+ opções.
+           Mantém <select> nativo só com ≤1 option ou data-gdi-no-select2.
+           data-gdi-select2-search="true" força Select2 mesmo com 1 option (edge cases). */
+        if (!lookupUrl && !forceLocalSearch && (nOpts <= 1 || $el.is('[data-gdi-no-select2]'))) {
             gdiDestroySelect2IfAny($el);
             if (window.GDI_DEBUG) {
-                console.log('[gdi-select2] lista curta (≤5 options), mantém <select> nativo. Forçar Select2: data-gdi-select2-search="true".', $el.get(0));
+                console.log('[gdi-select2] mantém <select> nativo (≤1 option ou data-gdi-no-select2). Forçar Select2: data-gdi-select2-search="true".', $el.get(0));
             }
             return;
         }
@@ -389,7 +443,12 @@ function gdiInitSelect2OnCollection(selector, dropdownParent, extraOpts) {
         gdiDestroySelect2IfAny($el);
         try {
             var buildFn = lookupUrl ? gdiSelect2BuildAjaxOptions : gdiSelect2BuildOptions;
-            $el.select2(buildFn($el, $resolvedParent, extraOpts));
+            var opts = buildFn($el, $resolvedParent, extraOpts);
+            gdiSelect2PrepareAllowClear($el, opts);
+            $el.select2(opts);
+            if (opts.allowClear) {
+                gdiSelect2BindAllowClearChange($el);
+            }
             gdiSyncSelect2ValidationToContainer($el);
         } catch (e) {
             if (window.GDI_DEBUG) {

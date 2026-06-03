@@ -74,20 +74,21 @@
                         </div>
                         @Html.Label("Posição", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                     <div class="col-sm-2">
-                        @Html.DropDownListFor(model => model.id_movimento_posicao, ViewBag.comboMovimentosPosicao as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();" })
+                        @Html.DropDownListFor(model => model.id_movimento_posicao, ViewBag.comboMovimentosPosicao as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroPainelPedidos();" })
                     </div>
                         @Html.Label("Estoque", "Estoque", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                         <div class="col-sm-2">
-                            @Html.DropDownListFor(model => model.id_local_estoque, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();" })
+                            @Html.DropDownListFor(model => model.id_local_estoque, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroPainelPedidos();" })
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-8 min-w-0">
-                            @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsAjaxPesquisarMovimentos();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
+                            @Html.DropDownListFor(model => model.id_cliente, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @onchange = "jsOnChangeFiltroPainelPedidos();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
                         <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroPainelPedidos" name="btnLimparFiltroPainelPedidos" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroPainelPedidos()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -150,13 +151,17 @@
 <script type="text/javascript">
 
     var otableGCIndexPedido;
+    var _gcPainelPedidosSuprimirPesquisaAuto = false;
+    var _gcPainelDefaultLocalEstoque = '-1';
 
     $(function ()
     {
         try
         {
             jsInitForm();
+            _gcPainelDefaultLocalEstoque = emptyIfNull($('#id_local_estoque').val()).toString();
             jsCreateOtableGCIndexPedido();
+            jsAtualizarIndicadorFiltroPainelPedidos('0');
             gdiAplicarFoco('#documento_numero', true);
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
@@ -184,6 +189,7 @@
                 .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                    if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroPainelPedidos(json.yesFilterOnOff); }
                 })
                 .DataTable({
                 "drawCallback": function (settings) {
@@ -211,7 +217,7 @@
                         yesFilterField: $('#yesFilterField').val().toString(),
                         yesCustomField01: emptyIfNull($('#documento_numero').val()).toString(),
                         yesCustomField02: emptyIfNull($('#id_movimento_posicao').val()).toString(),
-                        yesCustomField03: emptyIfNull($('#edit_cliente').val()).toString(),
+                        yesCustomField03: emptyIfNull($('#id_cliente').val()).toString(),
                         yesCustomField04: emptyIfNull($('#id_local_estoque').val()).toString(),
                         yesFilterController: $('#yesFilterController').val().toString(),
                     };
@@ -311,6 +317,21 @@
         }
     }
 
+    function jsOnChangeFiltroPainelPedidos()
+    {
+        if (_gcPainelPedidosSuprimirPesquisaAuto) { return; }
+        jsAjaxPesquisarMovimentos();
+    }
+
+    function jsAtualizarIndicadorFiltroPainelPedidos(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroPainelPedidos',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+        });
+    }
+
     function jsAjaxPesquisarMovimentos()
     {
         try
@@ -322,6 +343,30 @@
         catch (err)
         {
             LibMessageError("Atenção", "[jsAjaxPesquisarMovimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroPainelPedidos()
+    {
+        try
+        {
+            _gcPainelPedidosSuprimirPesquisaAuto = true;
+            $('#documento_numero').val('');
+            $('#id_movimento_posicao').val('-1').trigger('change');
+            $('#id_cliente').val('-1').trigger('change');
+            $('#id_local_estoque').val(_gcPainelDefaultLocalEstoque).trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dataTableGCIndexPedido").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroPainelPedidos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcPainelPedidosSuprimirPesquisaAuto = false;
         }
     }
 

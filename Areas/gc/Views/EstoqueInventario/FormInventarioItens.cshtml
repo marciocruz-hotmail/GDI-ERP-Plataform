@@ -23,28 +23,29 @@
                         <div class="form-group row text-sm-end m-0 pt-1">
                             @Html.Label("id_estoque_area", "Área:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                             <div class="col-sm-2 text-sm-start">
-                                @Html.DropDownList("id_estoque_area_form", ViewBag.comboEstoqueEnderecoArea as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_area_form", @class = "form-control", @title = "Área", @onchange = "jsAjaxPesquisarInventarioItens();", @onblur = "jsAjaxPesquisarInventarioItens();" })
+                                @Html.DropDownList("id_estoque_area_form", ViewBag.comboEstoqueEnderecoArea as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_area_form", @class = "form-control", @title = "Área", @onchange = "jsOnChangeFiltroInventarioItens();", @onblur = "jsOnChangeFiltroInventarioItens();" })
                             </div>
                             @Html.Label("id_estoque_secao", "Seção:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                             <div class="col-sm-2 text-sm-start">
-                                @Html.DropDownList("id_estoque_secao_form", ViewBag.comboEstoqueEnderecoSecao as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_secao_form", @class = "form-control", @title = "Seção", @onchange = "jsAjaxPesquisarInventarioItens();", @onblur = "jsAjaxPesquisarInventarioItens();" })
+                                @Html.DropDownList("id_estoque_secao_form", ViewBag.comboEstoqueEnderecoSecao as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_secao_form", @class = "form-control", @title = "Seção", @onchange = "jsOnChangeFiltroInventarioItens();", @onblur = "jsOnChangeFiltroInventarioItens();" })
                             </div>
                             @Html.Label("id_estoque_corredor", "Corredor:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                             <div class="col-sm-2 text-sm-start">
-                                @Html.DropDownList("id_estoque_corredor_form", ViewBag.comboEstoqueEnderecoCorredor as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_corredor_form", @class = "form-control", @title = "Corredor", @onchange = "jsAjaxPesquisarInventarioItens();", @onblur = "jsAjaxPesquisarInventarioItens();" })
+                                @Html.DropDownList("id_estoque_corredor_form", ViewBag.comboEstoqueEnderecoCorredor as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_corredor_form", @class = "form-control", @title = "Corredor", @onchange = "jsOnChangeFiltroInventarioItens();", @onblur = "jsOnChangeFiltroInventarioItens();" })
                             </div>
                             @Html.Label("id_estoque_prateleira", "Prateleira:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                             <div class="col-sm-2 text-sm-start">
-                                @Html.DropDownList("id_estoque_prateleira_form", ViewBag.comboEstoqueEnderecoPrateleira as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_prateleira_form", @class = "form-control", @title = "Prateleira", @onchange = "jsAjaxPesquisarInventarioItens();", @onblur = "jsAjaxPesquisarInventarioItens();" })
+                                @Html.DropDownList("id_estoque_prateleira_form", ViewBag.comboEstoqueEnderecoPrateleira as List<SelectListItem>, htmlAttributes: new { @id = "id_estoque_prateleira_form", @class = "form-control", @title = "Prateleira", @onchange = "jsOnChangeFiltroInventarioItens();", @onblur = "jsOnChangeFiltroInventarioItens();" })
                             </div>
                         </div>
                         <div class="form-group row text-sm-end m-0 pt-1">
                             @Html.Label("produto", "Item:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
                             <div class="col-sm-9 text-sm-start">
-                                @Html.DropDownList("id_produto_servico_form", ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @id = "id_produto_servico_form", @class = "form-control", @title = "Item", @onchange = "jsAjaxPesquisarInventarioItens();", @onblur = "jsAjaxPesquisarInventarioItens();" })
+                                @Html.DropDownList("id_produto_servico_form", ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @id = "id_produto_servico_form", @class = "form-control", @title = "Item", @onchange = "jsOnChangeFiltroInventarioItens();", @onblur = "jsOnChangeFiltroInventarioItens();" })
                             </div>
                             <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
                                 <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarInventarioItens()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                                <button type="button" id="btnLimparFiltroInventarioItens" name="btnLimparFiltroInventarioItens" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroInventarioItens()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                             </div>
                         </div>
                     </div>
@@ -74,6 +75,7 @@
 
 <script type="text/javascript">
 var otableGcInventarioItem;
+var _gcInventarioItensSuprimirPesquisaAuto = false;
 
 $(function ()
 {
@@ -81,6 +83,7 @@ $(function ()
     {
         jsInitForm();
         jsCreateTable();
+        jsAtualizarIndicadorFiltroInventarioItens('0');
         getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         document.forms["FormInventarioItens"]["id_estoque_area_form"].value = "-0";
         document.forms["FormInventarioItens"]["id_estoque_secao_form"].value = "0";
@@ -99,7 +102,7 @@ function jsCreateTable()
     try
     {
         $.fn.dataTable.ext.errMode = 'none';
-        otableGcInventarioItem = $('#dtGcInventarioItem').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; }).DataTable({
+        otableGcInventarioItem = $('#dtGcInventarioItem').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroInventarioItens(json.yesFilterOnOff); } }).DataTable({
             "drawCallback": function (settings) {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
             },
@@ -212,6 +215,21 @@ function jsModalCreateEditInventarioItem(id)
     }
 }
 
+function jsOnChangeFiltroInventarioItens()
+{
+    if (_gcInventarioItensSuprimirPesquisaAuto) { return; }
+    jsAjaxPesquisarInventarioItens();
+}
+
+function jsAtualizarIndicadorFiltroInventarioItens(yesFilterOnOff)
+{
+    GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+        btnId: 'btnLimparFiltroInventarioItens',
+        tituloInativo: 'Limpar filtro e restaurar padrão',
+        tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+    });
+}
+
 function jsAjaxPesquisarInventarioItens()
 {
     try
@@ -221,6 +239,31 @@ function jsAjaxPesquisarInventarioItens()
     }
     catch (err) {
         LibMessageError("Atenção", "[jsAjaxPesquisarInventarioItens] " + (err && err.message ? err.message.toString() : String(err)));
+    }
+}
+
+function jsLimparFiltroInventarioItens()
+{
+    try
+    {
+        _gcInventarioItensSuprimirPesquisaAuto = true;
+        document.forms["FormInventarioItens"]["id_estoque_area_form"].value = "-0";
+        document.forms["FormInventarioItens"]["id_estoque_secao_form"].value = "0";
+        document.forms["FormInventarioItens"]["id_estoque_corredor_form"].value = "0";
+        document.forms["FormInventarioItens"]["id_estoque_prateleira_form"].value = "0";
+        document.forms["FormInventarioItens"]["id_produto_servico_form"].value = "0";
+        document.getElementById("yesFilterField").value = "";
+        LibMessageProcessando('Atualizando lista...');
+        $("#dtGcInventarioItem").DataTable().draw(false);
+    }
+    catch (err)
+    {
+        LibMessageProcessandoHide();
+        LibMessageError("Atenção", "[jsLimparFiltroInventarioItens] " + (err && err.message ? err.message.toString() : String(err)));
+    }
+    finally
+    {
+        _gcInventarioItensSuprimirPesquisaAuto = false;
     }
 }
 

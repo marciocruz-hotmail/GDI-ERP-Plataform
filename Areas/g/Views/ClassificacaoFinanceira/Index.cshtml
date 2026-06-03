@@ -52,14 +52,31 @@
     function jsLoadTree()
     {
         try {
-            ojsTree = $('#jsTree').jstree({
-                'core': {
-                    'data': {
-                        'url': '@Url.Action("GetTreeViewClassificacaoFinanceira", "ClassificacaoFinanceira", new { Area = "g" })',
-                        'dataType': 'json'
+            var initJstree = function () {
+                ojsTree = $('#jsTree').jstree({
+                    'core': {
+                        'data': {
+                            'url': '@Url.Action("GetTreeViewClassificacaoFinanceira", "ClassificacaoFinanceira", new { Area = "g" })',
+                            'dataType': 'json'
+                        }
                     }
-                }
-            });
+                });
+                $('#jsTree').on('error.jstree', function (e, data) {
+                    var det = (data && (data.reason || data.error)) ? String(data.reason || data.error) : 'resposta inválida do servidor';
+                    LibMessageError("Atenção", "Falha ao carregar a árvore de classificação financeira: " + det);
+                });
+            };
+            if (typeof window.GdiEnsureScriptFlags === 'function' && (typeof jQuery.fn.jstree !== 'function')) {
+                window.GdiEnsureScriptFlags(16, function (err) {
+                    if (err) {
+                        LibMessageError("Atenção", "[jsLoadTree] jstree não carregou: " + String(err));
+                        return;
+                    }
+                    initJstree();
+                });
+            } else {
+                initJstree();
+            }
         }
         catch (err) {
             LibMessageError("Atenção", "[jsLoadTree] " + (err && err.message ? err.message.toString() : String(err)));

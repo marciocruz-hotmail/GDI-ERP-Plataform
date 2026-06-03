@@ -232,6 +232,16 @@ namespace GdiPlataform.Areas.gc.Controllers
             return View();
         }
 
+        /// <summary>Posição de estoque (legado Movimentos) — reutiliza <see cref="EstoqueController.GetDadosEstoque"/>.</summary>
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_Movimentos_*,gc_Movimentos_IndexPedido")]
+        public ActionResult IndexEstoque()
+        {
+            CachePersister.userIdentity.FormNameActive = "GcMovimentosIndexEstoque";
+            PreencherLookupsIndexEstoque();
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-boxes-stacked", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Posição de Estoque";
+            return View();
+        }
+
         public ActionResult GetDadosPedidos(jQueryDataTableParamModel param)
         {
             string filterOnOff = "0";
@@ -593,6 +603,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                         "", // anexo
                         ""  // editar
                     });
+                }
+
+                if (param.yesFilterField.EmptyIfNull().ToString().Trim() != "*")
+                {
+                    filterOnOff = "0";
                 }
 
                 return Json(new
@@ -5401,7 +5416,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 else 
                 {
                     ParamMovimentoExpedido = "0";
-                    TitleModal = LibIcons.getIcon("fa-solid fa-truck", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Expedição do Pedido Nº " + RecordMovimento.id_movimento.ToString(); 
+                    TitleModal = LibIcons.getIcon("fa-solid fa-truck", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Expedição do Pedido Nº " + RecordMovimento.id_movimento.ToString();
                 }
 
                 if (RecordMovimento.obs.EmptyIfNull().ToString().Length > 0) { MsgHistorico += "OBS Pedido: " + RecordMovimento.obs.EmptyIfNull().ToString() + "\r\n"; };
@@ -5450,7 +5465,8 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.ParamMovimentoExpedido = ParamMovimentoExpedido;
             PreencherLookupsTransportadoraExpedicao();
             if (ListaItensPedido.Count() <= 1) { ViewBag.QtdItensPedido = ListaItensPedido.Count() + " Item no Pedido"; } else { ViewBag.QtdItensPedido = ListaItensPedido.Count() + " Itens no Pedido"; }
-            return View("ModalPedidoExpedicao", RecordMovimento);
+
+            return View("ModalPedidoExpedicao", RecordMovimento); 
         }
 
 
@@ -5648,7 +5664,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
-        #endregion
+            #endregion
 
         #region Pedido - Entrega (Modal)
         public ActionResult ModalPedidoEntrega(int? id)
@@ -5662,8 +5678,14 @@ namespace GdiPlataform.Areas.gc.Controllers
             List<gc_movimentos_itens> ListaItensPedido = db.gc_movimentos_itens.Where(i => i.id_movimento == RecordMovimento.id_movimento).ToList();
             if (RecordMovimento != null)
             {
-                if (RecordMovimento.movimento_entregue == true) { TitleModal = LibIcons.getIcon("fa-solid fa-people-carry", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Pedido Nº " + RecordMovimento.id_movimento.ToString() + " já Entregue!"; }
-                else { TitleModal = LibIcons.getIcon("fa-solid fa-people-carry", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Entrega do Pedido Nº " + RecordMovimento.id_movimento.ToString(); }
+                if (RecordMovimento.movimento_entregue == true) 
+                { 
+                    TitleModal = LibIcons.getIcon("fa-solid fa-people-carry", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Atualização Dados da Entrega do Pedido Nº " + RecordMovimento.id_movimento.ToString(); 
+                }
+                else 
+                { 
+                    TitleModal = LibIcons.getIcon("fa-solid fa-people-carry", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Entrega do Pedido Nº " + RecordMovimento.id_movimento.ToString(); 
+                }
 
                 if (RecordMovimento.obs.EmptyIfNull().ToString().Length > 0) { MsgHistorico += "OBS Pedido: " + RecordMovimento.obs.EmptyIfNull().ToString() + "\r\n"; };
                 if (RecordMovimento.frete_observacoes.EmptyIfNull().ToString().Length > 0) { MsgHistorico = "OBS Frete: " + RecordMovimento.frete_observacoes.EmptyIfNull().ToString() + "\r\n"; };
@@ -5684,7 +5706,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     if ((RecordCfopOperacao.has_nfe == true) && (RecordMovimento.movimento_nf_autorizada == false)) { MsgBloqueio += " - Pedido NÃO possui NFe Autorizada!<br/>"; }
                     if ((RecordCfopOperacao.has_notifica_email == true) && (RecordMovimento.movimento_notificado == false)) { MsgBloqueio += " - Pedido NÃO foi NOTIFICADO!<br/>"; }
                     if ((RecordCfopOperacao.has_expedicao == true) && (RecordMovimento.movimento_expedido == false) ) { MsgBloqueio += " - Pedido NÃO foi EXPEDIDO!<br/>"; }
-                    //if ((RecordCfopOperacao.has_entrega == true) && (RecordMovimento.movimento_entregue == false)) { MsgBloqueio += " - Pedido NÃO foi ENTREGUE!<br/>"; }
                 }
 
                 if (MsgBloqueio.EmptyIfNull().ToString().Length == 0) { RecordMovimento.datahora_entrega = DataHoraAtual; };
@@ -5721,21 +5742,19 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 if (qtdInconsistencias == 0)
                 {
-                    if ((record_gc_movimento.id_movimento_posicao != 5) && (record_gc_movimento.id_movimento_posicao != 6))
+                    if (record_gc_movimento.id_movimento_posicao < 5) 
                     {
                         String PosicaoAtual = string.Empty;
                         if (record_gc_movimento.id_movimento_posicao == 0) { PosicaoAtual = "Aberto"; } else { PosicaoAtual = db.gc_movimentos_posicao.Find(record_gc_movimento.id_movimento_posicao).posicao.EmptyIfNull().ToString(); };
-                        MsgRetorno += "O Pedido está na posição [" + PosicaoAtual + "], não é possível Confirmar/Reprovar a Expedição!" + "<br/>";
+                        MsgRetorno += "O Pedido está na posição [" + PosicaoAtual + "], não é possível Confirmar/Atualizar a Expedição!" + "<br/>";
                         qtdInconsistencias += 1;
                     }
                 }
 
                 if (qtdInconsistencias == 0)
                 {
-
                     if (view_record_gc_movimento.movimento_entregue == true)
                     {
-                        record_gc_movimento.movimento_entregue = true;
                         record_gc_movimento.datahora_entrega = view_record_gc_movimento.datahora_entrega;
                         record_gc_movimento.nome_recebedor_entrega = view_record_gc_movimento.nome_recebedor_entrega;
                         record_gc_movimento.documento_recebedor_entrega = view_record_gc_movimento.documento_recebedor_entrega;
@@ -5763,50 +5782,34 @@ namespace GdiPlataform.Areas.gc.Controllers
                         record_gc_movimento.frete2_custo = view_record_gc_movimento.frete2_custo;
 
                         if (record_gc_movimento.id_movimento_posicao < 6) { record_gc_movimento.id_movimento_posicao = 6; }  // Entregue
-                        MsgRetorno += "Status do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + LibStringFormat.GetTabHtml(1) + "<b>ENTREGUE</b> " + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg");
+
+                        if (record_gc_movimento.movimento_entregue == false) { MsgRetorno += "Status do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + LibStringFormat.GetTabHtml(1) + "<b>ENTREGUE</b> "; }
+                        else MsgRetorno += "Atualização de dados da Entrega do do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString(); }
+
                         record_gc_movimento.datahora_alteracao = DataHoraAtual;
                         record_gc_movimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                        record_gc_movimento.movimento_entregue = true;
                         db.Entry(record_gc_movimento).State = EntityState.Modified;
                         Sucesso = true;
+
+                        // Log de Alterações
+                        String LogAlteracoes = string.Empty;
+                        LogAlteracoes += "Entrega do Pedido | ";
+                        if (record_gc_movimento.datahora_entrega != null) { LogAlteracoes += "Data Entrega: " + record_gc_movimento.datahora_entrega.GetValueOrDefault().ToString("dd/MM/yy") + " | "; };
+                        if (record_gc_movimento.datahora_entrega_previsao != null) { LogAlteracoes += "Data Previsão Entrega: " + record_gc_movimento.datahora_entrega_previsao.GetValueOrDefault().ToString("dd/MM/yy") + " | "; };
+                        if (record_gc_movimento.nome_recebedor_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Recebedor (Nome): " + record_gc_movimento.nome_recebedor_entrega.EmptyIfNull().ToString().Trim() + " | "; };
+                        if (record_gc_movimento.documento_recebedor_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Recebedor (Documento): " + record_gc_movimento.documento_recebedor_entrega.EmptyIfNull().ToString().Trim() + " | "; };
+                        if (record_gc_movimento.obs_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Obs Entrega: " + record_gc_movimento.obs_entrega.EmptyIfNull().ToString().Trim() + " | "; };
+                        if (LogFrete.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Dados do Frete: " + LogFrete; };
+
+                        if (Sucesso == true) { if (LogAlteracoes.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "gc_movimentos", record_gc_movimento.id_movimento, LogAlteracoes); };
+                        db.SaveChanges();
                     }
-                    else if (view_record_gc_movimento.movimento_entregue == false)
+                    else
                     {
-                        if (record_gc_movimento.id_movimento_posicao == 6)
-                        {
-                            record_gc_movimento.id_movimento_posicao = 5;
-                            record_gc_movimento.movimento_entregue = false;
-                            record_gc_movimento.datahora_entrega = null;
-                            record_gc_movimento.nome_recebedor_entrega = null;
-                            record_gc_movimento.documento_recebedor_entrega = null;
-                            record_gc_movimento.obs_entrega = null;
-                            record_gc_movimento.id_movimento_status = 2; // Fechado
-                            record_gc_movimento.id_usuario_entrega = 0;
-                            MsgRetorno += "Status do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + LibStringFormat.GetTabHtml(1) + "<b>NÃO ENTREGUE</b> " + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-solid fa-circle-xmark", "Erro", "red", "");
-                            record_gc_movimento.datahora_alteracao = DataHoraAtual;
-                            record_gc_movimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
-                            db.Entry(record_gc_movimento).State = EntityState.Modified;
-                            Sucesso = true;
-                        }
-                        else
-                        {
-                            String PosicaoAtual = string.Empty;
-                            if (record_gc_movimento.id_movimento_posicao == 0) { PosicaoAtual = "Aberto"; } else { PosicaoAtual = db.gc_movimentos_posicao.Find(record_gc_movimento.id_movimento_posicao).posicao.EmptyIfNull().ToString(); };
-                            MsgRetorno += "Não é possível excluir os dados da ENTREGA do Pedido Nº " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + ", o pedido está [<b>" + PosicaoAtual + "</b>]!";
-                        }
+                        MsgRetorno += "Não é possível excluir/atualizar os dados para ENTREGA Não Confirmada do Pedido Nº " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + " !";
+                        Sucesso = false;
                     }
-
-                    // Log de Alterações
-                    String LogAlteracoes = string.Empty;
-                    if (view_record_gc_movimento.movimento_entregue == true) { LogAlteracoes += "Entrega do Pedido | "; } else { LogAlteracoes += "Cancelamento da Entrega do Pedido | "; };
-                    if (record_gc_movimento.datahora_entrega != null) { LogAlteracoes += "Data Entrega: " + record_gc_movimento.datahora_entrega.GetValueOrDefault().ToString("dd/MM/yy") + " | "; };
-                    if (record_gc_movimento.datahora_entrega_previsao != null) { LogAlteracoes += "Data Previsão Entrega: " + record_gc_movimento.datahora_entrega_previsao.GetValueOrDefault().ToString("dd/MM/yy") + " | "; };
-                    if (record_gc_movimento.nome_recebedor_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Recebedor (Nome): " + record_gc_movimento.nome_recebedor_entrega.EmptyIfNull().ToString().Trim() + " | "; };
-                    if (record_gc_movimento.documento_recebedor_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Recebedor (Documento): " + record_gc_movimento.documento_recebedor_entrega.EmptyIfNull().ToString().Trim() + " | "; };
-                    if (record_gc_movimento.obs_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Obs Entrega: " + record_gc_movimento.obs_entrega.EmptyIfNull().ToString().Trim() + " | "; };
-                    if (LogFrete.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Dados do Frete: " + LogFrete; };
-
-                    if (Sucesso == true) { if (LogAlteracoes.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "gc_movimentos", record_gc_movimento.id_movimento, LogAlteracoes); }; };
-                    db.SaveChanges();
                 }
             }
             catch (DbEntityValidationException ex)
@@ -6107,6 +6110,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             valorFormatado,
             "", "", "", "", ""
         });
+            }
+
+            if (param.yesFilterField.EmptyIfNull().ToString().Trim() != "*")
+            {
+                filterOnOff = "0";
             }
 
             return Json(new

@@ -23,6 +23,12 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.comboMovimentosPosicao = MovimentosLookups.GetComboGcMovimentosPosicao(db);
         }
 
+        /// <summary>IndexEstoque — filtro produto: opções fixas + typeahead (mesmo contrato de Estoque/Index).</summary>
+        private void PreencherLookupsIndexEstoque()
+        {
+            ViewBag.comboProdutosServicos = LookupSearchQueries.ComboFiltroProdutoPosicaoEstoqueIndex();
+        }
+
         /// <summary>FormPedidoCreate — novo pedido/cotação/OS.</summary>
         private void PreencherLookupsPedidoFormCreate()
         {

@@ -55,13 +55,14 @@
                         </div>
                         <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroFretes" name="btnLimparFiltroFretes" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroFretes()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto;">
                 <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTableGCIndexPedido">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcFretes">
                         <thead>
                             <tr>
                                 <th>[x]</th>
@@ -97,6 +98,7 @@
 <script type="text/javascript">
 
     var otableGCFretes;
+    var _gcFretesSuprimirPesquisaAuto = false;
 
     $(function ()
     {
@@ -105,6 +107,8 @@
             jsInitForm();
             jsDatepickerFirstDayMonth('#ig_gc_fretes_idx_d1');
             jsDatepickerToday('#ig_gc_fretes_idx_d2');
+            jsCreateTableGcFretes();
+            jsAtualizarIndicadorFiltroFretes('0');
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -121,89 +125,81 @@
         }
     }
 
-    function jsCreateOtableGCIndexPedido()
+    function jsCreateTableGcFretes()
     {
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGCIndexPedido = $('#dataTableGCIndexPedido').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
-                "drawCallback": function (settings) {
-                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
-                },
-                "footerCallback": function (row, data, start, end, display) {
-                    var api = this.api(), data;
-                    var intVal = function (i) {
-                        return typeof i === 'string' ?
-                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
-                            typeof i === 'number' ?
-                                i : 0;
-                    };
+            otableGCFretes = $('#dtGcFretes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+                if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                if (json && json.yesFilterOnOff !== undefined) {
+                    jsAtualizarIndicadorFiltroFretes(json.yesFilterOnOff);
+                }
+            }).DataTable({
+                drawCallback: function (settings) {
+                    document.querySelectorAll('#dtGcFretes [data-bs-toggle="tooltip"]').forEach(function (el) {
+                        bootstrap.Tooltip.getOrCreateInstance(el);
+                    });
                     LibMessageProcessandoHide();
                     gdiAplicarFoco('#edit_numero_cotacao', true);
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
                 },
-            processing: true,
-            bServerSide: true,
-            ajax: {
-                url: '@Url.Action("GetDadosPedidos","Movimentos",new { Area = "gc" })',
-                type: 'POST',
-                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
-                dataType: 'json',
-                cache: false,
-                data: function (d) {
-                    return {
-                        sEcho: d.draw,
-                        iDisplayStart: d.start,
-                        iDisplayLength: d.length,
-                        yesFilterField: $('#yesFilterField').val().toString(),
-                        yesCustomField01: emptyIfNull($('#edit_numero_cotacao').val()).toString(),
-                        yesCustomField02: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_fretes_idx_d1')),
-                        yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_fretes_idx_d2')),
-                        yesCustomField04: emptyIfNull($('#edit_cliente').val()).toString(),
-                        yesCustomField05: emptyIfNull($('#edit_posicao').val()).toString(),
-                        yesCustomField06: emptyIfNull($('#edit_valor').val()).toString(),
-                        yesCustomField07: emptyIfNull($('#edit_status').val()).toString(),
-                        yesFilterController: $('#yesFilterController').val().toString(),
-                    };
+                processing: true,
+                bServerSide: true,
+                ajax: {
+                    url: '@Url.Action("GetDadosFretes","Fretes",new { Area = "gc" })',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    dataType: 'json',
+                    cache: false,
+                    data: function (d) {
+                        return {
+                            sEcho: d.draw,
+                            iDisplayStart: d.start,
+                            iDisplayLength: d.length,
+                            yesFilterField: $('#yesFilterField').val().toString(),
+                            yesFilterController: $('#yesFilterController').val().toString(),
+                            yesCustomField01: emptyIfNull($('#edit_numero_cotacao').val()).toString(),
+                            yesCustomField02: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_fretes_idx_d1')),
+                            yesCustomField03: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_fretes_idx_d2')),
+                            yesCustomField04: emptyIfNull($('#edit_transportadora').val()).toString(),
+                            yesCustomField06: emptyIfNull($('#edit_valor').val()).toString()
+                        };
+                    },
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
-            },
-            responsive: true,
-            bFilter: false,
-            bLengthChange: false,
-            bProcessing: true,
-            pageLength: 20,
-            scrollX: false,
-            scrollCollapse: false,
-            fixedColumns: false,
-            bAutoWidth: false,
-            pagingType: 'full_numbers',
-            aoColumnDefs: [
-                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [3] },
-                { "width": "10%", orderable: false, className: 'text-sm-start', targets: [4] },
-                { "width": "37%", orderable: false, className: 'text-sm-start', targets: [5] },
-                { "width": "7%", orderable: false, className: 'text-sm-start', targets: [6] },
-                { "width": "7%", orderable: false, className: 'text-sm-center', targets: [7] },
-                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [8] },
-                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [9] },
-                { "width": "3%", orderable: false, className: 'text-sm-center', targets: [10] },
-                { "width": "8%", orderable: false, className: 'text-sm-end', targets: [11] },
-                { "width": "2%", orderable: false, className: 'text-sm-end', targets: [12] },
-                { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [13], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCIndexPedidoEditRow" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos da Cotação/Pedido Nº ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnGCIndexPedidoAnexos d-inline-flex align-items-center" onclick="jsGCIndexPedidoAnexos(' + data[1] + ');"><i class="fa-solid fa-paperclip"></i></button>' } },
-                { "width": "4%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [14], data: null, defaultContent: "", render: function (data, type, row, meta) { return '<button type="button" name="btnGCIndexPedidoEditRow" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Cotação/Pedido Nº ' + data[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGCIndexPedidoEditRow d-inline-flex align-items-center" onclick="jsGCIndexPedidoEditRow(' + data[1] + ');"><i class="fa-regular fa-edit"></i></button>' } }
-            ],
-            select: {
-                style: 'multi',
-                selector: 'td:not(.dt-no-row-select)',
-                headerCheckbox: true
-            },
-            order: [[1, 'asc']],
-
-                language:
-                {
-                    sEmptyTable: 'Nenhum registro encontrado',
+                responsive: true,
+                bFilter: false,
+                bLengthChange: false,
+                bProcessing: true,
+                pageLength: 20,
+                scrollX: false,
+                scrollCollapse: false,
+                fixedColumns: false,
+                bAutoWidth: false,
+                pagingType: 'full_numbers',
+                aoColumnDefs: [
+                    { width: '4%', orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
+                    { width: '7%', orderable: false, className: 'text-sm-center', targets: [1] },
+                    { width: '8%', orderable: false, className: 'text-sm-center', targets: [2] },
+                    { width: '22%', orderable: false, className: 'text-sm-start', targets: [3] },
+                    { width: '22%', orderable: false, className: 'text-sm-start', targets: [4] },
+                    { width: '15%', orderable: false, className: 'text-sm-start', targets: [5] },
+                    { width: '8%', orderable: false, className: 'text-sm-center', targets: [6] },
+                    { width: '5%', orderable: false, className: 'text-sm-center dt-no-row-select', targets: [7], data: null, defaultContent: '',
+                        render: function (data, type, row) {
+                            return '<button type="button" title="Editar pedido Id. ' + row[1] + '" class="btn btn-outline-warning btn-sm p-1 btnGcFretesEditRow d-inline-flex align-items-center" onclick="jsGcFretesEditRow(' + row[1] + ');"><i class="fa-regular fa-edit"></i></button>';
+                        }
+                    }
+                ],
+                select: {
+                    style: 'multi',
+                    selector: 'td:not(.dt-no-row-select)',
+                    headerCheckbox: true
+                },
+                order: [[1, 'desc']],
+                language: {
+                    sEmptyTable: 'Informe os filtros e clique em Pesquisar.',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',
@@ -212,8 +208,7 @@
                     sLengthMenu: '_MENU_ registros por página',
                     sZeroRecords: 'Nenhum registro encontrado',
                     sSearch: 'Pesquisar',
-                    oPaginate:
-                    {
+                    oPaginate: {
                         sNext: '>',
                         sPrevious: '<',
                         sFirst: '<<',
@@ -221,9 +216,9 @@
                     },
                     select: {
                         rows: {
-                            0: "",
-                            1: " [ %d registro selecionado ] ",
-                            _: " [ %d registros selecionados ] "
+                            0: '',
+                            1: ' [ %d registro selecionado ] ',
+                            _: ' [ %d registros selecionados ] '
                         }
                     }
                 },
@@ -232,29 +227,75 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
             });
-            $('#dataTableGCIndexPedido tbody').on('dblclick', 'tr td', function () {
-                var data = otableGCIndexPedido.row($(this).closest('tr')).data();
-                jsGCIndexPedidoEditRow(data[1]);
-
+            $('#dtGcFretes tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
+                var data = otableGCFretes.row($(this).closest('tr')).data();
+                if (data) { jsGcFretesEditRow(data[1]); }
             });
         }
         catch (err)
         {
-            LibMessageError("Atenção", "[jsCreateOtableGCIndexPedido] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsCreateTableGcFretes] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
+
+    function jsGcFretesEditRow(idMovimento)
+    {
+        try {
+            var id = parseInt(idMovimento, 10);
+            if (!id || id <= 0) { return; }
+            JsEditRecordDoubleClick(id, '@Url.Action("EditPedido", "Movimentos", new { Area = "gc" })');
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsGcFretesEditRow] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsAtualizarIndicadorFiltroFretes(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroFretes',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+        });
+    }
 
     function jsAjaxPesquisarMovimentos()
     {
         try
         {
+            if (_gcFretesSuprimirPesquisaAuto) { return; }
             LibMessageProcessando('Pesquisando Cotações / Pedidos / OS. . .');
             document.getElementById("yesFilterField").value = "*";
-            $("#dataTableGCIndexPedido").DataTable().draw(false);
+            $("#dtGcFretes").DataTable().draw(false);
         }
         catch (err)
         {
             LibMessageError("Atenção", "[jsAjaxPesquisarMovimentos] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroFretes()
+    {
+        try
+        {
+            _gcFretesSuprimirPesquisaAuto = true;
+            $('#edit_numero_cotacao').val('');
+            $('#edit_valor').val('');
+            $('#edit_transportadora').val('0').trigger('change');
+            jsDatepickerFirstDayMonth('#ig_gc_fretes_idx_d1');
+            jsDatepickerToday('#ig_gc_fretes_idx_d2');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtGcFretes").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroFretes] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcFretesSuprimirPesquisaAuto = false;
         }
     }
 

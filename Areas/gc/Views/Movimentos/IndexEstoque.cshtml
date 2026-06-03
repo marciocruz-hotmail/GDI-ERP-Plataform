@@ -9,18 +9,17 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="card-header m-0 p-1">
+            <div class="card-body m-0 p-1" style="height: 100%">
                 <div class="form-horizontal m-0 p-0">
                     <div class="form-group row text-sm-end m-0 pt-1">
-                        @Html.Label("Local", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
-                        <div class="col-sm-6">
+                        @Html.Label("produto", "Item:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-8 text-sm-start">
+                            @Html.DropDownList("id_produto_servico", ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @id = "id_produto_servico", @class = "form-control", @title = "Item", @onchange = "jsAjaxPesquisarMovimentosEstoque();", @onblur = "jsAjaxPesquisarMovimentosEstoque();", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "Estoque", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
                         </div>
-                    </div>
-                    <div class="form-group row text-sm-end m-0 pt-1">
-                        @Html.Label("Produto", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
-                        <div class="col-sm-6">
+                        <div class="col-sm-3 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Produtos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarMovimentosEstoque()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroMovimentosEstoque" name="btnLimparFiltroMovimentosEstoque" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroMovimentosEstoque()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
-                        <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Produtos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarEstoque()">Pesquisar</button>
                     </div>
                 </div>
             </div>
@@ -33,21 +32,18 @@
                                     <th>[x]</th>
                                     <th>@Html.Encode("Id.")</th>
                                     <th>@Html.DisplayName("Produto")</th>
+                                    <th>@Html.DisplayName("Fob")</th>
                                     <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque BH"></i><br />BH</th>
                                     <th><i class="fa-solid fa-warehouse" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Estoque SP"></i><br />SP</th>
-                                    <th>@Html.DisplayName("Fob Unit (US$)")</th>
-                                    <th>@Html.DisplayName("Fob Estoque (US$)")</th>
+                                    <th>@Html.DisplayName("Fob BH")</th>
+                                    <th>@Html.DisplayName("Fob SP")</th>
                                 </tr>
                             </thead>
                             <tfoot align="right">
                                 <tr>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
+                                    <th align="right" colspan="6"></th>
+                                    <th align="right">@Html.Label("label_Valor_estoque_bh", "R$", htmlAttributes: new { @id = "label_Valor_estoque_bh" })</th>
+                                    <th align="right">@Html.Label("label_Valor_estoque_sp", "R$", htmlAttributes: new { @id = "label_Valor_estoque_sp" })</th>
                                 </tr>
                             </tfoot>
                             <tbody></tbody>
@@ -61,6 +57,7 @@
 
 <script type="text/javascript">
     var oTableMovimentosEstoque;
+    var _gcMovimentosEstoqueSuprimirPesquisaAuto = false;
 
     $(function ()
     {
@@ -68,6 +65,7 @@
         {
             jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroMovimentosEstoque('0');
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -82,17 +80,20 @@
             $.fn.dataTable.ext.errMode = 'none';
             oTableMovimentosEstoque = $('#dtMovimentosEstoque')
                 .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
-                .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; }).DataTable({
+                .on('xhr.dt', function (e, settings, json, xhr) {
+                    if (json) {
+                        document.getElementById("label_Valor_estoque_bh").innerHTML = json.yesDisplayField01 || '';
+                        document.getElementById("label_Valor_estoque_sp").innerHTML = json.yesDisplayField02 || '';
+                    }
+                    if (GdiDtNotifyJsonErrorMessage(json)) { return; }
+                    if (json && json.yesFilterOnOff !== undefined) {
+                        jsAtualizarIndicadorFiltroMovimentosEstoque(json.yesFilterOnOff);
+                    }
+                }).DataTable({
+                "drawCallback": function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                },
                 "footerCallback": function (row, data, start, end, display) {
-                    var api = this.api(), data;
-                    var intVal = function (i) {
-                        return typeof i === 'string' ?
-                            i.replace('R$', '').replace('.', '').replace(',', '') * 1 :
-                            typeof i === 'number' ?
-                                i : 0;
-                    };
-                    var valorEstoque = api.column(6).data().reduce(function (a, b) { return intVal(a) + intVal(b); }, 0);
-                    $(api.column(6).footer()).html((valorEstoque / 100).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }).replace('R$', ''));
                     LibMessageProcessandoHide();
                 },
             processing: true,
@@ -109,8 +110,7 @@
                         iDisplayStart: d.start,
                         iDisplayLength: d.length,
                         yesFilterField: $('#yesFilterField').val().toString(),
-                        yesCustomField01: $('#id_local_estoque').val().toString(),
-                        yesCustomField02: $('#id_produto').val().toString(),
+                        yesCustomField01: emptyIfNull($('#id_produto_servico').val()).toString(),
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
@@ -127,12 +127,13 @@
             pagingType: 'full_numbers',
             aoColumnDefs: [
                 { "width": "4%", orderable: false, className: 'text-sm-center', targets: [0], render: DataTable.render.select() },
-                { "width": "8%", orderable: false, className: 'text-sm-center', targets: [1] },
-                { "width": "48%", orderable: false, className: 'text-sm-center', targets: [2] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [3] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [4] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [5] },
-                { "width": "10%", orderable: false, className: 'text-sm-center', targets: [6] }
+                { "width": "4%", orderable: false, className: 'text-sm-center', targets: [1] },
+                { "width": "57%", orderable: false, className: 'text-sm-start', targets: [2] },
+                { "width": "6%", orderable: false, className: 'text-sm-end', targets: [3] },
+                { "width": "5%", orderable: false, className: 'text-sm-end', targets: [4] },
+                { "width": "5%", orderable: false, className: 'text-sm-end', targets: [5] },
+                { "width": "7%", orderable: false, className: 'text-sm-end', targets: [6] },
+                { "width": "7%", orderable: false, className: 'text-sm-end', targets: [7] }
             ],
             select: {
                 style: 'multi',
@@ -178,17 +179,48 @@
         }
     };
 
-    function jsAjaxPesquisarEstoque()
+    function jsAtualizarIndicadorFiltroMovimentosEstoque(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroMovimentosEstoque',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar item selecionado'
+        });
+    }
+
+    function jsAjaxPesquisarMovimentosEstoque()
     {
         try
         {
+            if (_gcMovimentosEstoqueSuprimirPesquisaAuto) { return; }
             LibMessageProcessando("Atualizando posição de estoque . . .");
             document.getElementById("yesFilterField").value = "*";
             $("#dtMovimentosEstoque").DataTable().draw(false);
-            $Table.columns.adjust();
+            oTableMovimentosEstoque.columns.adjust();
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsAjaxPesquisarEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsAjaxPesquisarMovimentosEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
+    function jsLimparFiltroMovimentosEstoque()
+    {
+        try
+        {
+            _gcMovimentosEstoqueSuprimirPesquisaAuto = true;
+            $('#id_produto_servico').val('0').trigger('change');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dtMovimentosEstoque").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroMovimentosEstoque] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gcMovimentosEstoqueSuprimirPesquisaAuto = false;
         }
     }
 </script>

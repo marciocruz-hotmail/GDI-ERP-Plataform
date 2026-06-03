@@ -78,6 +78,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroDifal('0');
             gdiAplicarFoco('#edit_id_parametro_difal', true);
@@ -161,7 +165,6 @@
                     jsAtualizarIndicadorFiltroDifal(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -228,7 +231,7 @@
             },
                 language:
                 {
-                    sEmptyTable: 'Informe Id. ou Sigla e clique em Pesquisar (ou Limpar para listar todos).',
+                    sEmptyTable: 'Nenhum registro encontrado',
                     sInfo: 'Mostrando de _START_ ate _END_   [ _TOTAL_ registros total ]',
                     sInfoEmpty: 'Mostrando 0 ate 0 de 0 registros',
                     sInfoFiltered: ' (Filtrados de _MAX_ registros)',

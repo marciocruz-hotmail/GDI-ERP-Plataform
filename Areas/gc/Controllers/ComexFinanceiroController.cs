@@ -56,6 +56,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 int idInvoice = 0;
                 int.TryParse(param.yesCustomField01.EmptyIfNull().ToString().Trim(), out idImportacao);
                 int.TryParse(param.yesCustomField02.EmptyIfNull().ToString().Trim(), out idInvoice);
+                bool filtroAplicado = idImportacao > 0 || idInvoice > 0;
+                string filterOnOff = (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && filtroAplicado) ? "1" : "0";
 
                 // -----------------------------
                 // Base query (LINQ + AsNoTracking)
@@ -182,6 +184,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     errorMessage = "",
                     stackTrace = "",
+                    yesFilterOnOff = filterOnOff,
                     yesDisplayField01 = saldoContaImportacao,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -211,6 +214,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 errorMessage = errorMessage,
                 severity = "error",
                 stackTrace = stackTrace, // se quiser ocultar em produção, devolva ""
+                yesFilterOnOff = "0",
                 yesDisplayField01 = saldoContaImportacao,
                 sEcho = param.sEcho,
                 iTotalRecords = 0,

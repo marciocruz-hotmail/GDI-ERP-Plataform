@@ -82,6 +82,10 @@
         try
         {
             jsInitForm();
+            @if (ViewBag.RestoreFilterAutoSearch != true)
+            {
+                <text>document.getElementById("yesFilterField").value = "*";</text>
+            }
             jsCreateTable();
             jsAtualizarIndicadorFiltroPagRecCondicoes('0');
             gdiAplicarFoco('#edit_id_pagrec_condicao', true);
@@ -165,7 +169,6 @@
                     jsAtualizarIndicadorFiltroPagRecCondicoes(json.yesFilterOnOff);
                 }
             }).DataTable({
-            deferLoading: true,
             processing: true,
             bServerSide: true,
             ajax: {
@@ -221,7 +224,7 @@
                 selector: 'td:not(.dt-no-row-select)',
                 headerCheckbox: true
             },
-            order: [[1, 'asc']],
+            order: [[3, 'asc']],
             drawCallback: function (settings) {
                 document.querySelectorAll('#dtGPagRecCondicoes [data-bs-toggle="tooltip"]').forEach(function (el) {
                     bootstrap.Tooltip.getOrCreateInstance(el);

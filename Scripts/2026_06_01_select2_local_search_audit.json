@@ -1,0 +1,1147 @@
+{
+  "static_select_without_local_search": 218,
+  "hits": [
+    {
+      "file": "Areas/g/Views/Atendimentos/Edit.cshtml",
+      "line": 61,
+      "snippet": "@Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsAjaxPesquisarAtendimentos();\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Edit.cshtml",
+      "line": 65,
+      "snippet": "@Html.DropDownListFor(model => model.responsavel_id_usuario, ViewBag.ComboUsuariosAtendimentoResponsavel as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Edit.cshtml",
+      "line": 91,
+      "snippet": "@Html.DropDownListFor(model => model.param_id_vendedor, ViewBag.ComboVendedores as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Edit.cshtml",
+      "line": 103,
+      "snippet": "@Html.DropDownListFor(model => model.param_id_produto, ViewBag.ComboProdutosServicos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "line": 34,
+      "snippet": "@Html.DropDownListFor(model => model.solicitacao_id_usuario, ViewBag.ComboUsuariosAtendimentoSolicitante as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsOnChangeFiltroAtendiment"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "line": 38,
+      "snippet": "@Html.DropDownListFor(model => model.id_status, ViewBag.ComboGAtendimentosStatus as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsOnChangeFiltroAtendimentos();\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "line": 44,
+      "snippet": "@Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsOnChangeFiltroAtendimentos();\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "line": 49,
+      "snippet": "@Html.DropDownListFor(model => model.responsavel_id_usuario, ViewBag.ComboUsuariosAtendimentoResponsavel as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsOnChangeFiltroAtendiment"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/ModalCreateNewAtendimento.cshtml",
+      "line": 26,
+      "snippet": "@Html.DropDownListFor(model => model.responsavel_id_departamento, ViewBag.ComboGDepartamentos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/ModalCreateNewAtendimento.cshtml",
+      "line": 32,
+      "snippet": "@Html.DropDownListFor(model => model.id_atendimento_categoria, ViewBag.ComboGAtendimentosCategorias as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/ModalCreateNewAtendimento.cshtml",
+      "line": 70,
+      "snippet": "@Html.DropDownListFor(model => model.param_id_vendedor, ViewBag.ComboVendedores as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Atendimentos/ModalUploadFileAtendimentos.cshtml",
+      "line": 21,
+      "snippet": "@Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/CentrosCustos/CreateEdit.cshtml",
+      "line": 45,
+      "snippet": "@Html.DropDownListFor(model => model.id_centro_custo_pai, ViewBag.comboCentroCustoPai as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ClassificacaoFinanceira/CreateEdit.cshtml",
+      "line": 47,
+      "snippet": "@Html.DropDownListFor(model => model.id_classificacao_financeira_pai, ViewBag.comboClassificacaoFinanceiraPai as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 126,
+      "snippet": "@Html.DropDownListFor(model => model.contato_principal_tipo, ViewBag.ComboGcClientesContatosTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 212,
+      "snippet": "@Html.DropDownListFor(model => model.id_indicador_ie, ViewBag.comboIndicadorIE as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 275,
+      "snippet": "@Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 285,
+      "snippet": "@Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 291,
+      "snippet": "@Html.DropDownListFor(model => model.id_pais, ViewBag.comboPais as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 306,
+      "snippet": "@Html.DropDownListFor(model => model.id_vendedor, ViewBag.comboVendedor as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 349,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_condicao, ViewBag.comboPagRecCondicoes as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 353,
+      "snippet": "@Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 361,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_venda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 380,
+      "snippet": "@Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContaCaixa as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 473,
+      "snippet": "@Html.DropDownListFor(model => model.iss_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 480,
+      "snippet": "@Html.DropDownListFor(model => model.ir_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 489,
+      "snippet": "@Html.DropDownListFor(model => model.pis_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 496,
+      "snippet": "@Html.DropDownListFor(model => model.cofins_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 505,
+      "snippet": "@Html.DropDownListFor(model => model.csll_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 512,
+      "snippet": "@Html.DropDownListFor(model => model.nf_tipo, ViewBag.comboNFTipo as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 521,
+      "snippet": "@Html.DropDownListFor(model => model.pcc_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "line": 528,
+      "snippet": "@Html.DropDownListFor(model => model.inss_tipo, ViewBag.ComboImpostosAcao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalAtualizarVendedorConsultor.cshtml",
+      "line": 18,
+      "snippet": "@Html.DropDownListFor(model => model.id_vendedor, ViewBag.comboVendedor as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalAtualizarVendedorConsultor.cshtml",
+      "line": 24,
+      "snippet": "@Html.DropDownListFor(model => model.id_vendedor2, ViewBag.comboVendedor as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalAtualizarVendedorConsultor.cshtml",
+      "line": 30,
+      "snippet": "@Html.DropDownListFor(model => model.id_vendedor3, ViewBag.comboVendedor as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalCreateEditContato.cshtml",
+      "line": 25,
+      "snippet": "@Html.DropDownListFor(model => model.id_contato_tipo, ViewBag.ComboGcClientesContatosTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalCreateEditDestinatario.cshtml",
+      "line": 61,
+      "snippet": "@Html.DropDownListFor(model => model.id_indicador_ie, ViewBag.comboIndicadorIE as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalCreateEditDestinatario.cshtml",
+      "line": 108,
+      "snippet": "@Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalCreateEditDestinatario.cshtml",
+      "line": 118,
+      "snippet": "@Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/g/Views/Clientes/ModalDesativarContato.cshtml",
+      "line": 25,
+      "snippet": "@Html.DropDownListFor(model => model.id_contato_tipo, ViewBag.ComboGcClientesContatosTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ContasCaixas/CreateEdit.cshtml",
+      "line": 118,
+      "snippet": "@Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ContasCaixas/CreateEdit.cshtml",
+      "line": 128,
+      "snippet": "@Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ContratosAviacao/CreateEdit.cshtml",
+      "line": 30,
+      "snippet": "@Html.DropDownListFor(model => model.id_contrato_tipo, ViewBag.comboContratosTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Filiais/CreateEdit.cshtml",
+      "line": 34,
+      "snippet": "@Html.DropDownListFor(model => model.id_coligada, ViewBag.comboColigadas as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Financeiro/Index.cshtml",
+      "line": 106,
+      "snippet": "@Html.DropDownListFor(model => model.FinanceiroIndex_id_financeiro_status, ViewBag.comboFinanceiroStatus as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Financeiro/ModalGerarRemessaBoletosBancarios.cshtml",
+      "line": 19,
+      "snippet": "@Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContasCaixas as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Financeiro/ModalTransferirContaCaixa.cshtml",
+      "line": 25,
+      "snippet": "@Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContaCaixa as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Ged/ModalEditFileGed.cshtml",
+      "line": 21,
+      "snippet": "@Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Ged/ModalUploadFileGed.cshtml",
+      "line": 36,
+      "snippet": "@Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Nfe/CreateEdit.cshtml",
+      "line": 127,
+      "snippet": "@Html.DropDownListFor(model => model.id_cidade_com, ViewBag.comboCidade as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Nfe/CreateEdit.cshtml",
+      "line": 137,
+      "snippet": "@Html.DropDownListFor(model => model.id_uf_com, ViewBag.comboUF as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 48,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto_tipo, ViewBag.comboProdutosTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 129,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto_ncm, ViewBag.comboProdutosNCM as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 133,
+      "snippet": "@Html.DropDownListFor(model => model.id_unidade_medida_compra, ViewBag.comboUnidadeMedida as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 158,
+      "snippet": "@Html.DropDownListFor(model => model.fob1_id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 168,
+      "snippet": "@Html.DropDownListFor(model => model.fob2_id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 178,
+      "snippet": "@Html.DropDownListFor(model => model.fob3_id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 289,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque01_area, ViewBag.comboEstoqueEnderecoAreaBH as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 293,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque01_secao, ViewBag.comboEstoqueEnderecoSecaoBH as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 297,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque01_corredor, ViewBag.comboEstoqueEnderecoCorredorBH as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 301,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque01_prateleira, ViewBag.comboEstoqueEnderecoPrateleiraBH as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 312,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque03_area, ViewBag.comboEstoqueEnderecoAreaSP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 316,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque03_secao, ViewBag.comboEstoqueEnderecoSecaoSP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 320,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque03_corredor, ViewBag.comboEstoqueEnderecoCorredorSP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/CreateEdit.cshtml",
+      "line": 324,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque03_prateleira, ViewBag.comboEstoqueEnderecoPrateleiraSP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/ModalDesativarCadastroProduto.cshtml",
+      "line": 17,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Produtos/ModalDesativarCadastroProduto.cshtml",
+      "line": 23,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto_substituto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 41,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_icms_entrada, ViewBag.comboCstIcmsEntrada as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 47,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_ipi_entrada, ViewBag.comboCstIpiEntrada as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 51,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_ipi_saida, ViewBag.comboCstIpiSaida as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 63,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_pis_entrada, ViewBag.comboCstPisEntrada as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 67,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_pis_saida, ViewBag.comboCstPisSaida as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 79,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_cofins_entrada, ViewBag.comboCstCofinsEntrada as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+      "line": 83,
+      "snippet": "@Html.DropDownListFor(model => model.id_cst_cofins_saida, ViewBag.comboCstPisSaida as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Usuarios/CreateEdit.cshtml",
+      "line": 55,
+      "snippet": "@Html.DropDownListFor(model => model.id_perfil, ViewBag.comboPerfil as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Usuarios/CreateEdit.cshtml",
+      "line": 61,
+      "snippet": "@Html.DropDownListFor(model => model.id_logomarca, ViewBag.comboLogomarca as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Usuarios/CreateEdit.cshtml",
+      "line": 67,
+      "snippet": "@Html.DropDownListFor(model => model.id_coligada, ViewBag.comboColigada as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Usuarios/CreateEdit.cshtml",
+      "line": 73,
+      "snippet": "@Html.DropDownListFor(model => model.id_filial, ViewBag.comboFilial as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/g/Views/Vendedores/CreateEdit.cshtml",
+      "line": 55,
+      "snippet": "@Html.DropDownListFor(model => model.g_vendedores.id_revenda, ViewBag.comboRevenda as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 35,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_dentrouf_contribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 41,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_dentrouf_contribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 47,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_dentrouf_naocontribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 53,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_dentrouf_naocontribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 65,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_forauf_contribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 71,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_forauf_contribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 77,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_forauf_naocontribuinte_revenda, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+      "line": 83,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_forauf_naocontribuinte_consumidor, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexFinanceiro/Index.cshtml",
+      "line": 37,
+      "snippet": "@Html.DropDownList(\"Importacao\", ViewBag.comboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = \"edit_importacao\", @class = \"form-control\", @onchange = \"jsAjaxPesquisarComexFinance"
+    },
+    {
+      "file": "Areas/gc/Views/ComexFinanceiro/Index.cshtml",
+      "line": 41,
+      "snippet": "@Html.DropDownList(\"Invoice\", ViewBag.comboComexInvoices as List<SelectListItem>, htmlAttributes: new { @id = \"edit_invoice\", @class = \"form-control\", @onchange = \"jsAjaxPesquisarComexFinanceiro();\" }"
+    },
+    {
+      "file": "Areas/gc/Views/ComexFinanceiro/ModalCreateEditGcComexFinanceiro.cshtml",
+      "line": 30,
+      "snippet": "@Html.DropDownListFor(model => model.tipo_pag_rec, ViewBag.comboPagRec as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexFinanceiro/ModalCreateEditGcComexFinanceiro.cshtml",
+      "line": 44,
+      "snippet": "@Html.DropDownListFor(model => model.id_importacao, ViewBag.comboComexImportacoesCrud as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexFinanceiro/ModalCreateEditGcComexFinanceiro.cshtml",
+      "line": 50,
+      "snippet": "@Html.DropDownListFor(model => model.id_invoice, ViewBag.comboComexInvoicesCrud as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexImportacoes/CreateEdit.cshtml",
+      "line": 141,
+      "snippet": "@Html.DropDownListFor(model => model.id_importacao_status, ViewBag.comboStatusImportacao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexProdutos/FormProcessarProdutosPreNovos.cshtml",
+      "line": 43,
+      "snippet": "<td class=\"text-center\">@Html.DropDownListFor(model => model[i].id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = \"form-control\" })</td>"
+    },
+    {
+      "file": "Areas/gc/Views/ComexProdutos/ModalCreateEdit.cshtml",
+      "line": 71,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexProdutos/ModalDesativarProdutoComex.cshtml",
+      "line": 17,
+      "snippet": "@Html.DropDownListFor(model => model.id_comex_produto, ViewBag.comboComexProdutos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/ComexProdutos/ModalDesativarProdutoComex.cshtml",
+      "line": 23,
+      "snippet": "@Html.DropDownListFor(model => model.id_comex_produto_substituto, ViewBag.comboComexProdutos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/FormRecebimentoItensImportacao.cshtml",
+      "line": 28,
+      "snippet": "@Html.DropDownList(\"tag_string\", ViewBag.comboOsCliente as List<SelectListItem>, htmlAttributes: new { @id = \"tag_string\", @class = \"form-control\", @title = \"[ OS / Cliente ]\", @onchange = \"jsOnChange"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml",
+      "line": 98,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml",
+      "line": 128,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml",
+      "line": 159,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml",
+      "line": 190,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml",
+      "line": 221,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml",
+      "line": 98,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml",
+      "line": 128,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml",
+      "line": 159,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml",
+      "line": 190,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml",
+      "line": 221,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#mainMo"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalTransferenciaGerencial.cshtml",
+      "line": 25,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalTransferenciaGerencial.cshtml",
+      "line": 35,
+      "snippet": "@Html.DropDownListFor(model => model.id_local_estoque_origem, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Estoque/ModalTransferenciaGerencial.cshtml",
+      "line": 39,
+      "snippet": "@Html.DropDownListFor(model => model.id_local_estoque_destino, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueControle/CreateEdit.cshtml",
+      "line": 61,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueControle/CreateEdit.cshtml",
+      "line": 67,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto_familia, ViewBag.comboProdutosFamilia as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueControle/CreateEdit.cshtml",
+      "line": 73,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto_status, ViewBag.comboProdutosStatus as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "line": 26,
+      "snippet": "@Html.DropDownList(\"id_estoque_area_form\", ViewBag.comboEstoqueEnderecoArea as List<SelectListItem>, htmlAttributes: new { @id = \"id_estoque_area_form\", @class = \"form-control\", @title = \"Área\", @onch"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "line": 30,
+      "snippet": "@Html.DropDownList(\"id_estoque_secao_form\", ViewBag.comboEstoqueEnderecoSecao as List<SelectListItem>, htmlAttributes: new { @id = \"id_estoque_secao_form\", @class = \"form-control\", @title = \"Seção\", @"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "line": 34,
+      "snippet": "@Html.DropDownList(\"id_estoque_corredor_form\", ViewBag.comboEstoqueEnderecoCorredor as List<SelectListItem>, htmlAttributes: new { @id = \"id_estoque_corredor_form\", @class = \"form-control\", @title = \""
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "line": 38,
+      "snippet": "@Html.DropDownList(\"id_estoque_prateleira_form\", ViewBag.comboEstoqueEnderecoPrateleira as List<SelectListItem>, htmlAttributes: new { @id = \"id_estoque_prateleira_form\", @class = \"form-control\", @tit"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "line": 44,
+      "snippet": "@Html.DropDownList(\"id_produto_servico_form\", ViewBag.comboProdutosServicos as List<SelectListItem>, htmlAttributes: new { @id = \"id_produto_servico_form\", @class = \"form-control\", @title = \"Item\", @o"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/Index.cshtml",
+      "line": 38,
+      "snippet": "@Html.DropDownList(\"id_local_estoque_index\", ViewBag.comboLocaisEstoque as List<SelectListItem>, htmlAttributes: new { @id = \"id_local_estoque\", @class = \"form-control\", @title = \"Estoque\", @onchange "
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/ModalCreateEditInventarioItem.cshtml",
+      "line": 22,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/ModalCreateEditInventarioItem.cshtml",
+      "line": 38,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque_area, ViewBag.comboEstoqueEnderecoArea as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/ModalCreateEditInventarioItem.cshtml",
+      "line": 42,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque_secao, ViewBag.comboEstoqueEnderecoSecao as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/ModalCreateEditInventarioItem.cshtml",
+      "line": 48,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque_corredor, ViewBag.comboEstoqueEnderecoCorredor as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/ModalCreateEditInventarioItem.cshtml",
+      "line": 52,
+      "snippet": "@Html.DropDownListFor(model => model.id_estoque_prateleira, ViewBag.comboEstoqueEnderecoPrateleira as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueInventario/ModalCreateInventario.cshtml",
+      "line": 19,
+      "snippet": "@Html.DropDownListFor(model => model.id_local_estoque, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueLotes/Index.cshtml",
+      "line": 38,
+      "snippet": "@Html.DropDownList(\"Produto\", ViewBag.comboProdutos as List<SelectListItem>, htmlAttributes: new { @id = \"edit_produto\", @onchange = \"jsAjaxPesquisarLotes();\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueLotes/Index.cshtml",
+      "line": 45,
+      "snippet": "@Html.DropDownList(\"Importação\", ViewBag.ComboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = \"edit_importacao\", @onchange = \"jsAjaxPesquisarLotes();\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueLotes/ModalCreateEdit.cshtml",
+      "line": 32,
+      "snippet": "@Html.DropDownListFor(model => model.id_importacao, ViewBag.ComboComexImportacoes as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueLotes/ModalCreateEdit.cshtml",
+      "line": 38,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/EstoqueLotes/ModalUploadAnexoEstoqueLotes.cshtml",
+      "line": 29,
+      "snippet": "@Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/Index.cshtml",
+      "line": 94,
+      "snippet": "@Html.DropDownListFor(model => model.Field_Text_01, comboContasCaixaGerencial, htmlAttributes: new { @class = \"form-control\", @onchange = \"jsAjaxPesquisarFinanceiroLancamentos();\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/Index.cshtml",
+      "line": 115,
+      "snippet": "@Html.DropDownListFor(model => model.Field_Text_02, comboFinanceiroFiltroStatus, htmlAttributes: new { @class = \"form-control\", @onchange = \"jsAjaxPesquisarFinanceiroLancamentos();\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/Index.cshtml",
+      "line": 143,
+      "snippet": "@Html.DropDownListFor(model => model.Field_Text_08, comboFiltroCst01, htmlAttributes: new { @class = \"form-control\", @onchange = \"jsAjaxPesquisarFinanceiroLancamentos();\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 58,
+      "snippet": "@Html.DropDownListFor(model => model.id_conta_caixa, ViewBag.comboContasCaixa as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 77,
+      "snippet": "@Html.DropDownListFor(model => model.tipo_pag_rec, ViewBag.comboDebitoCredito as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 81,
+      "snippet": "@Html.DropDownListFor(model => model.id_financeiro_status, ViewBag.comboFinanceiroStatus as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 93,
+      "snippet": "@Html.DropDownListFor(model => model.id_pag_rec_tipo, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 131,
+      "snippet": "@Html.DropDownListFor(model => model.id_tablerow_color, ViewBag.comboRowColors as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 143,
+      "snippet": "@Html.DropDownListFor(model => model.id_classificacao_financeira, ViewBag.comboGClassificacaoFinanceira as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 226,
+      "snippet": "@Html.DropDownListFor(model => model.id_lancamento_adiantamento, ViewBag.comboAdiantamentos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "line": 232,
+      "snippet": "@Html.DropDownListFor(model => model.id_lancamento_adiantamento2, ViewBag.comboAdiantamentos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 34,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_1, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 51,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_2, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 68,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_3, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 85,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_4, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 102,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_5, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 119,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_6, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 136,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_7, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "line": 153,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_tipo_8, ViewBag.comboPagRecTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/FinanceiroLancamentos/ModalUploadAnexoFinanceiro.cshtml",
+      "line": 33,
+      "snippet": "@Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Fretes/Index.cshtml",
+      "line": 40,
+      "snippet": "@Html.DropDownList(\"Transportadora\", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = \"edit_transportadora\", @onchange = \"jsAjaxPesquisarMovimentos();\", @class = \"form-"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 52,
+      "snippet": "@Html.DropDownList(\"id_movimento_tipo\", ViewBag.comboTiposMovimentosCreateEdit as List<SelectListItem>, htmlAttributes: new { @id = \"id_movimento_tipo\", @class = \"form-control\", @title = \"Cotação/Pedi"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 56,
+      "snippet": "@Html.DropDownList(\"id_vendedor\", ViewBag.comboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"id_vendedor\", @class = \"form-control\", @title = \"Vendedor\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 60,
+      "snippet": "@Html.DropDownList(\"id_cfop_finalidade\", ViewBag.comboCfopFinalidade as List<SelectListItem>, htmlAttributes: new { @id = \"id_cfop_finalidade\", @class = \"form-control\", @title = \"Finalidade\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 64,
+      "snippet": "@Html.DropDownList(\"id_local_estoque\", ViewBag.comboLocaisEstoqueOrders as List<SelectListItem>, htmlAttributes: new { @id = \"id_local_estoque\", @class = \"form-control\", @title = \"Estoque\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 78,
+      "snippet": "@Html.DropDownList(\"id_moeda\", ViewBag.comboMoedas as List<SelectListItem>, htmlAttributes: new { @id = \"id_moeda\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 92,
+      "snippet": "@Html.DropDownList(\"id_pagrec_condicao\", ViewBag.comboPagRecCondicoes as List<SelectListItem>, htmlAttributes: new { @id = \"id_pagrec_condicao\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 100,
+      "snippet": "@Html.DropDownList(\"id_cfop_operacao\", ViewBag.comboGcCfopOperacao as List<SelectListItem>, htmlAttributes: new { @id = \"id_cfop_operacao\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 122,
+      "snippet": "@Html.DropDownList(\"id_cliente_destinatario\", ViewBag.comboClienteDestinatarios as List<SelectListItem>, htmlAttributes: new { @id = \"id_cliente_destinatario\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 231,
+      "snippet": "@Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 237,
+      "snippet": "@Html.DropDownList(\"frete1_transportadora\", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = \"id_transportadora\", @class = \"form-control\", @title = \"Transportadora\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 260,
+      "snippet": "@Html.DropDownList(\"frete2_transportadora\", ViewBag.comboTransportadoraComplementar as List<SelectListItem>, htmlAttributes: new { @id = \"frete2_transportadora\", @class = \"form-control\", @title = \"Tra"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 390,
+      "snippet": "@Html.DropDownList(\"id_importacao\", ViewBag.ComboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = \"id_importacao\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "line": 485,
+      "snippet": "@Html.DropDownListFor(model => model.id_contato, ViewBag.ComboClientesContatos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\", @onchange = \"jsSetDadosContato();\", @on"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/IndexPedido.cshtml",
+      "line": 181,
+      "snippet": "@Html.DropDownList(\"Posicao\", ViewBag.comboMovimentosPosicao as List<SelectListItem>, htmlAttributes: new { @id = \"edit_posicao\", @onchange = \"jsOnChangeFiltroIndexPedido();\", @class = \"form-control\" "
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/IndexPedido.cshtml",
+      "line": 185,
+      "snippet": "@Html.DropDownList(\"Status\", ViewBag.comboStatusMovimentos as List<SelectListItem>, htmlAttributes: new { @id = \"edit_status\", @onchange = \"jsOnChangeFiltroIndexPedido();\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalImportarExcelSC.cshtml",
+      "line": 19,
+      "snippet": "@Html.DropDownListFor(model => model.IdMovimentoTipo, ViewBag.comboMovimentosTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalInvoicesItensEspelhoDigital.cshtml",
+      "line": 20,
+      "snippet": "@Html.DropDownList(\"Importação\", ViewBag.ComboComexImportacoes as List<SelectListItem>, htmlAttributes: new { @id = \"edit_importacao\", @data_container = \"body\", @class = \"form-control\", @onchange = \"j"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalInvoicesItensEspelhoDigital.cshtml",
+      "line": 26,
+      "snippet": "@Html.DropDownList(\"Clientes\", ViewBag.comboClientes as List<SelectListItem>, htmlAttributes: new { @id = \"edit_cliente\", @data_container = \"body\", @class = \"form-control\", @onchange = \"jsAjaxPesquisa"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalInvoicesItensEspelhoDigital.cshtml",
+      "line": 32,
+      "snippet": "@Html.DropDownList(\"OS\", ViewBag.comboNotes as List<SelectListItem>, htmlAttributes: new { @id = \"edit_os\", @class = \"form-control\", @data_container = \"body\", @onchange = \"jsAjaxPesquisarItens();\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalNotificacaoCliente.cshtml",
+      "line": 30,
+      "snippet": "@Html.DropDownListFor(model => model.id_contato, ViewBag.ComboClientesContatos as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsSetDadosContato();\", @onblur = \"jsSetDadosContato("
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAjustarComissao.cshtml",
+      "line": 33,
+      "snippet": "@Html.DropDownList(\"comissao1_vendedor\", ViewBag.comboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"comissao1_vendedor\", @data_container = \"body\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAjustarComissao.cshtml",
+      "line": 47,
+      "snippet": "@Html.DropDownList(\"comissao2_vendedor\", ViewBag.comboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"comissao2_vendedor\", @data_container = \"body\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAprovacao.cshtml",
+      "line": 60,
+      "snippet": "@Html.DropDownListFor(model => model.comissao1_vendedor, ViewBag.comboVendedores as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAprovacao.cshtml",
+      "line": 66,
+      "snippet": "@Html.DropDownListFor(model => model.id_pagrec_condicao, ViewBag.comboPagRecCondicoes as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAprovacao.cshtml",
+      "line": 74,
+      "snippet": "@Html.DropDownList(\"id_local_estoque\", ViewBag.comboLocaisEstoqueOrders as List<SelectListItem>, htmlAttributes: new { @id = \"id_local_estoque\", @class = \"form-control\", @data_container = \"body\", @tit"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAprovacao.cshtml",
+      "line": 78,
+      "snippet": "@Html.DropDownList(\"frete1_transportadora\", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = \"id_transportadora\", @class = \"form-control\", @data_container = \"body\", @ti"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoAprovacao.cshtml",
+      "line": 104,
+      "snippet": "@Html.DropDownListFor(model => model.id_contato, ViewBag.ComboClientesContatos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\", @onchange = \"jsSetDadosContato();\", @on"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoCartaCorrecao.cshtml",
+      "line": 26,
+      "snippet": "@Html.DropDownListFor(model => model.id_movimento_nf, ViewBag.comboNfeCartaCorrecao as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoEntrega.cshtml",
+      "line": 66,
+      "snippet": "@Html.DropDownList(\"frete1_transportadora\", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = \"id_transportadora\", @data_container = \"body\", @class = \"form-control\", @ti"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoEntrega.cshtml",
+      "line": 89,
+      "snippet": "@Html.DropDownList(\"frete2_transportadora\", ViewBag.comboTransportadoraComplementar as List<SelectListItem>, htmlAttributes: new { @id = \"frete2_transportadora\", @data_container = \"body\", @class = \"fo"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoExpedicao.cshtml",
+      "line": 62,
+      "snippet": "@Html.DropDownList(\"frete1_transportadora\", ViewBag.comboTransportadora as List<SelectListItem>, htmlAttributes: new { @id = \"id_transportadora\", @data_container = \"body\", @class = \"form-control\", @ti"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoExpedicao.cshtml",
+      "line": 84,
+      "snippet": "@Html.DropDownList(\"frete2_transportadora\", ViewBag.comboTransportadoraComplementar as List<SelectListItem>, htmlAttributes: new { @id = \"frete2_transportadora\", @data_container = \"body\", @class = \"fo"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoInsertEditItem.cshtml",
+      "line": 71,
+      "snippet": "@Html.DropDownListFor(model => model.id_produto_condicao, ViewBag.comboProdutosCondicoes as List<SelectListItem>, new { @class = \"form-control select-modal-fix\", @data_select2_dropdown_parent = \"#main"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoInsertEditItem.cshtml",
+      "line": 75,
+      "snippet": "@Html.DropDownListFor(model => model.id_entrega_prazo, ViewBag.comboEntregasPrazos as List<SelectListItem>, new { @class = \"form-control select-modal-fix\", @data_select2_dropdown_parent = \"#mainModal\""
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoNotaFiscal.cshtml",
+      "line": 56,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop, ViewBag.comboCFOP as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\", @onfocus = \"jsSetDadosInfoComplementar();\", @onchange "
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoNotaFiscal.cshtml",
+      "line": 65,
+      "snippet": "@Html.DropDownListFor(model => model.id_cfop_operacao, ViewBag.comboCfopOperacoes as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\", @onfocus = \"jsSetDadosInfoComplement"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoNotaFiscal.cshtml",
+      "line": 72,
+      "snippet": "@Html.DropDownListFor(model => model.id_cliente_destinatario, ViewBag.ComboDestinatarios as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoNotaFiscal.cshtml",
+      "line": 78,
+      "snippet": "@Html.DropDownListFor(model => model.id_transportadora, ViewBag.comboTransportadora as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoNotaFiscal.cshtml",
+      "line": 87,
+      "snippet": "@Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml",
+      "line": 61,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#contai"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml",
+      "line": 92,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#contai"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml",
+      "line": 123,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#contai"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml",
+      "line": 154,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#contai"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml",
+      "line": 185,
+      "snippet": "@Html.DropDownList(loteId, new SelectList(Model.ComboEstoqueLotes, \"Value\", \"Text\", loteIdValor), new { @class = \"form-control select-modal-fix\", @id = loteId, @data_select2_dropdown_parent = \"#contai"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/ModalUploadFilePedidos.cshtml",
+      "line": 21,
+      "snippet": "@Html.DropDownListFor(model => model.id_arquivo_tipo, ViewBag.ComboGedTipos as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/PainelPedidos.cshtml",
+      "line": 77,
+      "snippet": "@Html.DropDownListFor(model => model.id_movimento_posicao, ViewBag.comboMovimentosPosicao as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsOnChangeFiltroPainelPedidos();\" })"
+    },
+    {
+      "file": "Areas/gc/Views/Movimentos/PainelPedidos.cshtml",
+      "line": 81,
+      "snippet": "@Html.DropDownListFor(model => model.id_local_estoque, ViewBag.comboLocaisEstoque as List<SelectListItem>, new { @class = \"form-control\", @onchange = \"jsOnChangeFiltroPainelPedidos();\" })"
+    },
+    {
+      "file": "Areas/gc/Views/MovimentosEntradas/FormProcessarNFDevolucao.cshtml",
+      "line": 46,
+      "snippet": "<td class=\"text-center\">@Html.DropDownListFor(model => model.allItens[i].id_produto, ViewBag.comboProdutos as List<SelectListItem>, new { @class = \"form-control\" })</td>"
+    },
+    {
+      "file": "Areas/gc/Views/MovimentosEntradas/ModalNFEntradaGerarNF.cshtml",
+      "line": 25,
+      "snippet": "@Html.DropDownListFor(model => model.id_frete_responsavel, ViewBag.comboFreteResponsavel as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/MovimentosEntradas/ModalNFEntradaImportar.cshtml",
+      "line": 20,
+      "snippet": "@Html.DropDownListFor(model => model.id_movimento_tipo, ViewBag.comboMovimentosTipos as List<SelectListItem>, new { @class = \"form-control\", @data_container = \"body\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+      "line": 18,
+      "snippet": "@Html.DropDownList(\"Field_Int_01\", ViewBag.comboOpcoes as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_01\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+      "line": 24,
+      "snippet": "@Html.DropDownList(\"Field_Int_02\", ViewBag.comboOpcoes as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_02\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+      "line": 30,
+      "snippet": "@Html.DropDownList(\"Field_Int_03\", ViewBag.comboOpcoes as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_03\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+      "line": 36,
+      "snippet": "@Html.DropDownList(\"Field_Int_04\", ViewBag.comboOpcoes as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_04\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+      "line": 42,
+      "snippet": "@Html.DropDownList(\"Field_Int_05\", ViewBag.comboOpcoes as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_05\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+      "line": 48,
+      "snippet": "@Html.DropDownList(\"Field_Int_06\", ViewBag.comboOpcoes as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_06\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresAtrasados.cshtml",
+      "line": 18,
+      "snippet": "@Html.DropDownList(\"Field_Int_01\", ViewBag.ComboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_01\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresCarteira.cshtml",
+      "line": 19,
+      "snippet": "@Html.DropDownList(\"Field_Int_01\", ViewBag.ComboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_01\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresComissoes.cshtml",
+      "line": 37,
+      "snippet": "@Html.DropDownList(\"Field_Int_01\", ViewBag.ComboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_01\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresPedidos.cshtml",
+      "line": 37,
+      "snippet": "@Html.DropDownList(\"Field_Int_01\", ViewBag.ComboVendedores as List<SelectListItem>, htmlAttributes: new { @id = \"Field_Int_01\", @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosFinanceiros/ModalRelatorioLancamentosFinanceiros.cshtml",
+      "line": 18,
+      "snippet": "@Html.DropDownListFor(model => model.Field_Int_01, ViewBag.comboTipoPagRec as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosFinanceiros/ModalRelatorioLancamentosFinanceiros.cshtml",
+      "line": 22,
+      "snippet": "@Html.DropDownListFor(model => model.Field_Int_02, ViewBag.comboGcFinanceiroStatus as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/gc/Views/RelatoriosFinanceiros/ModalRelatorioLancamentosFinanceiros.cshtml",
+      "line": 45,
+      "snippet": "@Html.DropDownListFor(model => model.Field_Int_03, ViewBag.comboContasCaixas as List<SelectListItem>, new { @class = \"form-control\" })"
+    },
+    {
+      "file": "Areas/qa/Views/GedSGQ/IndexAtasReunioes.cshtml",
+      "line": 34,
+      "snippet": "@Html.DropDownList(\"Tipo\", ViewBag.ComboGedTiposFiltro as List<SelectListItem>, htmlAttributes: new { @id = \"edit_arquivo_tipo\", @class = \"form-control\", @onchange = \"jsOnChangeFiltroGedAtasReunioes()"
+    },
+    {
+      "file": "Areas/qa/Views/GedSGQ/IndexComunicados.cshtml",
+      "line": 37,
+      "snippet": "@Html.DropDownList(\"Tipo\", ViewBag.ComboGedTiposFiltro as List<SelectListItem>, htmlAttributes: new { @id = \"edit_arquivo_tipo\", @class = \"form-control\", @onchange = \"jsOnChangeFiltroGedComunicados();"
+    },
+    {
+      "file": "Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml",
+      "line": 34,
+      "snippet": "@Html.DropDownList(\"Tipo\", ViewBag.ComboGedTiposFiltro as List<SelectListItem>, htmlAttributes: new { @id = \"edit_arquivo_tipo\", @class = \"form-control\", @onchange = \"jsOnChangeFiltroGedDocsSGQ();\", d"
+    }
+  ],
+  "jsInitModal_only_no_jsInitForm": [
+    "Areas/g/Views/Atendimentos/ModalCreateNewAtendimento.cshtml",
+    "Areas/g/Views/Atendimentos/ModalUploadFileAtendimentos.cshtml",
+    "Areas/g/Views/Clientes/ModalAtualizarVendedorConsultor.cshtml",
+    "Areas/g/Views/Clientes/ModalCreateEditContato.cshtml",
+    "Areas/g/Views/Clientes/ModalCreateEditDestinatario.cshtml",
+    "Areas/g/Views/Clientes/ModalDesativarContato.cshtml",
+    "Areas/g/Views/Financeiro/ModalGerarRemessaBoletosBancarios.cshtml",
+    "Areas/g/Views/Financeiro/ModalTransferirContaCaixa.cshtml",
+    "Areas/g/Views/Ged/ModalEditFileGed.cshtml",
+    "Areas/g/Views/Ged/ModalUploadFileGed.cshtml",
+    "Areas/g/Views/Produtos/ModalDesativarCadastroProduto.cshtml",
+    "Areas/g/Views/ProdutosNcm/CreateEdit.cshtml",
+    "Areas/gc/Views/CfopParametros/ModalCreateEditParametro.cshtml",
+    "Areas/gc/Views/ComexFinanceiro/ModalCreateEditGcComexFinanceiro.cshtml",
+    "Areas/gc/Views/ComexProdutos/ModalCreateEdit.cshtml",
+    "Areas/gc/Views/ComexProdutos/ModalDesativarProdutoComex.cshtml",
+    "Areas/gc/Views/Estoque/ModalConferenciaEstoqueItem.cshtml",
+    "Areas/gc/Views/Estoque/ModalConferenciaImportacaoItem.cshtml",
+    "Areas/gc/Views/Estoque/ModalTransferenciaGerencial.cshtml",
+    "Areas/gc/Views/EstoqueInventario/ModalCreateEditInventarioItem.cshtml",
+    "Areas/gc/Views/EstoqueInventario/ModalCreateInventario.cshtml",
+    "Areas/gc/Views/EstoqueLotes/ModalCreateEdit.cshtml",
+    "Areas/gc/Views/EstoqueLotes/ModalUploadAnexoEstoqueLotes.cshtml",
+    "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+    "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+    "Areas/gc/Views/FinanceiroLancamentos/ModalUploadAnexoFinanceiro.cshtml",
+    "Areas/gc/Views/Movimentos/ModalConsultaPedidos.cshtml",
+    "Areas/gc/Views/Movimentos/ModalImportarExcelSC.cshtml",
+    "Areas/gc/Views/Movimentos/ModalInvoicesItensEspelhoDigital.cshtml",
+    "Areas/gc/Views/Movimentos/ModalNotificacaoCliente.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoAjustarComissao.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoAprovacao.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoCartaCorrecao.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoEntrega.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoExpedicao.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoInsertEditItem.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoNotaFiscal.cshtml",
+    "Areas/gc/Views/Movimentos/ModalPedidoSeparacaoLotes.cshtml",
+    "Areas/gc/Views/Movimentos/ModalUploadFilePedidos.cshtml",
+    "Areas/gc/Views/MovimentosEntradas/ModalNFEntradaGerarNF.cshtml",
+    "Areas/gc/Views/MovimentosEntradas/ModalNFEntradaImportar.cshtml",
+    "Areas/gc/Views/RelatoriosCadastrais/ModalRelatorioClientesFornecedores.cshtml",
+    "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresAtrasados.cshtml",
+    "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresCarteira.cshtml",
+    "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresComissoes.cshtml",
+    "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresPedidos.cshtml",
+    "Areas/gc/Views/RelatoriosFinanceiros/ModalRelatorioLancamentosFinanceiros.cshtml",
+    "Areas/qa/Views/GedSGQ/IndexAtasReunioes.cshtml",
+    "Areas/qa/Views/GedSGQ/IndexComunicados.cshtml",
+    "Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml"
+  ]
+}

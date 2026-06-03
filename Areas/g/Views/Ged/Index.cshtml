@@ -30,7 +30,7 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Tipo", htmlAttributes: new { @class = "col-form-label col-sm-2" })
                         <div class="col-sm-8">
-                            @Html.DropDownList("Tipo", ViewBag.ComboGedTiposFiltro as List<SelectListItem>, htmlAttributes: new { @id = "edit_arquivo_tipo", @class = "form-control", @onchange = "jsAjaxPesquisarGedArquivos();", data_autofocus = "true" })
+                            @Html.DropDownList("Tipo", ViewBag.ComboGedTiposFiltro as List<SelectListItem>, htmlAttributes: new { @id = "edit_arquivo_tipo", @class = "form-control", @onchange = "jsOnChangeFiltroGed();", @data_gdi_select2_search = "true", data_autofocus = "true" })
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
@@ -50,6 +50,7 @@
                         </div>
                         <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Lançamentos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarGedArquivos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                            <button type="button" id="btnLimparFiltroGed" name="btnLimparFiltroGed" title="Limpar filtro e restaurar padrão" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 ms-1" onclick="jsLimparFiltroGed()"><i class="fa-solid fa-magnifying-glass-minus me-2" aria-hidden="true"></i>Limpar</button>
                         </div>
                     </div>
                 </div>
@@ -95,6 +96,7 @@
 
 <script type="text/javascript">
     var otableGedArquivos;
+    var _gGedSuprimirPesquisaAuto = false;
 
 	$(function ()
     {
@@ -102,8 +104,11 @@
         {
             jsDatepicker('#ig_ged_idx_d1');
             jsDatepicker('#ig_ged_idx_d2');
-            jsInitModal();
+            _gGedSuprimirPesquisaAuto = true;
+            jsInitForm();
             jsCreateTable();
+            jsAtualizarIndicadorFiltroGed('0');
+            _gGedSuprimirPesquisaAuto = false;
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -116,7 +121,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroGed(json.yesFilterOnOff); } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
                 },
@@ -225,6 +230,21 @@
         window.location = '@Url.Action("EditPedido", "Movimentos", new { area = "gc" })?id=' + id;
     }
 
+    function jsOnChangeFiltroGed()
+    {
+        if (_gGedSuprimirPesquisaAuto) { return; }
+        jsAjaxPesquisarGedArquivos();
+    }
+
+    function jsAtualizarIndicadorFiltroGed(yesFilterOnOff)
+    {
+        GdiAtualizarIndicadorFiltro(yesFilterOnOff, {
+            btnId: 'btnLimparFiltroGed',
+            tituloInativo: 'Limpar filtro e restaurar padrão',
+            tituloAtivo: 'Filtro ativo — limpar critérios de pesquisa'
+        });
+    }
+
     function jsAjaxPesquisarGedArquivos()
     {
         try
@@ -241,6 +261,29 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsAjaxPesquisarGedArquivos] " + (e && e.message ? e.message.toString() : String(e)));
+        }
+    }
+
+    function jsLimparFiltroGed()
+    {
+        try
+        {
+            _gGedSuprimirPesquisaAuto = true;
+            $('#edit_arquivo_tipo').val('0').trigger('change');
+            $('#ig_ged_idx_d1 input').val('');
+            $('#ig_ged_idx_d2 input').val('');
+            document.getElementById("yesFilterField").value = "";
+            LibMessageProcessando('Atualizando lista...');
+            $("#dataTableGedArquivos").DataTable().draw(false);
+        }
+        catch (err)
+        {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsLimparFiltroGed] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+        finally
+        {
+            _gGedSuprimirPesquisaAuto = false;
         }
     }
 
