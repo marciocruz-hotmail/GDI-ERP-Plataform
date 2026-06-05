@@ -9,16 +9,17 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.31 - 01/06/2026";
+            return "2026.51.32 - 03/06/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.31";
+            return "2026.51.32";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.51.32 - 03/06/2026 - Atualização modal expedição
 // 2026.51.31 - 01/06/2026 - gdi-select2: pesquisa local Select2 em listas estáticas (2+ options; antes limite ≤5)
 // 2026.51.30 - 01/06/2026 - gdi-select2: allowClear em lookups Ajax (option vazia + select2:clear → change)
 // 2026.51.29 - 25/05/2026 - NF entrada nacional: Select2 Ajax (GdiPageScripts) + layout tabela MVC

@@ -88,8 +88,8 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = "0",
                         sEcho = param.sEcho,
                         iTotalRecords = totalRecords,
@@ -137,8 +137,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -346,11 +346,11 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             PreencherLookupsContratoCreateEdit(record_g_contratos_aviacao.id_cliente);
@@ -391,11 +391,11 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>" + LibStringFormat.GetTabHtml(1) + record_g_contratos_aviacao.id_contrato.EmptyIfNull().ToString() + " - " + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString();
@@ -420,12 +420,12 @@ namespace GdiPlataform.Areas.g.Controllers
             catch (DbEntityValidationException ex)
             {
                 Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
             }
             catch (Exception e)
             {
                 Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, RecordCliente = record_g_clientes }, JsonRequestBehavior.AllowGet);
         }
@@ -508,13 +508,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacaoIdProcessamento(ex, idProcessamentoGravado);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErroIdProcessamento(e, idProcessamentoGravado);
             }
             return Json(new { success = sucesso, msg = msgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -542,20 +540,19 @@ namespace GdiPlataform.Areas.g.Controllers
             return View("ModalUploadContratoAssinado", record_cstUploadGed);
         }
 
+        private JsonResult JsonAjaxErroIdProcessamento(Exception ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacaoIdProcessamento(DbEntityValidationException ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureValidationMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
+
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
     }
 }

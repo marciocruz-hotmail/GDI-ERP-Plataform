@@ -1,822 +1,114 @@
 # CHANGELOG-DEV.md
 
-> Changelog **operacional** para Cursor / Claude Code (~200 linhas).  
-> **Histórico integral (187 entradas, ~2900 linhas):** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`  
-> **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md`
+> Changelog **operacional** (~200 linhas).  
+> **Histórico integral:** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` (187 entradas)  
+> **Contexto fixo:** `AI-CONTEXT.md` | **Pendências:** `BACKLOG-DEV.md` | **Índice temas:** `.cursor/context/2026_06_05_indice-memoria-ia.md`
 
-**Última atualização:** 2026-05-29 — Painel de Indicadores da Qualidade Pós-Venda (ISO 9001) — Fases 1-3
-
----
-
-### [2026-05-29] — Painel de Indicadores da Qualidade Pós-Venda (ISO 9001) — Fases 1–3
-**Tipo:** Implementação
-**Arquivos tocados:**
-- `Areas/qa/Controllers/IndicadoresQualidadeController.cs`
-- `Areas/qa/Controllers/IndicadoresQualidadePosVendaController.cs` *(novo)*
-- `Areas/qa/Views/IndicadoresQualidade/Index.cshtml`
-- `Areas/qa/Views/IndicadoresQualidadePosVenda/Index.cshtml` *(novo)*
-- `GDI-ERP-Plataform.csproj` *(Content Include das duas novas views)*
-
-**Problema / Demanda:**
-Implantação da gestão da qualidade ISO 9001. Necessidade de painel consolidado de indicadores com navegação por grupos, iniciando pelo grupo Pós-Venda (avaliação do cliente após entrega do pedido).
-
-**O que foi feito:**
-1. **Painel Geral** (`qa/IndicadoresQualidade/Index`): hub de navegação com filtro trimestre+ano, card-resumo do grupo Pós-Venda (ISG, TNC, TRC com semáforo Bootstrap) e estrutura pronta para receber novos grupos de indicadores.
-2. **Painel Pós-Venda** (`qa/IndicadoresQualidadePosVenda/Index`): view completa com 9 KPIs ISO 9001 organizados em 3 grupos (satisfação escala 1–5, conformidade %, não conformidade/resposta), gráfico de tendência Flot (ISG + TNC por trimestre), tabela DataTables server-side com detalhe por pedido e exportação Excel (ClosedXML — 2 abas: Resumo KPIs + Avaliações).
-3. **`IndicadoresQualidadeController`**: `Index()` + `GetKpisPosVendaResumo()` (JSON resumo para o card).
-4. **`IndicadoresQualidadePosVendaController`**: `Index()`, `GetDadosKpi()`, `GetDadosGraficoTendencia()`, `GetDadosRelatorio()` (DataTables), `ExportarExcel()` (ClosedXML MemoryStream).
-
-**Decisões técnicas relevantes:**
-- Pedido entregue = `id_movimento_posicao >= 6` (conforme definição do produto).
-- Escala de notas 1–5 (metas: ISG/ISA/ISI ≥ 4,0 | ISP ≥ 3,8 | conformidades ≥ 95–98% | TNC ≤ 3% | TRC ≥ 60%).
-- Semáforo: `success` / `warning` / `danger` via Bootstrap color tokens.
-- Gráfico seguindo exatamente o padrão `FinanceiroController.GetDadosGrafico` + `DadosConsolidados.cshtml` (Flot, eixo duplo).
-- Excel via `ClosedXML` com `MemoryStream` (sem arquivo temp em disco) — padrão mais limpo que o template-file usado em outros controllers.
-- Sem roles de acesso — conforme definição do produto.
-- ADO.NET direto via `LibDB.GetDataTable` para todas as queries analíticas.
-
-**O que foi evitado e por quê:**
-- `Chart.js` → projeto usa Flot via AdminLTE 4; sem nova lib.
-- Arquivo temporário em disco para Excel → MemoryStream é suficiente e mais limpo.
-- Roles → não requeridas para este módulo neste momento.
-
-**Impactos conhecidos:**
-- Nenhum controller ou view existente foi alterado.
-- Arquitetura do painel geral está preparada para receber novos grupos de indicadores (Qualidade, Atendimento, Logística, etc.) sem refatoração.
-
-**Atenção para próximas intervenções:**
-- Novos grupos de indicadores: adicionar card no `IndicadoresQualidade/Index.cshtml` + criar controller/view específico seguindo o mesmo padrão.
-- Para exportação com templates `.xlsx` pré-formatados (logo, cores GDI): substituir `new XLWorkbook()` por `new XLWorkbook(templatePath)` conforme padrão de outros controllers.
-
----
-
-### [2026-05-28] — Remoção de referências hardcoded de ambiente (producao/homologacao) no código C#
-**Tipo:** Correção / Refatoração cirúrgica
-**Arquivos tocados:**
-- `Models/CstTenant.cs`
-- `Controllers/UserIdentityController.cs`
-- `Controllers/JobServerController.cs`
-
-**Problema / Demanda:**
-Strings de ambiente ("Homologação"/"Produção") e nomes de connection string estavam hardcoded em lógica C# fora do único ponto legítimo de configuração (SetTenants). O `JobServerController` duplicava o mapeamento host→database de `SetTenants` com um typo (`gdi_homologaca`). O `UserIdentityController` determinava `AmbienteDatabase` por sniff de substring na connection string.
-
-**O que foi feito:**
-1. `CstTenant` recebeu o campo `ambiente` (ex.: "Produção", "Homologação", "Desenvolvimento").
-2. `SetTenants()` tornou-se `public static` e cada tenant recebeu seu `ambiente` declarado.
-3. Os dois pontos de sniff (`_DbConnectionString.IndexOf("homologacao")`) foram substituídos por `currentTenant.ambiente ?? "Desconhecido"` — eliminando variável `_DbConnectionString` que existia só para esse fim.
-4. `JobServerController` passou a usar `UserIdentityController.SetTenants().FirstOrDefault(...)` — eliminando o mapeamento duplicado e o typo `gdi_homologaca`.
-
-**O que NÃO foi alterado:**
-- `RoboEnotasNFE.cs` — os strings "Producao"/"Homologacao" ali são valores do envelope da API e-Notas/SEFAZ, determinados por flag do banco (`recordNfeGateway.producao`). Conceito distinto do ambiente de aplicação.
-
-**Impactos conhecidos:**
-- Nenhuma view alterada. Comportamento externo idêntico.
-- Novo tenant adicionado no futuro: apenas um lugar para editar (SetTenants).
-
----
-
-### [2026-05-28] — Relatório Gerencial Diário via WhatsApp
-**Tipo:** Implementação
-**Arquivos tocados:**
-- `Robos/WhatsApp/RoboWhatsAppGerencial.cs` *(novo)*
-- `Controllers/JobServerController.cs`
-- `GDI-ERP-Plataform.csproj`
-
-**Problema / Demanda:**
-Diretoria precisa receber diariamente, às 18h, um resumo gerencial com pedidos do dia, pedidos do mês e breakdown por vendedor — sem precisar acessar o ERP.
-
-**O que foi feito:**
-Criado `RoboWhatsAppGerencial` (classe estática) que executa as mesmas queries SQL de `GerencialController.IndexPainelComercialGerencial` (pedidos hoje + pedidos mês por vendedor) e envia a mensagem formatada via Z-API para `+5531973001808`. Adicionado `case "EnviarResumoGerencialWhatsApp"` no switch do `JobServerController`. O agendamento é feito pelo **Windows Task Scheduler** do servidor IIS: `POST /api/JobServer/Run` `{"Key":"...","JobName":"EnviarResumoGerencialWhatsApp"}` às 18h, Seg–Sex.
-
-**Decisões técnicas relevantes:**
-- `RoboWhatsAppGerencial` é estático e sem dependência de `CachePersister` / `HttpContext` — compatível com background jobs do IIS.
-- `JsonConvert.SerializeObject` usado para serializar o body Z-API, garantindo escape correto de `\n` na mensagem.
-- Registro de execução em `g_jobserver` (padrão já adotado no projeto).
-- Erros HTTP da Z-API lançam exceção — o `JobServerController` captura e grava em `LibLogger`.
-
-**O que foi evitado e por quê:**
-- Não foi alterado `GerencialController` — as queries foram duplicadas no novo robô para evitar acoplamento entre o fluxo MVC (com ViewBag/View) e o job background.
-- Não foi usado `RoboWhatsApp.EnviarTextoSimplesWhatsApp` — ele depende de `CachePersister.userIdentity.IdUsuario` (sessão HTTP), que não existe em background jobs.
-
-**Impactos conhecidos:**
-- `JobServerController` inalterado em comportamento existente; novo `case` é additive.
-- Nenhuma view alterada.
-
-**Atenção para próximas intervenções:**
-- Configurar o **Windows Task Scheduler** no servidor IIS para disparar o job (instruções abaixo).
-- Verificar idle timeout do App Pool (configurar para 0 se necessário).
-- Instruções de configuração do Task Scheduler: `schtasks /create /tn "GDI-RelatorioGerencialWhatsApp" /tr "powershell -Command \"Invoke-WebRequest -Uri 'https://DOMINIO/api/JobServer/Run' -Method POST -ContentType 'application/json' -Body '{\"Key\":\"CHAVE\",\"JobName\":\"EnviarResumoGerencialWhatsApp\"}'\"" /sc WEEKLY /d MON,TUE,WED,THU,FRI /st 18:00`
+**Última atualização:** 2026-06-05 — consolidação memória IA + lote prefixos legado
 
 ---
 
 ## Estado atual do projeto
 
-O **GDI-ERP-Plataform** é um monólito ASP.NET MVC (.NET Framework **4.7.2**) para gestão COMEX, comercial, estoque, financeiro e qualidade da GDI Aviação. O portal público do cliente (**GDI-PortalCliente**) foi integrado neste repositório (área `crm`, `UserIdentity/AcessoPortal`).
+Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidade). Portal cliente em `crm` + `UserIdentity`. Modernização 2026: **`GdiMvcJsonResults`** + guards modal GET + handlers Ajax/DT homogéneos; lookups via **`ILookupQueryService`**; módulos legados removidos (Filtros, PortalVendedor, FinanceiroFaturamentos/Lancamentos em `g`, etc.).
 
-A modernização em curso (2026) concentrou-se em: (1) substituição de **`LibDataSets`** por **`ILookupQueryService`** com cache e partials por domínio; (2) padronização **DataTables/Ajax** (`GdiDt*` / `GdiAjax*`, JSON `errorMessage` no servidor); (3) **Index** com filtro inline, paginação SQL e `deferLoading` onde aplicável; (4) remoção de módulos legados (Filtros genérico, PortalVendedor, FinanceiroFaturamentos/Lancamentos em `g`, Requisicoes, etc.); (5) higiene **PascalCase** (paths Git `Cst*`, views `Modal*`); (6) segurança incremental (**CSRF**, **XSS** em Atendimentos, `customErrors` Release); (7) documentação enxuta para IA (`AI-CONTEXT`, `BACKLOG`, este ficheiro + arquivo histórico).
-
-**Build** Release|AnyCPU OK nas intervenções recentes. **VersionERP:** `2026.51.27` — incrementar após alterações em `start.js` / `start.css` / `gdi-select2.js`. **UTF-8:** sem BOM no inventário de 2026-05-20.
+**Build** Release OK nas intervenções recentes. **VersionERP:** incrementar após `start.js` / `start.css` / `gdi-select2.js`.
 
 ---
 
 ## Decisões técnicas ativas
 
-### Plataforma e processo
-
-- Manter **.NET Framework 4.7.2** nesta fase; migração **4.8.1** em trilha **separada** (não misturar PRs).
-- Modernização **incremental**, commits/PRs pequenos, **baixo risco**.
-- **Fonte de verdade:** código, `.csproj` e `Views/` prevalecem sobre documentação desatualizada.
-- **Não** alterar schema SQL Server / SPs sem autorização explícita.
-- **Não** remover funcionalidades, rotas ou POSTs sem mapeamento de uso.
-- Agente: **sem** `git push` nem publish remoto; português BR nas respostas.
-
-### UI e front-end
-
-- Stack fixa: **Bootstrap 5**, **AdminLTE 4**, **DataTables bs5**, **SweetAlert2**, **Tempus Dominus** — sem substituir versões.
-- Dois tipos de tabela: **DataTables** (Ajax, `GetDados*`, `scroll-body-horizontal`) vs **MVC** (`@for`, `gdi-form-table-*`) — não misturar CSS/contratos.
-- Mensagens: `LibMessage*` / `GdiDt*` / `GdiAjax*` em `start.js`; evitar `alert()` nativo (Fase 7 concluída no histórico).
-- Cache de assets: `?v=VersionERP` no layout.
-
-### DataTables e Ajax
-
-- Servidor `GetDados*`: `param` nulo, `try/catch`, JSON com `errorMessage`, `severity`, `stackTrace`, `yesFilterOnOff`, `aaData` vazio.
-- Cliente: `error.dt` + `GdiDtNotifyJsonErrorMessage` + **`return`** antes de processar `aaData`.
-- APIs **não-DataTables** com `{ ok, error }` (ex. LMS) mantêm contrato próprio.
-
-### Lookups
-
-- **`LibDataSets.cs` removido** (Onda 6b). Usar **`ILookupQueryService`** + `*.Lookups.cs`.
-- **Index/filtro:** combo/query **local** na action (sem cache global).
-- **CreateEdit/modal partilhado:** `PreencherLookups*` via serviço.
-- Typeahead pedidos: `GetClientesLookup` / `GetProdutosLookup` (Select2 Ajax).
-
-### Portal e áreas
-
-- Portal **externo:** `crm` + `UserIdentity/AcessoPortal` (hosts `*.portalflightx.com`).
-- `Areas/g/PortalCliente` = legado interno; **não** confundir com portal `crm`.
-
-### Registo de mudanças
-
-- Atualizar **tabela** «Últimas alterações» neste ficheiro + `BACKLOG-DEV.md`.
-- Detalhe extenso → `.cursor/context/AAAA_MM_DD_*.md`, não reexpandir o changelog operacional.
+- **.NET 4.7.2** nesta fase; migração **4.8.1** trilha isolada (`2026_05_20_migracao-472-481.md`).
+- Stack UI fixa (Bootstrap 5, AdminLTE 4, DataTables bs5, SweetAlert2, Tempus Dominus).
+- **Dois tipos de tabela:** DataTables (Ajax) vs MVC (`@for`) — não misturar CSS/contratos.
+- **Arquitetura centralizada obrigatória:** `2026_06_05_arquitetura-centralizada-erp-gdi.md` + `Lib/GdiMvcJsonResults.cs`.
+- **Lookups:** Index = combo local; CreateEdit = `ILookupQueryService` + `*.Lookups.cs`.
+- Portal externo = `crm`; `g/PortalCliente` = legado interno.
+- Agente: sem `git push` / publish remoto; português BR; registo só linha compacta aqui + `BACKLOG-DEV.md`.
 
 ---
 
 ## Últimas alterações relevantes
 
-### 2026-06-01 — API pública lote-documento migrada do Portal Cliente (portalflightx.com)
-- **Problema:** `GET /api/public/lote-documento?idLote=` existia só em `GDI-PortalCliente-Plataform` — após migração do portal para o monólito ERP, o endpoint retornava 404 em produção.
-- **Migração:** `LoteDocumentoPublicoController` + `LotePublicDocumentUrlService` — redireciona para `ged_arquivos.public_url` do lote ou PDF fallback S3; tenant por `Host` (ex. `portalflightx` → `GdiPlataformEntities_gdi_producao`); `RouteConfig` ignora `api/*` no MVC.
-- **Config:** `PublicApi:LoteDocumentoFallbackUrl` em `Web.config`; `PublicApi:EntityConnectionName` opcional no secrets.
-
-### 2026-06-01 — gc/RelatoriosCadastrais, Financeiros, Regulamentacao: botões alinhados ao padrão Comerciais
-- **Causa:** layout legado (`col-6`, `align-items-center`, classes conflitantes `d-block` + `d-inline-flex` + `mx-auto`) — botões desalinhados ou com ícone/texto quebrado.
-- **Correção:** `col-8 mx-auto`, `align-items-left`, grelha `form-group row text-sm-end` + `col-sm-6`, botões `btn-lg w-100 left-block d-inline-flex align-items-center gap-2` (igual `RelatoriosComerciais/Index`); Regulamentação em grelha 2×2; `btnRelatorio4` e mensagem de erro corrigidos em Jogue Limpo.
-
-### 2026-06-01 — Botão Limpar amarelo indevido: lote EstoqueLotes + views relacionadas (yesFilterOnOff)
-- **`gc/EstoqueLotes/Index`:** seletor Ajax/Limpar corrigido (`#codigo_serial` em vez de `#edit_codigo_serial`); `SuprimirPesquisaAuto` na carga inicial evita `onchange` dos combos marcar filtro antes do primeiro draw.
-- **Views (init cinza):** `gc/Estoque`, `gc/EstoqueInventario`, `g/Atendimentos`, `g/Ged`, `qa/GedSGQ` (DocsSGQ, Comunicados, AtasReunioes) — flag `*SuprimirPesquisaAuto` antes de `jsInitForm()`.
-- **Servidor:** `AtendimentosController.getDadosAtendimentos` — amarelo só com critério real; `MovimentosController.GetDadosPedidos` / `GetDadosPainelPedidos` — não sobrescrever `filterOnOff` só por `yesFilterField="*"`; `EstoqueController.GetDadosRecebimentoItensImportacao` — amarelo só com OS selecionada; `EstoqueInventarioController.GetDadosInventario` — removido `filterDb` na carga; amarelo só com local > 0 após Pesquisar; `GedController` / `GedSGQController` — `filterDb` só conta após Pesquisar.
-
-### 2026-06-01 — gc/Estoque Index: botão Limpar cinza na carga inicial (yesFilterOnOff)
-
-- **`EstoqueController.GetDadosEstoque`:** `yesFilterOnOff = "1"` apenas com `yesFilterField="*"` **e** `idProduto > 0` — evita amarelo quando Select2/`Pesquisar` disparam sem item selecionado.
-
-### 2026-06-01 — gc/Fretes Index: DataTable alinhado (8 colunas + GetDadosFretes)
-
-- **Causa:** init copiado de `IndexPedido` (15 colunas / `GetDadosPedidos`) com `<thead>` de fretes (8 colunas) — valores deslocados na grelha.
-- **`FretesController.GetDados.cs`:** action `GetDadosFretes` — Id, NF, cliente, transportadora, rastreio, data; filtros id/NF, período, transportadora, valor.
-- **`Fretes/Index.cshtml`:** `#dtGcFretes`, `aoColumnDefs` 8 colunas, Ajax `GetDadosFretes`, `#edit_transportadora` em `yesCustomField04`; edit → `Movimentos/EditPedido`.
-- **`GDI-ERP-Plataform.csproj`:** include do partial.
-
-### 2026-06-01 — g/PagRecCondicoes Index: ordenação alfabética por Descrição
-
-- **`PagRecCondicoesController.GetDados`:** fallback `AplicarOrdenacaoPagRecCondicoesNaQuery` → `OrderBy(descricao)` ascendente.
-- **`PagRecCondicoes/Index.cshtml`:** DataTables `order: [[3,'asc']]` (coluna Descrição).
-
-### 2026-06-01 — gc/Cfop Index: ordenação por número CFOP; filtro Id + Número
-
-- **`CfopController.GetDados`:** ordenação padrão e por coluna 3 em `numero` ascendente; filtro `yesCustomField02` por número CFOP (`LIKE`), removido filtro por descrição.
-- **`CstCfopIndex`:** `CfopIndex_descricao` → `CfopIndex_numero`.
-- **`Cfop/Index.cshtml`:** campo filtro Número CFOP; DataTables `order: [[3,'asc']]`; mensagens e persistência de filtro alinhadas.
-
-### 2026-06-01 — g/ClassificacaoFinanceira Index: árvore jstree carrega registos (raiz id=1)
-
-- **`ClassificacaoFinanceiraController.GetTreeViewClassificacaoFinanceira`:** nível 1 inclui filhos com `pai = 1` (registo sistema oculto em `getDados` com `id > 1`), além de `pai = 0` exceto `id = 1`; guard `db == null`; `[CustomAuthorize Actionread]`.
-- **`ClassificacaoFinanceira/Index.cshtml`:** `GdiEnsureScriptFlags(16)` antes do init jstree (defer) + handler `error.jstree`.
-
-### 2026-06-01 — g/Vendedores Index: remove coluna Revenda; E-mail alinhado à esquerda
-
-- **`Areas/g/Views/Vendedores/Index.cshtml`:** `<th>Revenda</th>` removido; `aoColumnDefs` reindexado; E-mail com `text-sm-start`.
-- **`VendedoresController.GetDados`:** `aaData` sem revenda; lookup `g_revendas` removido; ordenação e-mail coluna 4.
-
-### 2026-06-01 — g/ProdutosNcm Index: coluna Código NCM alinhada à esquerda
-
-- **`Areas/g/Views/ProdutosNcm/Index.cshtml`:** `aoColumnDefs` coluna índice 3 — `className: 'text-sm-start'`.
-
-### 2026-06-01 — Select2 pesquisa local: listas estáticas (global) + GedSGQ Index
-
-- **`gdi-select2.js`:** combos **sem** `data-gdi-lookup-url` passam a usar Select2 com filtro local quando há **2+** `<option>` (antes só >5 ou `data-gdi-select2-search="true"`). Exceções: `data-gdi-no-select2` ou ≤1 option. Lookups Ajax inalterados.
-- **`VersionERP`:** `2026.51.31` (`ControlVersion.cs`) — cache bust de `gdi-select2.js`.
-- **`qa/GedSGQ` Index (Atas, Comunicados, DocsSGQ):** `jsInitForm()` + `data-gdi-select2-search="true"` em `#edit_arquivo_tipo` (paridade com `g/Ged/Index`).
-- **Script auditoria:** `Scripts/2026_06_01_gdi_audit_select2_local_search.py`.
-
-### 2026-06-01 — g/Ged Index: combo Tipo com Select2 pesquisa local (opções já carregadas)
-
-- **`Areas/g/Views/Ged/Index.cshtml`:** `jsInitForm()` (substitui `jsInitModal()` na carga da página) + `data-gdi-select2-search="true"` em `#edit_arquivo_tipo` — pesquisa local nas opções de `ComboGedTiposFiltro` via `gdi-select2.js` (sem `data-gdi-lookup-url` / sem Ajax na tabela).
-
-### 2026-06-01 — Indicador botão Limpar: auditoria 35 views + correção yesFilterOnOff (servidor)
-
-- **Auditoria estática:** `Scripts/2026_06_01_gdi_audit_indicador_limpar_completo.py` — **35/35** views com Pesquisar+Limpar OK (`GdiAtualizarIndicadorFiltro`, `xhr.dt` + `yesFilterOnOff`, init cinza `'0'`).
-- **Contrato:** Padrão A (cadastros) — cinza sem critério / amarelo com `filterApplied`; Padrão B (operacionais) — cinza `yesFilterField=""` / amarelo após Pesquisar (`yesFilterField="*"`).
-- **Correções servidor** (carga inicial amarela indevida): `FinanceiroLancamentosController.GetDadosLancamentos` (removido `idContaCaixa < 999` como filtro UI); `ComexFinanceiroController.GetDadosPagamentos` e `EstoqueLotesController.GetDados` — `yesFilterOnOff` só com `yesFilterField="*"` e critério real.
-- **Comportamento intencional preservado:** `g/Financeiro` auto-pesquisa mês corrente (amarelo ao abrir); cadastros com carga inicial `yesFilterField="*"` permanecem cinza até critério inline.
-
-### 2026-06-01 — Cadastros: carga inicial automática (Grupo 6 — exceto Produtos/Clientes)
-
-- **Política:** grid vazia ao abrir + **Pesquisar** obrigatório só em **`g/Produtos`** e **`g/Clientes`** (`deferLoading: true` mantido).
-- **Demais cadastros** (UF, Filiais, Cidades, Perfis, Usuários, Vendedores, ContasCaixas, PagRec*, ContratosAviacao, ProdutosNcm, CFOP*, EstoqueControle): `yesFilterField = "*"` no init (salvo `RestoreFilterAutoSearch`) e remoção de `deferLoading` — listagem completa ao carregar a view.
-- **Script:** `Scripts/2026_06_01_gdi_cadastro_carga_inicial_todos.py`.
-
-### 2026-06-01 — gc/Movimentos IndexEstoque: action + filtros + colunas alinhadas a GetDadosEstoque
-
-- **`MovimentosController.IndexEstoque`:** action órfã criada; lookups via `PreencherLookupsIndexEstoque` (typeahead produto, mesmo contrato de `Estoque/Index`).
-- **`Areas/gc/Views/Movimentos/IndexEstoque.cshtml`:** combo Select2 **Item**; removido filtro **Local** (não suportado por `GetDadosEstoque`); colunas/tfoot alinhadas ao JSON de `GetDadosEstoque`; `SuprimirPesquisaAuto` no Limpar; totais BH/SP no rodapé via `yesDisplayField01/02`.
-
-### 2026-06-01 — g/Financeiro Index: yesFilterField Padrão B (Limpar → "")
-
-- **`Areas/g/Views/Financeiro/Index.cshtml`:** `jsLimparFiltroFinanceiro` passa a definir `yesFilterField = ""` (antes `"*"`), alinhado a Lancamentos/Pedidos — botão Limpar cinza após limpar.
-- **`FinanceiroController.GetDados`:** `yesFilterOnOff = "1"` quando `yesFilterField == "*"` e consulta executada (Pesquisar); `"0"` quando Limpar ou sem pesquisa ativa.
-
-### 2026-06-01 — RestoreFilterAutoSearch: repesquisa automática Cidades e Difal
-
-- **`Areas/g/Views/Cidades/Index.cshtml`** e **`Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml`:** bloco `@if (ViewBag.RestoreFilterAutoSearch == true)` com repesquisa automática ao retornar de CreateEdit (controller já restaurava campos via `g_filtros`; faltava `jsAjaxPesquisar*` na view).
-- **Auditoria Grupo 2:** demais cadastros com `MontarFiltro*Persistido` + `TryParseFiltro*Semicolon` já tinham par controller/view completo (18 módulos).
-
-### 2026-06-01 — gc/Movimentos IndexEstoque: botão Limpar + indicador amarelo
-
-- **`Areas/gc/Views/Movimentos/IndexEstoque.cshtml`:** botão **Limpar**, `GdiAtualizarIndicadorFiltro`, `xhr.dt` + init cinza; funções renomeadas (`jsAjaxPesquisarMovimentosEstoque` / `jsLimparFiltroMovimentosEstoque`); correção `$Table` → `oTableMovimentosEstoque`; `yesCustomField01` alinhado ao contrato de `GetDadosEstoque`.
-- **`EstoqueController.GetDadosEstoque`:** `yesFilterOnOff` derivado de `yesFilterField == "*"` (Pesquisar amarelo, Limpar cinza).
-- **`Areas/gc/Views/Estoque/Index.cshtml`:** Pesquisar define `yesFilterField = "*"` (indicador coerente após ajuste server-side).
-
-### 2026-06-01 — Indicador amarelo botão Limpar: yesFilterOnOff alinhado ao padrão Produtos
-
-- **Cliente:** `GdiAtualizarIndicadorFiltro` em `start.js` — amarelo (`btn-outline-warning`) quando `yesFilterOnOff === '1'`, cinza após Limpar.
-- **Servidor:** `AtendimentosController.getDadosAtendimentos` — `filterOnOff` só com `yesFilterField == "*"` (antes sempre `"1"`). `GedController.GetDados` e `GedSGQController.JsonGedSgqArquivosDataTable` — indicador com filtro inline (tipo/datas) além de `g_filtros`. `FinanceiroController.GetDados` — amarelo só com cliente ou status ≠ 0 (Limpar repõe cinza). `MovimentosController.GetDadosPedidos` / `GetDadosPainelPedidos` — `filterOnOff` ligado a `yesFilterField` (Limpar envia `""`). `EstoqueController.GetDadosRecebimentoItensImportacao` — idem.
-- **Views:** `ContratosAviacao/Index` — init `jsAtualizarIndicadorFiltroContratos('0')`. `FormRecebimentoItensImportacao` — Pesquisar define `yesFilterField = "*"`.
-
-### 2026-06-01 — g/Produtos Index: filtro Nome → lookup Ajax Select2
-
-- **`Areas/g/Views/Produtos/Index.cshtml`:** campo texto «Nome» substituído por combo pesquisável (`GetProdutosLookup`, padrão Estoque/Clientes).
-- **`ProdutosController.LookupAjax.cs`:** endpoint GET `GetProdutosLookup` (roles `g_Produtos_*`).
-- **`ProdutosController.Lookups.cs`:** `PreencherLookupsIndexProdutos` + `ComboFiltroProdutoCadastroIndex`.
-- **`ProdutosController.GetDados`:** `yesCustomField03` aceita id do produto (lookup) ou texto legado (filtro persistido).
-- **`LookupSearchQueries.ComboFiltroProdutoCadastroIndex`:** placeholder Index cadastro produtos.
-
-### 2026-06-01 — g/Cidades Index: carregar todos os registros ao abrir
-
-- **`Areas/g/Views/Cidades/Index.cshtml`:** removido `deferLoading`; na abertura padrão (sem filtro persistido) define `yesFilterField = "*"` antes de criar o DataTable — lista todas as cidades sem exigir Pesquisar/Limpar. Retorno de CreateEdit com filtro persistido mantém repesquisa pelos campos Id./Nome.
-
-### 2026-06-01 — gc/FinanceiroParametroDifal Index: carregar todos os registros ao abrir
-
-- **`Areas/gc/Views/FinanceiroParametroDifal/Index.cshtml`:** removido `deferLoading`; na abertura padrão (sem filtro persistido) define `yesFilterField = "*"` antes de criar o DataTable — lista todos os parâmetros (`id > 1`) sem exigir Pesquisar/Limpar. Retorno de CreateEdit com filtro persistido mantém repesquisa automática pelos campos Id./Sigla.
-
-### 2026-06-01 — g / gc / qa: botão Limpar filtro em 10 views restantes (padrão Cidades)
-
-- **g:** `Atendimentos/Index`, `Ged/Index`, `Financeiro/Index` — botão **Limpar** + `GdiAtualizarIndicadorFiltro` via `yesFilterOnOff`; reset ao padrão da página; flag `*SuprimirPesquisaAuto` nos combos com pesquisa automática.
-- **gc:** `Movimentos/IndexPedido`, `Movimentos/PainelPedidos`, `EstoqueInventario/FormInventarioItens`, `Estoque/FormRecebimentoItensImportacao` — mesmo padrão.
-- **qa:** `GedSGQ/IndexDocsSGQ`, `IndexAtasReunioes`, `IndexComunicados` — mesmo padrão GED; `IndexAtasReunioes` e `IndexComunicados` passam a incluir `jsAjaxPesquisarGedArquivos` (referenciado no HTML mas ausente).
-- **`PainelPedidos`:** ajax `yesCustomField03` corrigido de `#edit_cliente` para `#id_cliente`.
-
-### 2026-06-01 — gc: botão Limpar filtro em 5 Index (ComexFinanceiro, Estoque, EstoqueInventario, EstoqueLotes, Fretes)
-
-- **Views:** `ComexFinanceiro`, `Estoque`, `EstoqueInventario`, `EstoqueLotes`, `Fretes` — botão **Limpar** + `GdiAtualizarIndicadorFiltro` via `yesFilterOnOff`; reset dos campos ao padrão da página; flag `_gc*SuprimirPesquisaAuto` evita múltiplos `draw` nos `onchange` dos combos.
-- **`ComexFinanceiroController.GetDadosPagamentos`:** passa a devolver `yesFilterOnOff` (importação/invoice > 0).
-- **`EstoqueInventario/Index`:** ajax `yesCustomField01` corrigido para `#id_local_estoque` (id real do combo).
-- **`Fretes/Index`:** inclusão de `jsCreateOtableGCIndexPedido()` no init (tabela não era criada ao abrir a view).
-
-### 2026-06-01 — gc/FinanceiroLancamentos Index: botão Limpar filtro (padrão Cidades)
-
-- **`Areas/gc/Views/FinanceiroLancamentos/Index.cshtml`:** botão **Limpar** ao lado de Pesquisar; `GdiAtualizarIndicadorFiltro` (outline-secondary ↔ outline-warning via `yesFilterOnOff` do servidor); `jsLimparFiltroFinanceiroLancamentos` restaura conta caixa padrão, datas do mês, status/tipo [Todos], Cli./For. `-1`, textos vazios, flag gerencial desmarcada e repesquisa a grelha.
-
-### 2026-06-01 — gdi-select2: botão X (allowClear) em lookups Ajax de filtro
-
-- **`gdi-select2.js`:** Select2 exige `<option value="">` + placeholder para allowClear; combos com sentinela `-1`/`0` ([TODOS]) só tinham `data-gdi-select2-allow-clear` — o X aparecia mas não limpava nem disparava pesquisa. Correção: `gdiSelect2PrepareAllowClear` + `select2:clear` → `change`. Afeta FinanceiroLancamentos Cli./For., IndexPedido, Estoque, etc. **VersionERP:** `2026.51.30`.
-
-### 2026-06-01 — Script WhatsApp gerencial: URL produção aeroflightx.com
-
-- **`Scripts/2026_05_28_gdi_relatorio_gerencial_whatsapp.ps1`:** `-Url` padrão `https://aeroflightx.com/api/JobServer/Run` (domínio atual; substitui `gdidigital.com.br`). Re-deploy do script em `C:\Scripts\GDI\` no servidor IIS.
-
-### 2026-06-01 — Painel comercial gerencial + WhatsApp: EXISTS / OUTER APPLY (totais sem duplicata NF)
-
-- **`GerencialController.IndexPainelComercialGerencial`:** pedidos diário/mês/entregues — `INNER JOIN gc_movimentos_nf` substituído por `EXISTS`; grelha em processamento — `OUTER APPLY TOP 1` NF mais recente (1 linha por movimento); removido `using DocumentFormat.OpenXml.Drawing.Charts` (CS0104 `DataTable`).
-- **`RoboWhatsAppGerencial`:** mesmas queries diário/mês alinhadas (`EXISTS`), para totais WhatsApp = painel web.
-
-### 2026-06-01 — Relatórios Regulamentação: CROSS APPLY / EXISTS (item × NF sem duplicata)
-
-- **`RelatoriosRegulamentacaoController`:** ANP/IBAMA/PF/Jogue Limpo Excel — `CROSS APPLY TOP 1` NF elegível por item; ANP ZIP — `EXISTS` itens regulados (1 NF = 1 download); PF — removida deduplicação por movimento (1 linha por item).
-
-### 2026-06-01 — Relatório Itens Comercializados: EXISTS em vez de JOIN NF (SUM sem duplicata)
-
-- **`AjaxModalRelatorioItensComercializados`:** removido `JOIN gc_movimentos_nf` que duplicava itens quando o pedido tinha várias NFs; critérios preservados (status 8/17, período `nf_data_geracao`, `operacao.is_venda = 1`).
-
-### 2026-06-01 — Relatório Vendedores Pedidos: performance consultas SQL (batch NF)
-
-- **`AjaxModalRelatorioVendedoresPedidos`:** eliminado padrão N+1 (1 query de NFs em lote); query de movimentos com `EXISTS` (alias `m` corrigido, sem duplicatas por JOIN); lookups de clientes/vendedores restritos aos IDs do resultado; filtro `comissao1_vendedor` preservado (um vendedor ou todos).
-
-### 2026-05-28 — WhatsApp gerencial: correção envio silencioso pós-migração destinatários
-
-- **Causa:** após mover `DESTINATARIO` para `WhatsAppGerencial:Destinatarios`, o IIS sem a chave no `appSettings.local.config` falhava o job em background (202 Accepted, sem WhatsApp).
-- **Correção:** leitura em camadas (AppSettings → XML secrets → Parameters do job); `qtd_rows_erro` + log com mensagem; validação JSON Z-API; stub vazio em `Web.config`.
-
-### 2026-05-25 — WhatsApp gerencial: destinatários em appSettings.local.config (N números)
-
-- **Secrets:** removido `DESTINATARIO` hardcoded; chave `WhatsAppGerencial:Destinatarios` em `App_Data\Secrets\appSettings.local.config` (modelo `.example`).
-- **Multi-destino:** valores separados por `;` — relatório enviado a todos; normalização DDI 55 (`LibStringFormat.NormalizarTelefoneWhatsAppBrasil`); falha se algum envio Z-API falhar.
-
-### 2026-05-25 — WhatsApp gerencial: vendedores por seção (hoje/mês) em ordem alfabética
-
-- **Pedidos Hoje / Pedidos Mês:** linhas por vendedor (`Nome qtd | R$ valor`), separador `**********`, totais GDI / SC / Total; ordem alfabética pt-BR; secção «Pedidos Vendedor» removida (incorporada).
-- **Arquivo:** `Robos/WhatsApp/RoboWhatsAppGerencial.cs`.
-
-### 2026-05-25 — NF entrada nacional: Select2 ausente (LayoutLite) + scroll horizontal
-
-- **Lookups vazios:** `FormProcessarNFCompraNacional` estava em `LayoutLiteActionsByController` (G-PERF-20) — **Select2 não carregava**; combos ficavam `<select>` nativo só com `[ SELECIONE ]`.
-- **Correção:** `[GdiPageScripts(... | Select2)]` na action; placeholder vazio no combo (contrato Ajax); `gdi-select2.js` placeholder explícito; layout tabela sem `table-responsive` duplicado.
-- **VersionERP:** `2026.51.29`.
-
-### 2026-05-25 — NF entrada nacional: CS0122 LookupSearchQueries na view
-
-- **Causa:** `FormProcessarNFCompraNacional.cshtml` chamava `LookupSearchQueries` (`internal`) — views Razor compilam em assembly separado.
-- **Correção:** combos por linha montados no controller (`PreencherLookupsComboProdutosEntradaNacionalPorLinha` → `ViewBag.comboProdutosPorLinha`).
-
-### 2026-05-25 — Cartas de Correção: COUNT DataTables com coluna duplicada
-
-- **Causa:** `GetDadosCartaCorrecao` usava `SELECT *` com `JOIN gc_movimentos_nf` — ambas tabelas expõem `id_movimento_nf`; `LibDataTableSqlPaging.SqlCount` envolve em subquery `_cnt` e o SQL Server falha.
-- **Correção:** `SELECT cr.*` (filtro por `nf.id_movimento` mantido no JOIN).
-
-### 2026-05-25 — NF entrada nacional: lookup produto por linha (typeahead Ajax)
-
-- **Causa:** `FormProcessarNFCompraNacional` repetia `GetComboGcProdutosServicosTodos` em cada linha da tabela MVC — Select2 estático com milhares de opções impedia seleção (performance/overflow).
-- **Correção:** combo mínimo por linha (`BuildComboProdutoEntradaNacionalLinha`) + `GetProdutosLookup` em `MovimentosEntradasController.LookupAjax.cs` (roles `gc_MovimentosEntradas_*`); `nome_produto` ao auto-match por código externo.
-
-### 2026-05-25 — GED upload: extensão `.csv` permitida em anexos
-
-- **Causa:** `ServiceUploadFileGed` validava extensão via `_extensoesGedPermitidas` sem `.csv` — upload rejeitado antes do S3 em todos os modais que usam `AjaxUploadFileGed` (pedidos, financeiro, atendimentos, COMEX, etc.).
-- **Correção:** inclusão de `.csv` na whitelist e mensagem de erro alinhada.
-
-### 2026-05-21 — Lookup Ajax: sem modal em pedido abortado (digitação)
-
-- **Causa:** ao digitar no Select2, o GET anterior é cancelado (`textStatus: abort`); `gdi-select2.js` tratava como erro e exibia *Não foi possível carregar os resultados do lookup* mesmo com o pedido seguinte OK (ex.: FinanceiroLancamentos Cli./For.).
-- **Correção global:** `gdiSelect2IsLookupAjaxAbort` em `gdi-select2.js` — só notifica em falha real (404, 401/403, JSON erro). **VersionERP:** `2026.51.27`.
-
-### 2026-05-21 — Auditoria lookups Ajax: `gc/Estoque/Index` produto
-
-- **Lacuna:** `ComboFiltroProdutoPosicaoEstoqueIndex` sem `data-gdi-lookup-url` em `Estoque/Index` (único host typeahead produto/cliente em falta).
-- **Correção:** `GetProdutosLookup` + `area = "gc"` + allowClear. Inventário completo em `.cursor/context/2026_05_20_lookups-typeahead-ajax-pedidos.md`.
-
-### 2026-05-21 — Lookup Ajax: `area = ""` em `ClientesLookup` + erro Select2
-
-- **Causa:** `Url.Action("…", "ClientesLookup")` em views de área gerava `/g/ClientesLookup/...` ou `/gc/ClientesLookup/...` (404) → Select2 *Os resultados não puderam ser carregados*.
-- **Correção:** `new { area = "" }` em todas as views que apontam para `ClientesLookup`; `gdi-select2.js` — `transport` com mensagem legível em falha Ajax (404/401/403/JSON erro).
-
-### 2026-05-21 — Lookup clientes: `data-gdi-lookup-url` nas views pós-CACHE-2
-
-- **Causa:** combos migrados para placeholder (1 opção) sem atributos Ajax → `gdi-select2.js` não inicializa Select2 (`nOpts ≤ 5` sem `data-gdi-lookup-url`).
-- **Correção:** atributos typeahead em `g/Clientes/Index`, `gc/FinanceiroLancamentos` (Index + modal ComDoc), `gc/Movimentos` (`IndexPedido`, `PainelPedidos`, `ModalConsultaPedidos`), `g/Atendimentos`, `g/Financeiro/Index`, `g/ContratosAviacao`, `gc/RelatoriosFinanceiros` modal.
-- **Endpoints:** pedidos → `gc/Movimentos/GetClientesLookup`; cadastro/financeiro → `ClientesLookup/GetClientesFornecedores*`; atendimentos → `g/Atendimentos/GetClientesLookup`.
-- **VersionERP:** `2026.51.25`. Detalhe: `.cursor/context/2026_05_20_lookups-typeahead-ajax-pedidos.md`.
-
-### 2026-05-21 — G-PERF-20: TempusDominus global + correções flags (Parametros DT, IndexPops jstree)
-
-- **`_LayoutHeadOptionalScripts` / `_LayoutScriptsOptional`:** carregam Tempus quando `ViewBag.GdiPageScripts` inclui `TempusDominus` (8).
-- **`GdiPageScriptsDefaults`:** mapa de rotas com `jsDatepicker*` (actions MVC Create/Edit/IndexPedido, etc.); hubs `LayoutHubReport*` passam a incluir Tempus; área **`a`** + `Parametros` → DataTables.
-- **`GedSGQ/IndexPops`:** `[GdiPageScripts(LayoutHubJstree)]`.
-- **Governança:** `Scripts/2026_05_20_gdi_cross_audit_view_libraries.py` — exit **1** se hosts CRITICAL; relatório `.cursor/context/2026_05_20_relatorio-auditoria-bibliotecas-views-modais.md`.
-- Corrige alerta `[jsDatepickerFirstDayMonth] Tempus Dominus não carregado` (IndexPedido, FinanceiroLancamentos, etc.) sem partials por view.
-
-### 2026-05-20 — Mensagens: LibMessageConfirm + fim dos LibMessageDialog em views
-
-- **`start.js`:** `LibMessageConfirm`, `LibMessageConfirmChecklist`, `GdiConfirmDesativarAnexo` (SweetAlert2 `confirm` com ícone, labels HTML, `size`).
-- **`gdi-swal2-dialog-shim.js`:** `GdiSwal2.confirm` — `icon`, `size`→`width`, `backdrop`, `allowEscapeKey`, `html`.
-- **17 blocos** (12 views) com 2 botões migrados de `LibMessageDialog` → novos helpers; **0** `LibMessageDialog` em `Areas/**/*.cshtml`.
-- Views: pedidos (excluir item, anexos), clientes/vendedores, separação/expedição (checklist), medição, parâmetros ON/OFF, cancelar título financeiro.
-- **`VersionERP`:** `2026.51.23`. Detalhe: `.cursor/context/2026_05_20_libmessage-confirm-arquitetura.md`.
-
-### 2026-05-20 — Mensagens: LibMessageDialog (OK único) → LibMessageSuccess em massa
-
-- **~102 blocos** em **90 views** `Areas/**` migrados de `LibMessageDialog` (confirmação, botão OK) para `LibMessageSuccess` + `callback` preservado.
-- Scripts: `Scripts/2026_05_20_gdi_migrate_libmessage_dialog_single_ok.py`, `Scripts/2026_05_20_gdi_restore_and_migrate_libmessage.py` (restauração de backup `_filestemp` + migração com extração de callback por chaves).
-- **Mantidos** `LibMessageDialog` com cancelar+confirmar (~15 blocos): exclusões, confirmações duplas, checklist separação, etc.
-- Correção manual: `Financeiro/ModalTransferirContaCaixa.cshtml` (sem backup; forEach/callback).
-- Piloto: `FormPedidoCreate` (`jsAjaxSavePedido` / `jsAjaxPosVendaPedido`).
-
-### 2026-05-20 — Pedido CreateEdit: sucesso Ajax → LibMessageSuccess (piloto fase A)
-
-- **`FormPedidoCreate.cshtml`:** `jsAjaxSavePedido` e `jsAjaxPosVendaPedido` — troca de `LibMessageDialog` (1× OK, sem ícone) por `LibMessageSuccess` + `callback` (padrão Atendimentos/Ged).
-- **Inventário global:** `Scripts/2026_05_20_gdi_inventory_libmessage_dialog_single_ok.py` — candidatos fase A concluídos em `Areas/`.
-
-### 2026-05-20 — Cotação/Pedido: AjaxSavePedido — g_produtos id_produto_substituto
-
-- **Erro:** `data reader is incompatible with g_produtos` / coluna `id_produto_substituto` ausente no reader ao salvar cotação.
-- **Causa:** `LoadProdutosPedidoItens` (PERF-010) usava `SqlQuery` com colunas parciais; o modelo EF exige todas as colunas mapeadas.
-- **Correção:** `LoadProdutosPedidoItens` passa a usar EF `AsNoTracking` + filtro por itens do movimento (entidade completa, parametrizado).
-
-### 2026-05-20 — DataTables: correção global `.draw()` (Limpar/Pesquisar Index)
-
-- **Causa:** `gdi-datatables-defaults.js` tinha substituído `$.fn.DataTable` pelo mesmo wrapper de `$.fn.dataTable`; o **D maiúsculo** deve devolver **Api** (`.api()`), não jQuery — `$("#dt").DataTable().draw(false)` falhava em Produtos, Clientes e ~18 Index.
-- **Correção:** restaurar `$.fn.DataTable = function(opts) { return $(this).dataTable(opts).api(); }`; helpers `GdiDataTableApi` / `GdiDataTableDraw`. **VersionERP** `2026.51.22`.
-
-### 2026-05-20 — DataTables: filtro obrigatório — mensagem «aguardando filtro» (não «Carregando...»)
-
-- **Causa:** com `deferLoading`, o DT usa `sLoadingRecords` enquanto `settings.json` é indefinido (`_emptyRow`).
-- **Correção global:** `gdi-datatables-defaults.js` — hook em inits com `deferLoading` (sincroniza `sLoadingRecords` ← `sEmptyTable`/`gdiAwaitingFilter`; após 1.º `xhr.dt` limpa `sEmptyTable` para `sZeroRecords` em pesquisa vazia).
-- **Telas:** ~19 Index (Clientes, Produtos, Cfop, etc.) sem alteração por view. **VersionERP** `2026.51.21`. Detalhe: `.cursor/context/2026_05_20_datatables-filtro-obrigatorio-mensagem.md`.
-
-### 2026-05-20 — DataTables: PT-BR global (todas as grelhas)
-
-- **`gdi-datatables-defaults.js`:** `oLanguage` completo (paginação, pesquisa, processando, select/aria, length «Todos»); expõe `window.GdiDataTablesPtBr`.
-- **Carregamento:** `_LayoutScriptsDataTables` (já existente) + **`GdiPageScriptRegistry`** bundle `dataTables` (modais lazy) + **`_Blank.cshtml`**.
-- **~170 inits** sem bloco `language:` nas views passam a herdar PT-BR dos defaults; blocos `language:` locais mantêm mensagens customizadas (`sEmptyTable` por tela).
-- **VersionERP** `2026.51.20`.
-
-### 2026-05-20 — DataTables: colspan «Nenhum registro encontrado» (auditoria global)
-
-- **Causa:** `gdi-dt-scroll-host` + `table-layout: fixed` quebrava `colspan` da linha vazia (mensagem só na col. 1).
-- **Correção global:** `start.css` — `table-layout: auto` quando `tbody td.dt-empty`; `td.dt-empty` com `nowrap`.
-- **Grelhas ≤10 col.:** removido host (padrão Index) em 17 tabelas (Atendimentos, Clientes abas, COMEX, FormPedido, modais GED, Nfe logs, etc.) — script `2026_05_20_gdi_strip_host_narrow_datatables.py`.
-- **Mantém host (só CSS):** IndexPedido, PainelPedidos, DadosConsolidados, Clientes/Contatos (11+ col.) — **VersionERP** `2026.51.19`.
-
-### 2026-05-20 — Atendimentos/Edit Anexos: DataTable padrão Index (sem gdi-dt-scroll-host)
-
-- **Causa:** `gdi-dt-scroll-host` + `table-layout: fixed` na grelha GED fazia «Nenhum registro encontrado» ficar só na coluna 1 (colspan quebrado).
-- **Correção:** `#dtGAtendimentosGed` — markup e init alinhados a `Atendimentos/Index` (tabela no `card-body`, sem host/wrapper; sem `initComplete`/`dt-wrap`; `TableGed`).
-
-### 2026-05-20 — DataTables: mensagem vazia PT-BR (`gdi-datatables-defaults.js`)
-
-- **Causa:** DataTables 2.x ignora a chave `language` no init (só `oLanguage`); tabelas mostravam texto em inglês ou célula vazia sem «Nenhum registro encontrado» (ex.: Anexos em `Atendimentos/Edit`).
-- **Correção:** `gdi-datatables-defaults.js` (defer após `datatables.min.js`); CSS `td.dt-empty` no host; `Atendimentos/Edit` GED com `oLanguage` + guard reinit. **VersionERP** `2026.51.18`.
-
-### 2026-05-20 — DataTables: quebra de linha por omissão (`gdi-dt-scroll-host` / `dt-wrap`)
-
-- **Causa:** `.dt-wrap` em `aoColumnDefs` não vencia a regra `nowrap` + `ellipsis` de `.gdi-dt-scroll-host` (especificidade CSS) — Audit Trail truncado em `Clientes/Edit`.
-- **Correção:** `start.css` — padrão = quebra (`word-break`, `overflow-wrap`); opt-out `.dt-nowrap` (data/ícone); `.dt-wrap` com especificidade correta. **VersionERP** `2026.51.17`.
-- **Views audit:** `dt-nowrap` na coluna Dt/Hora em Clientes, Produtos, ComexImportacoes, FormPedidoCreate.
-
-### 2026-05-20 — ComexImportacoes/Edit: correção markup aba Itens (`CreateEdit`)
-
-- **Causa:** na migração G-DT-08 faltou `</div>` do wrapper `table-responsive` na aba Itens — markup inválido (tab-pane sem fecho correto).
-- **Correção:** `Areas/gc/Views/ComexImportacoes/CreateEdit.cshtml` — fecho do `scroll-body-horizontal` antes do botão «Carregar Itens».
-
-### 2026-05-20 — G-DT-08 Lotes A+ e B: `gdi-dt-scroll-host` em abas CreateEdit críticas
-
-- **A+:** `FormPedidoCreate` (itens + audit), `ComexImportacoes/CreateEdit` (itens, GED, invoices PDF, audit — invoices expandidas 13 col. mantém scroll largo).
-- **B:** `Clientes/CreateEdit`, `Atendimentos/Edit`, `ModalConsultaPedidos`, `Financeiro/DadosConsolidados`, `Nfe/CreateEdit` (logs).
-- Padrão: `gdi-dt-scroll-host min-w-0`, `initComplete` + `columns.adjust`, `dt-wrap` em colunas de texto.
-
-### 2026-05-20 — G-DT-08 Lote A: modais anexos/GED com `gdi-dt-scroll-host`
-
-- `ModalPedidoViewAnexos`, `ModalFinanceiroViewAnexos`, `ModalCreateEditLancamento` (aba GED), `EstoqueLotes/ModalCreateEdit` (documentos).
-
-### 2026-05-20 — Auditoria DataTables vs `gdi-dt-scroll-host`
-
-- Script `Scripts/2026_05_20_gdi_audit_dt_scroll_host.py`; relatório `.cursor/context/2026_05_20_datatables-gdi-dt-scroll-host-auditoria.md` (138 views DT, 3 com host, 38 candidatas ≤10 colunas).
-
-### 2026-05-20 — EditPedido aba Anexos: DataTable sem scroll horizontal
-
-- `FormPedidoCreate` tab GED: wrapper `gdi-dt-scroll-host min-w-0` (tabela 100% do card; evita `max-content` solto).
-- `jsInitTableGcMovimentosGed`: `columns.adjust`, colunas Descrição/Arquivo com `dt-wrap`.
-
-### 2026-05-20 — EditPedido aba Invoice/SO: AjaxComboComexImportacoesPedido
-
-- Removido `[HttpPost]` indevido na action GET (erro genérico «Falha ao processar os dados error» ao abrir aba).
-- `FormPedidoCreate`: feedback `success:false` e mensagem HTTP legível no Ajax do combo importações.
-
-### 2026-05-20 — Atendimentos/Edit: acentuação no campo Categoria
-
-- `ViewBag.MsgCategoria` sem `EncodeAtendimentoDisplay` (evita dupla codificação com `@ViewBag` na view).
-
-### 2026-05-20 — Clientes/Index: erro de análise Razor (Tempus partial)
-
-- Removido `@{` aninhado dentro do bloco `@{}` ao incluir `_LayoutHeadTempus` (linha 6).
-
-### 2026-05-20 — GdiMainModalLoad: modal hub sem reload Tempus duplicado
-
-- Hubs com `_LayoutScriptsTempus` (defer): `gdiEnsureScriptFlagsForModal` aguarda API Tempus já no DOM em vez de injetar de novo (DevTools Finish ~25 s no modal ANP com +3 kB).
-- `GdiLoadScriptOnce` reutiliza `<script defer>` existente; deteção de flags no HTML normalizado do `<body>`.
-- `VersionERP` **2026.51.16**.
-
-### 2026-05-20 — Hubs relatório gc (4× Index): modais alinhados
-
-- **Layout (todas):** `bootstrap.bundle.min.js` quando sem DataTables (`_LayoutScriptsOptional`); `GdiMainModalLoad` + corpo `_Modal.cshtml` (**2026.51.14–15**).
-- **Index:** callbacks `$("#mainModal").load` → `GdiMainModalShow()` em Cadastrais, Comerciais, Financeiros, Regulamentação (9+4+1+1 funções).
-- **Presets:** Cadastrais/Comerciais/Regulamentação `LayoutHubReport`; Financeiros `LayoutHubReportSelect2` + partials Tempus na Index.
-- `VersionERP` **2026.51.15**.
-
-### 2026-05-20 — GdiMainModalLoad: modais hubs (_Modal.cshtml)
-
-- `gdiNormalizeModalAjaxHtml`: extrai conteúdo de `<body>` quando a action devolve documento completo (`_Modal.cshtml`); corrige modais que não abriam (ex. `RelatoriosComerciais`).
-- `VersionERP` **2026.51.14**.
-
-### 2026-05-20 — Hubs relatórios gc: layout Index (Cadastrais, Comerciais, Financeiros, Regulamentação)
-
-- Removido `scroll-body-horizontal` em listas de botões MVC; grelha `row g-2` em Comerciais; `d-grid` nos hubs simples.
-- Modais: `GdiMainModalLoad` + scripts inline (**2026.51.13**); estrutura Bootstrap exige **2026.51.14** para layout `_Modal.cshtml`.
-
-### 2026-05-20 — Relatórios Regulamentação: layout + modal ANP
-
-- `GdiMainModalLoad`: executa `<script>` do fragmento (paridade `jQuery.load`); deteção lazy sem falso positivo em `switch-success`.
-- `RelatoriosRegulamentacao/Index`: removido `scroll-body-horizontal` indevido (lista de botões MVC).
-- `VersionERP` **2026.51.13**.
-
-### 2026-05-20 — Correção GdiPageScriptsActionFilter (ViewBag indexador)
-
-- Removido `ViewBag[ViewBagKey]` (RuntimeBinderException); flags só em `ViewData` — `ViewBag.GdiPageScripts` na view continua válido.
-
-### 2026-05-20 — G-PERF-M02 medição (estática + script live)
-
-- Script `Scripts/2026_05_20_gdi_perf_m02_network_baseline.py` (`--static` / `--live` Playwright).
-- Resultado proxy layout: hubs lite ~280–380 KB est.; telas DT+S2 ~510 KB est. (vs PERF-000 −450…−690 KB).
-- Doc `2026_05_20_perf-m02-resultado.md`; JSON `.cursor/context/2026_05_20_perf-m02-resultado.json`.
-- **Pendente:** M02b DevTools live em homologação (IIS local indisponível no agente).
-
-### 2026-05-20 — G-PERF-20f Lazy load `#mainModal`
-
-- `GdiPageScriptRegistry` + `GdiLoadScriptOnce` / `GdiMainModalLoad` em `start.js`; patch `$("#mainModal").load`.
-- Partial `Views/Shared/_LayoutPageScriptRegistry.cshtml`; doc `2026_05_20_layout-scripts-fase5-lazy-modal.md`.
-- `VersionERP` **2026.51.12**. Épico G-PERF-20 (layout scripts) concluído no código.
-
-### 2026-05-20 — G-PERF-20 Fase 4 lote C (LayoutLite por action)
-
-- `GdiPageScriptsDefaults`: mapa `LayoutLiteActionsByController` (Create/Edit cadastros `g`, forms `gc`, `GedSGQ/IndexPops`, treinamento vídeo).
-- Script espelho: `Scripts/2026_05_20_gdi_layout_lite_actions.py`; inventário views: `2026_05_20_gdi_inventory_layout_no_datatables.py`.
-- `Treinamentos` em `NoDataTablesControllers`; verify/smoke atualizados.
-- `VersionERP` **2026.51.11**. Épico Fase 4 (opt-out) fechado no código; próximo opcional: **G-PERF-20f** (lazy modal).
-
-### 2026-05-20 — G-PERF-20 Fase 3 (infra carregamento condicional — 1 PR)
-
-- Partials agregados: `_LayoutHeadOptionalScripts`, `_LayoutScriptsOptional`; `_Layout` simplificado.
-- `Lib/GdiPageScriptsView.cs` — leitura segura de flags; `data-gdi-page-scripts` no `<body>` (diagnóstico).
-- Script: `Scripts/2026_05_20_gdi_verify_page_scripts_resolve.py`; doc `2026_05_20_layout-scripts-fase3-infra.md`.
-- `VersionERP` **2026.51.09** (filter + flags 20d/20e mantidos).
-
-### 2026-05-20 — G-PERF-20 Fase 4 lote B (opt-out Treinamentos + portal)
-
-- `[GdiPageScripts]`: `qa/Treinamentos` (Index + IndexTreinamentoAviacao001) `LayoutLite`; `crm/Pedidos/Index` `LayoutPortalCliente`.
-- Preset `LayoutPortalCliente`; doc lotes A/B/C em `2026_05_20_layout-scripts-fase4-optout.md`.
-- Scripts: `2026_05_20_gdi_inventory_index_no_datatables.py`; verify/smoke atualizados.
-- `VersionERP` **2026.51.10**.
-
-### 2026-05-20 — G-PERF-20e Fase 4 lote A (hubs validados + smoke manifest)
-
-- Presets: `LayoutHubReport`, `LayoutHubReportSelect2`, `LayoutHubJstree`, `LayoutLite`.
-- `[GdiPageScripts]` em 7 controllers (Relatórios*, Parametros, CentrosCustos, ClassificacaoFinanceira).
-- **Correção:** `RelatoriosFinanceiros` mantém **Select2** no layout (modal com lookup).
-- Script smoke: `Scripts/2026_05_20_gdi_page_scripts_smoke_manifest.py`; doc `2026_05_20_layout-scripts-20e-validacao.md`.
-- `VersionERP` **2026.51.08**.
-
-### 2026-05-20 — G-PERF-20d Fase 3 (layout condicional + filter)
-
-- `GdiPageScriptsActionFilter` registado em `FilterConfig`; `_Layout` carrega DT/Select2/Toggle/jstree via `ViewBag.GdiPageScripts`.
-- Partials: `_LayoutHead/Scripts*DataTables|Select2|BootstrapToggle`; `_LayoutPageScriptsInit`.
-- Opt-out DataTables+Select2: `Parametros`, `Relatorios*`, árvores `CentrosCustos`/`ClassificacaoFinanceira` (jstree via filter).
-- `VersionERP` **2026.51.07**.
-
-### 2026-05-20 — G-PERF-20c-bis Tempus fora do layout global
-
-- `_Layout.cshtml`: removidos CSS/JS globais de **Tempus**; **22 views** com `_LayoutHeadTempus` + `_LayoutScriptsTempus` (15 com `jsDatepicker` + 7 hubs de modal com datas).
-- Inventário: `Scripts/2026_05_20_gdi_inventory_tempus_hosts.py`, `Scripts/2026_05_20_gdi_apply_tempus_partials.py`; padrão `jsDatepicker` no inventário Fase 0.
-- jstree (20c): inalterado — 2 Index `CentrosCustos` / `ClassificacaoFinanceira`.
-- Login/`_Blank` mantêm Tempus próprio; `VersionERP` **2026.51.06**.
-
-### 2026-05-20 — G-PERF-20c Fase 2 (jstree fora do layout)
-
-- `_Layout.cshtml`: removidos CSS/JS globais de **jstree**.
-- Partials jstree em `g/CentrosCustos/Index`, `g/ClassificacaoFinanceira/Index`.
-- `VersionERP` **2026.51.05**.
-
-### 2026-05-20 — G-PERF-20b Fase 1 (_Layout scripts defer)
-
-- `_Layout.cshtml`: CSS permanece no `<head>`; scripts removidos do head.
-- `_LayoutScriptsAuthenticated.cshtml`: núcleo síncrono (jQuery, OverlayScrollbars, swal-compat, spin, AdminLTE) no início do `<body>`.
-- Fim do body: defer em Tempus, DataTables, jstree, Select2, `gdi-select2`, `jsFileInputChange`, toggle; `start.js` **sem** defer; `gdi-session-handler` após `start.js`.
-- `ControlVersion` / `VersionERP` → **2026.51.04**.
-
-### 2026-05-20 — G-PERF-20 Fase 0 (layout scripts — preparação)
-
-- Script `Scripts/2026_05_20_gdi_inventory_page_scripts.py` + JSON `.cursor/context/2026_05_20_layout-scripts-inventario.json`.
-- Docs: `2026_05_20_layout-scripts-contrato-flags.md`, `2026_05_20_layout-scripts-matriz-modais.md`.
-- Arquitetura: `Lib/GdiPageScripts.cs` (enum, attribute, defaults, filter **sem** registo em `FilterConfig`); `_Layout` **sem** alteração de comportamento.
-- Backlog: sub-itens **G-PERF-20a** concluído; **G-PERF-20b…f** abertos.
-
-### 2026-05-20 — Auditoria performance ERP (read-only)
-
-- Relatório técnico priorizado: `.cursor/context/2026_05_20_performance-audit-erp.md` (10 secções, Top 10, cache/SQL/front/IIS, plano em 3 fases).
-- Inventário script: 6× `GetDados*` ainda com paginação em memória (`2026_05_20_gdi_inventory_datatables_memory_paging.py`).
-- Backlog: novos **G-DT-07**, **G-PERF-27…30** em `BACKLOG-DEV.md`. Sem alteração de código.
-
-### 2026-05-20 — G-FLT-04…07, G-LOGIN-01, G-UX-01, G-ENC-03 (filtro legado + flash + login)
-
-- **FLT:** `getFilterByUser` 3 parâmetros; removidos `yesFilterOperador`/`yesFilterText` do modelo; `LibFlashMessage`; helpers login chrome; `SentencaSQLFiltroGenerico` obsoleto.
-- **UX:** `LibFlashMessage.SetModalMessage` em Atendimentos, FinanceiroLancamentos, Nfe, Cfop*, ComexProdutos; `ModalError` usa chave constante.
-- **LOGIN:** `SaveLoginChromeToTempData` / `ApplyLoginChromeToViewBag` no `UserIdentityController`.
-- **ENC:** comentário `TempData IdColigada` removido em Usuarios.
-
-### 2026-05-20 — G-FLT-04 (TempData filtro no login)
-
-- Removidos `TempData.Remove` de `yesFilterField`, `yesFilterOperador`, `yesFilterText`, `yesFilterOn`, `yesFilterController`, `yesFilterControllerTemp` em `UserIdentityController.Index` (sem escritores no repo).
-
-### 2026-05-20 — Inventário TempData legado (backlog)
-
-- Documento `.cursor/context/2026_05_20_tempdata-legado-filtro-login.md`; novos itens **G-FLT-04…07**, **G-LOGIN-01**, **G-UX-01**, **G-ENC-03** em `BACKLOG-DEV.md`.
-
-### 2026-05-20 — Filtro legado + perfil vendedor Clientes
-
-- **`yesFilterAdvancedText`:** removida de `jQueryDataTableParamModel` (UI e servidor já sem uso desde FLT-1).
-- **Clientes / perfil -800:** `ClientesController.OnActionExecuting` → 403; removidos ramos UI e filtro carteira vendedor; SQL opcional `Scripts/2026_05_20_gdi_sql_revoke_clientes_perfil_vendedor.sql`. Doc: `.cursor/context/2026_05_20_clientes-perfil-vendedor-removido.md`.
-
-### 2026-05-20 — DT-1 (`GetDados*` g — Atendimentos, nomes legados)
-
-- **G-DT-06:** quatro actions em `AtendimentosController` (`getDadosAtendimentos`, `getDadosAtividades`, `getDadosAtendimentosLogs`, `GetDadosGedAtendimento`) — contrato DataTables mantido; paginação `AsNoTracking` + dicts só da página; `yesFilterOnOff` na listagem; sort GED corrigido (col 3 = descrição).
-- Inventário: `Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` passa a incluir `getDados*` e validar `catch` → `JsonDataTableException` por método.
-- Doc: `.cursor/context/2026_05_20_dt1-atendimentos-getdados-padrao.md`.
-
-### 2026-05-20 — FLT-1, HYB-1, NFE-1 (filtro legado, lookups híbridos, Portal Vendedor)
-
-- **FLT-1:** removido `yesFilterAdvancedText` em `GedSGQController` e `EstoqueInventarioController.GetDadosInventario`.
-- **HYB-1:** 9 controllers migrados para `*.Lookups.cs` + novos `GetCombo*` em `LookupQueryService` (Filiais, Vendedores, ContasCaixas, Nfe, ProdutosNcm, Financeiro g, ImportacoesBancarias, ComexFinanceiro, RelatoriosComerciais). Mantidos locais: CentrosCustos, ClassificacaoFinanceira, ComexImportacoes Index, RelatoriosCadastrais, Usuarios.
-- **NFE-1:** SQL desativar menu `g/PortalVendedor`; `UsuariosController` troca senha com `g_Vendedores_*` (sem roles legado portal).
-
-### 2026-05-20 — PUB-1 / PUB-2 (Release, health, versão)
-
-- **PUB-1:** `Web.Release.config` validado (sem `debug`, `customErrors On`, PERF-012); script `Scripts/2026_05_20_gdi_verify_web_release_transform.ps1`.
-- **Health:** `HealthController` + rota `GET /health`; `CustomAuthorize` respeita `[AllowAnonymous]`.
-- **PUB-2:** `ControlVersion` **2026.51.03**; smoke `Scripts/2026_05_20_gdi_smoke_health_login.ps1`; doc `.cursor/context/2026_05_20_health-endpoint-publish.md`.
-
-### 2026-05-20 — BACKLOG-DEV consolidado (`.cursor/context`)
-
-- Auditoria dos 25 ficheiros em `.cursor/context/` cruzada com `CHANGELOG-DEV.md`; itens concluídos removidos do backlog ativo.
-- Novo esquema de IDs por **grupos** (G-PUB, G-SMK, G-PROD, G-DT, G-PERF, G-LKP, G-NFE, G-FLT, G-ENC, G-NET, G-ARC, G-OPS) com checklist executável, criticidade, fase e ordem.
-
-### 2026-05-20 — Remoção Google Analytics
-
-- Removidos scripts GA (`_GoogleAnalyticsGtag`), `GoogleTag`/`GoogleTagURL` (tenant/sessão), `GdiGoogleAnalytics.Enabled`, item Tag no navbar e PERF-014.
-
-### 2026-05-20 — PERF-015 IsTableUpdate TTL (lookups cache)
-
-- `IsTableUpdate`: skip `SELECT MAX` se verificação fresca (`DateTimeLastVerified`, TTL 5 min / 15 min `g_clientes`/`g_produtos`); `LookupQueryServiceCache` testa MemoryCache antes de `IsTableUpdate`; `ResetTableUpdateVerification` na invalidação.
-
-### 2026-05-20 — PERF-012/013/014 infra assets (Etapa 3.1)
-
-- **PERF-012:** doc IIS + `Web.Release.config` compressão/`clientCache` LibUI e Content.
-- **PERF-013:** `BundleTable.EnableOptimizations = !Debugging.Enabled` em `Global.asax.cs`.
-
-### 2026-05-20 — PERF-011 Clientes CreateEdit lazy DataTables
-
-- `g/Clientes/CreateEdit`: contatos só no load (edição); destinatários e audit em `shown.bs.tab`; `error.dt`/`xhr.dt`/`GdiDtNotify*` preservados.
-
-### 2026-05-20 — PERF-008/009/010 FormPedidoCreate (load pedido)
-
-- **PERF-008:** DataTables Audit/GED em `shown.bs.tab`; grelha itens `pageLength` 50; mantidos `error.dt`/`xhr.dt`/`GdiDtNotify*`.
-- **PERF-009:** `PreencherLookupsPedidoFormCore` sem combo COMEX completo nem warm `GetDatasetGVendedores`; `AjaxComboComexImportacoesPedido` na aba Invoice.
-- **PERF-010:** `LoadProdutosPedidoItens` — `select` explícito de colunas de `g_produtos` (validação/gravação/markup).
-
-### 2026-05-20 — PERF-007 lote 2 DataTables paginação SQL
-
-- Helper `Lib/LibDataTableSqlPaging.cs` (`SqlCount`/`SqlPage`). Lote 2: `ClassificacaoFinanceiraController`, `GedSGQController` (4×), `AtendimentosController.getDadosAtendimentos`, `ComexImportacoesController` (itens/GED), `MovimentosController` (modal itens, relatório consulta, NF/carta correção display). Inventário: `Scripts/2026_05_20_gdi_inventory_datatables_memory_paging.py`; 8 actions lote 3 + aceite `GetDadosInvoicesItensEspelhoDigital`.
-
-### 2026-05-20 — Remoção módulo MovimentosCompras (gc)
-
-- Apagados `MovimentosComprasController` (+ `.Lookups`), views `Areas/gc/Views/MovimentosCompras/*`; `.csproj` e lookup `GetComboGcTiposMovimentosCompras` removidos. Excel SC mantido em `Movimentos/ModalImportarExcelSC`. **Menu BD:** desativar entradas `/gc/MovimentosCompras/*` manualmente se existirem.
-
-### 2026-05-20 — CACHE-PROD PROD-002a Estoque Index typeahead
-
-- `gc/Estoque/Index`: filtro produto com `ComboFiltroProdutoPosicaoEstoqueIndex` (2 opções fixas) + `Estoque/GetProdutosLookup`; removido `GetComboGcProdutosPosicaoEstoqueIndex` do primeiro paint (~13k options).
-
-### 2026-05-20 — CACHE-PROD PROD-000 baseline P0 executada
-
-- Script `Scripts/2026_05_20_gdi_prod000_baseline.py` + `2026_05_20_prod000-baseline-resultado.json`: homologação — 13 464 produtos ativos; Estoque Index ~2,1 MB HTML/select; inventário filtro importados 8 081 opt; dataset 13 464 linhas; typeahead pedido/consulta OK. **MovimentosCompras** fora. Próximo: **PROD-002a**.
-
-### 2026-05-20 — CACHE-PROD: checklist Fase 0 (sem MovimentosCompras)
-
-- `.cursor/context/2026_05_20_checklist-cache-produtos.md`: plano P0; compras excluído; ordem PROD-002a → 005b/002c → 005a.
-
-### 2026-05-20 — CACHE-2 completo + PERF-006 Financeiro GetDados
-
-- **CACHE-2b:** typeahead `ClientesLookupController` (`GetClientesFornecedoresLookup` / `ComDoc`) em FinanceiroLancamentos, Compras, Relatórios, Contratos.
-- **CACHE-2c:** `g/Financeiro/Index` e `g/Clientes/Index` sem foreach em todos os `g_clientes`.
-- **CACHE-2d:** produto em `ModalConsultaPedidos` via `GetProdutosLookup`.
-- **CACHE-2e:** removidos `GetComboSomenteGClientes`, `GetComboGClientesFornecedores*` e chaves `LookupCacheKeys` associadas.
-- **PERF-006:** `FinanceiroController.GetDados` — `COUNT` + `OFFSET/FETCH`; nomes de clientes só da página.
-
-### 2026-05-20 — Performance: modal consulta N+1 SQL (PERF-005)
-
-- `GetRelatorioConsultaPedidos`: uma query EF para itens da página (`IN id_movimento`); clientes/vendedores só dos ids da página; data fim lida de `yesCustomField04` (alinha ao Ajax do modal).
-
-### 2026-05-20 — Lookups: Atendimentos cliente typeahead (CACHE-2a)
-
-- Removido `GetComboSomenteGClientes` em Create/Edit atendimento; `GetClientesLookup` em `AtendimentosController.LookupAjax.cs`; placeholders `ComboPlaceholderAtendimentoCliente` / `BuildComboClienteAtendimento`; views Edit + `ModalCreateNewAtendimento` com Select2 Ajax. **Sem consumidores** de `GetComboSomenteGClientes` no HTML (método no serviço mantido até deprecação).
-
-### 2026-05-20 — Performance Etapa 1: Painel + modal consulta cliente Ajax (PERF-004b)
-
-- `PainelPedidos` / `ModalConsultaPedidos`: removido `GetComboSomenteGClientes` em `PreencherLookupsPainelPedidos` e `PreencherLookupsConsultaPedidos`; typeahead `GetClientesLookup`; helpers `ComboFiltroClienteTodosAtivos` / `ComboFiltroClienteSelecione` em `LookupSearchQueries.cs`.
-- **Correção:** `PainelPedidos` Ajax enviava `yesCustomField03` de `#edit_cliente` (inexistente) — passou a `#id_cliente` (filtro cliente passou a funcionar no painel).
-- Build: `using System` em `NavbarController.cs` (catch `Exception` da Etapa PERF-002).
-
-### 2026-05-20 — Performance Etapa 1: IndexPedido filtro cliente Ajax (PERF-004)
-
-- `IndexPedido`: removido `GetComboSomenteGClientes` no servidor; `#edit_cliente` typeahead `GetClientesLookup` (Select2 + `gdi-select2.js`); default `[ TODOS OS CLIENTES ]` (`-1`).
-
-### 2026-05-20 — Performance Etapa 1: navbar sem duplicar footer (PERF-003)
-
-- `NavbarFragmentCache.IsLoadedThisRequest` + flag por request; `IndexFooter` omite segunda `Apply` (listas já no `contextoModel` após `Index`).
-
-### 2026-05-20 — Performance Etapa 1: cache navbar (PERF-002)
-
-- `Security/NavbarFragmentCache.cs` — MemoryCache 60 s para mensagens/tarefas/atividades/alertas; `NavbarController` Index + IndexFooter; invalidação em `CachePersister.logout`.
-
-### 2026-05-20 — Performance Etapa 1: navbar tasks (PERF-001)
-
-- `Security/Contexto.cs` — `getNavbarItemsTask`: filtro `id_perfil` / `id_usuario` (como mensagens) + `Take(50)`; deixa de carregar todas as `g_tasks` ativas.
-
-### 2026-05-20 — Baseline performance Etapa 0 (DevTools)
-
-- Checklist: `.cursor/context/2026_05_20_checklist-performance-erp.md` — PERF-000.1 preenchido (IndexPedido, CreatePedido, Financeiro/Index, login redirect; 45–46 req, ~1–2,1 s Finish).
-
-### 2026-05-20 — Plano de ação performance (checklist)
-
-- Auditoria: `PERFORMANCE-AUDIT-ERP.md` (raiz).
-- Checklist executável por etapas (crítica → opcional): `.cursor/context/2026_05_20_checklist-performance-erp.md` (PERF-000…026, PRs sugeridos).
-
-### 2026-05-20 — Lookup clientes/fornecedores (sem filtro vendedor)
-
-- `LookupSearchQueries.SearchClientes`: removido filtro por `IdVendedor`/perfil; mantém `ativo` + `is_cliente` (typeahead pedido).
-- `ClientesController` índice: combo lookup lista todos `g_clientes` com `ativo = true`.
-- Demais combos via `GetComboGClientesFornecedores` já consideram todos ativos; pedidos usam `GetComboSomenteGClientes` (`is_cliente`).
-
-### 2026-05-20 — Notificar Cliente (pedido faturado)
-
-- `ModalNotificacaoCliente` / `AjaxModalNotificacaoCliente`: deduplicação e validação de e-mails (`LibStringFormat.NormalizarListaEmails*`), telefone só dígitos + DDI 55 no WhatsApp, `id_contato` ao criar contato novo, título seguro se pedido inexistente, merge `email_notificacao` sem repetir no GET.
-
-### 2026-05-20 — Backup projeto (scripts PowerShell)
-
-- `Scripts/2026_05_20_gdi_backup_projeto_*.ps1` — ZIP por omissao `yyyy-MM-dd_HHmmss-GDI-ERP-Plataform.zip`; `-SemZip` / `-ManterPasta`.
-
-### 2026-05-20 — Comercial pedidos
-
-- **ModalPedidoInsertEditItem:** sequência incremental corrigida — `max(sequencia)` usava `id_movimento` 0 no insert; novo `ObterProximaSequenciaItemPedido` no modal e no `AjaxInsertEditItem`.
-
-### 2026-05-20 — Documentação, checklist e higiene
-
-- Arquitetura docs: `AI-CONTEXT.md`, `BACKLOG-DEV.md`, changelog compacto na raiz; histórico em `docs/dev-history/`.
-- Regras Cursor alinhadas à ordem de leitura (AI-CONTEXT → CHANGELOG → BACKLOG).
-- **Grupos 2.5–2.11:** Financeiro g (POSTs órfãos), UI tabelas MVC + sidebar portal, Index 1º load (Filiais), filtro SQL legado, órfãos ProdutosTipos N/A, UTF-8 BOM 0 ficheiros, verify csproj Gdi 0 lacunas.
-- **Grupos 1.x:** smoke lookups OK; typeahead pedidos; EF6/DI piloto; convenção Index vs CreateEdit; partials domínio no serviço de lookups.
-- **LibDataSets:** Ondas 6a/6b concluídas (classe removida).
-- **NFe:** Fase 17 / arquitetura e-Notas documentada; Portal Vendedor N/A.
-- **PascalCase:** paths Git models `Cst*` + views NFe `Modal*`.
-- **UTF-8:** lote global 146 ficheiros (histórico); re-scan 0 BOM.
-- Convenção `AAAA_MM_DD_` em `.cursor/context`, rules e Scripts.
-
-### 2026-05-19 — Index, filtros e remoção de legado
-
-- Padrão **Index modernizado:** filtro inline Id/Nome (e variantes), paginação SQL, Editar in-line, indicador «Limpar», remoção modal filtro avançado (`btnFiltro`, `yesFilter*`).
-- **Produtos Index:** fases 1–5 (deferLoading, persistência filtro, sem carga automática inicial).
-- Remoção módulos: `a/Filtros`, `g/PortalVendedor`, `g/PortalCliente`, `g/Requisicoes`, `g/FinanceiroFaturamentos`, `g/FinanceiroLancamentos`.
-- **CSRF** fases 3A–3B (financeiro Ajax, Usuarios); **XSS** Fase A (Atendimentos).
-- **PascalCase** lotes B1–B2d (views `modal*`, models `cst*` → `Cst*`).
-- DataTables: `LibMessageProcessandoHide` global; filtro LIKE `%termo%` normalizado.
-- Correções pontuais: Clientes/Perfis/Cidades Index (filtro id explícito vs `> 1` na base); Filiais CreateEdit; Estoque ficha in-line.
-
-### 2026-05-14 — DataTables, NFe e UX global
-
-- **Fases 17–18:** DataTables área `a` + auditoria cadastros `g`/`gc`.
-- **e-Notas / NFS-e:** URLs, status 14 em falha, `porIdExterno`, NF produto vs serviço, alinhamento `RoboEnotasNFE`.
-- UX: menu lateral `LibMessageProcessando`; login `UserIdentity` HTML válido + scroll; navbar/sidebar.
-- Regras: linha de commit `AAAA_MM_DD - resumo` no relatório do agente.
-
-### 2026-05-13 — Fases DataTables e mensagens (0–9+)
-
-- Helpers `GdiDtNotifyLoadFailure`, `GdiDtNotifyJsonErrorMessage`, `GdiAjaxNotifyInconsistencias`.
-- Substituição massiva `alert` → `LibMessageError` (Fase 7).
-- `try/catch` + JSON erro em Atendimentos, GedSGQ, Movimentos (Fases 8–9).
-- Script `gdi_verify_csproj_gdi_helpers.py` (gate publish views `Gdi*`).
-
-*Entrada a entrada (ficheiros, causas, smoke): ver histórico arquivado.*
+### 2026-06-05 — packages.config: auditoria e remoção de 26 pacotes mortos
+- **Validado:** 112 → **86** pacotes; versões alinhadas ao `.csproj` e `targetFramework="net472"`.
+- **Removidos:** bloco Microsoft.Graph/Kiota/Identity/Azure (zero uso em código); órfãos `jQuery`, `Modernizr`, `Microsoft.AspNet.WebApi` (metapacote), `SixLabors.ImageSharp` (só props).
+- **Sincronizado:** `.csproj` (References/Import), `Web.config` (binding redirects), `using` mortos em `CustomPrincipal` e `FinanceiroLancamentosController`.
+- **Build Release OK.** Candidatos futuros: `SkiaSharp.NativeAssets.Linux/macOS`, `ZString`, `bootstrap` NuGet (UI ativa = LibUI).
+
+### 2026-06-05 — Web.config: auditoria e alinhamento de versões
+- **7 ficheiros** revistos: raiz (`Web.config`, `Web.Debug.config`, `Web.Release.config`), `Views/Web.config`, áreas `a|g|gc|qa|crm`.
+- **Correções:** `MvcWebRazorHostFactory` e assembly MVC em todas as Views → **5.3.0.0** (NuGet `Microsoft.AspNet.Mvc` 5.3.0); binding redirects IdentityModel (Tokens, Protocols, Jwt, JsonWebTokens, Logging) **8.15.0.0 → 8.18.0.0** alinhados a `packages.config`.
+- **Validado:** `Scripts/2026_05_22_gdi_verify_web_release_transform.ps1` — Release sem `debug`, `customErrors On`, compressão PERF-012 OK; áreas `web.config` já no `.csproj`.
+
+### 2026-06-05 — GDI-ERP-Plataform.csproj: auditoria e correções
+- **Validação:** 1069 Includes, 0 paths em falta, 0 duplicados, 0 views `Gdi*` fora do csproj.
+- **Correções:** SourceLink fallback 8.0.0 → 10.0.203; `ExcludeFoldersFromDeployment` + strip publish `.claude`; `None` para `AI-CONTEXT`/`CHANGELOG`/`BACKLOG`; `Content` templates `appSettings` + novo `sql-server.local.config.example`; script `2026_06_05_gdi_verify_csproj_includes.py`.
+
+### 2026-06-05 — Remoção `nul)` acidental na raiz (F06)
+- Artefacto cmd (redirecionamento `2>nul)` inválido); apagado com `Remove-Item -LiteralPath`; F06 resolvido em `docs/AVALIACAO-TECNICA-ERP-GDI.md`.
+
+### 2026-06-05 — Remoção pasta `.md/` legada: csproj e refs
+- Pasta **`.md/`** removida (duplicata de `docs/`); canónico: `docs/investigacao-timeout-sessao.md`, `docs/relatorio-migracao-netframework-472-481.md`.
+- **`.csproj`:** removidos `Content` `.md\*`; `CLAUDE.md` e docs relevantes → `None Include` (versionam no Git, **não** vão ao IIS).
+- **`roadmap.md`** / `0004 - auditoria-tecnica-relatorio.md` só existiam em `.md/` — recuperar do histórico Git se ainda forem necessários.
+
+### 2026-06-05 — .gitignore: consolidar Git × IIS + corrigir ProdutosController
+- **Reescrita** `.gitignore` (~543 → ~200 linhas): removida duplicata VisualStudio; removidos `*.dll`/`*.exe` globais; removida linha acidental `/Areas/g/Controllers/ProdutosController.cs`.
+- **GDI:** `**/_filestemp/`, `App_Data/Secrets/*Copia*`, `.claude/worktrees/`, `nul`/`nul)`; exceção `!Rotativa/*.exe` (PDF no IIS).
+- **`.csproj`:** `Rotativa\wkhtmltopdf.exe` e `wkhtmltoimage.exe` como `Content` para publish IIS.
+
+### 2026-06-05 — Prompt genérico enxugar memória (reutilizável)
+- **Novo:** `.cursor/context/2026_06_05_prompt-enxugar-memoria-projeto-generico.md` — prompt completo para auditoria/consolidação de memória em **qualquer** projeto (7 fases, hierarquia, anti-padrões).
+
+### 2026-06-05 — Auditoria memória IA: centralizar, enxugar duplicatas
+- **Índice único:** `.cursor/context/2026_06_05_indice-memoria-ia.md` — navegação por tema + mapa de duplicatas removidas.
+- **`AI-CONTEXT.md` / `CLAUDE.md`:** reduzidos a ponteiro + regras mínimas; detalhe arquitetura/lotes N-* só em contextos datados.
+- **`CHANGELOG-DEV.md`:** compactado (~200 linhas); entradas antigas → histórico arquivado.
+- **Órfão removido:** `pascalcase-areas-renomeacao-lotes.md` (duplicata sem prefixo).
+- **`sync_changelog_recent.py`:** fonte corrigida para `CHANGELOG-DEV.md` na raiz.
+
+### 2026-06-05 — Lote legado 2026_05_20_*: renomear por CreationTime + refs
+- 62 renomeações (`2026_05_21_`/`2026_05_22_`/`2026_05_15_`); 85 refs; script `2026_06_05_gdi_rename_legacy_2026_05_20_prefixes.py`; inventário prefixos exit 0.
+
+### 2026-06-05 — G-PUB smoke + I-1b + convenção prefixos
+- Smoke arquitetura 5 inventários exit 0; 18× `int.Parse` → `LibNumbers.ConvertInt` em relatórios/g; 35 ficheiros renomeados `2026_05_25_`/`2026_06_01_` → datas corretas.
+
+### 2026-05-29 — Painel Indicadores Qualidade Pós-Venda (ISO 9001) Fases 1–3
+- `IndicadoresQualidade` hub + `IndicadoresQualidadePosVenda` (KPIs, Flot, DataTables, Excel ClosedXML); pedido entregue = `id_movimento_posicao >= 6`.
+
+### 2026-05-28 — Ambiente tenant + WhatsApp gerencial
+- `CstTenant.ambiente`; `SetTenants()` público; `JobServerController` sem mapeamento duplicado host→DB.
+- `RoboWhatsAppGerencial` — resumo diário 18h via Z-API + Task Scheduler.
+
+### 2026-05-25 — Arquitetura centralizada ERP + ciclo N (servidor/cliente)
+- **`GdiMvcJsonResults`** Lib; wrappers `JsonDataTableException`/`JsonAjaxErro*` delegam (31+ controllers).
+- Modais GET gc/g com guards; remoção `GC.Collect` gc; inventários LibExceptions → **0** em a/crm/g/qa.
+- Cliente: C-1/C-2 handlers Ajax homogéneos (gc + 115 views a/g/gc/qa); DT `xhr.dt`/`error.dt`.
+- **Detalhe lotes N-A…N-V:** `2026_06_05_arquitetura-centralizada-erp-gdi.md` + histórico — não reexpandir aqui.
+
+### 2026-06-01 — UI cadastros/gc + API pública lote-documento
+- Cadastros carga inicial (exceto Produtos/Clientes deferLoading); yesFilterOnOff/Limpar amarelo corrigido (35 views auditadas).
+- Select2 pesquisa local; Fretes/Cfop/PagRecCondicoes/Estoque alinhamentos Index.
+- `LoteDocumentoPublicoController` — API `GET /api/public/lote-documento` migrada do portal descontinuado.
+
+### 2026-05-20 — Baseline modernização (Fases 0–17)
+- DataTables/Ajax padronização; lookups Onda 6; remoção módulos legados; PascalCase B1–B2d; CSRF/XSS fases iniciais.
+- **Detalhe:** `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`.
+
+*Entradas anteriores e blocos longos por ficheiro tocado:* arquivo histórico — **não** reabrir neste changelog operacional.
 
 ---
 
 ## Pendências abertas
 
-Lista priorizada em **`BACKLOG-DEV.md`**. Resumo:
+Lista completa e critérios de aceite → **`BACKLOG-DEV.md`**.
 
-| Prioridade | Item |
-|------------|------|
-| Alta | Publish/IIS (Release, `customErrors`, health); smoke NFe e-Notas homologação; smoke transversal pós-publish |
-| Média | Smoke Index cadastros (Filiais/Produtos); smoke Financeiro g; filtro legado `qa/GedSGQ` + `gc/EstoqueInventario`; 14 controllers híbridos `ViewBag.combo` |
-| Análise | Migração .NET 4.8.1 (trilha isolada); ~4 `GetDados*` g fora do padrão `JsonDataTableException`; cache combos globais (Fase 2+ lookups) |
-
-Checklist executável: `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md`.
+| Prioridade | Resumo |
+|------------|--------|
+| Alta | Smoke pós-publish; NFe e-Notas homologação; Release/IIS/health |
+| Média | 14 controllers híbridos `ViewBag.combo`; smoke Index cadastros |
+| Baixa | Migração 4.8.1; filtro legado residual; índices SQL (DBA) |
 
 ---
 
@@ -824,25 +116,13 @@ Checklist executável: `.cursor/context/2026_05_20_checklist-pendencias-lookups-
 
 | Alerta | Ação |
 |--------|------|
-| **Confundir DataTables com tabela MVC** | Ler `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md` antes de CSS em `<table>` |
-| **Views `Gdi*` fora do `.csproj`** | `python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` antes do publish |
-| **Cache `start.js` / `start.css`** | Incrementar `VersionERP` após alteração |
-| **Publish: PackageTmp / Filtros** | Pasta obsoleta em `obj` pode gerar Access denied — limpar `obj` se necessário |
-| **Filtro Index `id > 1` na query base** | Com filtro Id explícito pode excluir registo id=1 (corrigido em Perfis/Clientes/Difal — replicar padrão noutros Index) |
-| **Lookup valor `0` no filtro** | Pode gerar LIKE em nome em vez de filtrar por id (Clientes — validar noutros) |
-| **Portal / sessão** | Cache `contextoModel_*` antigo pode exigir novo login após deploy |
-| **NFe homologação** | Smoke 2.2.4 requer gateway e-Notas real |
-| **Menu legado Portal Vendedor** | Desativar em BD se ainda existir entrada |
-| **UTF-8 BOM** | VS pode reintroduzir BOM — `python Scripts/2026_05_20_gdi_inventory_utf8_bom.py --fail` |
-| **TLS em código novo** | Preferir Tls12 \| Tls13; não SSL3 |
-
----
-
-## Itens a revisar
-
-- **FinanceiroLancamentos Index (g):** entrada no histórico sobre período mês corrente — módulo `g/FinanceiroLancamentos` foi **removido** em 2026-05-19; confirmar se a alteração migrou para `gc` ou ficou só como referência histórica.
-- **Transferir conta caixa:** UI removida em 2.5 (2026-05-20); entradas de 2026-05-19 no histórico referem feature ainda não removida — estado atual = **removido**.
-- Sincronizar `.claude/CHANGELOG-RECENT.md` com fonte `CHANGELOG-DEV.md` (raiz) se o script `sync_changelog_recent.py` for reativado.
+| DataTables vs MVC | `2026_05_20_tabelas-datatables-vs-mvc.md` antes de CSS em `<table>` |
+| Views `Gdi*` fora do `.csproj` | `python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` |
+| Cache `start.js` | Incrementar `VersionERP` |
+| Publish `obj`/PackageTmp | Limpar `obj` se Access denied |
+| Filtro Index `id > 1` na base | Pode excluir id=1 — padrão Filiais/Clientes |
+| Portal pós-deploy | Novo login se cache `contextoModel_*` legado |
+| UTF-8 BOM | `python Scripts/2026_05_20_gdi_inventory_utf8_bom.py --fail` |
 
 ---
 
@@ -850,10 +130,8 @@ Checklist executável: `.cursor/context/2026_05_20_checklist-pendencias-lookups-
 
 | Arquivo | Conteúdo |
 |---------|----------|
-| **`docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`** | Snapshot **integral** (~2903 linhas, **187** blocos `### [data]`) — **não editar** para registo diário |
-| `docs/dev-history/README.md` | Índice da pasta |
-| `.cursor/context/*.md` | Contexto por tema (lookups, NFe, PascalCase, UTF-8, financeiro, etc.) |
-| `CLAUDE.md` | Padrões longos, fases 0–18, armadilhas |
+| `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` | Snapshot integral — **não editar** para registo diário |
+| `.cursor/context/2026_06_05_indice-memoria-ia.md` | Índice temas + scripts |
 | `.cursor/CHANGELOG-DEV.md` | Redirecionamento para este ficheiro |
 
-**Como registrar nova intervenção:** uma linha na secção «Últimas alterações relevantes» (mês/data) + atualizar `BACKLOG-DEV.md`; bloco longo só no histórico arquivado (se necessário, append datado em novo ficheiro `docs/dev-history/CHANGELOG-DEV-AAAA-MM-DD.md`, não no operacional).
+**Registar intervenção:** uma entrada compacta em «Últimas alterações» + `BACKLOG-DEV.md`; bloco longo só em contexto datado ou histórico.

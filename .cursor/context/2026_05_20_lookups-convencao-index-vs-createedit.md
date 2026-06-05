@@ -1,7 +1,7 @@
 # Lookups — convenção Index vs CreateEdit (Grupo 1.7)
 
 **Data:** 2026-05-20  
-**Relacionado:** `ILookupQueryService`, `*.Lookups.cs`, checklist `2026_05_20_checklist-pendencias-lookups-e-erp.md` §1.7.
+**Relacionado:** `ILookupQueryService`, `*.Lookups.cs`, checklist `2026_05_22_checklist-pendencias-lookups-e-erp.md` §1.7.
 
 ---
 

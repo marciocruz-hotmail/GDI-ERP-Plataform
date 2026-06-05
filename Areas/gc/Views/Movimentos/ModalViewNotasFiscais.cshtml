@@ -82,7 +82,16 @@
         try
         {
             jsInitModal();
-            jsCreateTable();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SincronizarStatusNotasFiscaisPedido", "Movimentos", new { area = "gc" })',
+                data: { idMovimento: '@Model.id_movimento' },
+                success: function () { jsCreateTable(); },
+                error: function (xhr, textStatus, errorThrown)
+                {
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao sincronizar notas fiscais.');
+                }
+            });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
@@ -94,7 +103,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableNotaFiscalPedido = $('#dataTableGCViewNotasFiscais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+            otableNotaFiscalPedido = $('#dataTableGCViewNotasFiscais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                     try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
@@ -222,12 +231,12 @@
                 }
                 else
                 {
-                    GdiAjaxNotifyInconsistencias(result.msg);
+                    GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                 }
             },
-            error: function (result)
+            error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(result.toString());
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
             }
         });
     };
@@ -257,12 +266,12 @@
                 }
                 else
                 {
-                    GdiAjaxNotifyInconsistencias(result.msg);
+                    GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                 }
             },
-            error: function (result)
+            error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(result.toString());
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
             }
         });
     };
@@ -297,12 +306,12 @@
                 }
                 else
                 {
-                    GdiAjaxNotifyInconsistencias(result.msg);
+                    GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                 }
             },
-            error: function (result)
+            error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(result.toString());
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
             }
         });
     };
@@ -349,13 +358,13 @@
                     else
                     {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             })
         }
@@ -399,13 +408,13 @@
                     else
                     {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             })
         }
@@ -571,12 +580,12 @@
                 }
                 else
                 {
-                    GdiAjaxNotifyInconsistencias(result.msg);
+                    GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                 }
             },
-            error: function (result)
+            error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(result.toString());
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
             }
         });
     };

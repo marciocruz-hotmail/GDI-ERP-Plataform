@@ -70,7 +70,7 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            oTableGcMovimentosCreatePedido = $('#dtFichaEstoqueProduto').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).dataTable({
+            oTableGcMovimentosCreatePedido = $('#dtFichaEstoqueProduto').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
             processing: true,
             bServerSide: true,
             ajax: {

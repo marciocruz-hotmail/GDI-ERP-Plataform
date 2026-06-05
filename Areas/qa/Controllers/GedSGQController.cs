@@ -163,8 +163,8 @@ namespace GdiPlataform.Areas.qa.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -180,18 +180,7 @@ namespace GdiPlataform.Areas.qa.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
 
     }

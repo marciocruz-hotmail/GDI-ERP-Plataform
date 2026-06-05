@@ -15,7 +15,7 @@ Se exit code 1: liste as views com GdiAjax*/GdiDt* ausentes do .csproj e pergunt
 ## Passo 2 — Verificar DataTables área g
 
 ```
-python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py
+python Scripts/2026_05_22_gdi_inventory_datatables_g_area.py
 ```
 
 Reporte controllers em Areas/g que ainda não têm o padrão try/catch + errorMessage.

@@ -79,12 +79,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }

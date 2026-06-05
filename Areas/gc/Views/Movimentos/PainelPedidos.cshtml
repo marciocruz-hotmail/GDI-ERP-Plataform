@@ -7,7 +7,7 @@
             <div class="card-title m-0 p-1">
                 <h5>@Html.Raw(ViewBag.Title)</h5>
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterController" value="IndexPedido" name="yesFilterController" />
+                <input type="hidden" id="yesFilterController" value="PainelPedidos" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -396,12 +396,12 @@
                     else
                     {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result) {
+                error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             })
         }

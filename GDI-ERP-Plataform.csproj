@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props" Condition="Exists('packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props')" />
   <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props')" />
   <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props')" />
   <Import Project="packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.props" Condition="Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.props')" />
@@ -32,11 +31,14 @@
     <NoWarn>$(NoWarn);MSB3247;MSB3277</NoWarn>
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3247;MSB3277</MSBuildWarningsAsMessages>
     <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense>
-    <!-- Publish Web: excluir .cursor do pacote (evita aviso RemoveEmptyDirectories / acesso negado em subpastas ex. context). -->
-    <ExcludeFoldersFromDeployment>.cursor</ExcludeFoldersFromDeployment>
+    <!-- Publish Web: excluir docs IA do pacote IIS (evita aviso RemoveEmptyDirectories / acesso negado). -->
+    <ExcludeFoldersFromDeployment>.cursor;.claude</ExcludeFoldersFromDeployment>
   </PropertyGroup>
   <ItemGroup>
     <ExcludeFromPackageFolders Include=".cursor">
+      <FromTarget>Project</FromTarget>
+    </ExcludeFromPackageFolders>
+    <ExcludeFromPackageFolders Include=".claude">
       <FromTarget>Project</FromTarget>
     </ExcludeFromPackageFolders>
   </ItemGroup>
@@ -64,9 +66,6 @@
     </Reference>
     <Reference Include="AWSSDK.S3, Version=4.0.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
       <HintPath>packages\AWSSDK.S3.4.0.23\lib\net472\AWSSDK.S3.dll</HintPath>
-    </Reference>
-    <Reference Include="Azure.Core, Version=1.55.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
-      <HintPath>packages\Azure.Core.1.55.0\lib\net472\Azure.Core.dll</HintPath>
     </Reference>
     <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
       <HintPath>packages\BouncyCastle.Cryptography.2.6.2\lib\net461\BouncyCastle.Cryptography.dll</HintPath>
@@ -144,62 +143,8 @@
     <Reference Include="Microsoft.Extensions.Primitives, Version=10.0.0.7, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Primitives.10.0.7\lib\net462\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Graph, Version=5.105.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Graph.5.105.0\lib\netstandard2.0\Microsoft.Graph.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Graph.Core, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Graph.Core.4.0.1\lib\net462\Microsoft.Graph.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Identity.Client, Version=4.84.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Identity.Client.4.84.0\lib\net472\Microsoft.Identity.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Identity.Client.Extensions.Msal, Version=4.84.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Identity.Client.Extensions.Msal.4.84.0\lib\netstandard2.0\Microsoft.Identity.Client.Extensions.Msal.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Abstractions, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Abstractions.8.18.0\lib\net472\Microsoft.IdentityModel.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.JsonWebTokens.8.18.0\lib\net472\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Logging, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Logging.8.18.0\lib\net472\Microsoft.IdentityModel.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Protocols, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Protocols.8.18.0\lib\net472\Microsoft.IdentityModel.Protocols.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Protocols.OpenIdConnect.8.18.0\lib\net472\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Tokens.8.18.0\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Validators, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Validators.8.18.0\lib\net472\Microsoft.IdentityModel.Validators.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.IO.RecyclableMemoryStream.3.0.1\lib\netstandard2.0\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Authentication.Azure, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Authentication.Azure.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Authentication.Azure.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Http.HttpClientLibrary, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Http.HttpClientLibrary.2.0.0\lib\net462\Microsoft.Kiota.Http.HttpClientLibrary.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Serialization.Form, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Serialization.Form.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Form.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Serialization.Json, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Serialization.Json.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Serialization.Multipart, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Serialization.Multipart.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Multipart.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Kiota.Serialization.Text, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Kiota.Serialization.Text.2.0.0\lib\netstandard2.0\Microsoft.Kiota.Serialization.Text.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -238,15 +183,9 @@
     <Reference Include="SkiaSharp, Version=3.119.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>packages\SkiaSharp.3.119.2\lib\net462\SkiaSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Std.UriTemplate, Version=2.0.8.0, Culture=neutral, PublicKeyToken=c118b0afb4598f9a, processorArchitecture=MSIL">
-      <HintPath>packages\Std.UriTemplate.2.0.8\lib\netstandard2.0\Std.UriTemplate.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ClientModel, Version=1.11.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
-      <HintPath>packages\System.ClientModel.1.11.0\lib\netstandard2.0\System.ClientModel.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration.ConfigurationManager, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -261,9 +200,6 @@
       <HintPath>packages\System.Formats.Asn1.10.0.7\lib\net462\System.Formats.Asn1.dll</HintPath>
     </Reference>
     <Reference Include="System.IdentityModel" />
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=8.18.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\System.IdentityModel.Tokens.Jwt.8.18.0\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
-    </Reference>
     <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
       <Private>True</Private>
@@ -1193,6 +1129,7 @@
     <Compile Include="Lib\LibDateTime.cs" />
     <Compile Include="Lib\LibDB.cs" />
     <Compile Include="Lib\LibFlashMessage.cs" />
+    <Compile Include="Lib\GdiMvcJsonResults.cs" />
     <Compile Include="Lib\GdiPageScripts.cs" />
     <Compile Include="Lib\GdiPageScriptsView.cs" />
     <Compile Include="Lib\LibDataTableSqlPaging.cs" />
@@ -1461,6 +1398,8 @@
     <Content Include="Lib\DDL\ddl-version.txt" />
     <Content Include="Rotativa\help-wkhtmltoimage.txt" />
     <Content Include="Rotativa\help-wkhtmltopdf.txt" />
+    <Content Include="Rotativa\wkhtmltoimage.exe" />
+    <Content Include="Rotativa\wkhtmltopdf.exe" />
     <Content Include="Areas\a\Views\Parametros\Index.cshtml" />
     <Content Include="Areas\a\Views\web.config" />
     <Content Include="Areas\crm\Views\Pedidos\BoletoPdfFebraban.cshtml" />
@@ -1636,6 +1575,7 @@
     <Content Include="Areas\g\Views\Financeiro\ModalGerarRemessaBoletosBancarios.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ModalNotaDebito.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ModalProrrogarVencimentoTitulo.cshtml" />
+    <Content Include="Areas\g\Views\Financeiro\ModalTransferirContaCaixa.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ReportBoletoDDA.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ReportBoletoGC.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\ReportBoletoHTML.cshtml" />
@@ -1778,10 +1718,14 @@
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\responsive.less" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.less" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\responsive.less" />
-    <Content Include="CLAUDE.md" />
-    <Content Include=".md\investigacao-timeout-sessao.md" />
-    <Content Include=".md\relatorio-migracao-netframework-472-481.md" />
-    <Content Include=".md\roadmap.md" />
+    <None Include="AI-CONTEXT.md" />
+    <None Include="BACKLOG-DEV.md" />
+    <None Include="CHANGELOG-DEV.md" />
+    <None Include="CLAUDE.md" />
+    <None Include="docs\investigacao-timeout-sessao.md" />
+    <None Include="docs\relatorio-migracao-netframework-472-481.md" />
+    <None Include="docs\AVALIACAO-TECNICA-ERP-GDI.md" />
+    <None Include="docs\dev-history\README.md" />
     <None Include="Properties\PublishProfiles\aeroflightx.com.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -1808,9 +1752,10 @@
     <None Include="Scripts\gdi-backup-repositorio.path.example" />
     <None Include="Scripts\gdi-backup-destino.path.example" />
     <None Include="Scripts\gdi-backup-LEIA-ME.txt" />
-    <None Include="Scripts\2026_05_20_gdi_inventory_datatables_g_area.py" />
+    <None Include="Scripts\2026_05_22_gdi_inventory_datatables_g_area.py" />
     <None Include="Scripts\2026_05_20_gdi_replace_alert_libmessage.py" />
-    <None Include="Scripts\2026_05_20_gdi_dedupe_libmessage_if_else.py" />
+    <None Include="Scripts\2026_05_15_gdi_dedupe_libmessage_if_else.py" />
+    <None Include="Scripts\2026_06_05_gdi_verify_csproj_includes.py" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -1851,8 +1796,10 @@
     <Content Include="Views\Shared\_AlertMsg.cshtml" />
     <Content Include="Views\UserIdentity\Index.cshtml" />
     <Content Include="Views\UserIdentity\TrocaObrigatoriaSenha.cshtml" />
+    <Content Include="App_Data\Secrets\appSettings.local.config.example" />
     <Content Include="App_Data\Secrets\aws-s3.local.json.example" />
     <Content Include="App_Data\Secrets\aws-ses-smtp.template.json" />
+    <Content Include="App_Data\Secrets\sql-server.local.config.example" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -1941,17 +1888,16 @@
     <Error Condition="!Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets'))" />
     <Error Condition="!Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props'))" />
     <Error Condition="!Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets'))" />
-    <Error Condition="!Exists('packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\SixLabors.ImageSharp.3.1.12\build\SixLabors.ImageSharp.props'))" />
   </Target>
   <Import Project="packages\EntityFramework.6.5.2\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.5.2\build\EntityFramework.targets')" />
   <Import Project="packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" />
   <!-- Garante AssemblyFile se os .props não forem avaliados (ex.: NuGet/VS em estado transitório). Espelha Microsoft.Build.Tasks.Git.props / Microsoft.SourceLink.Common.props. -->
   <PropertyGroup>
-    <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.8.0.0\tools\net472\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
-    <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.8.0.0\tools\core\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
-    <_MicrosoftSourceLinkCommonAssemblyFile Condition="'$(_MicrosoftSourceLinkCommonAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.SourceLink.Common.8.0.0\tools\net472\Microsoft.SourceLink.Common.dll</_MicrosoftSourceLinkCommonAssemblyFile>
-    <_MicrosoftSourceLinkCommonAssemblyFile Condition="'$(_MicrosoftSourceLinkCommonAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.SourceLink.Common.8.0.0\tools\core\Microsoft.SourceLink.Common.dll</_MicrosoftSourceLinkCommonAssemblyFile>
+    <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.10.0.203\tools\net472\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
+    <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.10.0.203\tools\core\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
+    <_MicrosoftSourceLinkCommonAssemblyFile Condition="'$(_MicrosoftSourceLinkCommonAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.SourceLink.Common.10.0.203\tools\net472\Microsoft.SourceLink.Common.dll</_MicrosoftSourceLinkCommonAssemblyFile>
+    <_MicrosoftSourceLinkCommonAssemblyFile Condition="'$(_MicrosoftSourceLinkCommonAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.SourceLink.Common.10.0.203\tools\core\Microsoft.SourceLink.Common.dll</_MicrosoftSourceLinkCommonAssemblyFile>
   </PropertyGroup>
   <Import Project="packages\SkiaSharp.NativeAssets.Linux.NoDependencies.3.119.2\build\net462\SkiaSharp.NativeAssets.Linux.NoDependencies.targets" Condition="Exists('packages\SkiaSharp.NativeAssets.Linux.NoDependencies.3.119.2\build\net462\SkiaSharp.NativeAssets.Linux.NoDependencies.targets')" />
   <Import Project="packages\SkiaSharp.NativeAssets.macOS.3.119.2\build\net462\SkiaSharp.NativeAssets.macOS.targets" Condition="Exists('packages\SkiaSharp.NativeAssets.macOS.3.119.2\build\net462\SkiaSharp.NativeAssets.macOS.targets')" />
@@ -1965,10 +1911,12 @@
     <PropertyGroup>
       <_GdiWppTmp>$([System.IO.Path]::GetFullPath($(WPPAllFilesInSingleFolder)))</_GdiWppTmp>
       <_GdiPkgCursor>$([System.IO.Path]::Combine($(_GdiWppTmp), '.cursor'))</_GdiPkgCursor>
+      <_GdiPkgClaude>$([System.IO.Path]::Combine($(_GdiWppTmp), '.claude'))</_GdiPkgClaude>
       <_GdiPkgFiltros>$([System.IO.Path]::Combine($(_GdiWppTmp), 'Areas', 'a', 'Views', 'Filtros'))</_GdiPkgFiltros>
       <_GdiPkgBootbox>$([System.IO.Path]::Combine($(_GdiWppTmp), 'LibUI_AdminLTE-4.0.0', 'plugins', 'bootbox-compat'))</_GdiPkgBootbox>
     </PropertyGroup>
     <Exec Command="cmd /c if exist &quot;$(_GdiPkgCursor)&quot; (attrib -r &quot;$(_GdiPkgCursor)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgCursor)&quot; 2&gt;nul)" IgnoreExitCode="true" />
+    <Exec Command="cmd /c if exist &quot;$(_GdiPkgClaude)&quot; (attrib -r &quot;$(_GdiPkgClaude)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgClaude)&quot; 2&gt;nul)" IgnoreExitCode="true" />
     <Exec Command="cmd /c if exist &quot;$(_GdiPkgFiltros)&quot; (attrib -r &quot;$(_GdiPkgFiltros)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgFiltros)&quot; 2&gt;nul)" IgnoreExitCode="true" />
     <Exec Command="cmd /c if exist &quot;$(_GdiPkgBootbox)&quot; (attrib -r &quot;$(_GdiPkgBootbox)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgBootbox)&quot; 2&gt;nul)" IgnoreExitCode="true" />
   </Target>

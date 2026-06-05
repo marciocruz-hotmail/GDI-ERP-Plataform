@@ -157,8 +157,8 @@ namespace GdiPlataform.Areas.a.Controllers
             }
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = "0",
                 sEcho = param.sEcho,
                 iTotalRecords = QtdRegistros,
@@ -175,18 +175,7 @@ namespace GdiPlataform.Areas.a.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, "0"), JsonRequestBehavior.AllowGet);
         }
         #endregion
 

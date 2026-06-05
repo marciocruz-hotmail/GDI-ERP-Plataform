@@ -150,7 +150,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     foreach (var RowNota in allRecordsNotas)
                     {
                         IndexLinha += 1;
-                        sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["id_lancamento"].EmptyIfNull().ToString().Trim()));
+                        sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["id_lancamento"].EmptyIfNull().ToString().Trim()));
                         sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(RowNota["conta_caixa"].EmptyIfNull().ToString().Trim());
                         sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(RowNota["status"].EmptyIfNull().ToString().Trim());
                         sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue(Convert.ToDateTime(RowNota["data_pagamento"]).ToString("dd/MM/yyyy"));
@@ -214,17 +214,25 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
 
     }
 }

@@ -55,7 +55,7 @@
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Produto", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-5">
-                            @Html.DropDownList("edit_id_produto_lookup", ViewBag.comboProdutosLookup as List<SelectListItem>, htmlAttributes: new { @id = "edit_id_produto_lookup", @class = "form-control", @title = "Produto", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "Produtos", new { area = "g" }), @data_gdi_lookup_min_length = "2", @data_gdi_select2_allow_clear = "true" })
+                            <input type="text" class="form-control" id="edit_nome" placeholder="Nome do produto (qualquer parte)" value="@(ViewBag.RestoreFilterNome ?? "")" onkeypress="keypressed(event);" />
                         </div>
                         <div class="col-sm-2 text-sm-start">
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar produtos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarProdutos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
@@ -132,10 +132,9 @@
 
     function jsProdutosTemCriterioFiltro()
     {
-        var idLookup = emptyIfNull($('#edit_id_produto_lookup').val()).toString();
         return !isEmpty($('#edit_id_produto').val())
             || !isEmpty($('#edit_codigo').val())
-            || (!isEmpty(idLookup) && idLookup !== '0');
+            || !isEmpty($('#edit_nome').val());
     }
 
     function jsAtualizarIndicadorFiltroProdutos(yesFilterOnOff)
@@ -172,7 +171,7 @@
         {
             $('#edit_id_produto').val('');
             $('#edit_codigo').val('');
-            $('#edit_id_produto_lookup').val('0').trigger('change');
+            $('#edit_nome').val('');
             document.getElementById("yesFilterField").value = "*";
             LibMessageProcessando('Atualizando lista...');
             $("#dtGProdutos").DataTable().draw(false);
@@ -216,7 +215,7 @@
                         yesFilterController: $('#yesFilterController').val().toString(),
                         yesCustomField01: emptyIfNull($('#edit_id_produto').val()).toString(),
                         yesCustomField02: emptyIfNull($('#edit_codigo').val()).toString(),
-                        yesCustomField03: emptyIfNull($('#edit_id_produto_lookup').val()).toString(),
+                        yesCustomField03: emptyIfNull($('#edit_nome').val()).toString(),
                     };
                 },
                 error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }

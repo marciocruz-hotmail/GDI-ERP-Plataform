@@ -51,8 +51,8 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
             if (param == null) param = new jQueryDataTableParamModel();
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
 
             try
             {
@@ -131,8 +131,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
                     iTotalDisplayRecords = totalDisplayRecords,
@@ -141,17 +141,17 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
+                errorMessage = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                 stackTrace = ex.ToString();
             }
             catch (WebException ex)
             {
-                errorMessage = LibExceptions.getWebException(ex);
+                errorMessage = GdiMvcJsonResults.AjaxFailureWebMessage(ex);
                 stackTrace = ex.ToString();
             }
             catch (Exception ex)
             {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
+                errorMessage = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 stackTrace = ex.ToString();
             }
 
@@ -208,11 +208,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             PreencherLookupsCreateEdit();
@@ -313,11 +313,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             PreencherLookupsCreateEdit();
@@ -373,8 +373,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     yesDisplayField01 = QtdItensImportacao.ToString(),
                     yesDisplayField02 = QtdProdutosImportacao.ToString() + " Registros",
@@ -445,8 +445,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
@@ -505,8 +505,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = AllRecordsInvoicesPDF.Count(),
@@ -526,7 +526,20 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalCancelarImportacaoComex(String idImportacao)
         {
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Importação</b>";
-            gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(int.Parse(idImportacao));
+            int id = 0;
+            if (!int.TryParse(idImportacao, out id) || id <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação", null);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Importação (não localizada)</b>";
+                return View(new gc_comex_importacoes { id_importacao = 0 });
+            }
+            gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(id);
+            if (record_gc_comex_importacoes == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação", id);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Importação (não localizada)</b>";
+                return View(new gc_comex_importacoes { id_importacao = id });
+            }
             CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_comex_importacoes);
             record_gc_comex_importacoes.exclusao_motivo = "";
             return View(record_gc_comex_importacoes);
@@ -576,13 +589,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -797,7 +808,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
                         ErroProcessamento = true;
                         MsgRetorno += " - Identificador da DI NÃO localizado" + "<br/>";
-                        MsgRetorno += LibExceptions.getExceptionShortMessage(ex);
+                        MsgRetorno += GdiMvcJsonResults.AjaxFailureMessage(ex);
                         ErroArquivoXlxs = true;
                     }
 
@@ -910,7 +921,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             ErroProcessamento = true;
                             MsgRetorno += " - Cabeçalho da planilha NÃO localizado!" + "<br/>";
                             ErroArquivoXlxs = true;
-                            MsgRetorno += LibExceptions.getExceptionShortMessage(ex);
+                            MsgRetorno += GdiMvcJsonResults.AjaxFailureMessage(ex);
                         }
                     }
 
@@ -1020,7 +1031,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         catch (Exception ex)
                         {
                             ErroProcessamento = true;
-                            MsgRetorno += LibExceptions.getExceptionShortMessage(ex) + "<br/>";
+                            MsgRetorno += GdiMvcJsonResults.AjaxFailureMessage(ex) + "<br/>";
                         }
                         finally
                         {
@@ -1671,13 +1682,13 @@ namespace GdiPlataform.Areas.gc.Controllers
                 catch (DbEntityValidationException ex)
                 {
                     Processado = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                     try { Clipboard.SetText(MsgRetorno); } catch (Exception) { };
                 }
                 catch (Exception e)
                 {
                     Processado = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(e);
                     try { Clipboard.SetText(MsgRetorno); } catch (Exception) { };
                 }
                 if (ErroArquivoXlxs == true)
@@ -1822,7 +1833,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
                         ErroProcessamento = true;
                         MsgRetorno += " - Identificador da DI NÃO localizado" + "<br/>";
-                        MsgRetorno += LibExceptions.getExceptionShortMessage(ex);
+                        MsgRetorno += GdiMvcJsonResults.AjaxFailureMessage(ex);
                         ErroArquivoXlxs = true;
                     }
 
@@ -1929,7 +1940,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                             ErroProcessamento = true;
                             MsgRetorno += " - Cabeçalho da planilha NÃO localizado!" + "<br/>";
                             ErroArquivoXlxs = true;
-                            MsgRetorno += LibExceptions.getExceptionShortMessage(ex);
+                            MsgRetorno += GdiMvcJsonResults.AjaxFailureMessage(ex);
                         }
                     }
 
@@ -2007,7 +2018,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         catch (Exception ex)
                         {
                             ErroProcessamento = true;
-                            MsgRetorno += LibExceptions.getExceptionShortMessage(ex) + "<br/>";
+                            MsgRetorno += GdiMvcJsonResults.AjaxFailureMessage(ex) + "<br/>";
                         }
                         finally
                         {
@@ -2216,13 +2227,13 @@ namespace GdiPlataform.Areas.gc.Controllers
                 catch (DbEntityValidationException ex)
                 {
                     Processado = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                     try { Clipboard.SetText(MsgRetorno); } catch (Exception) { };
                 }
                 catch (Exception e)
                 {
                     Processado = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(e);
                     try { Clipboard.SetText(MsgRetorno); } catch (Exception) { };
                 }
                 if (ErroArquivoXlxs == true)
@@ -2265,13 +2276,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -2443,13 +2452,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -2462,15 +2469,28 @@ namespace GdiPlataform.Areas.gc.Controllers
             if (IdGed > 0)
             {
                 ged_arquivos record_ged_arquivos = db.ged_arquivos.Find(IdGed);
+                if (record_ged_arquivos == null)
+                {
+                    ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Arquivo GED", IdGed);
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Documentos — (não localizado)</b>";
+                    return View("ModalUploadFileComexDocs", record_cstUploadGed);
+                }
                 record_cstUploadGed.id_arquivo = record_ged_arquivos.id_arquivo;
                 record_cstUploadGed.id_arquivo_tipo = record_ged_arquivos.id_arquivo_tipo;
                 record_cstUploadGed.descricao = record_ged_arquivos.descricao;
                 record_cstUploadGed.observacao = record_ged_arquivos.observacao;
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Documentos</b>";
             }
             else
             {
                 int IdImportacaoAtiva = CachePersister.userIdentity.IdGcComexImportacaoAtiva;
                 gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(IdImportacaoAtiva);
+                if (IdImportacaoAtiva <= 0 || record_gc_comex_importacoes == null)
+                {
+                    ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação COMEX", IdImportacaoAtiva > 0 ? (int?)IdImportacaoAtiva : null);
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Documentos — (importação não localizada)</b>";
+                    return View("ModalUploadFileComexDocs", record_cstUploadGed);
+                }
                 record_cstUploadGed.id_comex_importacao = CachePersister.userIdentity.IdGcComexImportacaoAtiva;
                 record_cstUploadGed.id_arquivo_tipo = 13;
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Documentos</b>";
@@ -2496,6 +2516,12 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 int IdImportacaoAtiva = CachePersister.userIdentity.IdGcComexImportacaoAtiva;
                 gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(IdImportacaoAtiva);
+                if (IdImportacaoAtiva <= 0 || record_gc_comex_importacoes == null)
+                {
+                    ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação COMEX", IdImportacaoAtiva > 0 ? (int?)IdImportacaoAtiva : null);
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Invoice de Cliente — (importação não localizada)</b>";
+                    return View("ModalUploadFileComexInvoicesPDF", record_cstUploadGed);
+                }
                 record_cstUploadGed.id_comex_importacao = CachePersister.userIdentity.IdGcComexImportacaoAtiva;
                 record_cstUploadGed.id_arquivo_tipo = 13;
                 record_cstUploadGed.isComexInvoicePDF = true;
@@ -2510,6 +2536,12 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             int temp = idImportacao.GetValueOrDefault();
             gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(temp);
+            if (record_gc_comex_importacoes == null || temp <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação", idImportacao);
+                ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Histórico da Importação (não localizada)";
+                return View("ModalImportacoesLogs", new gc_comex_importacoes { id_importacao = temp });
+            }
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Histórico da Importação " + record_gc_comex_importacoes.id_importacao.ToString();
             return View("ModalImportacoesLogs", record_gc_comex_importacoes);
         }
@@ -2540,8 +2572,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = AllItensHistorico.Count(),
@@ -2560,7 +2592,20 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region ModalCancelarImportacaoComex
         public ActionResult ModalFechamentoCustosImportacao(String idImportacao)
         {
-            gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(int.Parse(idImportacao));
+            int id = 0;
+            if (!int.TryParse(idImportacao, out id) || id <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação", null);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-circle-info", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Fechamento Custos da Importação (não localizada)";
+                return View(new gc_comex_importacoes { id_importacao = 0 });
+            }
+            gc_comex_importacoes record_gc_comex_importacoes = db.gc_comex_importacoes.Find(id);
+            if (record_gc_comex_importacoes == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Importação", id);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-circle-info", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Fechamento Custos da Importação (não localizada)";
+                return View(new gc_comex_importacoes { id_importacao = id });
+            }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-circle-info", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Fechamento Custos da Importação Nº " + record_gc_comex_importacoes.numero.EmptyIfNull().ToString();
             return View(record_gc_comex_importacoes);
         }
@@ -2867,13 +2912,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    Sucesso = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    return JsonAjaxErroValidacao(ex);
                 }
                 catch (Exception e)
                 {
-                    Sucesso = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    return JsonAjaxErro(e);
                 }
                 return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -2881,18 +2924,17 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
         }
 
     }

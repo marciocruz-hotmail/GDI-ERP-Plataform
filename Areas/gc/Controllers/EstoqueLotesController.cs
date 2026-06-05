@@ -140,8 +140,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = yesFilterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
@@ -157,18 +157,17 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, "0"), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -370,13 +369,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
 
             return Json(new { success = sucesso, msg = msgRetorno, id_estoque_lote = viewRecord.id_estoque_lote }, JsonRequestBehavior.AllowGet);
@@ -385,64 +382,71 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         public ActionResult GetGedEstoqueLotes(jQueryDataTableParamModel param)
         {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            int IdTable = 0;
-            int.TryParse(param.yesCustomIdPK, out IdTable);
-            List<g_usuarios> ListaUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
-            List<ged_arquivos> ListaArquivosGed = db.ged_arquivos.Where(g => g.ativo == true && g.id_estoque_lote == IdTable).ToList();
-            List<ged_arquivos_tipos> ListaArquivosGedTipos = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).ToList();
-            List<string[]> list = new List<string[]>();
-
-            var displayedRecords = ListaArquivosGed.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.ged_arquivos, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            foreach (var RecordGed in displayedRecords)
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            string filterOnOff = "0";
+            try
             {
-                String DataReferencia = String.Empty;
-                String DescricaoTipoArquivo = String.Empty;
-                String NomeUsuario = ListaUsuarios.Where(u => u.id_usuario == RecordGed.id_usuario_cadastro).FirstOrDefault().login.EmptyIfNull().ToString();
-                if (RecordGed.datahora_cadastro != null) { DataReferencia = RecordGed.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); }
-                ;
-                if (RecordGed.id_arquivo_tipo > 0)
+                bool filterDb = false;
+                bool filterAdvanced = false;
+                int IdTable = 0;
+                int.TryParse(param.yesCustomIdPK, out IdTable);
+                List<g_usuarios> ListaUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
+                List<ged_arquivos> ListaArquivosGed = db.ged_arquivos.Where(g => g.ativo == true && g.id_estoque_lote == IdTable).ToList();
+                List<ged_arquivos_tipos> ListaArquivosGedTipos = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).ToList();
+                List<string[]> list = new List<string[]>();
+
+                var displayedRecords = ListaArquivosGed.Skip(param.iDisplayStart).Take(param.iDisplayLength);
+                Func<Db.ged_arquivos, string> orderingFunction = (c =>
+                                         param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
+                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
+                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
+                                         "");
+                if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
+                else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+
+                foreach (var RecordGed in displayedRecords)
                 {
-                    ged_arquivos_tipos RecordArquivoTipo = ListaArquivosGedTipos.Where(t => t.id_arquivo_tipo == RecordGed.id_arquivo_tipo).FirstOrDefault();
-                    if (RecordArquivoTipo != null) { DescricaoTipoArquivo = RecordArquivoTipo.descricao.EmptyIfNull().ToString(); };
+                    String DataReferencia = String.Empty;
+                    String DescricaoTipoArquivo = String.Empty;
+                    g_usuarios recordUsuario = ListaUsuarios.Where(u => u.id_usuario == RecordGed.id_usuario_cadastro).FirstOrDefault();
+                    String NomeUsuario = recordUsuario != null ? recordUsuario.login.EmptyIfNull().ToString() : string.Empty;
+                    if (RecordGed.datahora_cadastro != null) { DataReferencia = RecordGed.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); }
+                    if (RecordGed.id_arquivo_tipo > 0)
+                    {
+                        ged_arquivos_tipos RecordArquivoTipo = ListaArquivosGedTipos.Where(t => t.id_arquivo_tipo == RecordGed.id_arquivo_tipo).FirstOrDefault();
+                        if (RecordArquivoTipo != null) { DescricaoTipoArquivo = RecordArquivoTipo.descricao.EmptyIfNull().ToString(); }
+                    }
+
+                    list.Add(new[] {
+                                        RecordGed.id_arquivo.ToString(),
+                                        "",
+                                        DescricaoTipoArquivo.ToString(),
+                                        RecordGed.descricao.ToString(),
+                                        RecordGed.filename.ToString(),
+                                        DataReferencia,
+                                        NomeUsuario,
+                                        ""
+                                    });
                 }
 
-                list.Add(new[] {
-                                    RecordGed.id_arquivo.ToString(),
-                                    "", // Botão Desativar
-                                    DescricaoTipoArquivo.ToString(),
-                                    RecordGed.descricao.ToString(),
-                                    RecordGed.filename.ToString(),
-                                    DataReferencia,
-                                    NomeUsuario,
-                                    "" // Botão Download
-                                });
+                if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; }
+
+                return Json(new
+                {
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = ListaArquivosGed.Count(),
+                    iTotalDisplayRecords = ListaArquivosGed.Count(),
+                    aaData = list
+                },
+                JsonRequestBehavior.AllowGet);
             }
-
-            String filterOnOff = "0";
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; }
-            ;
-
-            return Json(new
+            catch (Exception e)
             {
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = ListaArquivosGed.Count(),
-                iTotalDisplayRecords = ListaArquivosGed.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                return Json(GdiMvcJsonResults.DataTableError(e, param, filterOnOff), JsonRequestBehavior.AllowGet);
+            }
         }
 
         #region ModalUploadAnexoEstoqueLotes
@@ -455,7 +459,14 @@ namespace GdiPlataform.Areas.gc.Controllers
             };
 
             gc_estoque_lotes recordLote = db.gc_estoque_lotes.Find(IdEstoqueLote);
-            recordUpload.id_estoque_lote = recordLote != null ? recordLote.id_estoque_lote : 0;
+            if (recordLote == null || IdEstoqueLote.GetValueOrDefault() <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lote de estoque", IdEstoqueLote);
+                ViewBag.ComboGedTipos = new List<SelectListItem>();
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Documentos - Lote de Estoque (não localizado)</b>";
+                return View(recordUpload);
+            }
+            recordUpload.id_estoque_lote = recordLote.id_estoque_lote;
 
             var comboGedTipos = new List<SelectListItem>
             {

@@ -131,8 +131,8 @@ namespace GdiPlataform.Areas.qa.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace   = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace   = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     totalAvaliacoes,
                     totalEntregues,
                     isg  = Round1(isg),  corIsg  = CorNota(isg,  4.0, 3.6),
@@ -150,8 +150,8 @@ namespace GdiPlataform.Areas.qa.Controllers
             {
                 return Json(new
                 {
-                    errorMessage = LibExceptions.getExceptionShortMessage(e),
-                    severity     = "error",
+                    errorMessage = GdiMvcJsonResults.AjaxFailureMessage(e),
+                    severity     = GdiMvcJsonResults.SeverityError,
                     stackTrace   = e.ToString()
                 }, JsonRequestBehavior.AllowGet);
             }
@@ -217,8 +217,8 @@ namespace GdiPlataform.Areas.qa.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace   = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace   = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     dataIsg   = listIsg,
                     dataTnc   = listTnc,
                     dataTicks = listTicks
@@ -228,8 +228,8 @@ namespace GdiPlataform.Areas.qa.Controllers
             {
                 return Json(new
                 {
-                    errorMessage = LibExceptions.getExceptionShortMessage(e),
-                    severity     = "error",
+                    errorMessage = GdiMvcJsonResults.AjaxFailureMessage(e),
+                    severity     = GdiMvcJsonResults.SeverityError,
                     stackTrace   = e.ToString(),
                     dataIsg      = new List<string[]>(),
                     dataTnc      = new List<string[]>(),
@@ -313,8 +313,8 @@ namespace GdiPlataform.Areas.qa.Controllers
 
                 return Json(new
                 {
-                    errorMessage         = "",
-                    stackTrace           = "",
+                    errorMessage         = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace           = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff       = filterOnOff,
                     sEcho                = param.sEcho,
                     iTotalRecords        = total,
@@ -458,8 +458,8 @@ namespace GdiPlataform.Areas.qa.Controllers
             {
                 return Json(new
                 {
-                    errorMessage = LibExceptions.getExceptionShortMessage(e),
-                    severity     = "error",
+                    errorMessage = GdiMvcJsonResults.AjaxFailureMessage(e),
+                    severity     = GdiMvcJsonResults.SeverityError,
                     stackTrace   = e.ToString()
                 }, JsonRequestBehavior.AllowGet);
             }
@@ -485,17 +485,7 @@ namespace GdiPlataform.Areas.qa.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string filterOnOff)
         {
-            return Json(new
-            {
-                errorMessage         = LibExceptions.getExceptionShortMessage(e),
-                severity             = "error",
-                stackTrace           = e.ToString(),
-                yesFilterOnOff       = filterOnOff ?? "0",
-                sEcho                = param?.sEcho,
-                iTotalRecords        = 0,
-                iTotalDisplayRecords = 0,
-                aaData               = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, filterOnOff), JsonRequestBehavior.AllowGet);
         }
     }
 }

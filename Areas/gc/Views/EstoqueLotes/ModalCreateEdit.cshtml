@@ -186,12 +186,12 @@
                     }
                     else
                     {
-                    GdiAjaxNotifyInconsistencias(result.msg);
+                    GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result) {
+                error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }
@@ -239,13 +239,13 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }
@@ -280,8 +280,7 @@ function jsCreateTable() {
             TableEstoqueLotesGed = $('#dtGcEstoqueLotesGed')
                 .on('error.dt', function (e, settings, techNote, message) {
                     GdiDtNotifyLoadFailure(message);
-                })
-                .DataTable({
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -399,12 +398,12 @@ function jsCreateTable() {
                     }
                     else {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result) {
+                error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             })
         }

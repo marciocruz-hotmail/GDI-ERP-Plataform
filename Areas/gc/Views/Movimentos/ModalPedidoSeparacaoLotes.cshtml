@@ -23,7 +23,12 @@
     @Html.Raw((String)ViewBag.Title)</h4>
             </div>
             <div class="modal-body m-2 p-2">
-
+                @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
+                    @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                }
+                else
+                {
                 <div class="card-header m-0 p-1">
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                     <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
@@ -204,15 +209,15 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
+                }
 
     </div>
     <div class="modal-footer justify-content-between m-0 p-1">
         <button type="button" id="btnCancelarLote" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+        @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+        {
         <button type="button" id="btnSalvarLote" name="btnSalvarLote" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="JsConfirmarSeparacaoLotes()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar lotes</button>
+        }
     </div>
     </div>
     </div>
@@ -260,14 +265,14 @@
                     else
                     {
                         document.getElementById('btnSalvarLote').disabled = false;
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
                     document.getElementById('btnSalvarLote').disabled = false;
-                    GdiAjaxNotifyInconsistencias(result.msg)
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }

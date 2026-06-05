@@ -90,8 +90,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = "0",
                         sEcho = param.sEcho,
                         iTotalRecords = totalRecords,
@@ -160,8 +160,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -238,18 +238,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -340,13 +329,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             PreencherLookupsProdutosControleImportados();
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Produtos - Controles e Aferições";
@@ -389,11 +376,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             PreencherLookupsProdutosControleImportados();
@@ -405,36 +392,48 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region Medicoes
         public ActionResult GetDadosMedicoes(jQueryDataTableParamModel param)
         {
-            int IdProdutoControle = -1;
-            int.TryParse(param.yesCustomIdPK, out IdProdutoControle);
-
-            var allRecords = (from _m in db.g_produtos_medicoes
-                              join _u in db.g_usuarios on _m.id_usuario_cadastro equals _u.id_usuario into _U
-                              from _u in _U.DefaultIfEmpty() // Left Join
-                              where (_m.id_produto_controle == IdProdutoControle && _m.ativo == true)
-                              orderby _m.datahora_cadastro
-                              select new { medicoes = _m, usuario = _u.nome.ToString() }).ToList();
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-
-            List<string[]> list = new List<string[]>();
-            foreach (var l in displayedRecords)
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            string filterOnOff = "0";
+            try
             {
-                list.Add(new[] {
-                                    l.medicoes.id_produto_medicao.EmptyIfNull().ToString(), // Coluna de Seleção                
-                                    l.medicoes.data_medicao.ToString("dd/MM/yyyy"),
-                                    l.medicoes.tensao.ToString(),
-                                    "", // Botão Remover
-                                });
+                int IdProdutoControle = -1;
+                int.TryParse(param.yesCustomIdPK, out IdProdutoControle);
+
+                var allRecords = (from _m in db.g_produtos_medicoes
+                                  join _u in db.g_usuarios on _m.id_usuario_cadastro equals _u.id_usuario into _U
+                                  from _u in _U.DefaultIfEmpty()
+                                  where (_m.id_produto_controle == IdProdutoControle && _m.ativo == true)
+                                  orderby _m.datahora_cadastro
+                                  select new { medicoes = _m, usuario = _u.nome.ToString() }).ToList();
+                var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
+
+                List<string[]> list = new List<string[]>();
+                foreach (var l in displayedRecords)
+                {
+                    list.Add(new[] {
+                                        l.medicoes.id_produto_medicao.EmptyIfNull().ToString(),
+                                        l.medicoes.data_medicao.ToString("dd/MM/yyyy"),
+                                        l.medicoes.tensao.ToString(),
+                                        "",
+                                    });
+                }
+
+                return Json(new
+                {
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = allRecords.Count(),
+                    iTotalDisplayRecords = allRecords.Count(),
+                    aaData = list
+                },
+                JsonRequestBehavior.AllowGet);
             }
-
-            return Json(new
+            catch (Exception e)
             {
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                return Json(GdiMvcJsonResults.DataTableError(e, param, filterOnOff), JsonRequestBehavior.AllowGet);
+            }
         }
         
         public ActionResult ModalCreateMedicao(int? id)
@@ -478,13 +477,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = cadastrado, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -510,13 +507,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -529,6 +524,16 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (db != null) { db.Dispose(); };
             }
             base.Dispose(disposing);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
         }
 
     }

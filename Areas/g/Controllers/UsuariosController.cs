@@ -91,8 +91,8 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = "0",
                         sEcho = param.sEcho,
                         iTotalRecords = totalRecords,
@@ -154,8 +154,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -337,11 +337,11 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             PreencherLookupsCreateEdit();
@@ -415,11 +415,11 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
             PreencherLookupsCreateEdit();
@@ -493,13 +493,11 @@ namespace GdiPlataform.Areas.g.Controllers
                     }
                     catch (DbEntityValidationException ex)
                     {
-                        sucesso = false;
-                        msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                        return JsonAjaxErroValidacao(ex);
                     }
                     catch (Exception e)
                     {
-                        sucesso = false;
-                        msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                        return JsonAjaxErro(e);
                     }
 
                 }
@@ -508,20 +506,19 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
 
         protected override void Dispose(bool disposing)

@@ -13,16 +13,16 @@ alwaysApply: true
 
 | Ficheiro | Função |
 |----------|--------|
-| **`AI-CONTEXT.md`** | Contexto técnico fixo: stack, regras, áreas sensíveis, padrões obrigatórios |
-| **`CHANGELOG-DEV.md`** | Estado atual, decisões ativas, últimas alterações (compacto) |
-| **`BACKLOG-DEV.md`** | Pendências por prioridade |
+| **`AI-CONTEXT.md`** | Contexto fixo mínimo: stack, ordem de leitura, áreas sensíveis |
+| **`CHANGELOG-DEV.md`** | Estado atual + últimas alterações (~200 linhas) |
+| **`BACKLOG-DEV.md`** | Pendências ativas (IDs e critérios) |
+| **`.cursor/context/2026_06_05_indice-memoria-ia.md`** | **Índice único** — detalhe por tema (não duplicar em `AI-CONTEXT`) |
 
-| Histórico / detalhe | Caminho |
-|---------------------|---------|
+| Histórico / complemento | Caminho |
+|-------------------------|---------|
 | Changelog integral (arquivo) | `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` |
-| Contexto por tema | `.cursor/context/*.md` |
-| Padrões longos | `CLAUDE.md` |
-| Redirecionamento legado | `.cursor/CHANGELOG-DEV.md` → aponta para a raiz |
+| Padrões Claude Code | `CLAUDE.md` (ponteiros; sem duplicar §6 desta regra) |
+| Redirecionamento legado | `.cursor/CHANGELOG-DEV.md` → raiz |
 
 ---
 
@@ -67,13 +67,14 @@ alwaysApply: true
 
 ## 2. Ordem de leitura antes de agir
 
-1. **`AI-CONTEXT.md`** (raiz) — contexto fixo do projeto; regras de intervenção e áreas sensíveis.
-2. **`CHANGELOG-DEV.md`** (raiz) — estado atual e decisões ativas (compacto). Não contradizer o registado sem justificativa. Histórico extenso: `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`.
-3. **`BACKLOG-DEV.md`** (raiz) — pendências por prioridade; alinhar com `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` quando aplicável.
-4. **`.cursor/context/`** — detalhe por tema (ex.: `2026_05_20_tabelas-datatables-vs-mvc.md`, `2026_05_20_migracao-472-481.md`).
-5. **`CLAUDE.md`** (raiz) — padrões longos (`GdiDt*` / `GdiAjax*`, fases DataTables, ficheiros críticos). Complemento; não duplicar listas extensas neste `.mdc`.
-6. **Tabelas na UI:** antes de alterar `<table>`, ler **`.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`** — **DataTables** vs **MVC** (`gdi-form-table-*`).
-7. **Manutenção:** decisões estáveis → `CLAUDE.md` ou context em `.cursor/context/`; registo operacional → **`CHANGELOG-DEV.md`** (tabela «Últimas alterações»); pendências → **`BACKLOG-DEV.md`**. Não reexpandir o changelog com blocos longos (usar histórico em `docs/dev-history/`).
+0. **Arquitetura centralizada** — `AI-CONTEXT.md` § Arquitetura + `.cursor/context/2026_06_05_arquitetura-centralizada-erp-gdi.md`.
+1. **`AI-CONTEXT.md`** — contexto fixo mínimo.
+2. **`CHANGELOG-DEV.md`** — estado e últimas alterações. Histórico: `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md`.
+3. **`BACKLOG-DEV.md`** — pendências ativas.
+4. **Índice temas** — `.cursor/context/2026_06_05_indice-memoria-ia.md` → ficheiro `.cursor/context/` do assunto.
+5. **`CLAUDE.md`** — entrada Claude Code; **não** duplicar formato de resposta (§6 abaixo).
+6. **Tabelas:** `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md` antes de alterar `<table>`.
+7. **Registo:** linha compacta em `CHANGELOG-DEV.md` + `BACKLOG-DEV.md`; detalhe longo só em contexto datado ou histórico.
 
 *Perfis de publish e pastas de artefactos **são os deste** repositório (ex.: `Properties/PublishProfiles/`). Não presumir nomes de outro produto salvo existirem **aqui** com o mesmo propósito.*
 
@@ -104,6 +105,7 @@ Salvo pedido **explícito e inequívoco** do utilizador numa mensagem dedicada:
 
 ### 4.2 Alterações mínimas (“cirurgia”)
 
+- **Arquitetura centralizada primeiro:** em modais, DataTables, Ajax POST ou `$.ajax`, alinhar ao padrão `GdiMvcJsonResults` + guards + views `_AlertMsg`/`GdiDt*`/`GdiAjax*` (ver §2 item 0). Não introduzir `RedirectToAction(ModalError)`, `int.Parse` em GET modal nem JSON de erro solto fora do contrato.
 - Alterar só o necessário ao pedido; sem refactors cosméticos fora de escopo.
 - Não remover métodos, propriedades, `ViewBag`/`ViewData` ou rotas sem confirmação de não uso.
 - Não alterar `_Layout.cshtml` nem partials partilhadas sem verificar consumidores.
@@ -119,29 +121,33 @@ Salvo pedido **explícito e inequívoco** do utilizador numa mensagem dedicada:
 
 - Outras actions/views/rotas afetadas? O mesmo bug noutros sítios? Comportamento em produção? Partials e bundles? Model/ViewModel reutilizado?
 
-### 4.5 Nomes de ficheiros em `.cursor/context`, `.cursor/rules` e `Scripts`
+### 4.5 Nomes de ficheiros em `.cursor/context`, `.cursor/rules`, `Scripts` e histórico datado
 
-Ao **criar** ficheiros nestas pastas, prefixar com **`AAAA_MM_DD_`** (ano, mês e dia da **data atual**, separados por **sublinhado**, com `_` final), seguido do nome descritivo.
+Ao **criar** ficheiros nestas pastas, prefixar com **`AAAA_MM_DD_`** (ano_mês_dia da **criação**, separados por **sublinhado**, com `_` final), seguido do nome descritivo.
 
-**Data do prefixo (obrigatório ao criar):**
+**Como calcular o prefixo (obrigatório — nunca máscara fixa):**
 
-- Usar a **data do dia da sessão** — campo *Today's date* do ambiente do agente (ex.: `2026-05-26` → prefixo `2026_05_26_`).
-- **Não** copiar datas de exemplos, de ficheiros já existentes no repo nem de outras sessões (ex.: `2026_05_20_` só é válido para ficheiros criados nesse dia).
-- Formato: `AAAA_MM_DD_` + nome (`nfe-enotas-arquitetura.md`, `gdi_verify_csproj_gdi_helpers.py`, …).
+1. **Prioridade:** campo *Today's date* do ambiente da sessão Cursor (ex.: `2026-06-05` → `2026_06_05_`).
+2. **Se renomear ficheiro com prefixo errado:** usar `CreationTime` do ficheiro no disco (`Get-Item … | Select CreationTime`) → `AAAA_MM_DD_`.
+3. **Proibido:** copiar prefixo de exemplos na regra, de ficheiros vizinhos, de sessões anteriores ou de datas “de convenção” (ex.: usar `2026_05_25_` numa sessão de junho).
+4. Formato: `AAAA_MM_DD_` + nome (`arquitetura-centralizada-erp-gdi.md`, `gdi_inventory_ajax_hybrid_handlers.py`, …).
 
-| Pasta | Exemplo (se hoje for 2026-05-26) |
-|-------|----------------------------------|
-| `.cursor/context/` | `2026_05_26_nfe-enotas-arquitetura.md` |
-| `.cursor/rules/` | `2026_05_26_nome-da-regra.mdc` (regras novas; regras antigas mantêm o prefixo da criação) |
-| `Scripts/` (ferramentas) | `2026_05_26_gdi_verify_csproj_gdi_helpers.py` |
+| Pasta | Exemplo (sessão *Today's date* = 2026-06-05) |
+|-------|-----------------------------------------------|
+| `.cursor/context/` | `2026_06_05_arquitetura-centralizada-erp-gdi.md` |
+| `.cursor/rules/` | `2026_06_05_nome-da-regra.mdc` (regras **novas**; regras antigas mantêm o prefixo da criação) |
+| `Scripts/` (ferramentas) | `2026_06_05_gdi_inventory_ajax_hybrid_handlers.py` |
+| `docs/dev-history/` (append opcional) | `CHANGELOG-DEV-2026-06-05.md` — sem prefixo no nome do ficheiro; data no título |
 
-**`Scripts/` — âmbito:** aplicar a **todos** os ficheiros de **ferramenta de repositório** criados pelo agente/Cursor (`*.py`, `*.ps1`, etc. — tipicamente prefixo `gdi_`, `fix_`, `patch_`, `gen_`, `strip_`). **Não** renomear assets de **runtime/publicação** já referenciados no site ou no `.csproj` como `Content`, por exemplo: `bootstrap*.js`, `jquery.validate*`, `sessionInactivity.js`, `jsFileInputChange.js`, `gdi-session-handler.js`, ficheiros `.map`.
+**`Scripts/` — âmbito:** ferramentas de repositório (`*.py`, `*.ps1`, … — `gdi_`, `fix_`, `patch_`, `gen_`, `strip_`). **Não** renomear assets de runtime/publicação referenciados no `.csproj` (`bootstrap*.js`, `sessionInactivity.js`, …).
 
-- Ao **renomear** só quando o prefixo estiver errado (criado com data incorreta); ficheiros legítimos de outro dia **não** mudam de nome por causa de uma sessão nova.
-- Se o ficheiro **já** tiver prefixo `AAAA_MM_DD_`, não duplicar (`2026_05_26_2026_05_26_…` é inválido).
-- **Não** usar a máscara antiga `2026-05-` (só ano-mês).
-- Ficheiros fora destas pastas (controllers, views, `Lib/`, etc.) **não** usam esta máscara.
-- Atualizar referências em `CLAUDE.md`, `CHANGELOG-DEV.md`, `BACKLOG-DEV.md`, `.claude/commands/` e scripts que apontem para caminhos antigos.
+**Renomeação e referências:**
+
+- Prefixo ≠ data de criação → renomear e atualizar **todas** as referências (`AI-CONTEXT.md`, `CHANGELOG-DEV.md`, `BACKLOG-DEV.md`, `CLAUDE.md`, `.claude/commands/`, outros `.md`/scripts).
+- Inventário de conformidade: `python Scripts/2026_06_05_gdi_inventory_prefixed_file_dates.py` (exit 1 = mismatches).
+- Não duplicar prefixo (`2026_06_05_2026_06_05_…` é inválido).
+- **Não** usar máscara antiga `2026-05-` (só ano-mês).
+- Controllers, views, `Lib/`, etc. **não** usam esta máscara.
 
 ### 4.6 Qualidade antes de concluir
 
@@ -191,6 +197,8 @@ Pode usar os títulos com prefixos visuais do projeto (ex.: **Diagnóstico**, **
 
 ## 7. Lembranças técnicas curtas
 
+- **Arquitetura centralizada ERP GDI:** `GdiMvcJsonResults` + matriz modal/DT/Ajax — `.cursor/context/2026_06_05_arquitetura-centralizada-erp-gdi.md`; referência `MovimentosController`.
+- **Prefixo ficheiros novos:** *Today's date* → `AAAA_MM_DD_` (§4.5); inventário `Scripts/2026_06_05_gdi_inventory_prefixed_file_dates.py`.
 - **Lookups:** Index/filtro → combo **local** (sem cache global); CreateEdit partilhado → `ILookupQueryService` + `*.Lookups.cs`. Detalhe e inventário híbridos: `.cursor/context/2026_05_20_lookups-convencao-index-vs-createedit.md`.
 - **Tabelas:** dois tipos no ERP — **DataTables** (listagens Ajax) e **MVC** (formulário no servidor); ver `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md` em qualquer intervenção com grelha/tabela.
 - Razor: respeitar `@Html.*`, `@Url.*`, `@model`, `@ViewBag`.

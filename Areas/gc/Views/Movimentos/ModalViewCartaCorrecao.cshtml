@@ -12,7 +12,7 @@
     @Html.Raw((String)ViewBag.Title)</h4>
                     @Html.HiddenFor(model => model.id_movimento)
                     <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                    <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
+                    <input type="hidden" id="yesFilterController" value="ModalViewCartaCorrecao" name="yesFilterController" />
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
                 </div>
@@ -71,7 +71,16 @@
         try
         {
             jsInitModal();
-            jsCreateTable();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SincronizarStatusCartasCorrecaoPedido", "Movimentos", new { area = "gc" })',
+                data: { idMovimento: '@Model.id_movimento' },
+                success: function () { jsCreateTable(); },
+                error: function (xhr, textStatus, errorThrown)
+                {
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao sincronizar cartas de correção.');
+                }
+            });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
@@ -205,12 +214,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
         }
@@ -251,12 +260,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
 

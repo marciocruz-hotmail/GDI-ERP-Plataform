@@ -51,11 +51,10 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Clientes/Fornecedores";
-            PreencherLookupsClientesIndex();
             var model = new CstClientesIndex
             {
                 ClientesIndex_id_cliente = String.Empty,
-                ClientesIndex_id_cliente_lookup = 0,
+                ClientesIndex_nome = String.Empty,
                 ClientesIndex_cpf = String.Empty,
                 ClientesIndex_cnpj = String.Empty
             };
@@ -65,21 +64,25 @@ namespace GdiPlataform.Areas.g.Controllers
             if (TryParseFiltroClientesSemicolon(filtroPersistido.sql_filtro, out idRestore, out idLookupRestore, out razaoRestore, out cpfRestore, out cnpjRestore))
             {
                 model.ClientesIndex_id_cliente = idRestore;
-                int idLookup;
-                if (int.TryParse(idLookupRestore, out idLookup)) { model.ClientesIndex_id_cliente_lookup = idLookup; }
+                model.ClientesIndex_nome = ResolverNomeFiltroClientesRestaurado(idLookupRestore, razaoRestore);
                 model.ClientesIndex_cpf = cpfRestore;
                 model.ClientesIndex_cnpj = cnpjRestore;
                 ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore)
-                    || model.ClientesIndex_id_cliente_lookup > 0
+                    || !String.IsNullOrEmpty(model.ClientesIndex_nome)
                     || !String.IsNullOrEmpty(cpfRestore)
                     || !String.IsNullOrEmpty(cnpjRestore);
             }
             return View(model);
         }
 
-        private void PreencherLookupsClientesIndex()
+        /// <summary>Filtro persistido legado: campo 1 podia ser id do lookup; campo 2 razão social em texto.</summary>
+        private static string ResolverNomeFiltroClientesRestaurado(string idLookupRestore, string razaoRestore)
         {
-            ViewBag.comboClientes = GdiPlataform.Lib.Lookups.LookupSearchQueries.ComboFiltroClienteCadastroSelecione();
+            if (!String.IsNullOrWhiteSpace(razaoRestore)) return razaoRestore.Trim();
+            if (String.IsNullOrWhiteSpace(idLookupRestore)) return String.Empty;
+            int idLookup;
+            if (int.TryParse(idLookupRestore, out idLookup) && idLookup > 0) return String.Empty;
+            return idLookupRestore.Trim();
         }
 
         #region PreencherLookupsCreateEdit
@@ -225,7 +228,7 @@ namespace GdiPlataform.Areas.g.Controllers
         {
             bool filterDb = false;
             bool filterInline = false;
-            string errorMessage = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
             string filterOnOff = "0";
 
             if (param == null)
@@ -239,7 +242,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     errorMessage = "Conexão com o banco de dados não inicializada.",
                     severity = "error",
-                    stackTrace = "",
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = 0,
@@ -270,12 +273,12 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
 
                 string idStr = param.yesCustomField01.EmptyIfNull().ToString().Trim();
-                string idLookupStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
+                string nomeStr = param.yesCustomField02.EmptyIfNull().ToString().Trim();
                 string cpfStr = NormalizarDocumentoFiltro(param.yesCustomField03.EmptyIfNull().ToString());
                 string cnpjStr = NormalizarDocumentoFiltro(param.yesCustomField04.EmptyIfNull().ToString());
                 string razaoLegado = String.Empty;
 
-                bool hasInline = TemCriterioFiltroClientesInline(idStr, idLookupStr, cpfStr, cnpjStr);
+                bool hasInline = TemCriterioFiltroClientesInline(idStr, nomeStr, cpfStr, cnpjStr);
 
                 if (!hasInline && !listarTodosExplicito)
                 {
@@ -283,11 +286,11 @@ namespace GdiPlataform.Areas.g.Controllers
                     if (TryParseFiltroClientesSemicolon(recordFiltro.sql_filtro, out idRestore, out idLookupRestore, out razaoRestore, out cpfRestore, out cnpjRestore))
                     {
                         idStr = idRestore;
-                        idLookupStr = idLookupRestore;
+                        nomeStr = ResolverNomeFiltroClientesRestaurado(idLookupRestore, razaoRestore);
                         cpfStr = cpfRestore;
                         cnpjStr = cnpjRestore;
                         razaoLegado = razaoRestore;
-                        hasInline = TemCriterioFiltroClientesInline(idStr, idLookupStr, cpfStr, cnpjStr)
+                        hasInline = TemCriterioFiltroClientesInline(idStr, nomeStr, cpfStr, cnpjStr)
                             || !String.IsNullOrWhiteSpace(razaoLegado);
                     }
                 }
@@ -296,8 +299,8 @@ namespace GdiPlataform.Areas.g.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = "0",
                         sEcho = param.sEcho,
                         iTotalRecords = 0,
@@ -367,10 +370,10 @@ namespace GdiPlataform.Areas.g.Controllers
                 else if (hasInline)
                 {
                     filterInline = true;
-                    AplicarFiltroClientesInline(whereParts, args, idStr, idLookupStr, cpfStr, cnpjStr, razaoLegado);
+                    AplicarFiltroClientesInline(whereParts, args, idStr, nomeStr, cpfStr, cnpjStr, razaoLegado);
                     if (!listarTodosExplicito)
                     {
-                        LibDB.setFilterByUser(MontarFiltroClientesPersistido(idStr, idLookupStr, cpfStr, cnpjStr), controllerName, true, db);
+                        LibDB.setFilterByUser(MontarFiltroClientesPersistido(idStr, nomeStr, cpfStr, cnpjStr), controllerName, true, db);
                     }
                 }
 
@@ -490,7 +493,7 @@ namespace GdiPlataform.Areas.g.Controllers
                 return Json(new
                 {
                     errorMessage = errorMessage,
-                    stackTrace = "",
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -532,15 +535,15 @@ namespace GdiPlataform.Areas.g.Controllers
                 && String.IsNullOrEmpty(cpf) && String.IsNullOrEmpty(cnpj));
         }
 
-        private static string MontarFiltroClientesPersistido(string id, string idLookup, string cpf, string cnpj)
+        private static string MontarFiltroClientesPersistido(string id, string nome, string cpf, string cnpj)
         {
-            return (id ?? String.Empty) + ";" + (idLookup ?? String.Empty) + ";;" + (cpf ?? String.Empty) + ";" + (cnpj ?? String.Empty);
+            return (id ?? String.Empty) + ";" + (nome ?? String.Empty) + ";;" + (cpf ?? String.Empty) + ";" + (cnpj ?? String.Empty);
         }
 
-        private static bool TemCriterioFiltroClientesInline(string idStr, string idLookupStr, string cpfStr, string cnpjStr)
+        private static bool TemCriterioFiltroClientesInline(string idStr, string nomeStr, string cpfStr, string cnpjStr)
         {
             return !String.IsNullOrWhiteSpace(idStr)
-                || (!String.IsNullOrWhiteSpace(idLookupStr) && idLookupStr != "0")
+                || !String.IsNullOrWhiteSpace(nomeStr)
                 || !String.IsNullOrWhiteSpace(cpfStr)
                 || !String.IsNullOrWhiteSpace(cnpjStr);
         }
@@ -552,14 +555,13 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         /// <summary>
-        /// Filtro inline: numérico/lookup = igualdade; documento = dígitos exatos; texto (razão legada) = LIKE %termo%.
-        /// Lookup vazio no combo é valor "0" — não deve gerar critério adicional.
+        /// Filtro inline: id = igualdade; nome/razão = LIKE %termo%; documento = dígitos exatos.
         /// </summary>
         private static void AplicarFiltroClientesInline(
             List<string> whereParts,
             Dictionary<string, object> args,
             string idStr,
-            string idLookupStr,
+            string nomeStr,
             string cpfStr,
             string cnpjStr,
             string razaoLegado)
@@ -569,16 +571,12 @@ namespace GdiPlataform.Areas.g.Controllers
                 whereParts.Add("c.id_cliente = @idCliente");
                 args["@idCliente"] = idCli;
             }
-            if (!String.IsNullOrWhiteSpace(idLookupStr) && idLookupStr != "0" && int.TryParse(idLookupStr, out int idLookup) && idLookup > 0)
+            string termoNome = !String.IsNullOrWhiteSpace(nomeStr) ? nomeStr : razaoLegado;
+            if (!String.IsNullOrWhiteSpace(termoNome)
+                && LibStringFormat.TryMontarPadraoLikeContemTexto(termoNome, out string padraoNome))
             {
-                whereParts.Add("c.id_cliente = @idClienteLookup");
-                args["@idClienteLookup"] = idLookup;
-            }
-            if (!String.IsNullOrWhiteSpace(razaoLegado)
-                && LibStringFormat.TryMontarPadraoLikeContemTexto(razaoLegado, out string padraoRazao))
-            {
-                whereParts.Add("c.razao_social LIKE @razao");
-                args["@razao"] = padraoRazao;
+                whereParts.Add("(c.nome LIKE @nomeCli OR c.razao_social LIKE @nomeCli)");
+                args["@nomeCli"] = padraoNome;
             }
             if (!String.IsNullOrWhiteSpace(cpfStr))
             {
@@ -671,8 +669,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
@@ -702,8 +700,8 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = 0,
@@ -767,8 +765,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
@@ -782,20 +780,43 @@ namespace GdiPlataform.Areas.g.Controllers
             }
         }
 
-        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        private JsonResult JsonAjaxErro(Exception ex)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroComContato(Exception ex)
+        {
             return Json(new
             {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
+                success = false,
+                msg = GdiMvcJsonResults.AjaxFailureMessage(ex),
+                contato_telefone = string.Empty,
+                contato_email = string.Empty,
+                contato_nome = string.Empty
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacaoComContato(DbEntityValidationException ex)
+        {
+            return Json(new
+            {
+                success = false,
+                msg = GdiMvcJsonResults.AjaxFailureValidationMessage(ex),
+                contato_telefone = string.Empty,
+                contato_email = string.Empty,
+                contato_nome = string.Empty
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        {
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
 
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Clientes_*,g_Clientes_Actioncreate,g_Clientes_Actionupdate")]
@@ -980,13 +1001,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = cadastrado, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1273,11 +1292,11 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
 
@@ -1545,11 +1564,11 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getDbEntityValidationException(ex));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 }
                 catch (Exception e)
                 {
-                    ModelState.AddModelError("Model", LibExceptions.getExceptionShortMessage(e));
+                    ModelState.AddModelError("Model", GdiMvcJsonResults.AjaxFailureMessage(e));
                 }
             }
 
@@ -1700,13 +1719,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Cadastrado = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Cadastrado = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Cadastrado, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1766,13 +1783,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Desativado = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Desativado = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Desativado, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1863,13 +1878,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = cadastrado, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1955,13 +1968,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                cadastrado = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = cadastrado, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -2285,15 +2296,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                CadastroLiberado = false;
-                IntegradoSintegra = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                CadastroLiberado = false;
-                IntegradoSintegra = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             finally
             {
@@ -2357,13 +2364,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacaoComContato(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErroComContato(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, contato_telefone = ContatoTelefone, contato_email = ContatoEmail, contato_nome = ContatoNome }, JsonRequestBehavior.AllowGet);
         }

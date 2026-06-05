@@ -118,9 +118,9 @@
                     .addClass('bg-' + r.corTrc);
                 $('#pvTotal').text(r.totalAvaliacoes + ' avaliações / ' + r.totalEntregues + ' entregas');
             },
-            error: function () {
+            error: function (xhr, textStatus, errorThrown) {
                 $('#pvSpinner').hide();
-                LibMessageAlert("Atenção", "Falha ao carregar indicadores de Pós-Venda.");
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao carregar indicadores de Pós-Venda.', { title: 'Indicadores Pós-Venda' });
             }
         });
     }

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Security.Principal;
 using GdiPlataform.Models;
-using Microsoft.Graph;
 
 namespace GdiPlataform.Security
 {

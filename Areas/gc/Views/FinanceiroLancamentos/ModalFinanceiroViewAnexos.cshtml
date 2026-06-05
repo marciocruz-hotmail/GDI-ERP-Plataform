@@ -16,6 +16,9 @@
             <div class="modal-body m-0 p-0">
                 <div class="form-horizontal m-0 p-0">
                     <div class="card-body m-0 p-0" style="height: 100%">
+                        @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                        @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                        {
                         <div class="table-responsive scroll-body-horizontal m-0 p-0" style="width:100%">
                             <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
                                 <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
@@ -37,6 +40,7 @@
                                 </div>
                             </div>
                         </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -57,7 +61,10 @@
         try
         {
             jsInitModal();
-            CreateTableModalFinanceiroViewAnexos();
+            @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+            {
+            <text>CreateTableModalFinanceiroViewAnexos();</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -69,7 +76,7 @@
     {
         try
         {
-            oTableModalFinanceiroViewAnexos = $('#dtModalFinanceiroViewAnexos').DataTable({
+            oTableModalFinanceiroViewAnexos = $('#dtModalFinanceiroViewAnexos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -174,12 +181,12 @@
                     else
                     {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result) {
+                error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             })
         }

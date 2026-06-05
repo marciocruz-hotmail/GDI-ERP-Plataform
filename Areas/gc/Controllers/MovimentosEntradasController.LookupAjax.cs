@@ -21,7 +21,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                return JsonLookupError(LibExceptions.getExceptionShortMessage(ex));
+                return JsonLookupError(GdiMvcJsonResults.AjaxFailureMessage(ex));
             }
         }
 

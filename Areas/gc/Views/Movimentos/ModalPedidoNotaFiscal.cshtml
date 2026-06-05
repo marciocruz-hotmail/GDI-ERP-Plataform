@@ -211,11 +211,18 @@
                     dataType: "json",
                     success: function (result)
                     {
-                        document.getElementById("informacoes_adicionais").value = result.informacoes;
+                        if (result && result.success == true)
+                        {
+                            document.getElementById("informacoes_adicionais").value = result.informacoes;
+                        }
+                        else
+                        {
+                            GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
+                        }
                     },
-                    error: function (result)
+                    error: function (xhr, textStatus, errorThrown)
                     {
-                        LibMessageError("Atenção", result && result.msg != null ? String(result.msg) : (result && result.statusText ? String(result.statusText) : "Erro na requisição."));
+                        GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                     }
                 });
             }
@@ -257,13 +264,13 @@
                     else
                     {
                         document.getElementById('btnSalvar').disabled = false;
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     document.getElementById('btnSalvar').disabled = false;
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
         }

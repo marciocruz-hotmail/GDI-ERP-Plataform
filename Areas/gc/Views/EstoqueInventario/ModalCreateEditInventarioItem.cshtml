@@ -16,6 +16,8 @@
             <div class="modal-body m-0 p-0">
                 <div class="form-horizontal m-0 p-0">
                     @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                    @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                    {
                     <div class="form-group row text-sm-end m-1 p-1">
                         @Html.Label("produto", "Item:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                         <div class="col-sm-10 text-sm-start">
@@ -59,6 +61,7 @@
                         </div>
                     </div>
                     <br/>
+                    }
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
@@ -135,12 +138,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }

@@ -12,8 +12,11 @@
                 @Html.ValidationSummary(true)
             </div>
             <div class="modal-body m-0 p-2">
+                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
                 <div class="form-horizontal m-0 p-0">
                     <div class="card-body m-2 p-2" style="height: 100%">
+                        @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                        {
                         @if (!string.IsNullOrEmpty(ViewBag.MsgAdvertencia as string))
                         {
                             @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgAdvertencia as string, "danger", "<b>Atenção Usuário, verifique as advertências!</b><br />"))
@@ -27,12 +30,13 @@
                                 </div>
                             </div>
                         }
+                        }
                     </div>
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
                 <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
-                @if (string.IsNullOrEmpty(ViewBag.MsgAdvertencia as string))
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string) && string.IsNullOrEmpty(ViewBag.MsgAdvertencia as string))
                 {
                     <button type="button" name="btnSalvar" title="Cancelar Lançamento" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Cancelar Pagamento Comex</button>
                 }
@@ -100,12 +104,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }

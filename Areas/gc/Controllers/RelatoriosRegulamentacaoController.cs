@@ -117,7 +117,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                             bool IsEntrada = Convert.ToBoolean(RowNota["is_entrada"].EmptyIfNull().ToString().Trim());
                             bool IsSaida = Convert.ToBoolean(RowNota["is_saida"].EmptyIfNull().ToString().Trim());
-                            WorkSheet.Cell(IndexLinha, 1).Value = int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
+                            WorkSheet.Cell(IndexLinha, 1).Value = LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
                             WorkSheet.Cell(IndexLinha, 2).Value = Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm");
                             WorkSheet.Cell(IndexLinha, 3).Value = RowNota["razao_social"].EmptyIfNull().ToString().Trim();
                             if (RowNota["cnpj"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("J", RowNota["cnpj"].EmptyIfNull().ToString().Trim()); }
@@ -154,9 +154,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         WorkBook.SaveAs(FileNameRelatorio);
                         WorkBook.Dispose();
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
 
                         // Atualizar o registro do processamento
                         g_processamento record_g_processamento = new g_processamento();
@@ -431,13 +428,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -518,7 +513,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                         bool IsEntrada = Convert.ToBoolean(RowNota["is_entrada"].EmptyIfNull().ToString().Trim());
                         bool IsSaida = Convert.ToBoolean(RowNota["is_saida"].EmptyIfNull().ToString().Trim());
-                        WorkSheet.Cell(IndexLinha, 1).Value = int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
+                        WorkSheet.Cell(IndexLinha, 1).Value = LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
                         WorkSheet.Cell(IndexLinha, 2).Value = Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm");
                         WorkSheet.Cell(IndexLinha, 3).Value = RowNota["razao_social"].EmptyIfNull().ToString().Trim();
                         if (RowNota["cnpj"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("J", RowNota["cnpj"].EmptyIfNull().ToString().Trim()); }
@@ -554,9 +549,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     WorkBook.SaveAs(FileNameExportacao);
                     WorkBook.Dispose();
 
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
 
                     // Atualizar o registro do processamento
                     g_processamento record_g_processamento = new g_processamento();
@@ -589,13 +581,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -675,7 +665,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         IndexLinha += 1;
                         bool IsEntrada = Convert.ToBoolean(RowNota["is_entrada"].EmptyIfNull().ToString().Trim());
                         bool IsSaida = Convert.ToBoolean(RowNota["is_saida"].EmptyIfNull().ToString().Trim());
-                        WorkSheet.Cell(IndexLinha, 1).Value = int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
+                        WorkSheet.Cell(IndexLinha, 1).Value = LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
                         WorkSheet.Cell(IndexLinha, 2).Value = Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm");
                         WorkSheet.Cell(IndexLinha, 3).Value = RowNota["razao_social"].EmptyIfNull().ToString().Trim();
                         if (RowNota["cnpj"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("J", RowNota["cnpj"].EmptyIfNull().ToString().Trim()); }
@@ -712,9 +702,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     WorkBook.SaveAs(FileNameExportacao);
                     WorkBook.Dispose();
 
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
 
                     // Atualizar o registro do processamento
                     g_processamento record_g_processamento = new g_processamento();
@@ -747,13 +734,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -836,7 +821,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                         bool IsEntrada = Convert.ToBoolean(RowNota["is_entrada"].EmptyIfNull().ToString().Trim());
                         bool IsSaida = Convert.ToBoolean(RowNota["is_saida"].EmptyIfNull().ToString().Trim());
-                        WorkSheet.Cell(IndexLinha, 1).Value = int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
+                        WorkSheet.Cell(IndexLinha, 1).Value = LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim());
                         WorkSheet.Cell(IndexLinha, 2).Value = Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm");
                         WorkSheet.Cell(IndexLinha, 3).Value = RowNota["razao_social"].EmptyIfNull().ToString().Trim();
                         if (RowNota["cnpj"].EmptyIfNull().ToString().Trim().Length > 0) { WorkSheet.Cell(IndexLinha, 4).Value = LibStringFormat.FormatarCPFCNPJ("J", RowNota["cnpj"].EmptyIfNull().ToString().Trim()); }
@@ -872,9 +857,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     WorkBook.SaveAs(FileNameExportacao);
                     WorkBook.Dispose();
 
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
 
                     // Atualizar o registro do processamento
                     g_processamento record_g_processamento = new g_processamento();
@@ -907,19 +889,25 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
 
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
 
     }
 }

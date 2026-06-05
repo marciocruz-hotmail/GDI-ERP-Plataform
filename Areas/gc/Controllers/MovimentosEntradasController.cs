@@ -110,8 +110,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = filterOnOff,
                         sEcho = param.sEcho,
                         iTotalRecords = totalRecords,
@@ -300,8 +300,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -309,33 +309,9 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException e)
+                        catch (Exception e)
             {
-                return Json(new
-                {
-                    errorMessage = LibExceptions.getDbEntityValidationException(e),
-                    severity = "error",
-                    stackTrace = e.ToString(),
-                    yesFilterOnOff = filterOnOff,
-                    sEcho = param.sEcho,
-                    iTotalRecords = 0,
-                    iTotalDisplayRecords = 0,
-                    aaData = new List<string[]>()
-                }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception e)
-            {
-                return Json(new
-                {
-                    errorMessage = LibExceptions.getExceptionShortMessage(e),
-                    severity = "error",
-                    stackTrace = e.ToString(),
-                    yesFilterOnOff = filterOnOff,
-                    sEcho = param.sEcho,
-                    iTotalRecords = 0,
-                    iTotalDisplayRecords = 0,
-                    aaData = new List<string[]>()
-                }, JsonRequestBehavior.AllowGet);
+                return JsonDataTableException(e, param, filterOnOff);
             }
         }
 
@@ -1836,14 +1812,14 @@ namespace GdiPlataform.Areas.gc.Controllers
                 catch (DbEntityValidationException ex)
                 {
                     Processado = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                     try { System.IO.File.Delete(FileNameXmlUpload); } catch { };
                     try { System.IO.File.Delete(FileNameXmlUploadTemp); } catch { };
                 }
                 catch (Exception e)
                 {
                     Processado = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(e);
                     try { System.IO.File.Delete(FileNameXmlUpload); } catch { };
                     try { System.IO.File.Delete(FileNameXmlUploadTemp); } catch { };
                 }
@@ -2024,15 +2000,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                QtdErros = 1;
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                QtdErros = 1;
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -2204,15 +2176,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                QtdErros = 1;
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                QtdErros = 1;
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -2628,13 +2596,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacaoIdProcessamento(ex, idProcessamentoGravado);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErroIdProcessamento(e, idProcessamentoGravado);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -2733,17 +2699,17 @@ namespace GdiPlataform.Areas.gc.Controllers
             catch (WebException ex)
             {
                 RetornoProcessamento.Sucesso = false;
-                RetornoProcessamento.MsgProcessamento = LibExceptions.getWebException(ex);
+                RetornoProcessamento.MsgProcessamento = GdiMvcJsonResults.AjaxFailureWebMessage(ex);
             }
             catch (DbEntityValidationException ex)
             {
                 RetornoProcessamento.Sucesso = false;
-                RetornoProcessamento.MsgProcessamento = LibExceptions.getDbEntityValidationException(ex);
+                RetornoProcessamento.MsgProcessamento = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
             }
             catch (Exception e)
             {
                 RetornoProcessamento.Sucesso = false;
-                RetornoProcessamento.MsgProcessamento = LibExceptions.getExceptionShortMessage(e);
+                RetornoProcessamento.MsgProcessamento = GdiMvcJsonResults.AjaxFailureMessage(e);
             }
             return Json(new { success = RetornoProcessamento.Sucesso, msg = RetornoProcessamento.MsgProcessamento }, JsonRequestBehavior.AllowGet);
         }
@@ -2821,15 +2787,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                QtdErros = 1;
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                QtdErros = 1;
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
 
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
@@ -3007,21 +2969,46 @@ namespace GdiPlataform.Areas.gc.Controllers
             catch (WebException ex)
             {
                 Sucesso = false;
-                MsgRetorno = LibExceptions.getWebException(ex);
+                MsgRetorno = GdiMvcJsonResults.AjaxFailureWebMessage(ex);
             }
             catch (DbEntityValidationException ex)
             {
                 Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
             }
             catch (Exception ex)
             {
                 Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(ex);
+                MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(ex);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        {
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroIdProcessamento(Exception ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacaoIdProcessamento(DbEntityValidationException ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureValidationMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
 
     }
 }

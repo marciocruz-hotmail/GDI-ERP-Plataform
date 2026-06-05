@@ -128,11 +128,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                         String _NumeroNF = RowNota["nf_numero"].EmptyIfNull().ToString().Trim();
 
                         IndexLinha += 1;
-                        sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["id_movimento"].EmptyIfNull().ToString().Trim()));
+                        sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["id_movimento"].EmptyIfNull().ToString().Trim()));
                         sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(Convert.ToDateTime(RowNota["nf_data_geracao"]).ToString("dd/MM/yyyy HH:mm"));
                         sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(RowNota["cliente_nome"].EmptyIfNull().ToString().Trim());
                         sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue(RowNota["vendedor_nome"].EmptyIfNull().ToString().Trim());
-                        if (_NumeroNF.Length > 0) { sheetCatalogo.GetCell(IndexLinha, 5).SetCellValue(int.Parse(_NumeroNF)); }
+                        if (_NumeroNF.Length > 0) { sheetCatalogo.GetCell(IndexLinha, 5).SetCellValue(LibNumbers.ConvertInt(_NumeroNF)); }
                         sheetCatalogo.GetCell(IndexLinha, 6).SetCellValue(RowNota["numero_cfop"].EmptyIfNull().ToString().Trim() + " - " + RowNota["desc_cfop"].EmptyIfNull().ToString().Trim());
                         sheetCatalogo.GetCell(IndexLinha, 7).SetCellValue(RowNota["status_nf"].EmptyIfNull().ToString().Trim());
                         sheetCatalogo.GetCell(IndexLinha, 8).SetCellValue(Double.Parse(string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", Decimal.Parse(RowNota["valor_total_liquido"].EmptyIfNull().ToString().Trim())).Replace("R$ ", "").Replace("R$", "").Replace("$", "")));
@@ -189,13 +189,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -282,7 +280,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         DesvioPreco = ((PrecoMaximo * 100) / PrecoMinimo) - 100;
 
                         IndexLinha += 1;
-                        sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["id_produto"].EmptyIfNull().ToString().Trim()));
+                        sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["id_produto"].EmptyIfNull().ToString().Trim()));
                         sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(RowNota["nome"].EmptyIfNull().ToString().Trim());
                         sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(double.Parse(RowNota["qtd"].EmptyIfNull().ToString().Trim()));
                         sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue(Double.Parse(string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", Decimal.Parse(RowNota["valor_total"].EmptyIfNull().ToString().Trim())).Replace("R$ ", "").Replace("R$", "").Replace("$", "")));
@@ -342,13 +340,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -432,11 +428,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                     {
 
                         IndexLinha += 1;
-                        try { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["id_movimento"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(""); }
+                        try { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["id_movimento"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(""); }
                         ;
                         try { sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(RowNota["emitente"].EmptyIfNull().ToString().Trim()); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(""); }
                         ;
-                        try { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(""); }
+                        try { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(""); }
                         ;
                         try { sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue((RowNota["numero"].EmptyIfNull().ToString().Trim() + " - " + RowNota["desc_cfop"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue(""); }
                         ;
@@ -504,13 +500,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -575,11 +569,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                     foreach (var RowNota in allRecordsNotas)
                     {
                         IndexLinha += 1;
-                        try { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["id_movimento"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(""); }
+                        try { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["id_movimento"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(""); }
                         ;
-                        try { sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(int.Parse(RowNota["id_movimento_nf"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(""); }
+                        try { sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(LibNumbers.ConvertInt(RowNota["id_movimento_nf"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(""); }
                         ;
-                        try { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(""); }
+                        try { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(""); }
                         ;
                         try { sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue((RowNota["numero"].EmptyIfNull().ToString().Trim() + " - " + RowNota["desc_cfop"].EmptyIfNull().ToString().Trim())); } catch (Exception) { sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue(""); }
                         ;
@@ -655,13 +649,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -829,9 +821,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                     WorkBook.SaveAs(FileNameExportacao);
                     WorkBook.Dispose();
 
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
 
                     // Atualizar o registro do processamento
                     g_processamento record_g_processamento = new g_processamento();
@@ -864,13 +853,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -1116,9 +1103,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         WorkBook.SaveAs(FileNameExportacao);
                         WorkBook.Dispose();
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
 
                         // Atualizar o registro do processamento
                         g_processamento record_g_processamento = new g_processamento();
@@ -1143,7 +1127,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         IdProcessamentoGravado = record_g_processamento.id_processamento.ToString();
                         MsgRetorno = "Relatório GERADO com sucesso!" + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "[" + NumeroRegistrosExportados.ToString() + " registros]" + "<br/><br/>" + "O Download do relatório será iniciado automaticamente!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                     else
                     {
@@ -1152,7 +1135,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Sucesso = false;
                         MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!" + view_cstModalRelatorio.Field_Data_01.EmptyIfNull().ToString().Trim() + view_cstModalRelatorio.Field_Data_02.EmptyIfNull().ToString().Trim();
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                 }
                 else
@@ -1160,18 +1142,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     Sucesso = false;
                     MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!" + view_cstModalRelatorio.Field_Data_01.EmptyIfNull().ToString().Trim() + view_cstModalRelatorio.Field_Data_02.EmptyIfNull().ToString().Trim();
                     Thread.Sleep(2000);
-                    GC.Collect();
                 }
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -1456,9 +1435,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         WorkBook.SaveAs(FileNameExportacao);
                         WorkBook.Dispose();
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
 
                         // Atualizar o registro do processamento
                         g_processamento record_g_processamento = new g_processamento();
@@ -1483,7 +1459,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         IdProcessamentoGravado = record_g_processamento.id_processamento.ToString();
                         MsgRetorno = "Relatório GERADO com sucesso!" + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "[" + NumeroRegistrosExportados.ToString() + " Lançamentos Financeiros]" + "<br/><br/>" + "O Download do relatório será iniciado automaticamente!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                     else
                     {
@@ -1492,7 +1467,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Sucesso = false;
                         MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                 }
                 else
@@ -1500,18 +1474,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     Sucesso = false;
                     MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!";
                     Thread.Sleep(2000);
-                    GC.Collect();
                 }
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -1677,9 +1648,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         WorkBook.SaveAs(FileNameExportacao);
                         WorkBook.Dispose();
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
 
                         // Atualizar o registro do processamento
                         g_processamento record_g_processamento = new g_processamento();
@@ -1704,7 +1672,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         IdProcessamentoGravado = record_g_processamento.id_processamento.ToString();
                         MsgRetorno = "Relatório GERADO com sucesso!" + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "[" + NumeroRegistrosExportados.ToString() + " registros]" + "<br/><br/>" + "O Download do relatório será iniciado automaticamente!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                     else
                     {
@@ -1713,7 +1680,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Sucesso = false;
                         MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                 }
                 else
@@ -1721,18 +1687,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     Sucesso = false;
                     MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!";
                     Thread.Sleep(2000);
-                    GC.Collect();
                 }
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -1935,9 +1898,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         WorkBook.SaveAs(FileNameExportacao);
                         WorkBook.Dispose();
 
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
 
                         // Atualizar o registro do processamento
                         g_processamento record_g_processamento = new g_processamento();
@@ -1962,7 +1922,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         IdProcessamentoGravado = record_g_processamento.id_processamento.ToString();
                         MsgRetorno = "Relatório GERADO com sucesso!" + LibStringFormat.GetTabHtml(1) + LibIcons.getIcon("fa-regular fa-thumbs-up", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "[" + NumeroRegistrosExportados.ToString() + " registros]" + "<br/><br/>" + "O Download do relatório será iniciado automaticamente!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                     else
                     {
@@ -1971,7 +1930,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Sucesso = false;
                         MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!";
                         Thread.Sleep(2000);
-                        GC.Collect();
                     }
                 }
                 else
@@ -1979,18 +1937,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     Sucesso = false;
                     MsgRetorno = "Não há lançamentos que atendam à pesquisa realizada!";
                     Thread.Sleep(2000);
-                    GC.Collect();
                 }
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -2074,14 +2029,14 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Decimal ValorFrete2Custo = 0;
 
 
-                        if (int.Parse(RowNota["frete1_transportadora"].EmptyIfNull().ToString().Trim()) > 0)
+                        if (LibNumbers.ConvertInt(RowNota["frete1_transportadora"].EmptyIfNull().ToString().Trim()) > 0)
                         {
                             IndexLinha += 1;
                             Decimal.TryParse(RowNota["valor_frete"].EmptyIfNull().ToString().Trim(), out ValorFreteCliente);
                             Decimal.TryParse(RowNota["frete_gerencial"].EmptyIfNull().ToString().Trim(), out ValorFreteGerencial);
                             Decimal.TryParse(RowNota["frete1_custo"].EmptyIfNull().ToString().Trim(), out ValorFrete1Custo);
                             Decimal.TryParse(RowNota["frete2_custo"].EmptyIfNull().ToString().Trim(), out ValorFrete2Custo);
-                            sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim()));
+                            sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim()));
                             sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(Convert.ToDateTime(RowNota["data_venda"]).ToString("dd/MM/yyyy"));
                             sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(RowNota["cliente"].EmptyIfNull().ToString().Trim());
                             sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue("Principal");
@@ -2093,10 +2048,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                             NumeroRegistrosExportados += 1;
                         }
 
-                        if (int.Parse(RowNota["frete2_transportadora"].EmptyIfNull().ToString().Trim()) > 0)
+                        if (LibNumbers.ConvertInt(RowNota["frete2_transportadora"].EmptyIfNull().ToString().Trim()) > 0)
                         {
                             IndexLinha += 1;
-                            sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(int.Parse(RowNota["nf_numero"].EmptyIfNull().ToString().Trim()));
+                            sheetCatalogo.GetCell(IndexLinha, 1).SetCellValue(LibNumbers.ConvertInt(RowNota["nf_numero"].EmptyIfNull().ToString().Trim()));
                             sheetCatalogo.GetCell(IndexLinha, 2).SetCellValue(Convert.ToDateTime(RowNota["data_venda"]).ToString("dd/MM/yyyy"));
                             sheetCatalogo.GetCell(IndexLinha, 3).SetCellValue(RowNota["cliente"].EmptyIfNull().ToString().Trim());
                             sheetCatalogo.GetCell(IndexLinha, 4).SetCellValue("Adicional");
@@ -2161,16 +2116,24 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
     }
 }

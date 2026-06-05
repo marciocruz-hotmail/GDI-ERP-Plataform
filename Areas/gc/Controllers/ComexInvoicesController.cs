@@ -46,8 +46,8 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDadosViewImportacao(jQueryDataTableParamModel param)
         {
             if (param == null) param = new jQueryDataTableParamModel();
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
 
             int idImportacao = -1;
             int.TryParse(param.yesCustomIdPK, out idImportacao);
@@ -132,8 +132,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = "0",
                     yesDisplayField01 = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", valorTotalCambioDebito).Replace("R$ ", "").Replace("R$", "").Replace("$", ""),
                     yesDisplayField02 = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:C}", valorTotalItensImportacao).Replace("R$ ", "").Replace("R$", "").Replace("$", ""),
@@ -143,36 +143,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+            catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, "0");
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            // ✅ Retorno padrão do DataTables + erro real
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = stackTrace, // se quiser ocultar em produção, devolva ""
-                yesFilterOnOff = "0",
-                yesDisplayField01 = "0,00",
-                yesDisplayField02 = "0,00",
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -181,8 +155,8 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDadosViewInvoicesItens(jQueryDataTableParamModel param)
         {
             if (param == null) param = new jQueryDataTableParamModel();
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
 
             int idInvoice = -1;
             int.TryParse(param.yesCustomIdPK, out idInvoice);
@@ -269,8 +243,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = "0",
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -278,34 +252,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+            catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, "0");
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            // ✅ Retorno padrão do DataTables + erro real
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = stackTrace, // se quiser ocultar em produção, devolva ""
-                yesFilterOnOff = "0",
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         public ActionResult ModalImportarInvoiceXLS()
@@ -839,13 +789,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    Processado = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    return JsonAjaxErroValidacao(ex);
                 }
                 catch (Exception e)
                 {
-                    Processado = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    return JsonAjaxErro(e);
                 }
             }
             return Json(new { success = Processado, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
@@ -1202,13 +1150,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    Processado = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    return JsonAjaxErroValidacao(ex);
                 }
                 catch (Exception e)
                 {
-                    Processado = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    return JsonAjaxErro(e);
                 }
             }
             return Json(new { success = Processado, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
@@ -1330,13 +1276,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    Processado = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    return JsonAjaxErroValidacao(ex);
                 }
                 catch (Exception e)
                 {
-                    Processado = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    return JsonAjaxErro(e);
                 }
             }
             return Json(new { success = Processado, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
@@ -1348,7 +1292,19 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             int IdInvoice = -1;
             int.TryParse(viewIdInvoice, out IdInvoice);
+            if (IdInvoice <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Invoice COMEX", null);
+                ViewBag.Title = "<b>Itens da Invoice — (não localizada)</b>";
+                return View(new gc_comex_invoices());
+            }
             gc_comex_invoices record_gc_comex_invoices = db.gc_comex_invoices.Find(IdInvoice);
+            if (record_gc_comex_invoices == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Invoice COMEX", IdInvoice);
+                ViewBag.Title = "<b>Itens da Invoice — (não localizada)</b>";
+                return View(new gc_comex_invoices { id_invoice = IdInvoice });
+            }
             ViewBag.Title = "<b>Itens da Invoice </b>" + record_gc_comex_invoices.invoice.EmptyIfNull().ToString();
             return View(record_gc_comex_invoices);
         }
@@ -1357,7 +1313,19 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             int IdInvoice = -1;
             int.TryParse(viewIdInvoice, out IdInvoice);
+            if (IdInvoice <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Invoice COMEX", null);
+                ViewBag.Title = "<b>Câmbio da Invoice — (não localizada)</b>";
+                return View(new gc_comex_invoices());
+            }
             gc_comex_invoices record_gc_comex_invoices = db.gc_comex_invoices.Find(IdInvoice);
+            if (record_gc_comex_invoices == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Invoice COMEX", IdInvoice);
+                ViewBag.Title = "<b>Câmbio da Invoice — (não localizada)</b>";
+                return View(new gc_comex_invoices { id_invoice = IdInvoice });
+            }
             ViewBag.Title = "<b>Câmbio da Invoice </b>" + record_gc_comex_invoices.invoice.EmptyIfNull().ToString();
             return View(record_gc_comex_invoices);
         }
@@ -1366,10 +1334,23 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             ViewBag.Title = "Cancelar Invoice";
             String MsgAdvertencia = String.Empty;
-            gc_comex_invoices record_gc_comex_invoices = db.gc_comex_invoices.Find(int.Parse(idInvoice));
+            int IdInvoice = 0;
+            if (!int.TryParse(idInvoice, out IdInvoice) || IdInvoice <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Invoice COMEX", null);
+                ViewBag.Title = "Cancelar Invoice — (não localizada)";
+                return View(new gc_comex_invoices());
+            }
+            gc_comex_invoices record_gc_comex_invoices = db.gc_comex_invoices.Find(IdInvoice);
+            if (record_gc_comex_invoices == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Invoice COMEX", IdInvoice);
+                ViewBag.Title = "Cancelar Invoice — (não localizada)";
+                return View(new gc_comex_invoices { id_invoice = IdInvoice });
+            }
             record_gc_comex_invoices.exclusao_motivo = "";
             gc_comex_importacoes RecordImportacao = db.gc_comex_importacoes.Find(record_gc_comex_invoices.id_importacao);
-            if (RecordImportacao.invoices_finalizadas == true)
+            if (RecordImportacao != null && RecordImportacao.invoices_finalizadas == true)
             {
                 MsgAdvertencia += " - Não é possível cancelar as invoices, a planilha de itens já foi processada!";
             }
@@ -1421,13 +1402,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1461,13 +1440,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1569,6 +1546,21 @@ namespace GdiPlataform.Areas.gc.Controllers
                 throw ex;
             }
             return Concluido;
+        }
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        {
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
         }
 
     }

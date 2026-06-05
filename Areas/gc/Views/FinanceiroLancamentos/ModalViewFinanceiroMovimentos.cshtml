@@ -11,7 +11,7 @@
     @Html.Raw((String)ViewBag.Title)</h4>
                     @Html.HiddenFor(model => model.id_movimento)
                     <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                    <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
+                    <input type="hidden" id="yesFilterController" value="ModalViewFinanceiroMovimentos" name="yesFilterController" />
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
                 </div>
@@ -256,12 +256,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.msg)            }
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
             });
         }
         catch (err) {

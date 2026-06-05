@@ -97,8 +97,8 @@ namespace GdiPlataform.Areas.qa.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     totalAvaliacoes,
                     totalEntregues,
                     isg,
@@ -113,8 +113,8 @@ namespace GdiPlataform.Areas.qa.Controllers
             {
                 return Json(new
                 {
-                    errorMessage = LibExceptions.getExceptionShortMessage(e),
-                    severity = "error",
+                    errorMessage = GdiMvcJsonResults.AjaxFailureMessage(e),
+                    severity = GdiMvcJsonResults.SeverityError,
                     stackTrace = e.ToString()
                 }, JsonRequestBehavior.AllowGet);
             }

@@ -290,14 +290,14 @@
                             else
                             {
                                 $('#limite_credito_atual').attr('disabled', true);
-                                GdiAjaxNotifyInconsistencias(result.msg);
+                                GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                             }
                         },
-                        error: function (result)
+                        error: function (xhr, textStatus, errorThrown)
                         {
                             LibMessageProcessandoHide();
                             $('#limite_credito_atual').attr('disabled', true);
-                            GdiAjaxNotifyInconsistencias(result.toString());
+                            GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                         }
                     });
                 }

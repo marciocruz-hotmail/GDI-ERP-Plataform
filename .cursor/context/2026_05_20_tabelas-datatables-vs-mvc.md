@@ -15,7 +15,7 @@
 | **Cliente** | Inicialização DataTables; eventos `error.dt` / `xhr.dt`; helpers `GdiDtNotifyLoadFailure`, `GdiDtNotifyJsonErrorMessage` |
 | **Servidor** | JSON com `aaData`, `errorMessage`, `stackTrace`, `yesFilterOnOff` (fases documentadas em `CLAUDE.md`) |
 | **CSS** | `start.css`: `width: max-content` em `table.display`, `table.dataTable`, `.dataTables_wrapper table` |
-| **Inventário** | `Scripts/2026_05_20_gdi_inventory_datatables_g_area.py`, `Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` |
+| **Inventário** | `Scripts/2026_05_22_gdi_inventory_datatables_g_area.py`, `Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` |
 
 **Não fazer:** aplicar `gdi-form-table-fixed`, remover `scroll-body-horizontal` nem `max-content` em listagens DataTables sem validar impacto em todas as colunas.
 

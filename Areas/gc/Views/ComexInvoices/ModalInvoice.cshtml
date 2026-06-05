@@ -11,12 +11,15 @@
     @Html.Raw((String)ViewBag.Title)</h4>
                 @Html.HiddenFor(model => model.id_invoice)
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                <input type="hidden" id="yesFilterController" value="ModalViewNotasFiscais" name="yesFilterController" />
+                <input type="hidden" id="yesFilterController" value="ModalInvoice" name="yesFilterController" />
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
             <div class="modal-body m-0 p-0">
+                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
                 <div class="form-horizontal m-0 p-0">
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
                     <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
                         <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTable-InvoicesItens">
                             <thead>
@@ -35,6 +38,7 @@
                             </thead>
                         </table>
                     </div>
+                }
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
@@ -54,7 +58,10 @@
         try
         {
             jsInitModal();
-            jsCreateOTableInvoicesItens();
+            @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+            {
+            <text>jsCreateOTableInvoicesItens();</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {

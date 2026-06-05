@@ -86,8 +86,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = "0",
                         sEcho = param.sEcho,
                         iTotalRecords = totalRecords,
@@ -128,8 +128,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -204,18 +204,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -225,14 +214,24 @@ namespace GdiPlataform.Areas.gc.Controllers
             gc_cfop_parametros record_gc_cfop_parametros = new Db.gc_cfop_parametros();
             try
             {
-                if ((IdParametro != null) && (IdParametro > 0)) { record_gc_cfop_parametros = db.gc_cfop_parametros.Find(IdParametro); };
+                if ((IdParametro != null) && (IdParametro > 0))
+                {
+                    record_gc_cfop_parametros = db.gc_cfop_parametros.Find(IdParametro);
+                    if (record_gc_cfop_parametros == null)
+                    {
+                        ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Parâmetro CFOP", IdParametro);
+                        PreencherLookupsCfop();
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Parâmetros — (não localizado)</b>";
+                        return View("ModalCreateEditParametro", new gc_cfop_parametros { id_cfop_parametro = IdParametro.GetValueOrDefault() });
+                    }
+                }
                 PreencherLookupsCfop();
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Parâmetros - " + record_gc_cfop_parametros.id_cfop_parametro.EmptyIfNull().ToString() + "</b>";
                 return View("ModalCreateEditParametro", record_gc_cfop_parametros);
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "CfopParametrosController";
                 msg += "<br/>" + "ModalCreateEditParametro";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -272,17 +271,23 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
         }
 
     }

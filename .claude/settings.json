@@ -2,9 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py)",
-      "Bash(python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py)",
+      "Bash(python Scripts/2026_05_22_gdi_inventory_datatables_g_area.py)",
       "Bash(python Scripts/2026_05_20_gdi_replace_alert_libmessage.py)",
-      "Bash(python Scripts/2026_05_20_gdi_dedupe_libmessage_if_else.py)",
+      "Bash(python Scripts/2026_05_15_gdi_dedupe_libmessage_if_else.py)",
       "Bash(python .claude/scripts/sync_changelog_recent.py)",
       "Bash(findstr*)",
       "Bash(dir*)",

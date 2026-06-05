@@ -31,8 +31,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = "0",
                         sEcho = param.sEcho,
                         iTotalRecords = 0,
@@ -54,14 +54,12 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 filterOnOff = "1";
 
-                if (!string.IsNullOrWhiteSpace(termo))
+                if (LibStringFormat.TryParseTermoBuscaMovimentoIdOuNf(termo, out int idMov, out string padraoNf))
                 {
-                    string termoLimpo = termo.StartsWith("*") ? termo.Substring(1) : termo;
-                    int idMov = 0;
-                    int.TryParse(termoLimpo, out idMov);
                     movimentos = movimentos.Where(m =>
                         (idMov > 0 && m.id_movimento == idMov) ||
-                        db.gc_movimentos_nf.Any(nf => nf.id_movimento == m.id_movimento && nf.nf_numero == termoLimpo));
+                        (padraoNf != null && db.gc_movimentos_nf.Any(nf =>
+                            nf.id_movimento == m.id_movimento && nf.nf_numero != null && DbFunctions.Like(nf.nf_numero, padraoNf))));
                 }
                 else
                 {
@@ -169,8 +167,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -186,17 +184,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         private JsonResult JsonDataTableExceptionFretes(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            return Json(new
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(e),
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
         #endregion
     }

@@ -443,6 +443,20 @@ namespace GdiPlataform.Lib
             return true;
         }
 
+        /// <summary>Termo de listagem movimento/frete/pedido: remove prefixo *; id exato + padrão LIKE para número NF.</summary>
+        public static bool TryParseTermoBuscaMovimentoIdOuNf(string termo, out int idMovimento, out string padraoLikeNf)
+        {
+            idMovimento = 0;
+            padraoLikeNf = null;
+            if (String.IsNullOrWhiteSpace(termo)) return false;
+            string limpo = termo.Trim();
+            if (limpo.StartsWith("*", StringComparison.Ordinal)) { limpo = limpo.Substring(1).Trim(); }
+            if (String.IsNullOrEmpty(limpo)) return false;
+            int.TryParse(limpo, out idMovimento);
+            TryMontarPadraoLikeContemCodigo(limpo, out padraoLikeNf);
+            return idMovimento > 0 || padraoLikeNf != null;
+        }
+
         public static String FormatarStringGenerico(String texto, int tamanho, bool AcrescentarADireita = false, String CaracterAcrescentar = "")
         {
             texto = texto.Trim();

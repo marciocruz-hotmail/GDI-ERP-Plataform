@@ -170,9 +170,9 @@
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 url: '@Url.Action("GetDadosGrafico", "Financeiro", new { Area = "g" })',
-                error: function ()
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    LibMessageAlert("Atenção", "Falha ao processar os dados <b>" + url + "</b>");
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao processar os dados do gráfico.');
                 },
                 success: function (result)
                 {

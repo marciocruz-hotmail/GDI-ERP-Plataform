@@ -1,61 +1,56 @@
 """
 Gera .claude/CHANGELOG-RECENT.md a partir das N entradas mais recentes de
-.cursor/CHANGELOG-DEV.md.
+CHANGELOG-DEV.md (raiz).
 
-Executado automaticamente pelo hook PostToolUse (settings.json) sempre que
-qualquer arquivo é editado, e pelo hook UserPromptSubmit no início de cada
-sessão. Idempotente e rápido (leitura sequencial).
-
-Uso direto: python .claude/scripts/sync_changelog_recent.py
+Uso: python .claude/scripts/sync_changelog_recent.py
 """
 
-import os
+from __future__ import annotations
+
 import re
+from pathlib import Path
 
-CHANGELOG_SRC = os.path.join(".cursor", "CHANGELOG-DEV.md")
-CHANGELOG_OUT = os.path.join(".claude", "CHANGELOG-RECENT.md")
+ROOT = Path(__file__).resolve().parents[2]
+CHANGELOG_SRC = ROOT / "CHANGELOG-DEV.md"
+CHANGELOG_OUT = ROOT / ".claude" / "CHANGELOG-RECENT.md"
 MAX_ENTRIES = 5
+SECTION_MARKER = "## Últimas alterações relevantes"
 
-def main():
-    if not os.path.exists(CHANGELOG_SRC):
+
+def main() -> None:
+    if not CHANGELOG_SRC.is_file():
         return
 
-    with open(CHANGELOG_SRC, encoding="utf-8") as f:
-        content = f.read()
-
-    # Separar cabeçalho (tudo antes de "## HISTÓRICO DE INTERVENÇÕES")
-    historico_marker = "## HISTÓRICO DE INTERVENÇÕES"
-    marker_pos = content.find(historico_marker)
+    content = CHANGELOG_SRC.read_text(encoding="utf-8")
+    marker_pos = content.find(SECTION_MARKER)
     if marker_pos == -1:
-        # Fallback: sem marcador, pegar primeiras 50 linhas
-        header = "\n".join(content.splitlines()[:50])
-        entries_block = ""
-    else:
-        header_block = content[:marker_pos].rstrip()
-        # Resumir cabeçalho: só primeiras 3 linhas (título + stack) + linha em branco
-        header_lines = header_block.splitlines()
-        header = "\n".join(header_lines[:5])
-        entries_block = content[marker_pos + len(historico_marker):]
+        return
 
-    # Dividir entradas pelo padrão "### [YYYY-MM-DD]"
-    entry_pattern = re.compile(r"(?=^### \[\d{4}-\d{2}-\d{2}\])", re.MULTILINE)
-    entries = entry_pattern.split(entries_block)
-    # Filtrar fragmentos vazios (separadores ---, linhas em branco)
-    entries = [e.strip() for e in entries if e.strip() and e.strip().startswith("###")]
+    entries_block = content[marker_pos + len(SECTION_MARKER) :]
+    # Parar na próxima secção ##
+    next_section = re.search(r"\n## ", entries_block)
+    if next_section:
+        entries_block = entries_block[: next_section.start()]
 
+    entry_pattern = re.compile(r"(?=^### \d{4}-\d{2}-\d{2})", re.MULTILINE)
+    entries = [
+        e.strip()
+        for e in entry_pattern.split(entries_block)
+        if e.strip().startswith("###")
+    ]
     recent = entries[:MAX_ENTRIES]
 
     out_lines = [
         "<!-- GERADO AUTOMATICAMENTE por .claude/scripts/sync_changelog_recent.py -->",
-        "<!-- Fonte: .cursor/CHANGELOG-DEV.md | Últimas {} entradas -->".format(MAX_ENTRIES),
+        f"<!-- Fonte: CHANGELOG-DEV.md (raiz) | Últimas {MAX_ENTRIES} entradas -->",
         "",
         "# CHANGELOG-DEV — Entradas Recentes",
         "",
-        "> Arquivo gerado automaticamente. Para o histórico completo, consulte `.cursor/CHANGELOG-DEV.md`.",
+        "> Gerado automaticamente. Histórico completo: `CHANGELOG-DEV.md` e `docs/dev-history/`.",
         "",
         "---",
         "",
-        "## HISTÓRICO DE INTERVENÇÕES (últimas {})".format(MAX_ENTRIES),
+        f"## Últimas alterações ({MAX_ENTRIES})",
         "",
     ]
 
@@ -67,17 +62,12 @@ def main():
 
     out_content = "\n".join(out_lines)
 
-    # Só escrever se o conteúdo mudou (evita toques desnecessários no arquivo)
-    if os.path.exists(CHANGELOG_OUT):
-        with open(CHANGELOG_OUT, encoding="utf-8") as f:
-            existing = f.read()
-        if existing == out_content:
-            return
+    if CHANGELOG_OUT.is_file() and CHANGELOG_OUT.read_text(encoding="utf-8") == out_content:
+        return
 
-    with open(CHANGELOG_OUT, "w", encoding="utf-8") as f:
-        f.write(out_content)
+    CHANGELOG_OUT.write_text(out_content, encoding="utf-8")
+    print(f"[sync_changelog_recent] atualizado ({len(recent)} entradas).")
 
-    print("[sync_changelog_recent] CHANGELOG-RECENT.md atualizado ({} entradas).".format(len(recent)))
 
 if __name__ == "__main__":
     main()

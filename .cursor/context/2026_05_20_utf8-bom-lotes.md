@@ -1,7 +1,7 @@
 # Grupo 2.11 — UTF-8 sem BOM (lotes por área)
 
 **Data:** 2026-05-20  
-**Checklist:** `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` §2.11
+**Checklist:** `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` §2.11
 
 ## Arquitetura
 

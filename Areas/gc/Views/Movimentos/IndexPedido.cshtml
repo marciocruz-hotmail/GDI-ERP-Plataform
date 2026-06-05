@@ -503,12 +503,12 @@
                             else
                             {
                                 LibMessageProcessandoHide();
-                                GdiAjaxNotifyInconsistencias(result.msg)
+                                GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                             }
                         },
-                        error: function (result) {
+                        error: function (xhr, textStatus, errorThrown) {
                             LibMessageProcessandoHide();
-                            GdiAjaxNotifyInconsistencias(result.toString());
+                            GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                         }
                     })
                 }
@@ -771,7 +771,7 @@
             }
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalPedidoConverterMoeda] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsModalPedidoAtualizarValorTotal] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 
@@ -977,7 +977,7 @@
             })
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalPedidosHistorico] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsModalConsultaPedidos] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 
@@ -1035,36 +1035,6 @@
             LibMessageError("Atenção", "[jsModalNotificacaoCliente] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
-
-    function jsModalPedidoPosvenda(TableName, columnName)
-    {
-        try {
-            var selectedIds = JsGetSelectedRows(TableName, columnName);
-            if (!selectedIds || selectedIds.length == 0)
-            {
-                LibMessageAlert("Atenção", "Selecione a Cotação/Pedido/OS!");
-            }
-            else {
-                if (selectedIds.indexOf(',') == -1)
-                {
-                    LibMessageProcessando("");
-                    $("#mainModal").load('@Url.Action("ModalPedidoPosvenda", "Movimentos", new { Area = "gc" })?id=' + selectedIds, function () {
-                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                    })
-                }
-                else
-                {
-                    LibMessageAlert("Atenção", "Selecione apenas 1(uma) Cotação/Pedido/OS!");
-                }
-            }
-        }
-        catch (err) {
-            LibMessageError("Atenção", "[jsModalPedidoPosvenda] " + (err && err.message ? err.message.toString() : String(err)));
-        }
-    }
-
-
 
 
 </script>

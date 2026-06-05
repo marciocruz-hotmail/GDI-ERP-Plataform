@@ -48,8 +48,8 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDados(jQueryDataTableParamModel param)
         {
             if (param == null) { param = new jQueryDataTableParamModel(); }
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
 
             // Parâmetros/filtros
             bool filterDb = false;
@@ -161,8 +161,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                     return Json(new
                     {
-                        errorMessage = "",
-                        stackTrace = "",
+                        errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                        stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                         yesFilterOnOff = filterOnOff,
                         sEcho = param.sEcho,
                         iTotalRecords = total,
@@ -241,8 +241,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -250,33 +250,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = listOut
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+                        catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, filterOnOff);
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = stackTrace, // em produção, você pode retornar ""
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -285,8 +262,8 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDadosProdutosPre(jQueryDataTableParamModel param)
         {
             if (param == null) { param = new jQueryDataTableParamModel(); }
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
 
             string filterOnOff = "0";
 
@@ -408,8 +385,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -417,33 +394,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+                        catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, filterOnOff);
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = stackTrace, // em produção, você pode retornar ""
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -453,35 +407,39 @@ namespace GdiPlataform.Areas.gc.Controllers
         {
             try
             {
-                if ((id == null) || (id == 0))
+                int idProdutoComex = id.GetValueOrDefault();
+                if (idProdutoComex <= 0)
                 {
-                    return RedirectToAction("Index");
+                    ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Produto COMEX", null);
+                    PreencherLookupsProdutosServicosTodos();
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex — (não localizado)</b>";
+                    return View("ModalCreateEdit", new gc_comex_produtos());
                 }
-                gc_comex_produtos record_gc_comex_produtos = db.gc_comex_produtos.Find(id);
+                gc_comex_produtos record_gc_comex_produtos = db.gc_comex_produtos.Find(idProdutoComex);
                 if (record_gc_comex_produtos == null)
                 {
-                    return RedirectToAction("Index");
+                    ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Produto COMEX", idProdutoComex);
+                    PreencherLookupsProdutosServicosTodos();
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex — (não localizado)</b>";
+                    return View("ModalCreateEdit", new gc_comex_produtos { id_comex_produto = idProdutoComex });
                 }
-                else 
+                if (record_gc_comex_produtos.id_produto == 0)
                 {
-                    if (record_gc_comex_produtos.id_produto == 0)
+                    g_produtos record_g_produtos = db.g_produtos.Where(p => p.ativo == true && p.codigo == record_gc_comex_produtos.pn).FirstOrDefault();
+                    if (record_g_produtos == null) { record_g_produtos = db.g_produtos.SqlQuery("select * from g_produtos where codigo like '" + record_gc_comex_produtos.pn.EmptyIfNull().ToString().Replace("0","_").Replace("O", "_").Replace("o", "_") + "'").FirstOrDefault(); };
+                    if (record_g_produtos != null)
                     {
-                        g_produtos record_g_produtos = db.g_produtos.Where(p => p.ativo == true && p.codigo == record_gc_comex_produtos.pn).FirstOrDefault();
-                        if (record_g_produtos == null) { record_g_produtos = db.g_produtos.SqlQuery("select * from g_produtos where codigo like '" + record_gc_comex_produtos.pn.EmptyIfNull().ToString().Replace("0","_").Replace("O", "_").Replace("o", "_") + "'").FirstOrDefault(); };
-                        if (record_g_produtos != null)
-                        {
-                            record_gc_comex_produtos.id_produto = record_g_produtos.id_produto;
-                        }
+                        record_gc_comex_produtos.id_produto = record_g_produtos.id_produto;
                     }
-                    CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_comex_produtos);
                 }
+                CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_comex_produtos);
                 PreencherLookupsProdutosServicosTodos();
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex</b>" + LibStringFormat.GetTabHtml(1) + record_gc_comex_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_gc_comex_produtos.description.EmptyIfNull().ToString();
                 return View("ModalCreateEdit", record_gc_comex_produtos);
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "ComexProdutosController";
                 msg += "<br/>" + "ModalCreateEdit";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -554,13 +512,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }
                     catch (DbEntityValidationException ex)
                     {
-                        sucesso = false;
-                        msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                        return JsonAjaxErroValidacao(ex);
                     }
                     catch (Exception e)
                     {
-                        sucesso = false;
-                        msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                        return JsonAjaxErro(e);
                     }
                 }
                 else
@@ -570,13 +526,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -873,13 +827,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacaoIdProcessamento(ex, idProcessamentoGravado);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErroIdProcessamento(e, idProcessamentoGravado);
             }
             return Json(new { success = sucesso, msg = msgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -980,13 +932,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacaoIdProcessamento(ex, idProcessamentoGravado);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErroIdProcessamento(e, idProcessamentoGravado);
             }
             return Json(new { success = sucesso, msg = msgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -1052,13 +1002,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1071,7 +1019,19 @@ namespace GdiPlataform.Areas.gc.Controllers
             int.TryParse(id, out IdProdutoComex);
             ViewBag.Title = "Produto Comex - Desativar Cadastro";
             PreencherLookupsComexProdutosComId();
+            if (IdProdutoComex <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Produto COMEX", null);
+                ViewBag.Title = "Produto Comex - Desativar Cadastro — (não localizado)";
+                return View(new gc_comex_produtos());
+            }
             gc_comex_produtos RecordComexProduto = db.gc_comex_produtos.Find(IdProdutoComex);
+            if (RecordComexProduto == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Produto COMEX", IdProdutoComex);
+                ViewBag.Title = "Produto Comex - Desativar Cadastro — (não localizado)";
+                return View(new gc_comex_produtos { id_comex_produto = IdProdutoComex });
+            }
             return View(RecordComexProduto);
         }
 
@@ -1159,13 +1119,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
 
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
@@ -1180,5 +1138,30 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             base.Dispose(disposing);
         }
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        {
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroIdProcessamento(Exception ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacaoIdProcessamento(DbEntityValidationException ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureValidationMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
+
     }
 }

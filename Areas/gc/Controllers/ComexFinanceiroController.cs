@@ -40,9 +40,10 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDadosPagamentos(jQueryDataTableParamModel param)
         {
             if (param == null) { param = new jQueryDataTableParamModel(); }
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
             string saldoContaImportacao = "0,00";
+            string filterOnOff = "0";
 
             try
             {
@@ -57,7 +58,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 int.TryParse(param.yesCustomField01.EmptyIfNull().ToString().Trim(), out idImportacao);
                 int.TryParse(param.yesCustomField02.EmptyIfNull().ToString().Trim(), out idInvoice);
                 bool filtroAplicado = idImportacao > 0 || idInvoice > 0;
-                string filterOnOff = (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && filtroAplicado) ? "1" : "0";
+                filterOnOff = (param.yesFilterField.EmptyIfNull().ToString().Trim() == "*" && filtroAplicado) ? "1" : "0";
 
                 // -----------------------------
                 // Base query (LINQ + AsNoTracking)
@@ -182,8 +183,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     yesDisplayField01 = saldoContaImportacao,
                     sEcho = param.sEcho,
@@ -192,35 +193,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+                        catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, filterOnOff);
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            // ✅ retorna no padrão do DataTables, mas com erro real
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = stackTrace, // se quiser ocultar em produção, devolva ""
-                yesFilterOnOff = "0",
-                yesDisplayField01 = saldoContaImportacao,
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -231,6 +207,13 @@ namespace GdiPlataform.Areas.gc.Controllers
             if (IdFinanceiro > 0)
             {
                 record_gc_comex_financeiro = db.gc_comex_financeiro.Find(IdFinanceiro);
+                if (record_gc_comex_financeiro == null)
+                {
+                    ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro COMEX", IdFinanceiro);
+                    PreencherLookups(IdFinanceiro);
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Lançamento — (não localizado)</b>";
+                    return View(new gc_comex_financeiro { id_financeiro = IdFinanceiro.GetValueOrDefault() });
+                }
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Lançamento - " + record_gc_comex_financeiro.id_financeiro.EmptyIfNull().ToString() + "</b>";
             }
             else
@@ -420,15 +403,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -437,8 +416,21 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalCancelarComexFinanceiro(String id)
         {
             String MsgAdvertencia = String.Empty;
-            ViewBag.Title = ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Pagamento Comex</b>";
-            gc_comex_financeiro record_gc_comex_financeiro = db.gc_comex_financeiro.Find(int.Parse(id));
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Pagamento Comex</b>";
+            int idFinanceiro = 0;
+            if (!int.TryParse(id, out idFinanceiro) || idFinanceiro <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro COMEX", null);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Pagamento Comex — (não localizado)</b>";
+                return View(new gc_comex_financeiro());
+            }
+            gc_comex_financeiro record_gc_comex_financeiro = db.gc_comex_financeiro.Find(idFinanceiro);
+            if (record_gc_comex_financeiro == null)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro COMEX", idFinanceiro);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-ban", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cancelar Pagamento Comex — (não localizado)</b>";
+                return View(new gc_comex_financeiro { id_financeiro = idFinanceiro });
+            }
             if (record_gc_comex_financeiro.tipo_pag_rec == 2)
             {
                 MsgAdvertencia += " - Somente Pagamentos podem ser cancelados!";
@@ -496,18 +488,31 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
+
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        {
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
 
     }
 }

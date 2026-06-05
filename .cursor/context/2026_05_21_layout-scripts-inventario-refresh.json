@@ -1,0 +1,2003 @@
+﻿{
+  "generated_at": "2026-05-21 14:09:33",
+  "script": "2026_05_22_gdi_inventory_page_scripts.py",
+  "views_scanned": 240,
+  "summary": {
+    "datatables_views": 137,
+    "select2_views": 2,
+    "jstree_views": 2,
+    "tempus_views": 41,
+    "main_modal_hosts": 47,
+    "lite_layout_candidates": 5
+  },
+  "controllers": [
+    {
+      "area": "",
+      "controller": "AcessoNegado",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "",
+      "controller": "Error",
+      "views": 3,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "",
+      "controller": "Home",
+      "views": 3,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "",
+      "controller": "Shared",
+      "views": 6,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "Toggle"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "",
+      "controller": "UserIdentity",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "Tempus",
+        "Toggle"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 2
+    },
+    {
+      "area": "a",
+      "controller": "Parametros",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "crm",
+      "controller": "Pedidos",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "crm",
+      "controller": "_ViewStart",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Atendimentos",
+      "views": 5,
+      "modal_hosts": 2,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "CentrosCustos",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "Jstree"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 1,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Cidades",
+      "views": 3,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "ClassificacaoFinanceira",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "Jstree"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 1,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Clientes",
+      "views": 8,
+      "modal_hosts": 2,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 2
+    },
+    {
+      "area": "g",
+      "controller": "ContasCaixas",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "ContratosAviacao",
+      "views": 4,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 1
+    },
+    {
+      "area": "g",
+      "controller": "Filiais",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Financeiro",
+      "views": 19,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 3
+    },
+    {
+      "area": "g",
+      "controller": "Ged",
+      "views": 4,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 4,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 3
+    },
+    {
+      "area": "g",
+      "controller": "Nfe",
+      "views": 10,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 9,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 2
+    },
+    {
+      "area": "g",
+      "controller": "PagRecCondicoes",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "PagRecTipos",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Perfis",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Produtos",
+      "views": 5,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "ProdutosNcm",
+      "views": 3,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Shared",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "UF",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Usuarios",
+      "views": 3,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "Vendedores",
+      "views": 2,
+      "modal_hosts": 2,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "_ViewStart",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Cfop",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "CfopOperacoes",
+      "views": 2,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "CfopParametros",
+      "views": 2,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "ComexFinanceiro",
+      "views": 3,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 1
+    },
+    {
+      "area": "gc",
+      "controller": "ComexImportacoes",
+      "views": 10,
+      "modal_hosts": 2,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 9,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 1
+    },
+    {
+      "area": "gc",
+      "controller": "ComexInvoices",
+      "views": 5,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "ComexProdutos",
+      "views": 7,
+      "modal_hosts": 2,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Estoque",
+      "views": 10,
+      "modal_hosts": 3,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 8,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 1
+    },
+    {
+      "area": "gc",
+      "controller": "EstoqueControle",
+      "views": 3,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 3,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 2
+    },
+    {
+      "area": "gc",
+      "controller": "EstoqueInventario",
+      "views": 5,
+      "modal_hosts": 2,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "EstoqueLotes",
+      "views": 3,
+      "modal_hosts": 3,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 2,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 1
+    },
+    {
+      "area": "gc",
+      "controller": "FinanceiroLancamentos",
+      "views": 12,
+      "modal_hosts": 4,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 6,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 2
+    },
+    {
+      "area": "gc",
+      "controller": "FinanceiroParametroDifal",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Fretes",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Gerencial",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 1,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Movimentos",
+      "views": 31,
+      "modal_hosts": 5,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Select2",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 27,
+      "select2_views": 2,
+      "jstree_views": 0,
+      "tempus_views": 5
+    },
+    {
+      "area": "gc",
+      "controller": "MovimentosEntradas",
+      "views": 8,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 5,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Parametros",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "RelatoriosCadastrais",
+      "views": 2,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Select2"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "RelatoriosComerciais",
+      "views": 10,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Select2",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 7
+    },
+    {
+      "area": "gc",
+      "controller": "RelatoriosFinanceiros",
+      "views": 2,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Select2",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 1
+    },
+    {
+      "area": "gc",
+      "controller": "RelatoriosRegulamentacao",
+      "views": 5,
+      "modal_hosts": 1,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Select2",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 4
+    },
+    {
+      "area": "gc",
+      "controller": "Shared",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "_ViewStart",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "qa",
+      "controller": "GedSGQ",
+      "views": 4,
+      "modal_hosts": 3,
+      "default_flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 3,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 3
+    },
+    {
+      "area": "qa",
+      "controller": "Shared",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "qa",
+      "controller": "Treinamentos",
+      "views": 2,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "qa",
+      "controller": "_ViewStart",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": false,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    }
+  ],
+  "lite_layout_candidates": [
+    {
+      "area": "g",
+      "controller": "Shared",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "g",
+      "controller": "_ViewStart",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Parametros",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "Shared",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    },
+    {
+      "area": "gc",
+      "controller": "_ViewStart",
+      "views": 1,
+      "modal_hosts": 0,
+      "default_flags": [
+        "Core"
+      ],
+      "lite_layout_candidate": true,
+      "datatables_views": 0,
+      "select2_views": 0,
+      "jstree_views": 0,
+      "tempus_views": 0
+    }
+  ],
+  "jstree_views": [
+    {
+      "path": "Areas/g/Views/CentrosCustos/Index.cshtml",
+      "flags": [
+        "Core",
+        "Jstree"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/ClassificacaoFinanceira/Index.cshtml",
+      "flags": [
+        "Core",
+        "Jstree"
+      ]
+    }
+  ],
+  "tempus_views": [
+    {
+      "path": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Clientes/ModalAtualizarLimiteCredito.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/ContratosAviacao/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Financeiro/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Financeiro/ModalProrrogarVencimentoTitulo.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Financeiro/ModalTransferirContaCaixa.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Ged/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Ged/ModalEditFileGed.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Ged/ModalUploadFileGed.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Nfe/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/g/Views/Nfe/ModalExportarDadosNfePDF.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/ComexFinanceiro/ModalCreateEditGcComexFinanceiro.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/ComexImportacoes/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueControle/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueControle/ModalCreateMedicao.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueLotes/ModalCreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/Estoque/ModalRecebimentoComexLote.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/FinanceiroLancamentos/ModalGerarFinanceiroMovimentos.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Select2",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/ModalConsultaPedidos.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/ModalPedidoEntrega.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/ModalPedidoExpedicao.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/ModalPedidoSeparacao.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioItensComercializados.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioNotasFiscaisContabilidade.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioNotasFiscaisEmitidas.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioNotasFiscaisMensais.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioTransportadorasFretes.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresComissoes.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/ModalRelatorioVendedoresPedidos.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosFinanceiros/ModalRelatorioLancamentosFinanceiros.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosRegulamentacao/ModalRelatorioANP.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosRegulamentacao/ModalRelatorioIBAMA.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosRegulamentacao/ModalRelatorioJogueLimpo.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosRegulamentacao/ModalRelatorioPF.cshtml",
+      "flags": [
+        "Core",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/qa/Views/GedSGQ/IndexAtasReunioes.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/qa/Views/GedSGQ/IndexComunicados.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ]
+    },
+    {
+      "path": "Views/UserIdentity/Index.cshtml",
+      "flags": [
+        "Core",
+        "Tempus",
+        "Toggle"
+      ]
+    },
+    {
+      "path": "Views/UserIdentity/TrocaObrigatoriaSenha.cshtml",
+      "flags": [
+        "Core",
+        "Tempus",
+        "Toggle"
+      ]
+    }
+  ],
+  "modal_hosts": [
+    {
+      "path": "Areas/g/Views/Atendimentos/Edit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Atendimentos/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Clientes/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Clientes/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/ContratosAviacao/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Financeiro/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Ged/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Nfe/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/ProdutosNcm/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Produtos/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Vendedores/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/g/Views/Vendedores/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/CfopOperacoes/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/CfopParametros/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/ComexFinanceiro/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/ComexImportacoes/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/ComexImportacoes/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/ComexInvoices/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/ComexProdutos/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/ComexProdutos/ProdutosPre.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueControle/CreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueInventario/FormInventarioItens.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueInventario/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueLotes/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueLotes/ModalCreateEdit.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/EstoqueLotes/ModalUploadAnexoEstoqueLotes.cshtml",
+      "flags": [
+        "Core"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Estoque/FormRecebimentoItensEstoque.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Estoque/FormRecebimentoItensImportacao.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Estoque/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/FinanceiroLancamentos/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/FinanceiroLancamentos/ModalCreateEditLancamento.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/FinanceiroLancamentos/ModalUploadAnexoFinanceiro.cshtml",
+      "flags": [
+        "Core"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/FinanceiroLancamentos/ModalViewFinanceiroMovimentos.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/MovimentosEntradas/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Select2",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": true,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/IndexPedido.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/ModalPedidoViewAnexos.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/ModalUploadFilePedidos.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/Movimentos/PainelPedidos.cshtml",
+      "flags": [
+        "Core",
+        "DataTables"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosCadastrais/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Select2"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosComerciais/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Select2"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosFinanceiros/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Select2"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/gc/Views/RelatoriosRegulamentacao/Index.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Select2"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/qa/Views/GedSGQ/IndexAtasReunioes.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/qa/Views/GedSGQ/IndexComunicados.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Areas/qa/Views/GedSGQ/IndexDocsSGQ.cshtml",
+      "flags": [
+        "Core",
+        "DataTables",
+        "Tempus"
+      ],
+      "hits": {
+        "datatables": true,
+        "select2": false,
+        "jstree": false,
+        "tempus": true,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    },
+    {
+      "path": "Views/Shared/_Navbar.cshtml",
+      "flags": [
+        "Core"
+      ],
+      "hits": {
+        "datatables": false,
+        "select2": false,
+        "jstree": false,
+        "tempus": false,
+        "main_modal_load": true,
+        "toggle": false
+      }
+    }
+  ],
+  "errors": []
+}

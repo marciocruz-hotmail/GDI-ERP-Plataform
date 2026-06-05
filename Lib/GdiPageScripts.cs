@@ -88,7 +88,7 @@ namespace GdiPlataform.Lib
 
         /// <summary>
         /// G-PERF-20 Fase 4 lote C — actions sem DataTables/Select2 na view (CreateEdit, formulários, POPs).
-        /// Inventário: <c>Scripts/2026_05_20_gdi_inventory_layout_no_datatables.py</c>.
+        /// Inventário: <c>Scripts/2026_05_22_gdi_inventory_layout_no_datatables.py</c>.
         /// </summary>
         private static readonly Dictionary<string, HashSet<string>> LayoutLiteActionsByController =
             BuildLayoutLiteActionsByController();
@@ -176,7 +176,7 @@ namespace GdiPlataform.Lib
         private static Dictionary<string, HashSet<string>> BuildTempusActionsByAreaController()
         {
             var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-            // Nomes de action MVC (não nome do ficheiro .cshtml). Inventário: Scripts/2026_05_20_gdi_cross_audit_view_libraries.py
+            // Nomes de action MVC (não nome do ficheiro .cshtml). Inventário: Scripts/2026_05_22_gdi_cross_audit_view_libraries.py
             var pairs = new[]
             {
                 Tuple.Create("g", "Clientes", "Create"), Tuple.Create("g", "Clientes", "Edit"), Tuple.Create("g", "Clientes", "Index"),

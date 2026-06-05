@@ -261,7 +261,7 @@ Controllers, `Lib/Lookups/*`, `Robos/*`, entidades em `Db/*.cs` (~170 tabelas), 
 | F03 | `Db/ModelDbGdiPlataform1.Designer.cs` | EF designer | Morto provável | Par de F02; só no `.csproj` | Alta | Baixo | Idem F02 |
 | F04 | `BACKLOG-DEV - Copia.md` | Markdown | Morto provável | Cópia manual na raiz | Alta | Nulo | Remover após diff com `BACKLOG-DEV.md` |
 | F05 | `App_Data/Secrets/sql-server.local - Copia.config` | Config | Morto provável | Duplicata de secrets local | Alta | Médio (dev) | Apagar cópia; manter só `.example` + gitignored |
-| F06 | `nul)` | Arquivo acidental | Morto provável | Nome inválido na raiz | Alta | Nulo | Remover |
+| F06 | ~~`nul)`~~ | Arquivo acidental | **Removido** (2026-06-05) | Artefacto cmd `2>nul)` na raiz; gitignored | — | Nulo | Resolvido |
 | F07 | `_filestemp/` (7173 arquivos) | Temp/backup | Legado preservado | Gitignored; backups de intervenções Cursor | Média | Nulo local | Manter gitignore; limpar disco local periodicamente |
 | F08 | Views `FinanceiroFaturamentos/*` | Views | Removido (confirmado) | 0 arquivos; changelog registra remoção módulo | Alta | N/A | Já removido — validar menus DB |
 | F09 | `PortalVendedorController` | Controller | Removido (confirmado) | 0 arquivos; refs só em docs/SQL scripts | Alta | N/A | Validar roles/menus SQL pendentes |
@@ -311,7 +311,7 @@ Controllers, `Lib/Lookups/*`, `Robos/*`, entidades em `Db/*.cs` (~170 tabelas), 
 | U04 | Query duplicada | `RoboEnotasNFE.cs` | SqlQuery produtos/NCM repetido L619 vs L1568 | Médio | Método privado parametrizado |
 | U05 | Padrão acesso dados | 17 controllers | EF + LibDB misturados | Alto | Definir fronteira por fluxo |
 | U06 | Lookup duplicado | `ClientesLookupController` vs `MovimentosController.GetClientesLookup` | URLs diferentes em views | Baixo | Consolidar endpoints typeahead |
-| U07 | Documentação duplicada | `.md/` vs `docs/` | Dois relatórios migração 472-481 | Baixo | Manter `docs/` como canônico |
+| U07 | Documentação duplicada | ~~`.md/`~~ removida (2026-06-05) | Conteúdo canónico em `docs/` | — | Resolvido — `docs/relatorio-migracao-netframework-472-481.md`, `docs/investigacao-timeout-sessao.md` |
 | U08 | Scripts duplicados | `Scripts/gdi_*.ps1` vs `Scripts/2026_05_20_gdi_*.ps1` | Mesma função, nomes diferentes | Baixo | Padronizar prefixo data |
 | U09 | Namespace inconsistente | `LibDBGestaoComercial.cs` | Classe `StartDBGestaoComercial` em namespace `Areas.gc.Controllers` mas arquivo em `Lib/` | Médio | Mover para `Services/` ou namespace `Lib` |
 | U10 | Autorização inconsistente | Controllers com/sem `[CustomAuthorize]` | 14 controllers área + 6 raiz sem attr | Alto | Matriz roles uniforme |
@@ -420,7 +420,7 @@ Controllers, `Lib/Lookups/*`, `Robos/*`, entidades em `Db/*.cs` (~170 tabelas), 
 
 ### Fase 3: Código morto e padronização (P3)
 
-- [ ] Validar e remover `PedidosVendaServices`, `ModelDbGdiPlataform1*`, `*Copia*`, `nul)`.
+- [ ] Validar e remover `PedidosVendaServices`, `ModelDbGdiPlataform1*`, `*Copia*` (~~`nul)`~~ removido 2026-06-05).
 - [ ] Desinstalar Modernizr se confirmado unused.
 - [ ] Consolidar scripts `Scripts/` com prefixo `2026_MM_DD_`.
 - [ ] Mover `StartDBGestaoComercial` para namespace/pasta corretos.
@@ -490,7 +490,7 @@ Checklist objetivo — **executar todos os itens aplicáveis** antes de qualquer
 ### Top 5 ganhos rápidos (baixo esforço)
 
 1. Corrigir log de senha (1 linha).
-2. Remover arquivos `*Copia*` e `nul)`.
+2. Remover arquivos `*Copia*` (~~`nul)`~~ removido 2026-06-05).
 3. Remover `Ssl3` de email (2 arquivos).
 4. Tornar `JobServer:Key` obrigatório (config + validação).
 5. Cache `g_unidade_medida` / NCM no robô NFe.

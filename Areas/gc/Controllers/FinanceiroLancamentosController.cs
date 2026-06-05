@@ -7,7 +7,6 @@ using GdiPlataform.Lib;
 using GdiPlataform.Lib.Lookups;
 using GdiPlataform.Robos.Itau;
 using GdiPlataform.Security;
-using Microsoft.Graph.Models;
 using Newtonsoft.Json;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
@@ -71,8 +70,8 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult GetDadosLancamentos(jQueryDataTableParamModel param)
         {
             if (param == null) param = new jQueryDataTableParamModel();
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
             string filterOnOff = "0";
 
             try
@@ -585,8 +584,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesDisplayField01 = saldoContaCaixa,
                     yesFilterOnOff = uiFilterOnOff,
                     sEcho = param.sEcho,
@@ -595,40 +594,16 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+                        catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, filterOnOff);
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error", // opcional: GdiDtNotifyJsonErrorMessage → LibMessageError (ícone erro)
-                stackTrace = stackTrace, // em produção você pode retornar ""
-                yesDisplayField01 = "",
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         public ActionResult GetDadosLancamentosByMovimento(jQueryDataTableParamModel param)
         {
             if (param == null) param = new jQueryDataTableParamModel();
-            string errorMessage = "";
-            string stackTrace = "";
+            string errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage;
+            string stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace;
             string filterOnOff = "0";
 
             try
@@ -752,8 +727,8 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -761,33 +736,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     aaData = list
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch (DbEntityValidationException ex)
+                        catch (Exception e)
             {
-                errorMessage = LibExceptions.getDbEntityValidationException(ex);
-                stackTrace = ex.ToString();
+                return JsonDataTableException(e, param, filterOnOff);
             }
-            catch (WebException ex)
-            {
-                errorMessage = LibExceptions.getWebException(ex);
-                stackTrace = ex.ToString();
-            }
-            catch (Exception ex)
-            {
-                errorMessage = LibExceptions.getExceptionShortMessage(ex);
-                stackTrace = ex.ToString();
-            }
-
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = stackTrace, // em produção você pode retornar ""
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
         }
         public ActionResult ModalCreateEditLancamento(int? IdLancamento, int? TipoPagRec, int? IdLancamentoDuplicate)
         {
@@ -799,16 +751,41 @@ namespace GdiPlataform.Areas.gc.Controllers
             {
                 if (IdLancamento >= 0)
                 {
-                    if (IdLancamento > 0) { record_gc_financeiro_lancamentos = db.gc_financeiro_lancamentos.Find(IdLancamento); }
-                    else if (IdLancamento == 0) 
+                    if (IdLancamento > 0)
                     {
-                        gc_financeiro_lancamentos OldLancamento = db.gc_financeiro_lancamentos.Find(IdLancamentoDuplicate);
+                        record_gc_financeiro_lancamentos = db.gc_financeiro_lancamentos.Find(IdLancamento);
+                        if (record_gc_financeiro_lancamentos == null)
+                        {
+                            ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro", IdLancamento);
+                            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Edição de Lançamento — (não localizado)</b>";
+                            PreencherLookupsModalLancamento(0);
+                            return View("ModalCreateEditLancamento", new gc_financeiro_lancamentos { id_lancamento = IdLancamento.GetValueOrDefault() });
+                        }
+                    }
+                    else if (IdLancamento == 0)
+                    {
+                        int idLancamentoDuplicate = IdLancamentoDuplicate.GetValueOrDefault();
+                        if (idLancamentoDuplicate <= 0)
+                        {
+                            ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro", null);
+                            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Duplicar Lançamento — (não localizado)</b>";
+                            PreencherLookupsModalLancamento(0);
+                            return View("ModalCreateEditLancamento", new gc_financeiro_lancamentos());
+                        }
+                        gc_financeiro_lancamentos OldLancamento = db.gc_financeiro_lancamentos.Find(idLancamentoDuplicate);
+                        if (OldLancamento == null)
+                        {
+                            ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro", idLancamentoDuplicate);
+                            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Duplicar Lançamento — (não localizado)</b>";
+                            PreencherLookupsModalLancamento(0);
+                            return View("ModalCreateEditLancamento", new gc_financeiro_lancamentos { id_lancamento = 0 });
+                        }
                         record_gc_financeiro_lancamentos = LibDB.CloneTObject(OldLancamento);
                         record_gc_financeiro_lancamentos.id_lancamento = 0;
                         record_gc_financeiro_lancamentos.id_lancamento_adiantamento = 0;
                         record_gc_financeiro_lancamentos.id_lancamento_adiantamento2 = 0;
                         record_gc_financeiro_lancamentos.id_lancamento_adiantamento3 = 0;
-                    };
+                    }
 
                     if (record_gc_financeiro_lancamentos.is_provisao_imposto == true) { BloquearLancamentoProvisaoImposto = true; } // Não é Permitido lançar provisão de impostos de lançamentos de provisão | O Botão não irá aparecer
                     if (record_gc_financeiro_lancamentos.id_lancamento_tributos > 0) { BloquearLancamentoProvisaoImposto = true; } // Não é Permitido lançar provisão de impostos de lançamentos de provisão | O Botão não irá aparecer
@@ -924,7 +901,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalCreateEditLancamento";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -1237,15 +1214,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -1310,7 +1283,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalViewFinanceiroMovimentos(" + id.ToString() + ")";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -1346,7 +1319,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (RecordMovimento != null)
                 {
                     if (RecordMovimento.obs.EmptyIfNull().ToString().Length > 0) { MsgHistorico += "OBS Pedido: " + RecordMovimento.obs.EmptyIfNull().ToString() + "\r\n"; };
-                    if (RecordMovimento.frete_observacoes.EmptyIfNull().ToString().Length > 0) { MsgHistorico = "OBS Frete: " + RecordMovimento.frete_observacoes.EmptyIfNull().ToString() + "\r\n"; };
+                    if (RecordMovimento.frete_observacoes.EmptyIfNull().ToString().Length > 0) { MsgHistorico += "OBS Frete: " + RecordMovimento.frete_observacoes.EmptyIfNull().ToString() + "\r\n"; };
                     if (RecordMovimento.obs_aprovacao.EmptyIfNull().ToString().Length > 0) { MsgHistorico += "OBS Aprovação: " + RecordMovimento.obs_aprovacao.EmptyIfNull().ToString() + "\r\n"; };
                     if (RecordMovimento.obs_separacao.EmptyIfNull().ToString().Length > 0) { MsgHistorico += "OBS Separação: " + RecordMovimento.obs_separacao.EmptyIfNull().ToString() + "\r\n"; };
                 };
@@ -1563,7 +1536,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalGerarFinanceiroMovimentos(" + id.ToString() + ")";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -2129,7 +2102,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 QtdInconsistencias = 1;
                 msgRetorno += "<br/><br/>" + "<b>----- ERRO na Geração dos Lançamentos Financeiros -----</b>" + "<br/>";
                 if (QtdBoletosACancelar > 0) { msgRetorno += QtdBoletosACancelar.ToString() + " Boletos à Cancelar (" + ListaIdsBoletosCancelar.ToString() + ")" + "<br/>" + MsgGeral; };
-                msgRetorno += "Mensagem: " + LibExceptions.getDbEntityValidationException(ex);
+                msgRetorno += "Mensagem: " + GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                 LibAudit.SaveAudit(db, true,"gc_movimentos", record_gc_movimento.id_movimento, msgRetorno.Replace("<br/>", " | ").Replace("-----", "").Replace("</b>", "").Replace("<b>", ""));
             }
             catch (Exception e)
@@ -2213,7 +2186,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 QtdInconsistencias = 1;
                 msgRetorno += "<br/><br/>" + "<b>----- ERRO na Geração dos Lançamentos Financeiros -----</b>" + "<br/>";
                 if (QtdBoletosACancelar > 0) { msgRetorno += QtdBoletosACancelar.ToString() + " Boletos à Cancelar (" + ListaIdsBoletosCancelar.ToString() + ")" + "<br/>" + MsgGeral; };
-                msgRetorno += "Mensagem: " + LibExceptions.getExceptionShortMessage(e);
+                msgRetorno += "Mensagem: " + GdiMvcJsonResults.AjaxFailureMessage(e);
                 LibAudit.SaveAudit(db, true,"gc_movimentos", record_gc_movimento.id_movimento, msgRetorno.Replace("<br/>", " | ").Replace("-----", "").Replace("</b>", "").Replace("<b>", ""));
             }
             return Json(new { success = Sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
@@ -2386,7 +2359,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         new_record_gc_financeiro_lancamento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
                         db.Entry(new_record_gc_financeiro_lancamento).State = EntityState.Modified;
                         db.SaveChanges();
-                        MsgGeral += "  |  Erro Boleto On-Line [" + LibExceptions.getExceptionShortMessage(e) + "]!<br/>";
+                        MsgGeral += "  |  Erro Boleto On-Line [" + GdiMvcJsonResults.AjaxFailureMessage(e) + "]!<br/>";
                         throw e;
                     }
                 }
@@ -2407,7 +2380,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         db.SaveChanges();
                     }
                 }
-                MsgGeral += "  |  Erro Boleto On-Line [" + LibExceptions.getExceptionShortMessage(e) + "]!<br/>";
+                MsgGeral += "  |  Erro Boleto On-Line [" + GdiMvcJsonResults.AjaxFailureMessage(e) + "]!<br/>";
                 Thread.Sleep(2000);
                 throw e;
             }
@@ -2608,7 +2581,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalBaixarLancamentos(" + id.ToString() + ")";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -2659,13 +2632,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -2704,7 +2675,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalCancelarLancamentos(" + id.ToString() + ")";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -2819,13 +2790,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno}, JsonRequestBehavior.AllowGet);
         }
@@ -3110,13 +3079,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -3125,21 +3092,16 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region Financeiro Movimento
         public ActionResult ModalGerarBoletoLancamentoAvulso(int? id)
         {
-            try
+            int IdLancamento = id.GetValueOrDefault();
+            gc_financeiro_lancamentos record_gc_financeiro_lancamentos = db.gc_financeiro_lancamentos.Find(IdLancamento);
+            if (record_gc_financeiro_lancamentos == null || IdLancamento <= 0)
             {
-                int IdLancamento = id.GetValueOrDefault();
-                gc_financeiro_lancamentos record_gc_financeiro_lancamentos = db.gc_financeiro_lancamentos.Find(IdLancamento);
-                ViewBag.Title = LibIcons.getIcon("fa-solid fa-credit-card", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Gerar Boleto - Lançamento Nº " + IdLancamento.ToString(); ;
-                return View(record_gc_financeiro_lancamentos);
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro", id);
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-credit-card", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Gerar Boleto (não localizado)";
+                return View(new gc_financeiro_lancamentos { id_lancamento = 0 });
             }
-            catch (Exception ex)
-            {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
-                msg += "<br/>" + "FinanceiroLancamentoController";
-                msg += "<br/>" + "ModalGerarBoletoLancamentoAvulso(" + id.ToString() + ")";
-                LibFlashMessage.SetModalMessage(this, msg);
-                return RedirectToAction("ModalError", "Error", new { area = "" });
-            }
+            ViewBag.Title = LibIcons.getIcon("fa-solid fa-credit-card", "", "#008000", "fa-lg") + LibStringFormat.GetEspacesHtml(3) + "Gerar Boleto - Lançamento Nº " + IdLancamento.ToString();
+            return View(record_gc_financeiro_lancamentos);
         }
 
         [HttpPost]
@@ -3271,15 +3233,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                qtdInconsistencias = 1;
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
 
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
@@ -3365,7 +3323,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalCancelarMovimentoFinanceiro(" + id.ToString() + ")";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -3503,13 +3461,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -3529,7 +3485,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "FinanceiroLancamentoController";
                 msg += "<br/>" + "ModalRelatorioContaCaixaSaldoDiario";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -3751,13 +3707,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = IdProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
@@ -3839,13 +3793,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
 
@@ -3865,13 +3817,11 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -3879,54 +3829,63 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region GetGedComex
         public ActionResult GetGedLancamentos(jQueryDataTableParamModel param)
         {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            int IdLancamento = 0;
-            int.TryParse(param.yesCustomIdPK, out IdLancamento);
-            List<g_usuarios> allUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
-            List<Db.ged_arquivos> allRecords = db.ged_arquivos.Where(g => g.ativo == true && g.id_gc_financeiro == IdLancamento).ToList();
-            List<string[]> list = new List<string[]>();
-
-            var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.ged_arquivos, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            foreach (var ged in displayedRecords)
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            string filterOnOff = "0";
+            try
             {
-                String DataReferencia = String.Empty;
-                String NomeUsuario = allUsuarios.Where(u => u.id_usuario == ged.id_usuario_cadastro).FirstOrDefault().login.EmptyIfNull().ToString();
-                if (ged.datahora_cadastro != null) { DataReferencia = ged.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); };
+                bool filterDb = false;
+                bool filterAdvanced = false;
+                int IdLancamento = 0;
+                int.TryParse(param.yesCustomIdPK, out IdLancamento);
+                List<g_usuarios> allUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
+                List<Db.ged_arquivos> allRecords = db.ged_arquivos.Where(g => g.ativo == true && g.id_gc_financeiro == IdLancamento).ToList();
+                List<string[]> list = new List<string[]>();
 
-                list.Add(new[] {
-                                    ged.id_arquivo.ToString(),
-                                    "", // Botão Remover
-                                    ged.descricao.ToString(),
-                                    ged.filename.ToString(),
-                                    DataReferencia,
-                                    NomeUsuario,
-                                    "" // Botão Abrir
-                                });
+                var displayedRecords = allRecords.Skip(param.iDisplayStart).Take(param.iDisplayLength);
+                Func<Db.ged_arquivos, string> orderingFunction = (c =>
+                                         param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
+                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
+                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
+                                         "");
+                if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
+                else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+
+                foreach (var ged in displayedRecords)
+                {
+                    String DataReferencia = String.Empty;
+                    g_usuarios recordUsuario = allUsuarios.Where(u => u.id_usuario == ged.id_usuario_cadastro).FirstOrDefault();
+                    String NomeUsuario = recordUsuario != null ? recordUsuario.login.EmptyIfNull().ToString() : string.Empty;
+                    if (ged.datahora_cadastro != null) { DataReferencia = ged.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); }
+
+                    list.Add(new[] {
+                                        ged.id_arquivo.ToString(),
+                                        "",
+                                        ged.descricao.ToString(),
+                                        ged.filename.ToString(),
+                                        DataReferencia,
+                                        NomeUsuario,
+                                        ""
+                                    });
+                }
+
+                if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; }
+
+                return Json(new
+                {
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = allRecords.Count(),
+                    iTotalDisplayRecords = allRecords.Count(),
+                    aaData = list
+                },
+                JsonRequestBehavior.AllowGet);
             }
-
-            String filterOnOff = "0";
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
-
-            return Json(new
+            catch (Exception e)
             {
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = allRecords.Count(),
-                iTotalDisplayRecords = allRecords.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                return JsonDataTableException(e, param, filterOnOff);
+            }
         }
         #endregion
 
@@ -3936,6 +3895,13 @@ namespace GdiPlataform.Areas.gc.Controllers
             CstUploadGed record_cstUploadGed = new CstUploadGed();
             record_cstUploadGed.isLancamentoFinanceiro = true;
             gc_financeiro_lancamentos RecordLancamentoFinanceiro = db.gc_financeiro_lancamentos.Find(IdLancamento);
+            if (RecordLancamentoFinanceiro == null || IdLancamento.GetValueOrDefault() <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro", IdLancamento);
+                ViewBag.ComboGedTipos = new List<SelectListItem>();
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-box-archive", "", "#008000", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Upload de Documentos (não localizado)</b>";
+                return View(record_cstUploadGed);
+            }
             record_cstUploadGed.id_gc_financeiro = RecordLancamentoFinanceiro.id_lancamento;
             record_cstUploadGed.id_gc_movimento = RecordLancamentoFinanceiro.id_movimento;
                 var ComboGedTipos = new List<SelectListItem>();
@@ -3952,6 +3918,13 @@ namespace GdiPlataform.Areas.gc.Controllers
         public ActionResult ModalFinanceiroViewAnexos(int? id, string tag)
         {
             gc_financeiro_lancamentos RecordFinanceiroLancamento = db.gc_financeiro_lancamentos.Find(id);
+            if (RecordFinanceiroLancamento == null || id.GetValueOrDefault() <= 0)
+            {
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Lançamento financeiro", id);
+                RecordFinanceiroLancamento = new gc_financeiro_lancamentos { id_lancamento = id.GetValueOrDefault() };
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-paperclip", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Anexos do Lançamento Financeiro (não localizado)</b>";
+                return View(RecordFinanceiroLancamento);
+            }
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-paperclip", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Anexos do Lançamento Financeiro Nº " + RecordFinanceiroLancamento.id_lancamento.EmptyIfNull().ToString() + "</b>";
             return View(RecordFinanceiroLancamento);
         }
@@ -3959,62 +3932,71 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         public ActionResult GetGedFinanceiro(jQueryDataTableParamModel param)
         {
-            // Parâmetros
-            bool filterDb = false;
-            bool filterAdvanced = false;
-            String SentencaSQL = string.Empty;
-            int IdTable = 0;
-            int.TryParse(param.yesCustomIdPK, out IdTable);
-            List<g_usuarios> ListaUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
-            List<ged_arquivos> ListaArquivosGed = db.ged_arquivos.Where(g => g.ativo == true && g.id_gc_financeiro == IdTable).ToList();
-            List<ged_arquivos_tipos> ListaArquivosGedTipos = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).ToList();
-            List<string[]> list = new List<string[]>();
-
-            var displayedRecords = ListaArquivosGed.Skip(param.iDisplayStart).Take(param.iDisplayLength);
-            Func<Db.ged_arquivos, string> orderingFunction = (c =>
-                                     param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
-                                     param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
-                                     "");
-            if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
-            else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
-
-            foreach (var RecordGed in displayedRecords)
+            if (param == null) { param = new jQueryDataTableParamModel(); }
+            string filterOnOff = "0";
+            try
             {
-                String DataReferencia = String.Empty;
-                String DescricaoTipoArquivo = String.Empty;
-                String NomeUsuario = ListaUsuarios.Where(u => u.id_usuario == RecordGed.id_usuario_cadastro).FirstOrDefault().login.EmptyIfNull().ToString();
-                if (RecordGed.datahora_cadastro != null) { DataReferencia = RecordGed.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); };
-                if (RecordGed.id_arquivo_tipo > 0)
+                bool filterDb = false;
+                bool filterAdvanced = false;
+                int IdTable = 0;
+                int.TryParse(param.yesCustomIdPK, out IdTable);
+                List<g_usuarios> ListaUsuarios = db.g_usuarios.Where(u => u.id_usuario > 0).ToList();
+                List<ged_arquivos> ListaArquivosGed = db.ged_arquivos.Where(g => g.ativo == true && g.id_gc_financeiro == IdTable).ToList();
+                List<ged_arquivos_tipos> ListaArquivosGedTipos = db.ged_arquivos_tipos.Where(t => t.id_arquivo_tipo > 0).ToList();
+                List<string[]> list = new List<string[]>();
+
+                var displayedRecords = ListaArquivosGed.Skip(param.iDisplayStart).Take(param.iDisplayLength);
+                Func<Db.ged_arquivos, string> orderingFunction = (c =>
+                                         param.iSortCol_0 == 1 && param.iSortingCols > 0 ? Convert.ToString(c.id_arquivo) :
+                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.filename :
+                                         param.iSortCol_0 == 2 && param.iSortingCols > 0 ? c.descricao :
+                                         "");
+                if (param.sSortDir_0 == "asc") displayedRecords = displayedRecords.OrderBy(orderingFunction);
+                else displayedRecords = displayedRecords.OrderByDescending(orderingFunction);
+
+                foreach (var RecordGed in displayedRecords)
                 {
-                    ged_arquivos_tipos RecordArquivoTipo = ListaArquivosGedTipos.Where(t => t.id_arquivo_tipo == RecordGed.id_arquivo_tipo).FirstOrDefault();
-                    if (RecordArquivoTipo != null) { DescricaoTipoArquivo = RecordArquivoTipo.descricao.EmptyIfNull().ToString(); };
+                    String DataReferencia = String.Empty;
+                    String DescricaoTipoArquivo = String.Empty;
+                    g_usuarios recordUsuario = ListaUsuarios.Where(u => u.id_usuario == RecordGed.id_usuario_cadastro).FirstOrDefault();
+                    String NomeUsuario = recordUsuario != null ? recordUsuario.login.EmptyIfNull().ToString() : string.Empty;
+                    if (RecordGed.datahora_cadastro != null) { DataReferencia = RecordGed.datahora_cadastro.GetValueOrDefault().ToString("dd/MM/yy"); }
+                    if (RecordGed.id_arquivo_tipo > 0)
+                    {
+                        ged_arquivos_tipos RecordArquivoTipo = ListaArquivosGedTipos.Where(t => t.id_arquivo_tipo == RecordGed.id_arquivo_tipo).FirstOrDefault();
+                        if (RecordArquivoTipo != null) { DescricaoTipoArquivo = RecordArquivoTipo.descricao.EmptyIfNull().ToString(); }
+                    }
+
+                    list.Add(new[] {
+                                        RecordGed.id_arquivo.ToString(),
+                                        "",
+                                        DescricaoTipoArquivo.ToString(),
+                                        RecordGed.descricao.ToString(),
+                                        RecordGed.filename.ToString(),
+                                        DataReferencia,
+                                        NomeUsuario,
+                                        ""
+                                    });
                 }
 
-                list.Add(new[] {
-                                    RecordGed.id_arquivo.ToString(),
-                                    "", // Botão Desativar
-                                    DescricaoTipoArquivo.ToString(),
-                                    RecordGed.descricao.ToString(),
-                                    RecordGed.filename.ToString(),
-                                    DataReferencia,
-                                    NomeUsuario,
-                                    "" // Botão Download
-                                });
+                if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; }
+
+                return Json(new
+                {
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
+                    yesFilterOnOff = filterOnOff,
+                    sEcho = param.sEcho,
+                    iTotalRecords = ListaArquivosGed.Count(),
+                    iTotalDisplayRecords = ListaArquivosGed.Count(),
+                    aaData = list
+                },
+                JsonRequestBehavior.AllowGet);
             }
-
-            String filterOnOff = "0";
-            if ((filterDb == true) || (filterAdvanced == true)) { filterOnOff = "1"; };
-
-            return Json(new
+            catch (Exception e)
             {
-                yesFilterOnOff = filterOnOff,
-                sEcho = param.sEcho,
-                iTotalRecords = ListaArquivosGed.Count(),
-                iTotalDisplayRecords = ListaArquivosGed.Count(),
-                aaData = list
-            },
-            JsonRequestBehavior.AllowGet);
+                return JsonDataTableException(e, param, filterOnOff);
+            }
         }
 
         #region AjaxFinanceiroBoletoGCPDF
@@ -4194,16 +4176,29 @@ namespace GdiPlataform.Areas.gc.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                Sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = Sucesso, msg = MsgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+        private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
+        {
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
+        }
+
     }
 } 

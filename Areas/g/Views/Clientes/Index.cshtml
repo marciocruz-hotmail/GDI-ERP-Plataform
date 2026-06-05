@@ -67,7 +67,7 @@
                         </div>
                         @Html.Label("Nome", htmlAttributes: new { @class = "col-form-label col-sm-1" })
                         <div class="col-sm-5">
-                            @Html.DropDownListFor(model => model.ClientesIndex_id_cliente_lookup, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @id = "edit_id_cliente_lookup", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesFornecedoresLookup", "ClientesLookup", new { area = "" }), @data_gdi_lookup_min_length = "2" })
+                            @Html.TextBoxFor(model => model.ClientesIndex_nome, new { @class = "form-control", @id = "edit_nome_cliente", @placeholder = "Nome ou razão social (qualquer parte)", @onkeypress = "keypressed(event);" })
                         </div>
                     </div>
                     <div class="form-group row text-sm-end m-0 pt-1">
@@ -148,9 +148,8 @@
 
     function jsClientesTemCriterioFiltro()
     {
-        var idLookup = $('#edit_id_cliente_lookup').val();
         return !isEmpty($('#edit_id_cliente').val())
-            || (!isEmpty(idLookup) && idLookup !== '0')
+            || !isEmpty($('#edit_nome_cliente').val())
             || !isEmpty($('#edit_cpf').val())
             || !isEmpty($('#edit_cnpj').val());
     }
@@ -170,7 +169,7 @@
         {
             if (!jsClientesTemCriterioFiltro())
             {
-                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id., Cliente, CPF ou CNPJ).");
+                LibMessageAlert("Atenção", "Preencha ao menos um campo do <b>filtro</b> (Id., Nome, CPF ou CNPJ).");
                 return;
             }
             LibMessageProcessando('Pesquisando clientes...');
@@ -188,7 +187,7 @@
         try
         {
             $('#edit_id_cliente').val('');
-            $('#edit_id_cliente_lookup').val('0');
+            $('#edit_nome_cliente').val('');
             $('#edit_cpf').val('');
             $('#edit_cnpj').val('');
             document.getElementById("yesFilterField").value = "*";
@@ -229,7 +228,7 @@
                         yesFilterField: $('#yesFilterField').val().toString(),
                         yesFilterController: $('#yesFilterController').val().toString(),
                         yesCustomField01: emptyIfNull($('#edit_id_cliente').val()).toString(),
-                        yesCustomField02: emptyIfNull($('#edit_id_cliente_lookup').val()).toString(),
+                        yesCustomField02: emptyIfNull($('#edit_nome_cliente').val()).toString(),
                         yesCustomField03: emptyIfNull($('#edit_cpf').val()).toString(),
                         yesCustomField04: emptyIfNull($('#edit_cnpj').val()).toString()
                     };

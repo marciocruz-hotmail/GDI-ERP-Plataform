@@ -37,12 +37,12 @@ namespace GdiPlataform.Areas.gc.Services
             }
             catch (DbEntityValidationException ex)
             {
-                _msgProcessamento.Append(LibExceptions.getDbEntityValidationException(ex));
+                _msgProcessamento.Append(GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 return false;
             }
             catch (Exception ex)
             {
-                _msgProcessamento.Append(LibExceptions.getExceptionShortMessage(ex));
+                _msgProcessamento.Append(GdiMvcJsonResults.AjaxFailureMessage(ex));
                 return false;
             }
         }
@@ -68,12 +68,12 @@ namespace GdiPlataform.Areas.gc.Services
             }
             catch (DbEntityValidationException ex)
             {
-                _msgProcessamento.Append(LibExceptions.getDbEntityValidationException(ex));
+                _msgProcessamento.Append(GdiMvcJsonResults.AjaxFailureValidationMessage(ex));
                 return false;
             }
             catch (Exception ex)
             {
-                _msgProcessamento.Append(LibExceptions.getExceptionShortMessage(ex));
+                _msgProcessamento.Append(GdiMvcJsonResults.AjaxFailureMessage(ex));
                 return false;
             }
         }

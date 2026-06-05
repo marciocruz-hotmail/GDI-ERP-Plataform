@@ -199,9 +199,9 @@
                 criarCardKpi('rowKpisNc', 'TNC', 'Não Conformidade',  r.tnc.toFixed(1), r.corTnc, '%');
                 criarCardKpi('rowKpisNc', 'TRC', 'Taxa de Resposta', r.trc.toFixed(1), r.corTrc, '%');
             },
-            error: function () {
+            error: function (xhr, textStatus, errorThrown) {
                 $('#rowKpisNota, #rowKpisConf, #rowKpisNc').html('');
-                LibMessageAlert("Atenção", "Falha ao carregar os KPIs.");
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao carregar os KPIs.', { title: 'KPIs Pós-Venda' });
             }
         });
     }
@@ -253,8 +253,9 @@
                 html += '</tbody></table>';
                 $('#tblTendenciaWrapper').html(html);
             },
-            error: function () {
+            error: function (xhr, textStatus, errorThrown) {
                 $('#tblTendenciaWrapper').html('<div class="text-center text-muted py-2">Falha ao carregar tendência.</div>');
+                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao carregar tendência.', { title: 'Tendência' });
             }
         });
     }

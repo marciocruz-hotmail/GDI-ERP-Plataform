@@ -37,7 +37,7 @@
 **Tipo:** Análise | Documentação
 **Arquivos tocados:**
 - `.cursor/context/2026_05_20_ficheiros-orfaos-produtostipos.md` (novo)
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — §2.10 marcado [x]
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — §2.10 marcado [x]
 
 **Problema / Demanda:** Checklist 2.10 — confirmar `Areas/g/Views/ProdutosTipos/*` e `ProdutosTiposController.cs` (incluir no `.csproj` ou apagar); correr verify após mudanças em views.
 
@@ -51,7 +51,7 @@
 **Arquivos tocados:**
 - `Areas/g/Controllers/AssistentesController.cs`, `GedController.cs`, `NfeController.cs`, `CentrosCustosController.cs`, `ClassificacaoFinanceiraController.cs`
 - `Areas/gc/Controllers/ComexProdutosController.cs` — removido bloco `filterAdvanced`
-- `Scripts/2026_05_20_gdi_inventory_legacy_filter_server.py`, `.cursor/context/2026_05_20_filtro-generico-legado-limpeza.md`
+- `Scripts/2026_05_20_gdi_inventory_legacy_filter_server.py`, `.cursor/context/2026_05_22_filtro-generico-legado-limpeza.md`
 
 **Problema / Demanda:** Views já sem `yesFilterOperador`/`yesFilterText`/`yesFilterAdvancedText` (lote 2026-05-19); servidor ainda tinha ramos inalcançáveis.
 
@@ -98,7 +98,7 @@
 - `Areas/g/Controllers/FinanceiroController.cs` — removidos `ModalTransferirContaCaixa`, `AjaxTransferirContaCaixa`, `AjaxSaveFinanceiroAvulso`, `AjaxDownloadBoletos`, relatórios CSV órfãos (ex-Faturamentos)
 - Removidos: `Areas/g/Views/Financeiro/ModalTransferirContaCaixa.cshtml`, `CstFinanceiroTransferirContaCaixa.cs`, `CstFinanceiroLancamentos.cs`
 - `Areas/g/Views/Financeiro/Index.cshtml` — item menu e JS `modalTransferirContaCaixa`
-- `.cursor/context/2026_05_20_financeiro-g-posts-mapeamento.md`, checklist §2.5, `Scripts/2026_05_20_gdi_check_specific_modals.ps1`, `.csproj`
+- `.cursor/context/2026_05_20_financeiro-g-posts-mapeamento.md`, checklist §2.5, `Scripts/2026_05_22_gdi_check_specific_modals.ps1`, `.csproj`
 
 **Problema / Demanda:** Limpar código morto após remoção de `FinanceiroFaturamentos`/`FinanceiroLancamentos`; transferir conta não usado em produção.
 
@@ -127,7 +127,7 @@
 **Tipo:** Análise | Documentação | Correção pontual
 **Arquivos tocados:**
 - `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md` (novo; antes `2026_05_20_*` com prefixo incorreto) — fluxo `g_nfe`↔`gc_movimentos_nf`, mapa Ajax↔`RoboEnotasNFE`, smoke 2.2.4
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — §2.2.1–2.2.3 concluídos; 2.2.4 smoke pendente homologação
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — §2.2.1–2.2.3 concluídos; 2.2.4 smoke pendente homologação
 - `Areas/g/Controllers/NfeController.cs` — view export: nome alinhado ao ficheiro `modalExportarDadosNfePDF.cshtml`
 - `GDI-ERP-Plataform.csproj` — `Content Include` export PDF (casing disco)
 - `Areas/g/Views/Nfe/ModalImportarNfeLote.cshtml` — erro Ajax: `GdiAjaxNotifyInconsistencias` (padrão modais NFe)
@@ -145,11 +145,11 @@
 - `Areas/g/Views/Nfe/CreateEdit.cshtml` — logs NFe: `xhr.dt` com `return` após `GdiDtNotifyJsonErrorMessage`
 - `Areas/g/Views/*/Index.cshtml` (13 cadastros) — `xhr.dt`: bloco vazio `{ }` → `{ return; }`
 - `Areas/gc/Controllers/ComexProdutosController.cs` — `param` nulo em `GetDados` e `GetDadosProdutosPre`
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — §2.1.1/2.1.2 marcados
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — §2.1.1/2.1.2 marcados
 
 **Problema / Demanda:** Fechar checklist 2.1 (lote CHANGELOG): views `GdiDt*` e contrato servidor `GetDados*` em cadastros `g`.
 
-**O que foi feito:** Inventário `2026_05_20_gdi_inventory_datatables_g_area.py` (27 actions) — servidor `g` já com `try/catch`, `JsonDataTableException`, `errorMessage`/`stackTrace`/`yesFilterOnOff` (Fases 13–16). Cliente: Nfe Index/ComexProdutos já OK; corrigido `return` em 13 Index `g` + logs em Nfe CreateEdit. `ProdutosTipos/Index` inexistente (N/A). ComexProdutos servidor: guard `param == null`. `gdi_verify_csproj_gdi_helpers.py --fail` → 0 lacunas.
+**O que foi feito:** Inventário `2026_05_22_gdi_inventory_datatables_g_area.py` (27 actions) — servidor `g` já com `try/catch`, `JsonDataTableException`, `errorMessage`/`stackTrace`/`yesFilterOnOff` (Fases 13–16). Cliente: Nfe Index/ComexProdutos já OK; corrigido `return` em 13 Index `g` + logs em Nfe CreateEdit. `ProdutosTipos/Index` inexistente (N/A). ComexProdutos servidor: guard `param == null`. `gdi_verify_csproj_gdi_helpers.py --fail` → 0 lacunas.
 
 **Decisões:** CentrosCustos/ClassificacaoFinanceira usam jstree (sem DataTable Index); Assistentes sem pasta Views — fora do lote views.
 
@@ -163,7 +163,7 @@
 - `Areas/gc/Controllers/MovimentosController.LookupAjax.cs`, `MovimentosController.Lookups.cs`
 - `Areas/gc/Views/Movimentos/FormPedidoCreate.cshtml`, `ModalPedidoInsertEditItem.cshtml`
 - `LibUI_AdminLTE-4.0.0/plugins/startprime/js/gdi-select2.js`
-- `.cursor/context/2026_05_20_lookups-typeahead-ajax-pedidos.md`
+- `.cursor/context/2026_05_22_lookups-typeahead-ajax-pedidos.md`
 
 **O que foi feito:** GET `GetClientesLookup` / `GetProdutosLookup` com `{ items: [{ id, text }] }`; Select2 Ajax via `data-gdi-lookup-url`; form pedido e modal item sem carregar combos completos no primeiro paint; filtro vendedor em pesquisa de clientes.
 
@@ -231,7 +231,7 @@
 - `.cursor/context/2026_05_20_lookups-libdatasets.md` — regenerado (59 Get*)
 - `.cursor/context/2026_05_20_lookups-libdatasets-inventario.md` — banner arquivado
 - `Scripts/2026_05_20_gdi_libdatasets_obsolete_attrs.py` — legado; nao muta sem LibDataSets.cs
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — 1.4 concluído
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — 1.4 concluído
 
 **O que foi feito:** Plano e referencias alinhados a `ILookupQueryService` apos remocao de `LibDataSets.cs`; script ObsoleteAttrs seguro (exit 0).
 
@@ -239,7 +239,7 @@
 ### [2026-05-20] — Grupo 1.3: smoke manual pós-Onda 6b (lookups) — concluído
 **Tipo:** Validação / documentação
 **Arquivos tocados:**
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — secção 1.3 (1.3.1–1.3.20) marcada concluída
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — secção 1.3 (1.3.1–1.3.20) marcada concluída
 
 **O que foi feito:** Registado smoke manual **OK** em ambiente local com dados reais: login/navbar, Movimentos (pedidos/modais), compras, financeiro gc, inventário, produtos, atendimentos, contratos, estoque/controle/COMEX, clientes, relatórios financeiros, GED/SGQ, CFOP, fretes, lotes, NF importação. Sem defeito de lookup que exija commit de correção nesta onda.
 
@@ -250,7 +250,7 @@
 **Tipo:** Análise / validação
 **Arquivos tocados:**
 - `Scripts/2026_05_20_gdi_audit_lookup_get_names.py` (novo)
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — itens 1.2.1–1.2.4
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — itens 1.2.1–1.2.4
 
 **O que foi feito:** Comparados 59 métodos em `ILookupQueryService` com 142 chamadas em 19 partials `*.Lookups.cs`: 0 fora do contrato, 0 divergência de casing (`GetComboGProdutosNcm` OK). `GetDatasetGcClientesDestinatarios` usado em `MovimentosController.cs` apenas. Build Debug OK; sem alteração C#.
 
@@ -258,7 +258,7 @@
 ### [2026-05-20] — Grupo 1.1: build Debug/Release + guardrails lookups (Onda 6b)
 **Tipo:** Análise / validação
 **Arquivos tocados:**
-- `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` — itens 1.1.1–1.1.4 marcados
+- `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` — itens 1.1.1–1.1.4 marcados
 - `.cursor/context/2026_05_20_lookups-libdatasets.md` — regenerado (59 métodos)
 
 **O que foi feito:**
@@ -1161,7 +1161,7 @@ Validar em SQL Profiler: sem `SELECT` sem limite no primeiro load Admin. Testar 
 **Tipo:** Implementação
 **Arquivos tocados:**
 - `Areas/g/Views/Financeiro/Index.cshtml`
-- `Scripts/2026_05_20_gdi_check_specific_modals.ps1`
+- `Scripts/2026_05_22_gdi_check_specific_modals.ps1`
 
 **O que foi feito:**
 Item no dropdown Processos (`g_Financeiro_*` ou `g_Financeiro_GerarRemessaBoletosBancarios`), antes de Gerar Remessa; chama `modalTransferirContaCaixa()`.
@@ -1265,7 +1265,7 @@ Rename de classes e ficheiros `crm`; `a` já tinha ficheiro `CstFiltroModel.cs` 
 - `Areas/g/Views/FinanceiroFaturamentos/ModalAtualizarFaturamentoGestorFranquia.cshtml` (renomeado)
 - `Areas/g/Views/Nfe/ModalCancelarNfe.cshtml`, `ModalExportarDadosNfePDF.cshtml` (renomeados)
 - `Areas/g/Controllers/NfeController.cs` — `return View("ModalCancelarNfe")`, `ModalExportarDadosNfePDF`
-- `GDI-ERP-Plataform.csproj`, `Scripts/2026_05_20_gdi_remove_remaining_modal_icons.ps1`, `Scripts/2026_05_20_gdi_check_specific_modals.ps1`
+- `GDI-ERP-Plataform.csproj`, `Scripts/2026_05_20_gdi_remove_remaining_modal_icons.ps1`, `Scripts/2026_05_22_gdi_check_specific_modals.ps1`
 
 **Problema / Demanda:**
 Concluir padronização PascalCase das views `modal*` em `Areas` (Lote B1 do plano).
@@ -2565,7 +2565,7 @@ Fase 17: acionar Ajax NFe com `RoboEnotasNFE` / padrão de processamento de `Fin
 
 **Impactos conhecidos:**
 - `python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` → **0** lacunas.
-- `python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` → **32** métodos `GetDados*` (inclui `GetDadosGedAtendimento`).
+- `python Scripts/2026_05_22_gdi_inventory_datatables_g_area.py` → **32** métodos `GetDados*` (inclui `GetDadosGedAtendimento`).
 
 **Atenção para próximas intervenções:**
 - Homologar em ambiente real: `GerarNFServico` exige item de serviço único no movimento; validar `id_processamento_tipo` 49/50 na tabela de tipos se houver FK/restrição.
@@ -2601,7 +2601,7 @@ Fase 16: eliminar rotas 404 das views **`Nfe`** e **`PortalVendedor`**; alinhar 
 
 **Impactos conhecidos:**
 - `python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` → **0** lacunas após alteração em `CreateEdit` NFe.
-- `python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` → **31** métodos `GetDados*` (inclui `Nfe` + `PortalVendedor` + `GetDadosNfeLogs`); `GetGedAtendimento` fora do padrão de nome.
+- `python Scripts/2026_05_22_gdi_inventory_datatables_g_area.py` → **31** métodos `GetDados*` (inclui `Nfe` + `PortalVendedor` + `GetDadosNfeLogs`); `GetGedAtendimento` fora do padrão de nome.
 
 **Atenção para próximas intervenções:**
 - **Fase 17:** ligar Ajax NFe (`AjaxClonarNfe`, cancelamento, e-mail, etc.) a `RoboEnotasNFE` / regras já usadas em `FinanceiroFaturamentos`; revisar roles reais de `g_PortalVendedor_*` em produção; opcional `param` nulo explícito em `Nfe.GetDados` (heurística script).
@@ -2632,7 +2632,7 @@ Fase 15 (planejada na Fase 14): fechar o lote `GetDados`/`getDados*` pendente em
 
 **Impactos conhecidos:**
 - `python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` → **0** lacunas (sem `.cshtml` novo nesta fase).
-- `python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` → **28** métodos `GetDados*` na data da Fase 15.
+- `python Scripts/2026_05_22_gdi_inventory_datatables_g_area.py` → **28** métodos `GetDados*` na data da Fase 15.
 
 **Atenção para próximas intervenções:**
 - **Fase 16** — ver entrada no topo do histórico.
@@ -2674,7 +2674,7 @@ Fase 14: continuar padronização `GetDados*` / financeiro lista + dados consoli
 - `Areas/g/Controllers/UFController.cs` — `GetDados`: idem + sucesso com `errorMessage`/`stackTrace` vazios
 - `Areas/g/Controllers/PagRecTiposController.cs` — `GetDados`: idem (`yesFilterOnOff` fixo `"0"`)
 - `Areas/g/Views/Filiais/Index.cshtml`, `Areas/g/Views/PagRecTipos/Index.cshtml` — **`xhr.dt`** + `GdiDtNotifyJsonErrorMessage`
-- `Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` — inventário `GetDados*` em `Areas/g/Controllers`
+- `Scripts/2026_05_22_gdi_inventory_datatables_g_area.py` — inventário `GetDados*` em `Areas/g/Controllers`
 - `GDI-ERP-Plataform.csproj` — `<None Include>` do script
 - `CLAUDE.md`, `.cursor/CHANGELOG-DEV.md`
 
@@ -2694,7 +2694,7 @@ Fase 13: alinhar cadastros `g` ao contrato DataTables (servidor + cliente) e fer
 - `UF/Index` já tinha `xhr.dt`; sem alteração nesta entrega.
 
 **Atenção para próximas intervenções:**
-- **Fase 14:** demais controllers em `Areas/g` conforme saída de `2026_05_20_gdi_inventory_datatables_g_area.py` (priorizar `ClientesController`, `FinanceiroController`, etc.).
+- **Fase 14:** demais controllers em `Areas/g` conforme saída de `2026_05_22_gdi_inventory_datatables_g_area.py` (priorizar `ClientesController`, `FinanceiroController`, etc.).
 
 ---
 
@@ -2852,9 +2852,9 @@ Fase 13 sugerida: cadastros `Areas/g` (`GetDados*`) ou inventário automatizado 
 **Tipo:** Implementação
 **Arquivos tocados:**
 - `Scripts/2026_05_20_gdi_replace_alert_libmessage.py` — substituição mecânica (regex com `(?<!\.)alert` para não tocar em `GdiSwal2.alert`) dos padrões `+"…"+ err.message` / `e.message` / `err.message` / `err.toString` / `Erro [tag]` + `err.message`
-- `Scripts/2026_05_20_gdi_dedupe_libmessage_if_else.py` — remoção de `if (typeof LibMessageError === "function") { LibMessageError(...); } else { LibMessageError(...); }` quando ambos os ramos são equivalentes (472 ocorrências em 168 ficheiros)
+- `Scripts/2026_05_15_gdi_dedupe_libmessage_if_else.py` — remoção de `if (typeof LibMessageError === "function") { LibMessageError(...); } else { LibMessageError(...); }` quando ambos os ramos são equivalentes (472 ocorrências em 168 ficheiros)
 - ~237 ficheiros `.cshtml` tocados pelo primeiro script; ajustes manuais: `ClassificacaoFinanceira/CreateEdit`, `UserIdentity/Index`, `ModalPedidoNotaFiscal`, `Atendimentos/Index`, `ComexProdutos/Index`, `ProdutosPre`, `Produtos/Index`; `FormPedidoCreate` + `FinanceiroLancamentos/Index` (ramos `else` não idênticos)
-- `GDI-ERP-Plataform.csproj` — `<None Include>` para `2026_05_20_gdi_replace_alert_libmessage.py` e `2026_05_20_gdi_dedupe_libmessage_if_else.py`
+- `GDI-ERP-Plataform.csproj` — `<None Include>` para `2026_05_20_gdi_replace_alert_libmessage.py` e `2026_05_15_gdi_dedupe_libmessage_if_else.py`
 - `CLAUDE.md` — nota Fase 7 + scripts
 - `.cursor/CHANGELOG-DEV.md`
 
@@ -2864,7 +2864,7 @@ Fase 7 do plano de modernização UX: eliminar `alert(` nativo nas views em favo
 **O que foi feito:**
 - Script executado uma vez; revisão grep: restam apenas `GdiSwal2.alert` e comentário `// alert(options)`.
 - `gdi-session-handler.js` e fallbacks internos em `start.js` mantidos (alert como último recurso).
-- Após o primeiro script, correção em massa de `if/else` duplicado com `2026_05_20_gdi_dedupe_libmessage_if_else.py`.
+- Após o primeiro script, correção em massa de `if/else` duplicado com `2026_05_15_gdi_dedupe_libmessage_if_else.py`.
 
 **Decisões técnicas relevantes:**
 - Não alterar `GdiSwal2.alert({...})` (confirmações com callback).

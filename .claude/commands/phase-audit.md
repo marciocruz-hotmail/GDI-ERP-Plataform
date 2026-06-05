@@ -11,7 +11,7 @@ O projeto está numa migração progressiva (Fases 0–16+) padronizando:
 
 ## O que fazer
 
-1. Execute `python Scripts/2026_05_20_gdi_inventory_datatables_g_area.py` para obter o inventário atual da área `g`
+1. Execute `python Scripts/2026_05_22_gdi_inventory_datatables_g_area.py` para obter o inventário atual da área `g`
 
 2. Faça uma busca por controllers que ainda usam o padrão legado:
    - `return Json(new { error = "` (padrão legado — usar `errorMessage` no lugar)

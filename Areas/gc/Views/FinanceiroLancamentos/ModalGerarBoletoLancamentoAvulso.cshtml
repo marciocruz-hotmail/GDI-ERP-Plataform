@@ -16,24 +16,15 @@
                 <div class="form-horizontal m-0 p-0">
                     <div class="card m-0 p-1">
                         <div class="card-body m-0 p-1" style="height: 100%">
-                            @if (Model.id_lancamento == 0)
-                            {
-                                <div class="form-group row text-sm-end m-0 pt-1">
-                                    @Html.Label("text", "Lançamentos financeiros não encontrado!", htmlAttributes: new { @class = "col-sm-8 col-form-label" })
-                                </div>
-                            }
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
-                @if (Model.id_lancamento == 0)
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
                 {
-                    <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
-                }
-                else
-                {
-                    <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
                     <button type="button" id="btnSalvar" name="btnSalvar" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsSendForm()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Gerar Boleto</button>
                 }
             </div>
@@ -84,13 +75,13 @@
                     else
                     {
                         document.getElementById('btnSalvar').disabled = false;
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     document.getElementById('btnSalvar').disabled = false;
-                    GdiAjaxNotifyInconsistencias(result.msg)
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }

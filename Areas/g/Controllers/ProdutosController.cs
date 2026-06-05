@@ -41,8 +41,8 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Cadastro de Produtos/Serviços";
             ViewBag.RestoreFilterId = String.Empty;
             ViewBag.RestoreFilterPn = String.Empty;
+            ViewBag.RestoreFilterNome = String.Empty;
             ViewBag.RestoreFilterAutoSearch = false;
-            int? idProdutoLookupRestore = null;
 
             g_filtros filtroPersistido = ObterFiltroPersistidoUsuario();
             string idRestore, pnRestore, auxRestore, nomeRestore, descRestore;
@@ -50,17 +50,11 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 ViewBag.RestoreFilterId = idRestore;
                 ViewBag.RestoreFilterPn = pnRestore;
-                int idLookup;
-                if (int.TryParse(nomeRestore, out idLookup) && idLookup > 0)
-                {
-                    idProdutoLookupRestore = idLookup;
-                }
+                ViewBag.RestoreFilterNome = nomeRestore;
                 ViewBag.RestoreFilterAutoSearch = !String.IsNullOrEmpty(idRestore)
                     || !String.IsNullOrEmpty(pnRestore)
-                    || idProdutoLookupRestore.HasValue
-                    || (!String.IsNullOrEmpty(nomeRestore) && !idProdutoLookupRestore.HasValue);
+                    || !String.IsNullOrEmpty(nomeRestore);
             }
-            PreencherLookupsIndexProdutos(idProdutoLookupRestore);
             return View();
         }
 
@@ -110,8 +104,8 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = "0",
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -178,8 +172,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
@@ -243,7 +237,7 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             if (!String.IsNullOrEmpty(pnStr))
             {
-                pnStr = LibStringFormat.RemoverEspacos(pnStr).Trim();
+                pnStr = pnStr.Trim();
                 if (pnStr.StartsWith("PN:", StringComparison.OrdinalIgnoreCase))
                 {
                     pnStr = pnStr.Substring(3).Trim();
@@ -257,17 +251,10 @@ namespace GdiPlataform.Areas.g.Controllers
             {
                 query = query.Where(p => p.codigo_auxiliar != null && DbFunctions.Like(p.codigo_auxiliar, padraoAux));
             }
-            if (!String.IsNullOrEmpty(nomeStr))
+            if (!String.IsNullOrEmpty(nomeStr) && nomeStr != "0"
+                && LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
             {
-                int idProdutoLookup;
-                if (int.TryParse(nomeStr, out idProdutoLookup) && idProdutoLookup > 0)
-                {
-                    query = query.Where(p => p.id_produto == idProdutoLookup);
-                }
-                else if (LibStringFormat.TryMontarPadraoLikeContemTexto(nomeStr, out string padraoNome))
-                {
-                    query = query.Where(p => p.nome != null && DbFunctions.Like(p.nome, padraoNome));
-                }
+                query = query.Where(p => p.nome != null && DbFunctions.Like(p.nome, padraoNome));
             }
             if (LibStringFormat.TryMontarPadraoLikeContemTexto(descStr, out string padraoDesc))
             {
@@ -548,12 +535,12 @@ namespace GdiPlataform.Areas.g.Controllers
                 catch (DbEntityValidationException ex)
                 {
                     Sucesso = false;
-                    MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                 }
                 catch (Exception e)
                 {
                     Sucesso = false;
-                    MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(e);
                 }
             }
             return Json(new { success = Sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
@@ -919,13 +906,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
 
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
@@ -957,7 +942,10 @@ namespace GdiPlataform.Areas.g.Controllers
 
         public ActionResult GetFichaEstoqueProduto(jQueryDataTableParamModel param)
         {
+            if (param == null) { param = new jQueryDataTableParamModel(); }
             String filterOnOff = "0";
+            try
+            {
             String SentencaSQL = string.Empty;
             int IdProduto = 0;
             int.TryParse(param.yesCustomIdPK, out IdProduto);
@@ -1025,6 +1013,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
             return Json(new
             {
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = AllMovimentosFicha.Count(),
@@ -1032,23 +1022,27 @@ namespace GdiPlataform.Areas.g.Controllers
                 aaData = list
             },
             JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return JsonDataTableException(e, param, filterOnOff);
+            }
         }
         #endregion
 
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
 
         protected override void Dispose(bool disposing)

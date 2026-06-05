@@ -235,7 +235,7 @@
             }
 
             $.fn.dataTable.ext.errMode = 'none';
-            OTablePedidoSeparacaoLotes = $tbl.off('error.dt.pedSepLot').on('error.dt.pedSepLot', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).dataTable({
+            OTablePedidoSeparacaoLotes = $tbl.off('error.dt.pedSepLot').off('xhr.dt.pedSepLot').on('error.dt.pedSepLot', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt.pedSepLot', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
                     initComplete: function ()
                     {
                         var api = this.api();
@@ -388,14 +388,14 @@
                     else
                     {
                         document.getElementById('btnSalvar').disabled = false;
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
-                    GdiAjaxNotifyInconsistencias(result.msg)
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
         }
@@ -507,14 +507,14 @@
                     else
                     {
                         document.getElementById('btnSalvar').disabled = false;
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
-                    GdiAjaxNotifyInconsistencias(result.msg)
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
         }

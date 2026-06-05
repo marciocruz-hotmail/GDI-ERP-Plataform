@@ -28,25 +28,21 @@ namespace GdiPlataform.Lib.Lookups
             if (term.Length < 2)
                 return new List<LookupAjaxItemDto>();
 
-            // Pedidos: apenas cadastros ativos marcados como cliente (sem filtro por vendedor/perfil).
-            var query = db.g_clientes.AsNoTracking().Where(c => c.ativo && c.is_cliente);
+            bool hasTexto = LibStringFormat.TryMontarPadraoLikeContemTexto(term, out string padraoTexto);
+            bool hasDoc = LibStringFormat.TryMontarPadraoLikeContemCodigo(term, out string padraoDoc);
+            if (!hasTexto && !hasDoc)
+                return new List<LookupAjaxItemDto>();
 
             int idParsed;
-            if (int.TryParse(term, out idParsed) && idParsed > 0)
-            {
-                query = query.Where(c =>
-                    c.id_cliente == idParsed
-                    || c.nome.Contains(term)
-                    || c.cpf.Contains(term)
-                    || c.cnpj.Contains(term));
-            }
-            else
-            {
-                query = query.Where(c =>
-                    c.nome.Contains(term)
-                    || c.cpf.Contains(term)
-                    || c.cnpj.Contains(term));
-            }
+            int.TryParse(term, out idParsed);
+
+            // Pedidos: apenas cadastros ativos marcados como cliente (sem filtro por vendedor/perfil).
+            var query = db.g_clientes.AsNoTracking().Where(c => c.ativo && c.is_cliente);
+            query = query.Where(c =>
+                (idParsed > 0 && c.id_cliente == idParsed)
+                || (hasTexto && c.nome != null && DbFunctions.Like(c.nome, padraoTexto))
+                || (hasDoc && c.cpf != null && DbFunctions.Like(c.cpf, padraoDoc))
+                || (hasDoc && c.cnpj != null && DbFunctions.Like(c.cnpj, padraoDoc)));
 
             int displayWidth = 0;
             int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out displayWidth);
@@ -95,23 +91,20 @@ namespace GdiPlataform.Lib.Lookups
             if (term.Length < 2)
                 return new List<LookupAjaxItemDto>();
 
-            var query = db.g_clientes.AsNoTracking().Where(c => c.ativo);
+            bool hasTexto = LibStringFormat.TryMontarPadraoLikeContemTexto(term, out string padraoTexto);
+            bool hasDoc = LibStringFormat.TryMontarPadraoLikeContemCodigo(term, out string padraoDoc);
+            if (!hasTexto && !hasDoc)
+                return new List<LookupAjaxItemDto>();
+
             int idParsed;
-            if (int.TryParse(term, out idParsed) && idParsed > 0)
-            {
-                query = query.Where(c =>
-                    c.id_cliente == idParsed
-                    || c.nome.Contains(term)
-                    || c.cpf.Contains(term)
-                    || c.cnpj.Contains(term));
-            }
-            else
-            {
-                query = query.Where(c =>
-                    c.nome.Contains(term)
-                    || c.cpf.Contains(term)
-                    || c.cnpj.Contains(term));
-            }
+            int.TryParse(term, out idParsed);
+
+            var query = db.g_clientes.AsNoTracking().Where(c => c.ativo);
+            query = query.Where(c =>
+                (idParsed > 0 && c.id_cliente == idParsed)
+                || (hasTexto && c.nome != null && DbFunctions.Like(c.nome, padraoTexto))
+                || (hasDoc && c.cpf != null && DbFunctions.Like(c.cpf, padraoDoc))
+                || (hasDoc && c.cnpj != null && DbFunctions.Like(c.cnpj, padraoDoc)));
 
             int displayWidth = 0;
             int.TryParse(CachePersister.userIdentity.DisplayScreenWidth, out displayWidth);
@@ -159,19 +152,19 @@ namespace GdiPlataform.Lib.Lookups
             if (term.Length < 2)
                 return new List<LookupAjaxItemDto>();
 
-            var query = db.g_produtos.AsNoTracking().Where(p => p.ativo);
+            bool hasNome = LibStringFormat.TryMontarPadraoLikeContemTexto(term, out string padraoNome);
+            bool hasCodigo = LibStringFormat.TryMontarPadraoLikeContemCodigo(term, out string padraoCodigo);
+            if (!hasNome && !hasCodigo)
+                return new List<LookupAjaxItemDto>();
+
             int idParsed;
-            if (int.TryParse(term, out idParsed) && idParsed > 0)
-            {
-                query = query.Where(p =>
-                    p.id_produto == idParsed
-                    || p.nome.Contains(term)
-                    || p.codigo.Contains(term));
-            }
-            else
-            {
-                query = query.Where(p => p.nome.Contains(term) || p.codigo.Contains(term));
-            }
+            int.TryParse(term, out idParsed);
+
+            var query = db.g_produtos.AsNoTracking().Where(p => p.ativo);
+            query = query.Where(p =>
+                (idParsed > 0 && p.id_produto == idParsed)
+                || (hasNome && p.nome != null && DbFunctions.Like(p.nome, padraoNome))
+                || (hasCodigo && p.codigo != null && DbFunctions.Like(p.codigo, padraoCodigo)));
 
             int sizeNome = ResolveSizeNomeProduto();
 

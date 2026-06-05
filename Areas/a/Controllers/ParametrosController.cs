@@ -59,8 +59,8 @@ namespace GdiPlataform.Areas.a.Controllers
 
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = "0",
                 sEcho = param.sEcho,
                 iTotalRecords = allRecords.Count(),
@@ -77,18 +77,7 @@ namespace GdiPlataform.Areas.a.Controllers
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, "0"), JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -107,13 +96,11 @@ namespace GdiPlataform.Areas.a.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                ativado = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                ativado = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = ativado, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -134,15 +121,23 @@ namespace GdiPlataform.Areas.a.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                ativado = false;
-                msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                ativado = false;
-                msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = ativado, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
         }
 
         protected override void Dispose(bool disposing)

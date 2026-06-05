@@ -151,8 +151,8 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             return Json(new
             {
-                errorMessage = "",
-                stackTrace = "",
+                errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                 yesFilterOnOff = filterOnOff,
                 sEcho = param.sEcho,
                 iTotalRecords = totalRecords,
@@ -239,8 +239,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -270,7 +270,7 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "AtendimentosController";
                 msg += "<br/>" + "ModalCreateNewAtendimento";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -516,24 +516,22 @@ namespace GdiPlataform.Areas.g.Controllers
                     catch (DbEntityValidationException ex)
                     {
                         sucesso = false;
-                        MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                        MsgRetorno = GdiMvcJsonResults.AjaxFailureValidationMessage(ex);
                     }
                     catch (Exception e)
                     {
                         sucesso = false;
-                        MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                        MsgRetorno = GdiMvcJsonResults.AjaxFailureMessage(e);
                     }
                 }
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -622,7 +620,7 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "AtendimentosController";
                 msg += "<br/>" + "Edit";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -693,8 +691,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -736,7 +734,7 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (Exception ex)
             {
-                String msg = LibExceptions.getExceptionShortMessage(ex);
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
                 msg += "<br/>" + "AtendimentosController";
                 msg += "<br/>" + "ModalCreateAtividade";
                 LibFlashMessage.SetModalMessage(this, msg);
@@ -879,13 +877,11 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                sucesso = false;
-                MsgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                return JsonAjaxErroValidacao(ex);
             }
             catch (Exception e)
             {
-                sucesso = false;
-                MsgRetorno = LibExceptions.getExceptionShortMessage(e);
+                return JsonAjaxErro(e);
             }
             return Json(new { success = sucesso, msg = MsgRetorno }, JsonRequestBehavior.AllowGet);
         }
@@ -935,8 +931,8 @@ namespace GdiPlataform.Areas.g.Controllers
 
                 return Json(new
                 {
-                    errorMessage = "",
-                    stackTrace = "",
+                    errorMessage = GdiMvcJsonResults.DataTableSuccessErrorMessage,
+                    stackTrace = GdiMvcJsonResults.DataTableSuccessStackTrace,
                     yesFilterOnOff = filterOnOff,
                     sEcho = param.sEcho,
                     iTotalRecords = totalRecords,
@@ -972,20 +968,19 @@ namespace GdiPlataform.Areas.g.Controllers
                 .Replace("\r", "<br/>");
         }
 
+        private JsonResult JsonAjaxErro(Exception ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailure(ex), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacao(DbEntityValidationException ex)
+        {
+            return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+        }
+
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)
         {
-            string errorMessage = LibExceptions.getExceptionShortMessage(e);
-            return Json(new
-            {
-                errorMessage = errorMessage,
-                severity = "error",
-                stackTrace = e.ToString(),
-                yesFilterOnOff = yesFilterOnOff ?? "0",
-                sEcho = param != null ? param.sEcho : null,
-                iTotalRecords = 0,
-                iTotalDisplayRecords = 0,
-                aaData = new List<string[]>()
-            }, JsonRequestBehavior.AllowGet);
+            return Json(GdiMvcJsonResults.DataTableError(e, param, yesFilterOnOff), JsonRequestBehavior.AllowGet);
         }
     }
 }

@@ -15,6 +15,14 @@
             </div>
             <div class="modal-body m-0 p-0">
                 <div class="form-horizontal m-0 p-0">
+                    @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                    {
+                        <div class="col-sm-12 text-sm-start m-0 p-1">
+                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
+                        </div>
+                    }
+                    @if (Model.id_movimento > 0)
+                    {
                     <div class="card-body m-0 p-0" style="height: 100%">
                         <div class="table-responsive scroll-body-horizontal m-0 p-0" style="width:100%">
                             <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
@@ -46,6 +54,7 @@
                         </div>
                     </div>
                 </div>
+                    }
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
                 <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
@@ -64,7 +73,10 @@
         try
         {
             jsInitModal();
-            CreateTableModalPedidoViewAnexos();
+            @if (Model.id_movimento > 0)
+            {
+            <text>CreateTableModalPedidoViewAnexos();</text>
+            }
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -76,7 +88,8 @@
     {
         try
         {
-            oTableModalPedidoViewAnexos = $('#dtModalPedidoViewAnexos').DataTable({
+            $.fn.dataTable.ext.errMode = 'none';
+            oTableModalPedidoViewAnexos = $('#dtModalPedidoViewAnexos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -195,12 +208,12 @@
                     else
                     {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result) {
+                error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             })
         }
@@ -248,12 +261,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
         }

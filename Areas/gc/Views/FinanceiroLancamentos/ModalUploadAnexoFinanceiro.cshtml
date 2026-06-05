@@ -15,6 +15,7 @@
                 @Html.ValidationSummary(true)
             </div>
             <div class="modal-body m-0 p-1">
+                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
                 <div class="card-header m-0 p-1">
                     <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
                         <li class="nav-item"><a class="d-flex align-items-center nav-link active" id="tabDados_tab" data-bs-toggle="pill" href="#tabDados" role="tab" aria-controls="crud-tabs" aria-selected="true"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Dados do Anexo</a></li>
@@ -26,6 +27,8 @@
                             <!-- Dados - Início -->
                             <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
                                 <div class="card-body m-0 p-1" style="height: 100%">
+                                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                                {
 
                                     <div class="form-group row text-sm-end m-0 pt-1">
                                         @Html.Label("Tipo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
@@ -46,6 +49,7 @@
                                             @Html.EditorFor(model => model.descricao, new { htmlAttributes = new { @class = "form-control" } })
                                         </div>
                                     </div>
+                                }
                                 </div>
                             </div>
                             <!-- Dados - Fim -->
@@ -55,7 +59,10 @@
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
                 <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" onclick="jsCloseModalUploadAnexo()"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
                 <button type="button" id="btnSalvar" name="btnSalvar" title="Confirmar Upload" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsCheckInputs()"><i class="fa-solid fa-cloud-arrow-up me-2" aria-hidden="true"></i>Confirmar Upload</button>
+                }
             </div>
         </div>
     </div>

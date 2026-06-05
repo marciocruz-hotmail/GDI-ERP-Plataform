@@ -37,7 +37,7 @@
 | `GDI-ERP-Plataform.csproj` | 3 entradas `Content Include` |
 | `Areas/g/Controllers/NfeController.cs` | 2× `return View("modal...")` → `Modal...` |
 | `Scripts/2026_05_20_gdi_remove_remaining_modal_icons.ps1` | 3 nomes de ficheiro |
-| `Scripts/2026_05_20_gdi_check_specific_modals.ps1` | action `modalAtualizarFaturamentoGestorFranquia` → `ModalAtualizar...` (só no comentário/array de verificação; action real no controller já é PascalCase) |
+| `Scripts/2026_05_22_gdi_check_specific_modals.ps1` | action `modalAtualizarFaturamentoGestorFranquia` → `ModalAtualizar...` (só no comentário/array de verificação; action real no controller já é PascalCase) |
 
 **Sem alteração necessária:** `Url.Action("Modal...")` em `Index.cshtml` (já PascalCase). Form ids internos (`formModal...`) podem permanecer — não são nomes de ficheiro.
 

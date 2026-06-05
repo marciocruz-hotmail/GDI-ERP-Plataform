@@ -30,7 +30,10 @@
                 @Html.ValidationSummary(true)
             </div>
             <div class="modal-body m-0 p-0">
+                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
                 <div class="form-horizontal m-0 p-0">
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
                     <div class="card m-0 p-1">
                         <div class="card-header m-1 p-1">
                             <ul class="nav nav-tabs" id="crud-tabs" role="tablist">
@@ -288,12 +291,15 @@
                             </div>
                         </div>
                     </div>
+                }
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
                 <div class="col-4 m-0 p-1" style="text-align:left">
                     <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
                 </div>
+                @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+                {
                 <div class="col-4 m-0 p-1" style="text-align:center">
                     @if ((Model.id_lancamento > 0) && (Model.tipo_pag_rec == 2) && (Model.id_financeiro_status == 3))
                     {
@@ -304,6 +310,7 @@
                     <button type="button" id="btnSalvar" name="btnSalvar" title="Confirmar Lançamento" class="btn btn-success d-inline-flex align-items-center gap-2" onclick="jsAjaxCreateEditLancamento()"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>Confirmar Lançamento</button>
                     &nbsp;
                 </div>
+                }
             </div>
         </div>
     </div>
@@ -350,13 +357,13 @@
                     else
                     {
                         document.getElementById('btnSalvar').disabled = false;
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
                     document.getElementById('btnSalvar').disabled = false;
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }
@@ -385,12 +392,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }
@@ -405,7 +412,7 @@
         {
             if (otableGedGcLancamentos == null) {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableGedGcLancamentos = $('#dtGedGcLancamentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).DataTable({
+                otableGedGcLancamentos = $('#dtGedGcLancamentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -527,12 +534,12 @@
                     }
                     else {
                         LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(result.msg)
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result) {
+                error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             })
         }
@@ -580,12 +587,12 @@
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias(result.msg);
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
                     }
                 },
-                error: function (result)
+                error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(result.toString());
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
         }

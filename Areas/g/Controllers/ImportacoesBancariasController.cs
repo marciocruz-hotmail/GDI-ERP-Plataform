@@ -516,17 +516,25 @@ namespace GdiPlataform.Areas.g.Controllers
                 }
                 catch (DbEntityValidationException ex)
                 {
-                    processado = false;
-                    msgRetorno = LibExceptions.getDbEntityValidationException(ex);
+                    return JsonAjaxErroValidacaoIdProcessamento(ex, idProcessamentoGravado);
                 }
                 catch (Exception e)
                 {
-                    processado = false;
-                    msgRetorno = LibExceptions.getExceptionShortMessage(e);
+                    return JsonAjaxErroIdProcessamento(e, idProcessamentoGravado);
                 }
             }
             return Json(new { success = processado, msg = msgRetorno, idProcessamento = idProcessamentoGravado }, JsonRequestBehavior.AllowGet);
         }
         #endregion Importar Arquivo - CNAB Boletos
+
+        private JsonResult JsonAjaxErroIdProcessamento(Exception ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
+
+        private JsonResult JsonAjaxErroValidacaoIdProcessamento(DbEntityValidationException ex, string idProcessamento)
+        {
+            return Json(new { success = false, msg = GdiMvcJsonResults.AjaxFailureValidationMessage(ex), idProcessamento = idProcessamento ?? "0" }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

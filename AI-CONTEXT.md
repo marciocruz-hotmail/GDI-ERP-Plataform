@@ -1,130 +1,97 @@
 # AI-CONTEXT.md
 
-Contexto técnico **fixo e atual** do **GDI-ERP-Plataform** para desenvolvimento assistido por IA (Cursor, Claude Code) e desenvolvedores humanos.
-
-**Documentação complementar (não duplicar aqui em detalhe):**
+Contexto técnico **fixo** do **GDI-ERP-Plataform** para IA e developers. Detalhe por tema → **`.cursor/context/2026_06_05_indice-memoria-ia.md`**.
 
 | Ficheiro | Função |
 |----------|--------|
-| `CHANGELOG-DEV.md` | Estado atual, decisões ativas, últimas mudanças |
-| `BACKLOG-DEV.md` | Pendências por prioridade |
-| `CLAUDE.md` | Padrões longos, fases DataTables, listas de ficheiros críticos |
-| `docs/dev-history/` | Histórico completo do changelog e arquivo |
+| **`CHANGELOG-DEV.md`** | Estado atual + últimas alterações (compacto) |
+| **`BACKLOG-DEV.md`** | Pendências ativas (IDs G-PUB, G-DT, …) |
+| **Índice temas** | `.cursor/context/2026_06_05_indice-memoria-ia.md` |
+| **Regras agente** | `.cursor/rules/2026_05_20_gdi-erp-plataform.mdc` (formato resposta, git, publish) |
+| **Histórico** | `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` |
 
 ---
 
 ## Projeto
 
-- **Nome:** GDI-ERP-Plataform (GDI Aviação — ERP Plataform)
-- **Natureza:** Monólito ASP.NET MVC customizado para importação, comercialização e distribuição de peças e componentes aeronáuticos (matriz BH-MG, filial SP).
-- **Repositório único:** o portal público do cliente (**GDI-PortalCliente-Plataform**) foi descontinuado; fluxos vivem neste ERP (`UserIdentity`, área `crm`).
-- **Publicação:** Visual Studio Publish → IIS (Windows Server). O agente **não** faz deploy remoto.
+Monólito **ASP.NET MVC .NET Framework 4.7.2** — COMEX, comercial, estoque, financeiro, qualidade (GDI Aviação, BH/SP). Portal cliente **integrado** (`crm`, `UserIdentity/AcessoPortal`); repositório **GDI-PortalCliente** descontinuado. Publish: VS → IIS; agente **sem** deploy remoto nem git salvo pedido explícito.
 
 ---
 
-## Stack principal
+## Stack
 
 | Camada | Tecnologia |
 |--------|------------|
-| Backend | ASP.NET MVC, **.NET Framework 4.7.2** |
-| Dados | SQL Server — **um** padrão por fluxo (EF6 **ou** ADO.NET; não misturar) |
+| Backend | ASP.NET MVC **4.7.2** |
+| Dados | SQL Server — **EF6 ou ADO.NET por fluxo** (não misturar) |
 | UI | Bootstrap 5, AdminLTE 4, Font Awesome 7.2 |
-| JS | DataTables 2.3.2 (bs5), SweetAlert2, Tempus Dominus 6.9.4 |
-| Helpers UX | `LibUI_AdminLTE-4.0.0/plugins/startprime/js/start.js` (`LibMessage*`, `GdiDt*`, `GdiAjax*`) |
+| JS | DataTables 2.3.2 bs5, SweetAlert2, Tempus Dominus 6.9.4 |
+| UX global | `LibUI_.../start.js` — `LibMessage*`, `GdiDt*`, `GdiAjax*` |
 
 ---
 
-## Objetivo atual
+## Ordem de leitura (antes de código)
 
-Modernização e refatoração **incremental**, com foco em:
-
-- Eliminação de débito (`LibDataSets`, filtros legados, POSTs órfãos, PascalCase paths).
-- Padronização DataTables/Ajax e mensagens UX.
-- Lookups centralizados (`ILookupQueryService`) sem regressão de RAM/UX.
-- Documentação enxuta para IA (`AI-CONTEXT`, `CHANGELOG-DEV`, `BACKLOG-DEV`, `docs/dev-history/`).
+1. Este ficheiro → `CHANGELOG-DEV.md` → `BACKLOG-DEV.md`
+2. Tema específico → **índice memória** → ficheiro `.cursor/context/` correspondente
+3. Formato da resposta ao utilizador → `.mdc` §6 (não duplicar noutros `.md`)
 
 ---
 
-## Estratégia de modernização
+## Arquitetura centralizada (obrigatória)
 
-1. **Fases documentadas** — DataTables (Fases 0–17), lookups (Ondas 6a/6b), checklist em `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md`.
-2. **Cirurgia** — alterar só o necessário; uma PR de encoding separada de refactor funcional.
-3. **Verificação automatizada** — scripts em `Scripts/2026_05_20_gdi_*` (inventários, verify csproj, UTF-8 BOM).
-4. **Smoke manual** — após mudanças sensíveis (pedidos, NFe, financeiro, portal).
-5. **Migração 4.8.1** — trilha isolada (ver `.cursor/context/2026_05_20_migracao-472-481.md`).
+**Detalhe:** `.cursor/context/2026_06_05_arquitetura-centralizada-erp-gdi.md`  
+**Lib:** `Lib/GdiMvcJsonResults.cs` | **Referência ouro:** `MovimentosController`
 
----
+| Situação | Regra resumida |
+|----------|----------------|
+| DataTables `GetDados*` | `param` nulo, `try/catch`, sucesso/erro via `GdiMvcJsonResults` |
+| Modal GET | `int.TryParse`; `Find` null → `ViewBag.MsgBloqueio` + model mínimo; view oculta form/DT |
+| Ajax POST | `{ success, msg }`; `catch` → `GdiMvcJsonResults.AjaxFailure*` |
+| Views JS | DT: `error.dt`/`xhr.dt`; Ajax rede: `GdiAjaxNotifyInconsistencias` — **sem** `alert()` |
+| Proibido | `GC.Collect()` em MVC; `int.Parse` em modal; side-effect em `GetDados*` |
 
-## Regras para alterações assistidas por IA
-
-- **Língua:** português brasileiro nas respostas ao utilizador.
-- **Leitura obrigatória antes de código:** `CHANGELOG-DEV.md` → `BACKLOG-DEV.md` → contexto em `.cursor/context/` se o tema estiver documentado.
-- **Proibido (salvo pedido explícito):** `git push`, publish remoto, alterar schema SQL, remover métodos/rotas/ViewBags sem confirmação, misturar libs (Bootstrap/AdminLTE/DataTables) não alinhadas à stack.
-- **Git:** não executar comandos git salvo pedido explícito do utilizador (regra do projeto).
-- **Workspace:** apenas ficheiros dentro deste repositório.
-- **Commits:** só quando o utilizador pedir.
+**Smoke (exit 0):** `python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py`
 
 ---
 
 ## Áreas sensíveis
 
-| Área | Risco | Referência |
-|------|-------|------------|
-| `Views/Shared/_Layout.cshtml`, `_Navbar.cshtml` | Impacto global, ordem de scripts | `BundleConfig`, `start.js` |
-| `LibUI_.../start.js` | Todo o ERP (mensagens, DataTables, menu) | Incrementar `VersionERP` após mudança |
-| `Web.config`, `connectionStrings.config` | IIS, segurança | Só com intenção documentada |
-| `GDI-ERP-Plataform.csproj` | Publish — views novas com `Gdi*` devem estar em `Content Include` | `Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py` |
-| `Areas/gc/Controllers/MovimentosController.cs` | Pedidos, portal, e-mail templates | |
-| `UserIdentityController` | Login, portal `*.portalflightx.com` | |
-| `Robos/ENotas`, financeiro, boletos | Integrações externas | Smoke homologação |
-| `Db/*.edmx`, metadata | EF — não alterar schema sem autorização | |
+| Área | Nota |
+|------|------|
+| `_Layout.cshtml`, `start.js` | Impacto global; incrementar `VersionERP` após mudança |
+| `GDI-ERP-Plataform.csproj` | Views novas com `Gdi*` → `verify_csproj_gdi_helpers.py` |
+| `MovimentosController`, `UserIdentityController` | Pedidos, portal, e-mail |
+| `Web.config`, EF `.edmx` | Só com intenção documentada |
+| `Robos/ENotas`, financeiro | Smoke homologação |
 
-**Módulos:** COMEX (`gc`), Comercial, Estoque, Financeiro (`g`/`gc`), Qualidade (`qa`), Cadastros (`g`), Portal (`crm`).
+**Tabelas:** classificar **DataTables** vs **MVC** antes de CSS/JS — `2026_05_20_tabelas-datatables-vs-mvc.md`.
 
 ---
 
-## Padrão obrigatório antes de alterar código
+## Lookups (resumo)
 
-1. Localizar ficheiro, action, view ou query exatos; mapear referências.
-2. Identificar **causa raiz** (não corrigir só sintoma).
-3. Classificar tabelas: **DataTables** vs **MVC** (`.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md`).
-4. Verificar impacto: outras actions, partials, bundles, roles.
-5. Build local (VS/MSBuild Release) quando houver alteração C#.
-6. Scripts de verificação aplicáveis (`verify_csproj`, inventários).
+- **Index/filtro:** combo local na action (sem cache global).
+- **CreateEdit/modal:** `ILookupQueryService` + `*.Lookups.cs`.
+- Convenção: `2026_05_20_lookups-convencao-index-vs-createedit.md`.
 
 ---
 
-## Padrão de registro no CHANGELOG-DEV.md
-
-Após intervenção relevante:
-
-1. Atualizar tabela **«Últimas alterações relevantes»** no topo de `CHANGELOG-DEV.md` (1 linha resumo + data).
-2. Se necessário detalhe técnico: criar/atualizar ficheiro em `.cursor/context/` e referenciar na linha.
-3. Mover pendências resolvidas/abertas em `BACKLOG-DEV.md`.
-4. **Não** reexpandir o changelog com blocos longos — histórico extenso fica em `docs/dev-history/` ou context docs.
-
-Formato legado (blocos `### [data]`) preservado apenas no arquivo histórico `CHANGELOG-DEV-HISTORICO-INICIAL.md`.
-
----
-
-## Arquivos de referência
-
-| Tipo | Caminho |
-|------|---------|
-| Changelog operacional (~200 linhas) | `CHANGELOG-DEV.md` |
-| Backlog | `BACKLOG-DEV.md` |
-| Histórico changelog (187 entradas, arquivo) | `docs/dev-history/CHANGELOG-DEV-HISTORICO-INICIAL.md` |
-| Checklist ERP | `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` |
-| Regras Cursor | `.cursor/rules/2026_05_20_gdi-erp-plataform.mdc` (ordem de leitura: este ficheiro → `CHANGELOG-DEV` → `BACKLOG-DEV`) |
-| Padrões Claude | `CLAUDE.md` |
-| Lookups | `.cursor/context/2026_05_20_lookups-libdatasets.md` |
-| DataTables vs MVC | `.cursor/context/2026_05_20_tabelas-datatables-vs-mvc.md` |
-| Migração 4.8.1 | `.cursor/context/2026_05_20_migracao-472-481.md` |
-
-**Scripts úteis (raiz do repo):**
+## Verificação pós-alteração
 
 ```powershell
+python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py
 python Scripts/2026_05_20_gdi_verify_csproj_gdi_helpers.py
-python Scripts/2026_05_20_gdi_inventory_libdatasets_usage.py --fail
-python Scripts/2026_05_20_gdi_inventory_utf8_bom.py --fail
 ```
+
+Lista completa de inventários → **índice memória** § Scripts.
+
+---
+
+## Registo pós-intervenção
+
+1. Linha em `CHANGELOG-DEV.md` § «Últimas alterações»
+2. `BACKLOG-DEV.md` — marcar pendência resolvida/aberta
+3. Detalhe técnico longo → novo `.cursor/context/AAAA_MM_DD_*.md` (prefixo = data criação)
+
+**Convenção nomes:** `AAAA_MM_DD_` em `.cursor/context/`, `.cursor/rules/`, `Scripts/` — ver `.mdc` §4.5; inventário `2026_06_05_gdi_inventory_prefixed_file_dates.py`.

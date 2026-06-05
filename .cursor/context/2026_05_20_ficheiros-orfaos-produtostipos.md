@@ -1,7 +1,7 @@
 # Grupo 2.10 — Ficheiros órfãos no disco (ProdutosTipos)
 
 **Data:** 2026-05-20  
-**Checklist:** `.cursor/context/2026_05_20_checklist-pendencias-lookups-e-erp.md` §2.10
+**Checklist:** `.cursor/context/2026_05_22_checklist-pendencias-lookups-e-erp.md` §2.10
 
 ## Arquitetura de verificação
 
