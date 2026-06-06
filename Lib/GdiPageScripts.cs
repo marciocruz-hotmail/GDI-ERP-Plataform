@@ -18,6 +18,7 @@ namespace GdiPlataform.Lib
         DataTables = 2,
         Select2 = 4,
         TempusDominus = 8,
+        /// <summary>Wunderbaum (árvore hierárquica; nome legado <c>Jstree</c>).</summary>
         Jstree = 16,
 
         /// <summary>Padrão áreas g/gc: Core + DataTables + Select2 (modais Ajax frequentes).</summary>
@@ -35,7 +36,7 @@ namespace GdiPlataform.Lib
         /// <summary>G-PERF-20e — Hub relatório com lookup Select2 no modal (ex. lançamentos financeiros).</summary>
         LayoutHubReportSelect2 = Core | Select2 | TempusDominus,
 
-        /// <summary>G-PERF-20e — Index hierárquico jstree (sem DataTables).</summary>
+        /// <summary>G-PERF-20e / G-TREE-01 — Index hierárquico Wunderbaum (sem DataTables).</summary>
         LayoutHubJstree = Core | Jstree,
 
         /// <summary>G-PERF-20e — Página simples (parâmetros, etc.).</summary>
@@ -65,7 +66,7 @@ namespace GdiPlataform.Lib
         /// <summary>Chave HTML opcional para diagnóstico em homologação (Fase 3).</summary>
         public const string HtmlDiagnosticAttribute = "data-gdi-page-scripts";
 
-        /// <summary>Controllers que usam jstree no Index (inventário 2026-05-20).</summary>
+        /// <summary>Controllers com árvore Wunderbaum no Index (inventário 2026-05-20).</summary>
         private static readonly string[] JstreeControllers =
         {
             "CentrosCustos",

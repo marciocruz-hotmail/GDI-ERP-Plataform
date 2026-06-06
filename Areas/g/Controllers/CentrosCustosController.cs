@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 using GdiPlataform.Db;
 using GdiPlataform.Security;
 using GdiPlataform.Lib;
@@ -31,6 +32,8 @@ namespace GdiPlataform.Areas.g.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = LibIcons.getIcon("fa-regular fa-folder-open", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "Centros de Custos";
+            var treeSerializer = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
+            ViewBag.CentrosCustosTreeJson = treeSerializer.Serialize(MontarArvoreCentrosCustos());
             return View();
         }
 
@@ -163,81 +166,102 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region GetTreeViewCentroCusto
+        private const string IconePastaCentroCusto = "fa-regular fa-folder-open";
+        private const string IconeFolhaCentroCusto = "fa-regular fa-file";
+
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_CentrosCustos_*,g_CentrosCustos_Actionread")]
         public JsonResult GetTreeViewCentroCusto()
         {
-            var root = new JsTree3Node() // Create our root node and ensure it is opened
+            return Json(MontarArvoreCentrosCustos(), JsonRequestBehavior.AllowGet);
+        }
+
+        private JsTree3Node MontarArvoreCentrosCustos()
+        {
+            if (db == null)
             {
-                id = "-1",
-                text = "Árvore - Centros de Custos",
-                icon = "/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/images/icons8-genealogy-24.png",
-                state = new State(true, false, false)
-            };
-            var children = new List<JsTree3Node>();
-            //String nameIconAgrupador = "/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/images/icons8-genealogy-24.png";
-            //String nameIconCentroCusto = "/LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/images/icons8-pie-chart-report-script-24.png";
-            String nameIconAgrupador = "fa-regular fa-folder-open";
-            String nameIconCentroCusto = "fa-regular fa-file";
-            var listaCentrosCustos = (from _c1 in db.g_centros_custos select new { g_centros_custos = _c1 }).ToList();
-
-            // Nível 1
-            var listaCentrosCustosN1 = listaCentrosCustos.Where(N1 => N1.g_centros_custos.id_centro_custo_pai == 0).OrderBy(N1 => N1.g_centros_custos.codigo).ToList();
-            foreach (var CentrosCustosN1 in listaCentrosCustosN1)
-            {
-                var nodeN1 = JsTree3Node.NewNode(CentrosCustosN1.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN1.g_centros_custos.nome.ToString());
-                nodeN1.id = CentrosCustosN1.g_centros_custos.id_centro_custo.ToString();
-                nodeN1.text = CentrosCustosN1.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN1.g_centros_custos.nome.ToString();
-                nodeN1.icon = nameIconAgrupador;
-                nodeN1.state = new State(true, false, false);
-
-                // Nível 2
-                var listaCentrosCustosN2 = listaCentrosCustos.Where(N2 => (N2.g_centros_custos.id_centro_custo_pai == CentrosCustosN1.g_centros_custos.id_centro_custo) && (N2.g_centros_custos.id_centro_custo != CentrosCustosN1.g_centros_custos.id_centro_custo)).OrderBy(N2 => N2.g_centros_custos.codigo).ToList();
-                foreach (var CentrosCustosN2 in listaCentrosCustosN2)
-                {
-                    var nodeN2 = JsTree3Node.NewNode(CentrosCustosN2.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN2.g_centros_custos.nome.ToString());
-                    nodeN2.id = CentrosCustosN2.g_centros_custos.id_centro_custo.ToString();
-                    nodeN2.text = CentrosCustosN2.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN2.g_centros_custos.nome.ToString();
-                    nodeN2.icon = nameIconCentroCusto;
-                    nodeN2.state = new State(true, false, false);
-
-
-                    // Nível 3
-                    var listaCentrosCustosN3 = listaCentrosCustos.Where(N3 => (N3.g_centros_custos.id_centro_custo_pai == CentrosCustosN2.g_centros_custos.id_centro_custo) && (N3.g_centros_custos.id_centro_custo != CentrosCustosN2.g_centros_custos.id_centro_custo)).OrderBy(N3 => N3.g_centros_custos.codigo).ToList();
-                    foreach (var CentrosCustosN3 in listaCentrosCustosN3)
-                    {
-                        var nodeN3 = JsTree3Node.NewNode(CentrosCustosN3.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN3.g_centros_custos.nome.ToString());
-                        nodeN3.id = CentrosCustosN3.g_centros_custos.id_centro_custo.ToString();
-                        nodeN3.text = CentrosCustosN3.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN3.g_centros_custos.nome.ToString();
-                        nodeN3.icon = nameIconCentroCusto;
-                        nodeN3.state = new State(true, false, false);
-
-                        // Nível 4
-                        var listaCentrosCustosN4 = listaCentrosCustos.Where(N4 => (N4.g_centros_custos.id_centro_custo_pai == CentrosCustosN3.g_centros_custos.id_centro_custo) && (N4.g_centros_custos.id_centro_custo != CentrosCustosN3.g_centros_custos.id_centro_custo)).OrderBy(N3 => N3.g_centros_custos.codigo).ToList();
-                        foreach (var CentrosCustosN4 in listaCentrosCustosN4)
-                        {
-                            var nodeN4 = JsTree3Node.NewNode(CentrosCustosN4.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN4.g_centros_custos.nome.ToString());
-                            nodeN4.id = CentrosCustosN4.g_centros_custos.id_centro_custo.ToString();
-                            nodeN4.text = CentrosCustosN4.g_centros_custos.codigo.ToString() + " - " + CentrosCustosN4.g_centros_custos.nome.ToString();
-                            nodeN4.icon = nameIconCentroCusto;
-                            nodeN4.state = new State(true, false, false);
-                            nodeN3.children.Add(nodeN4);
-                        }
-                        if (listaCentrosCustosN4.Count() > 0) { nodeN3.icon = nameIconAgrupador; }
-
-                        nodeN2.children.Add(nodeN3);
-                    }
-                    if (listaCentrosCustosN3.Count() > 0) { nodeN2.icon = nameIconAgrupador; }
-
-                    nodeN1.children.Add(nodeN2);
-                }
-
-                children.Add(nodeN1);
+                return CriarNoRaizArvoreCentrosCustos("Árvore - Centros de Custos (sessão inválida)");
             }
 
-            // Add the sturcture to the root nodes children property
-            root.children = children;
+            try
+            {
+                var lista = db.g_centros_custos.AsNoTracking()
+                    .Where(x => x.id_centro_custo > 0)
+                    .OrderBy(x => x.codigo)
+                    .ToList();
 
-            // Return the object as JSON
-            return Json(root, JsonRequestBehavior.AllowGet);
+                var filhosPorPai = lista
+                    .GroupBy(x => x.id_centro_custo_pai ?? 0)
+                    .ToDictionary(g => g.Key, g => g.OrderBy(x => x.codigo).ToList());
+
+                var raizes = lista
+                    .Where(cc => (cc.id_centro_custo_pai ?? 0) == 0)
+                    .OrderBy(cc => cc.codigo)
+                    .ToList();
+
+                var root = CriarNoRaizArvoreCentrosCustos("Árvore - Centros de Custos");
+                var visitados = new HashSet<int>();
+                root.children = raizes
+                    .Select(cc => CriarNoArvoreCentrosCustos(cc, filhosPorPai, visitados))
+                    .Where(node => node != null)
+                    .ToList();
+
+                return root;
+            }
+            catch (Exception ex)
+            {
+                return CriarNoRaizArvoreCentrosCustos("Árvore - Centros de Custos (erro: " + GdiMvcJsonResults.AjaxFailureMessage(ex) + ")");
+            }
+        }
+
+        private static JsTree3Node CriarNoRaizArvoreCentrosCustos(string titulo)
+        {
+            return new JsTree3Node
+            {
+                id = "-1",
+                text = titulo,
+                icon = "/LibUI_AdminLTE-4.0.0/plugins/startprime/images/icons8-genealogy-24.png",
+                state = new State(true, false, false),
+                children = new List<JsTree3Node>()
+            };
+        }
+
+        private static JsTree3Node CriarNoArvoreCentrosCustos(
+            g_centros_custos cc,
+            Dictionary<int, List<g_centros_custos>> filhosPorPai,
+            HashSet<int> visitados)
+        {
+            if (!visitados.Add(cc.id_centro_custo))
+            {
+                return null;
+            }
+
+            List<g_centros_custos> filhos;
+            if (!filhosPorPai.TryGetValue(cc.id_centro_custo, out filhos))
+            {
+                filhos = new List<g_centros_custos>();
+            }
+
+            var texto = cc.codigo.EmptyIfNull().ToString() + " - " + cc.nome.EmptyIfNull().ToString();
+            var node = JsTree3Node.NewNode(texto);
+            node.id = cc.id_centro_custo.ToString();
+            node.text = texto;
+            node.state = new State(true, false, false);
+            node.icon = filhos.Count > 0 ? IconePastaCentroCusto : IconeFolhaCentroCusto;
+
+            foreach (var filho in filhos)
+            {
+                if (filho.id_centro_custo == cc.id_centro_custo)
+                {
+                    continue;
+                }
+                var childNode = CriarNoArvoreCentrosCustos(filho, filhosPorPai, visitados);
+                if (childNode != null)
+                {
+                    node.children.Add(childNode);
+                }
+            }
+
+            return node;
         }
         #endregion
 

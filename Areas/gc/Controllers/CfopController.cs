@@ -220,14 +220,102 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
+        #region ModalCreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_Cfop_*,gc_Cfop_Actioncreate,gc_Cfop_Actionupdate")]
+        public ActionResult ModalCreateEditCfop(int? IdCfop)
+        {
+            try
+            {
+                int id = IdCfop.GetValueOrDefault();
+                gc_cfop record;
+                if (id > 0)
+                {
+                    record = db.gc_cfop.Find(id);
+                    if (record == null)
+                    {
+                        ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("CFOP", id);
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>CFOP — (não localizado)</b>";
+                        return View("ModalCreateEditCfop", new gc_cfop { id_cfop = id });
+                    }
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>CFOP</b>" + LibStringFormat.GetTabHtml(1) + record.id_cfop.EmptyIfNull().ToString() + " - " + record.numero.EmptyIfNull().ToString();
+                }
+                else
+                {
+                    record = new gc_cfop { ativo = true };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>CFOP</b>";
+                }
+                return View("ModalCreateEditCfop", record);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "CfopController";
+                msg += "<br/>" + "ModalCreateEditCfop";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_Cfop_*,gc_Cfop_Actioncreate,gc_Cfop_Actionupdate")]
+        public ActionResult AjaxCreateEditCfop(gc_cfop record_gc_cfop)
+        {
+            try
+            {
+                record_gc_cfop.descricao = (record_gc_cfop.descricao ?? "").Trim().ToUpper();
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<gc_cfop> lista = record_gc_cfop.id_cfop > 0
+                        ? db.gc_cfop.Where(p => p.descricao == record_gc_cfop.descricao && p.id_cfop != record_gc_cfop.id_cfop)
+                        : db.gc_cfop.Where(p => p.descricao == record_gc_cfop.descricao);
+                    foreach (gc_cfop validacao in lista)
+                    {
+                        if (validacao.descricao.ToString().ToUpper().Equals(record_gc_cfop.descricao.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Descrição] duplicado na base de dados [" + validacao.descricao.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                if (record_gc_cfop.id_cfop == 0)
+                {
+                    record_gc_cfop.id_coligada = 1;
+                    record_gc_cfop.id_filial = 1;
+                    record_gc_cfop.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    record_gc_cfop.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.gc_cfop.Add(record_gc_cfop);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "CFOP <b>" + record_gc_cfop.numero + "</b> cadastrado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                record_gc_cfop.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                record_gc_cfop.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(record_gc_cfop).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "CFOP <b>" + record_gc_cfop.numero + "</b> atualizado com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
+
         #region CreateEdit
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_Cfop_*,gc_Cfop_Actioncreate")]
         public ActionResult Create()
         {
-            gc_cfop newRecord = new gc_cfop();
-            newRecord.ativo = true;
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>CFOP</b";
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -276,17 +364,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_Cfop_*,gc_Cfop_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            gc_cfop record_g_cfop = db.gc_cfop.Find(id);
-            if (record_g_cfop == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>CFOP</b>" + LibStringFormat.GetTabHtml(1) + record_g_cfop.id_cfop.EmptyIfNull().ToString() + " - " + record_g_cfop.numero.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_cfop);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

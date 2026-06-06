@@ -288,15 +288,160 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Usuarios_*,g_Usuarios_Actioncreate,g_Usuarios_Actionupdate")]
+        public ActionResult ModalCreateEditUsuario(int? IdUsuario)
+        {
+            try
+            {
+                int idUsuario = IdUsuario.GetValueOrDefault();
+                g_usuarios record_g_usuarios;
+                if (idUsuario > 0)
+                {
+                    record_g_usuarios = db.g_usuarios.Find(idUsuario);
+                    if (record_g_usuarios == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    ViewBag.Title = MontarTituloCreateEditUsuario(record_g_usuarios);
+                }
+                else
+                {
+                    record_g_usuarios = new g_usuarios { ativo = true };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Usuário</b>";
+                }
+                PreencherLookupsCreateEdit();
+                return View("ModalCreateEditUsuario", record_g_usuarios);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "UsuariosController";
+                msg += "<br/>" + "ModalCreateEditUsuario";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Usuarios_*,g_Usuarios_Actioncreate,g_Usuarios_Actionupdate")]
+        public ActionResult AjaxCreateEditUsuario(g_usuarios ViewRecordUsuarios)
+        {
+            try
+            {
+                if (String.IsNullOrWhiteSpace(ViewRecordUsuarios.email.EmptyIfNull().ToString().Trim()))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Email</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+                if (String.IsNullOrWhiteSpace(ViewRecordUsuarios.nome.EmptyIfNull().ToString().Trim()))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Nome</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+                if (String.IsNullOrWhiteSpace(ViewRecordUsuarios.login.EmptyIfNull().ToString().Trim()))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Login</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+                if (String.IsNullOrWhiteSpace(ViewRecordUsuarios.senha.EmptyIfNull().ToString().Trim()))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Senha</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+
+                ViewRecordUsuarios.nome = LibStringFormat.FormatarTextoCadastroNormal(ViewRecordUsuarios.nome);
+
+                if (ViewRecordUsuarios.id_usuario == 0)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        IQueryable<g_usuarios> listaUsuarios = db.g_usuarios.Where(p => p.nome == ViewRecordUsuarios.nome || p.login == ViewRecordUsuarios.login || p.email == ViewRecordUsuarios.email);
+                        foreach (g_usuarios validacao in listaUsuarios)
+                        {
+                            if (validacao.nome.ToString().ToUpper().Equals(ViewRecordUsuarios.nome.ToString().ToUpper()))
+                            { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [Id. " + validacao.id_usuario.ToString() + "]"); }
+                            if (validacao.email.ToString().ToUpper().Equals(ViewRecordUsuarios.email.ToString().ToUpper()))
+                            { ModelState.AddModelError("Model", "Campo [Email] duplicado na base de dados [Id. " + validacao.id_usuario.ToString() + "]"); }
+                            if (validacao.login.ToString().ToUpper().Equals(ViewRecordUsuarios.login.ToString().ToUpper()))
+                            { ModelState.AddModelError("Model", "Campo [Login] duplicado na base de dados [Id. " + validacao.id_usuario.ToString() + "]"); }
+                        }
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                        return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                    }
+
+                    ViewRecordUsuarios.gc_param_grupo_vendedor = "0";
+                    ViewRecordUsuarios.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    ViewRecordUsuarios.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_usuarios.Add(ViewRecordUsuarios);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Usuário <b>" + ViewRecordUsuarios.nome + "</b> cadastrado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                g_usuarios RecordUsuario = db.g_usuarios.Find(ViewRecordUsuarios.id_usuario);
+                if (RecordUsuario == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Usuário", ViewRecordUsuarios.id_usuario)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_usuarios> listaUsuarios = db.g_usuarios.Where(p => (p.nome == ViewRecordUsuarios.nome || p.login == ViewRecordUsuarios.login || p.email == ViewRecordUsuarios.email) && (p.id_usuario != ViewRecordUsuarios.id_usuario));
+                    foreach (g_usuarios validacao in listaUsuarios)
+                    {
+                        if (validacao.nome.ToString().ToUpper().Equals(ViewRecordUsuarios.nome.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [Id. " + validacao.id_usuario.ToString() + "]"); }
+                        if (validacao.email.ToString().ToUpper().Equals(ViewRecordUsuarios.email.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Email] duplicado na base de dados [Id. " + validacao.id_usuario.ToString() + "]"); }
+                        if (validacao.login.ToString().ToUpper().Equals(ViewRecordUsuarios.login.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Login] duplicado na base de dados [Id. " + validacao.id_usuario.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                RecordUsuario.ativo = ViewRecordUsuarios.ativo;
+                RecordUsuario.nome = ViewRecordUsuarios.nome;
+                RecordUsuario.email = ViewRecordUsuarios.email;
+                RecordUsuario.login = ViewRecordUsuarios.login;
+                RecordUsuario.senha = ViewRecordUsuarios.senha;
+                RecordUsuario.id_perfil = ViewRecordUsuarios.id_perfil;
+                RecordUsuario.id_logomarca = ViewRecordUsuarios.id_logomarca;
+                RecordUsuario.id_coligada = ViewRecordUsuarios.id_coligada;
+                RecordUsuario.id_filial = ViewRecordUsuarios.id_filial;
+                RecordUsuario.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                RecordUsuario.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(RecordUsuario).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Usuário <b>" + ViewRecordUsuarios.nome + "</b> atualizado com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditUsuario(g_usuarios record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Usuário</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_usuario.EmptyIfNull().ToString() + " - " + record.nome.EmptyIfNull().ToString();
+        }
+
         #region Create
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Usuarios_*,g_Usuarios_Actioncreate")]
         public ActionResult Create()
         {
-            PreencherLookupsCreateEdit();
-            g_usuarios newRecord = new g_usuarios();
-            newRecord.ativo = true;
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Usuário</b";
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -354,18 +499,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Usuarios_*,g_Usuarios_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0)) // O Usuário SuperAdm não pode ser editado
-            {
-                return RedirectToAction("Index", "Error", new { area = "" });
-            }
-            g_usuarios record_g_usuarios = db.g_usuarios.Find(id);
-            if (record_g_usuarios == null)
-            {
-                return RedirectToAction("Index");
-            }
-            PreencherLookupsCreateEdit();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Usuário</b>" + LibStringFormat.GetTabHtml(1) + record_g_usuarios.id_usuario.EmptyIfNull().ToString() + " - " + record_g_usuarios.nome.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_usuarios);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -504,6 +638,7 @@ namespace GdiPlataform.Areas.g.Controllers
             }
             return Json(new { success = sucesso, msg = msgRetorno }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
         #endregion
 
         private JsonResult JsonAjaxErro(Exception ex)

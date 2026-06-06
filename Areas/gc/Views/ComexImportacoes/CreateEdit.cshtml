@@ -225,7 +225,7 @@
 
                                 <!-- Aba Itens - INÍCIO -->
                                 <div class="tab-pane fade" id="tabItens" role="tabpanel" aria-labelledby="tabItens_tab">
-                                    
+
                                     <div class="card-header m-0 p-1">
                                         @if ((CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_*")) || (CachePersister.userIdentity.Roles.Contains("gc_ComexImportacoes_Actiondelete")))
                                         {
@@ -275,7 +275,6 @@
                                 </div>
                                 <!-- Aba Itens - FIM -->
 
-
                                 <!-- Aba Invoices PDF - INÍCIO -->
                                 <div class="tab-pane fade" id="tabInvoicesPDF" role="tabpanel" aria-labelledby="tabInvoicesPDF_tab">
                                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
@@ -308,7 +307,6 @@
                                     </div>
                                 </div>
                                 <!-- Aba Invoices PDF - FIM -->
-
 
                                 <!-- Aba GED - INÍCIO -->
                                 <div class="tab-pane fade" id="tabGED" role="tabpanel" aria-labelledby="tabGED_tab">
@@ -345,7 +343,6 @@
                                 </div>
                                 <!-- Aba GED - FIM -->
 
-
                                 <!-- Aba CUSTOS - INÍCIO -->
                                 <div class="tab-pane fade" id="tabCustos" role="tabpanel" aria-labelledby="tabCustos_tab">
                                     <div class="table-responsive scroll-body-horizontal" style="width:100%">
@@ -359,7 +356,6 @@
                                                         @Html.EditorFor(model => model.despesas_fob, new { htmlAttributes = new { @class = "form-control", @style = "text-align:right;" } })
                                                     </div>
                                                 </div>
-
 
                                                 <div class="form-group row text-sm-end m-0 pt-1">
                                                     @Html.Label("despesas_fob", "FOB SC (US$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
@@ -376,11 +372,9 @@
                                                     </div>
                                                 </div>
 
-
                                                 <div class="form-group row text-sm-end m-0 pt-1">
                                                     &nbsp;
                                                 </div>
-
 
                                                 <div class="form-group row text-sm-end m-0 pt-1">
                                                     @Html.Label("despesas_icms", "ICMS (R$)", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
@@ -864,7 +858,6 @@
         }
     });
 
-
     $('#tabInvoicesPDF_tab').on('click', function (e)
     {
         try
@@ -948,8 +941,6 @@
             LibMessageError("Atenção", "[tabInvoicesPDF_tab] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
-
-
 
     $('#tabAudit_tab').on('click', function (e)
     {
@@ -1111,7 +1102,6 @@
         }
     }
 
-
     function jsModalCancelarInvoice(TableName, columnName)
     {
         try
@@ -1141,7 +1131,6 @@
             LibMessageError("Atenção", "[jsModalCancelarInvoice] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
     function jsModalExcluirItensImportacao()
     {
@@ -1184,7 +1173,6 @@
             LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
     function jsDownloadFile(id)
     {

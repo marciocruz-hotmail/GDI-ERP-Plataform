@@ -1,0 +1,167 @@
+@model GdiPlataform.Db.g_produtos_ncm
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalCreateEditGProdutosNcm .modal-body {
+        overflow-x: visible;
+    }
+</style>
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGProdutosNcm" }))
+{
+    <div class="modal-dialog modal-full modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_produto_ncm)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.HiddenFor(model => model.id_coligada)
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-boxes-stacked me-1" aria-hidden="true"></i>Dados do Produto</div>
+                        <div class="card-body m-0 p-1">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Ativo", "Ativo", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2 text-sm-start" style="margin-top:7px;">
+                                    <div class="form-check form-switch form-switch-lg">
+                                        @Html.CheckBoxFor(model => model.ativo, new { @class = "form-check-input switch-success", role = "switch" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Código NCM", "Código NCM", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.codigo_ncm, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Cst ICMS Entrada", "Cst ICMS Entrada", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_icms_entrada, ViewBag.comboCstIcmsEntrada as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Cst IPI Entrada", "Cst IPI Entrada", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_ipi_entrada, ViewBag.comboCstIpiEntrada as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                                @Html.Label("Cst IPI Saída", "Cst IPI Saída", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_ipi_saida, ViewBag.comboCstIpiSaida as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Aliq. IPI Venda", "Aliq. IPI Venda", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.aliquota_ipi, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Cst PIS Entrada", "Cst PIS Entrada", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_pis_entrada, ViewBag.comboCstPisEntrada as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                                @Html.Label("Cst PIS Saída", "Cst PIS Saída", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_pis_saida, ViewBag.comboCstPisSaida as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Aliq. PIS", "Aliq. PIS", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.aliquota_pis, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Cst CONFIS Entrada", "Cst CONFIS Entrada", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_cofins_entrada, ViewBag.comboCstCofinsEntrada as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                                @Html.Label("Cst CONFIS Saída", "Cst CONFIS Saída", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.DropDownListFor(model => model.id_cst_cofins_saida, ViewBag.comboCstPisSaida as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("Aliq. CONFIS", "Aliq. CONFIS", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.aliquota_cofins, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxCreateEditProdutosNcm()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitModal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditProdutosNcm()
+    {
+        try
+        {
+            if (isEmpty($('#codigo_ncm').val() == null ? '' : $('#codigo_ncm').val().toString().trim())) {
+                LibMessageAlert('Atenção', 'Campo <b>Código NCM</b> é de preenchimento obrigatório!');
+                return;
+            }
+
+            LibMessageProcessando('Salvando NCM...');
+            var form = $('#FormModalCreateEditGProdutosNcm');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AjaxCreateEditProdutosNcm", "ProdutosNcm", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success === true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function (m) { var i = bootstrap.Modal.getInstance(m); if (i) i.hide(); });
+                        if (typeof otableGProdutosNcm !== 'undefined' && otableGProdutosNcm) {
+                            otableGProdutosNcm.draw(false);
+                        } else {
+                            $('#dtGProdutosNcm').DataTable().draw(false);
+                        }
+                        LibMessageHideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
+            });
+        }
+        catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageError('Atenção', '[jsAjaxCreateEditProdutosNcm] ' + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

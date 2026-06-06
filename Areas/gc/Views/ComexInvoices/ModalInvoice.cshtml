@@ -7,7 +7,7 @@
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
                 <h4 class="modal-title d-flex align-items-center gap-2">
-    
+
     @Html.Raw((String)ViewBag.Title)</h4>
                 @Html.HiddenFor(model => model.id_invoice)
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
@@ -68,7 +68,6 @@
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
         }
     });
-
 
     function jsCreateOTableInvoicesItens()
     {
@@ -155,6 +154,3 @@
     };
 
 </script>
-
-
-

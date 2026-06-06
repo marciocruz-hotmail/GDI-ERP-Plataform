@@ -142,7 +142,6 @@
                                         </div>
                                     </div>
 
-
                                     @if (@Model.is_servico == false)
                                     {
                                         <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
@@ -398,7 +397,6 @@
         }
     });
 
-
     $('#tabAudit_tab').on('click', function (e)
     {
         try
@@ -479,7 +477,6 @@
             LibMessageError("Atenção", "[tabAudit_tab] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
-
 
     function JsAjaxCreateEditProduto()
     {

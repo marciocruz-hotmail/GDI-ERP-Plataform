@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.props')" />
   <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.props')" />
@@ -370,6 +370,7 @@
     <Compile Include="Areas\gc\Controllers\ComexInvoicesController.cs" />
     <Compile Include="Areas\gc\Controllers\ComexProdutosController.cs" />
     <Compile Include="Areas\gc\Controllers\ComexProdutosController.Lookups.cs" />
+    <Compile Include="Areas\gc\Controllers\ComexProdutosController.LookupAjax.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueControleController.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueControleController.Lookups.cs" />
     <Compile Include="Areas\gc\Controllers\EstoqueController.cs" />
@@ -446,7 +447,6 @@
     <Compile Include="Areas\gc\Reports\ReportEmailPedido.cs" />
     <Compile Include="Areas\gc\Services\EstoqueInventarioService.cs" />
     <Compile Include="Areas\gc\Services\PedidosVendaServices.cs" />
-    <Compile Include="Areas\g\Controllers\AssistentesController.cs" />
     <Compile Include="Areas\g\Controllers\AtendimentosController.cs" />
     <Compile Include="Areas\g\Controllers\AtendimentosController.Lookups.cs" />
     <Compile Include="Areas\g\Controllers\AtendimentosController.LookupAjax.cs" />
@@ -485,7 +485,6 @@
     <Compile Include="Areas\g\gAreaRegistration.cs" />
     <Compile Include="Areas\g\Models\Lib\LibFinanceiro.cs" />
     <Compile Include="Areas\g\Models\Lib\LibFinanceiroBoletos.cs" />
-    <Compile Include="Areas\g\Models\CstAlterarPrecosTabelasRevendaVendedor.cs" />
     <Compile Include="Areas\g\Models\CstClienteLimiteCredito.cs" />
     <Compile Include="Areas\g\Models\CstClientesIndex.cs" />
     <Compile Include="Areas\g\Models\CstPerfisIndex.cs" />
@@ -515,7 +514,6 @@
     <Compile Include="Areas\g\Models\CstStringReplace.cs" />
     <Compile Include="Areas\g\Models\CstUpload.cs" />
     <Compile Include="Areas\g\Models\CstUploadGed.cs" />
-    <Compile Include="Areas\g\Models\CstVendedoresTabelasDetalhesModel.cs" />
     <Compile Include="Areas\g\Models\CstViewPerfisAcessosModel.cs" />
     <Compile Include="Areas\g\Models\CstViewRevendasTabelasModel.cs" />
     <Compile Include="Areas\g\Models\CstViewVendedoresTabelasModel.cs" />
@@ -1313,62 +1311,9 @@
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.slim.min.js" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery.spin.fgnass-2.3.2\spin.js" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery.spin.fgnass-2.3.2\spin.min.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\jstree.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\jstree.min.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap-theme.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap-theme.min.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\css\bootstrap.min.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\js\bootstrap.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\js\bootstrap.min.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\jquery.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\30px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\32px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\40px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\style.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\style.min.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\default\throbber.gif" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\30px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\32px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\style.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\style.min.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\throbber.gif" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\asttter.ico" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\favicon.ico" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\favicon2.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\favicon3.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icon-bank-32.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-genealogy-24.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-genealogy-32.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-pie-chart-report-script-24.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\images\icons8-tags-24.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap-theme.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap-theme.min.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\css\bootstrap.min.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\js\bootstrap.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\js\bootstrap.min.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\jquery.js" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\30px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\32px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\40px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\style.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\throbber.gif" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\30px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\32px.png" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.svg" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.css" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\throbber.gif" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\wunderbaum-0.14.1\dist\wunderbaum.css" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\wunderbaum-0.14.1\dist\wunderbaum.umd.min.js" />
+    <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\images\icons8-genealogy-24.png" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\css\start.css" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\js\gdi-select2.js" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\startprime\js\gdi-swal2-dialog-shim.js" />
@@ -1400,6 +1345,7 @@
     <Content Include="Areas\gc\Views\CfopParametros\Index.cshtml" />
     <Content Include="Areas\gc\Views\CfopParametros\ModalCreateEditParametro.cshtml" />
     <Content Include="Areas\gc\Views\Cfop\CreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\Cfop\ModalCreateEditCfop.cshtml" />
     <Content Include="Areas\gc\Views\Cfop\Index.cshtml" />
     <Content Include="Areas\gc\Views\ComexFinanceiro\Index.cshtml" />
     <Content Include="Areas\gc\Views\ComexFinanceiro\ModalCancelarComexFinanceiro.cshtml" />
@@ -1427,6 +1373,7 @@
     <Content Include="Areas\gc\Views\ComexProdutos\ModalDesativarProdutoComex.cshtml" />
     <Content Include="Areas\gc\Views\ComexProdutos\ProdutosPre.cshtml" />
     <Content Include="Areas\gc\Views\EstoqueControle\CreateEdit.cshtml" />
+    <Content Include="Areas\gc\Views\EstoqueControle\ModalCreateEditEstoqueControle.cshtml" />
     <Content Include="Areas\gc\Views\EstoqueControle\Index.cshtml" />
     <Content Include="Areas\gc\Views\EstoqueControle\ModalCreateMedicao.cshtml" />
     <Content Include="Areas\gc\Views\EstoqueInventario\FormInventarioItens.cshtml" />
@@ -1458,6 +1405,7 @@
     <Content Include="Areas\gc\Views\FinanceiroLancamentos\ModalViewFinanceiroMovimentos.cshtml" />
     <Content Include="Areas\gc\Views\FinanceiroParametroDifal\CreateEdit.cshtml" />
     <Content Include="Areas\gc\Views\FinanceiroParametroDifal\Index.cshtml" />
+    <Content Include="Areas\gc\Views\FinanceiroParametroDifal\ModalCreateEditParametroDifal.cshtml" />
     <Content Include="Areas\gc\Views\Fretes\Index.cshtml" />
     <Content Include="Areas\gc\Views\Gerencial\IndexPainelComercialGerencial.cshtml" />
     <Content Include="Areas\gc\Views\MovimentosEntradas\FormProcessarNFCompraNacional.cshtml" />
@@ -1519,7 +1467,6 @@
     <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioIBAMA.cshtml" />
     <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioJogueLimpo.cshtml" />
     <Content Include="Areas\gc\Views\RelatoriosRegulamentacao\ModalRelatorioPF.cshtml" />
-    <Content Include="Areas\gc\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\gc\Views\web.config" />
     <Content Include="Areas\gc\Views\_ViewStart.cshtml" />
     <Content Include="Areas\g\Views\Atendimentos\Edit.cshtml" />
@@ -1531,6 +1478,7 @@
     <Content Include="Areas\g\Views\CentrosCustos\Index.cshtml" />
     <Content Include="Areas\g\Views\Cidades\CreateEdit.cshtml" />
     <Content Include="Areas\g\Views\Cidades\Index.cshtml" />
+    <Content Include="Areas\g\Views\Cidades\ModalCreateEditCidade.cshtml" />
     <Content Include="Areas\g\Views\Cidades\ModalCadastrarNovaCidade.cshtml" />
     <Content Include="Areas\g\Views\ClassificacaoFinanceira\CreateEdit.cshtml" />
     <Content Include="Areas\g\Views\ClassificacaoFinanceira\Index.cshtml" />
@@ -1543,13 +1491,16 @@
     <Content Include="Areas\g\Views\Clientes\ModalDesativarContato.cshtml" />
     <Content Include="Areas\g\Views\Clientes\ModalNovoCadastroRoboSintegra.cshtml" />
     <Content Include="Areas\g\Views\ContasCaixas\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ContasCaixas\ModalCreateEditContaCaixa.cshtml" />
     <Content Include="Areas\g\Views\ContasCaixas\Index.cshtml" />
     <Content Include="Areas\g\Views\ContratosAviacao\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\ContratosAviacao\ModalCreateEditContratoAviacao.cshtml" />
     <Content Include="Areas\g\Views\ContratosAviacao\Index.cshtml" />
     <Content Include="Areas\g\Views\ContratosAviacao\ModalUploadContratoAssinado.cshtml" />
     <Content Include="Areas\g\Views\ContratosAviacao\ReportPDFContrato001.cshtml" />
     <Content Include="Areas\g\Views\Filiais\CreateEdit.cshtml" />
     <Content Include="Areas\g\Views\Filiais\Index.cshtml" />
+    <Content Include="Areas\g\Views\Filiais\ModalCreateEditFilial.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\Backup_ReportBoletoDDA.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\BoletoPDF.cshtml" />
     <Content Include="Areas\g\Views\Financeiro\BoletoPdfFebraban.cshtml" />
@@ -1584,26 +1535,32 @@
     <Content Include="Areas\g\Views\Nfe\ModalNfeEnviarPorEmailUnitario.cshtml" />
     <Content Include="Areas\g\Views\Nfe\ModalSincronizarLotesNfe.cshtml" />
     <Content Include="Areas\g\Views\PagRecCondicoes\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\PagRecCondicoes\ModalCreateEditPagRecCondicao.cshtml" />
     <Content Include="Areas\g\Views\PagRecCondicoes\Index.cshtml" />
     <Content Include="Areas\g\Views\PagRecTipos\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\PagRecTipos\ModalCreateEditPagRecTipo.cshtml" />
     <Content Include="Areas\g\Views\PagRecTipos\Index.cshtml" />
     <Content Include="Areas\g\Views\Perfis\CreateEdit.cshtml" />
     <Content Include="Areas\g\Views\Perfis\Index.cshtml" />
     <Content Include="Areas\g\Views\ProdutosNcm\CreateEdit.cshtml" />
     <Content Include="Areas\g\Views\ProdutosNcm\Index.cshtml" />
+    <Content Include="Areas\g\Views\ProdutosNcm\ModalCreateEditProdutosNcm.cshtml" />
     <Content Include="Areas\g\Views\ProdutosNcm\ModalAtualizarTabelaIBPT.cshtml" />
     <Content Include="Areas\g\Views\Produtos\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Produtos\ModalCreateEditProduto.cshtml" />
     <Content Include="Areas\g\Views\Produtos\Index.cshtml" />
     <Content Include="Areas\g\Views\Produtos\ModalAtualizarCadastroProdutos.cshtml" />
     <Content Include="Areas\g\Views\Produtos\ModalDesativarCadastroProduto.cshtml" />
     <Content Include="Areas\g\Views\Produtos\ModalViewFichaEstoqueProduto.cshtml" />
-    <Content Include="Areas\g\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\g\Views\UF\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\UF\ModalCreateEditUF.cshtml" />
     <Content Include="Areas\g\Views\UF\Index.cshtml" />
     <Content Include="Areas\g\Views\Usuarios\CreateEdit.cshtml" />
     <Content Include="Areas\g\Views\Usuarios\Index.cshtml" />
+    <Content Include="Areas\g\Views\Usuarios\ModalCreateEditUsuario.cshtml" />
     <Content Include="Areas\g\Views\Usuarios\ModalUsuarioTrocarSenha.cshtml" />
     <Content Include="Areas\g\Views\Vendedores\CreateEdit.cshtml" />
+    <Content Include="Areas\g\Views\Vendedores\ModalCreateEditVendedor.cshtml" />
     <Content Include="Areas\g\Views\Vendedores\Index.cshtml" />
     <Content Include="Areas\g\Views\web.config" />
     <Content Include="Areas\g\Views\_ViewStart.cshtml" />
@@ -1613,7 +1570,6 @@
     <Content Include="Areas\qa\Views\GedSGQ\IndexComunicados.cshtml" />
     <Content Include="Areas\qa\Views\GedSGQ\IndexDocsSGQ.cshtml" />
     <Content Include="Areas\qa\Views\GedSGQ\IndexPops.cshtml" />
-    <Content Include="Areas\qa\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\qa\Views\Treinamentos\Index.cshtml" />
     <Content Include="Areas\qa\Views\Treinamentos\IndexTreinamentoAviacao001.cshtml" />
     <Content Include="Areas\qa\Views\web.config" />
@@ -1661,50 +1617,6 @@
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\fontawesome-free-7.2.0\webfonts\fa-v4compatibility.woff2" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.min.map" />
     <Content Include="LibUI_AdminLTE-4.0.0\plugins\jquery-3.6.0\jquery.slim.min.map" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\libs\bootstrap\fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-bold-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\dist\themes\proton\fonts\titillium\titilliumweb-regular-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\libs\bootstrap\fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\base.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-bold-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-extralight-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\fonts\titillium\titilliumweb-regular-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\default\style.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\main.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\mixins.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\base.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-bold-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-extralight-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.eot" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.ttf" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\fonts\titillium\titilliumweb-regular-webfont.woff" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\main.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\mixins.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\responsive.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\proton\style.less" />
-    <Content Include="LibUI_AdminLTE-4.0.0\plugins\jstree-3.3.4\src\themes\responsive.less" />
     <None Include="AI-CONTEXT.md" />
     <None Include="BACKLOG-DEV.md" />
     <None Include="CHANGELOG-DEV.md" />
@@ -1808,7 +1720,7 @@
       <AssemblySearchPaths>$(ProjectDir)packages\System.Net.Http.4.3.4\lib\net46\;$(AssemblySearchPaths)</AssemblySearchPaths>
     </PropertyGroup>
   </Target>
-  <!-- Garante que apenas o System.Net.Http do pacote NuGet seja usado (remove o do framework e mantém o do pacote para compilação e cópia) -->
+  <!-- Garante que apenas o System.Net.Http do pacote NuGet seja usado (remove o do framework e mantÃ©m o do pacote para compilaÃ§Ã£o e cÃ³pia) -->
   <Target Name="UnifySystemNetHttpReference" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'System.Net.Http'" />
@@ -1866,7 +1778,7 @@
   <Import Project="packages\EntityFramework.6.5.2\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.5.2\build\EntityFramework.targets')" />
   <Import Project="packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" />
-  <!-- Garante AssemblyFile se os .props não forem avaliados (ex.: NuGet/VS em estado transitório). Espelha Microsoft.Build.Tasks.Git.props / Microsoft.SourceLink.Common.props. -->
+  <!-- Garante AssemblyFile se os .props nÃ£o forem avaliados (ex.: NuGet/VS em estado transitÃ³rio). Espelha Microsoft.Build.Tasks.Git.props / Microsoft.SourceLink.Common.props. -->
   <PropertyGroup>
     <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.10.0.203\tools\net472\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
     <MicrosoftBuildTasksGitAssemblyFile Condition="'$(MicrosoftBuildTasksGitAssemblyFile)' == '' and '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildProjectDirectory)\packages\Microsoft.Build.Tasks.Git.10.0.203\tools\core\Microsoft.Build.Tasks.Git.dll</MicrosoftBuildTasksGitAssemblyFile>
@@ -1877,7 +1789,7 @@
   <Import Project="packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets" Condition="Exists('packages\Microsoft.Build.Tasks.Git.10.0.203\build\Microsoft.Build.Tasks.Git.targets')" />
   <Import Project="packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets" Condition="Exists('packages\Microsoft.SourceLink.Common.10.0.203\build\Microsoft.SourceLink.Common.targets')" />
   <Import Project="packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets" Condition="Exists('packages\Microsoft.SourceLink.GitHub.10.0.203\build\Microsoft.SourceLink.GitHub.targets')" />
-  <!-- Publish Web (WPP): apagar pastas obsoletas/só leitura em PackageTmp antes de CopyAllFilesToSingleFolder* — evita RemoveEmptyDirectories "Access to the path 'X' is denied" (ex.: .cursor\context, Areas\a\Views\Filtros removido 2026-05-19, bootbox-compat legado). -->
+  <!-- Publish Web (WPP): apagar pastas obsoletas/sÃ³ leitura em PackageTmp antes de CopyAllFilesToSingleFolder* â€” evita RemoveEmptyDirectories "Access to the path 'X' is denied" (ex.: .cursor\context, Areas\a\Views\Filtros removido 2026-05-19, bootbox-compat legado). -->
   <Target Name="GdiStripPackageTmpObsoletePathsBeforeWppCopy" BeforeTargets="CopyAllFilesToSingleFolderForMsdeploy;CopyAllFilesToSingleFolderForPackage" Condition="'$(WPPAllFilesInSingleFolder)' != '' And '$(OS)' == 'Windows_NT'">
     <PropertyGroup>
       <_GdiWppTmp>$([System.IO.Path]::GetFullPath($(WPPAllFilesInSingleFolder)))</_GdiWppTmp>
@@ -1891,7 +1803,7 @@
     <Exec Command="cmd /c if exist &quot;$(_GdiPkgFiltros)&quot; (attrib -r &quot;$(_GdiPkgFiltros)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgFiltros)&quot; 2&gt;nul)" IgnoreExitCode="true" />
     <Exec Command="cmd /c if exist &quot;$(_GdiPkgBootbox)&quot; (attrib -r &quot;$(_GdiPkgBootbox)\*.*&quot; /s /d 2&gt;nul &amp; rmdir /s /q &quot;$(_GdiPkgBootbox)&quot; 2&gt;nul)" IgnoreExitCode="true" />
   </Target>
-  <!-- Evita FileLoadException 0x80131040: cópias duplicadas no Explorer geram "Antlr3 (1).Runtime.dll" em bin; o ASP.NET carrega todos os .dll e o nome não bate com o manifesto. -->
+  <!-- Evita FileLoadException 0x80131040: cÃ³pias duplicadas no Explorer geram "Antlr3 (1).Runtime.dll" em bin; o ASP.NET carrega todos os .dll e o nome nÃ£o bate com o manifesto. -->
   <Target Name="RemoveMisnamedAntlrDuplicatesFromBin" AfterTargets="CopyFilesToOutputDirectory">
     <ItemGroup>
       <_MisnamedAntlr Include="$(OutputPath)Antlr3.Runtime (*).dll" />

@@ -212,12 +212,84 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_UF_*,g_UF_Actionupdate")]
+        public ActionResult ModalCreateEditUF(int? IdUf)
+        {
+            try
+            {
+                int idUf = IdUf.GetValueOrDefault();
+                if (idUf <= 0)
+                {
+                    return RedirectToAction("Index");
+                }
+                g_uf record_g_uf = db.g_uf.Find(idUf);
+                if (record_g_uf == null)
+                {
+                    return RedirectToAction("Index");
+                }
+                ViewBag.Title = MontarTituloCreateEditUF(record_g_uf);
+                return View("ModalCreateEditUF", record_g_uf);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "UFController";
+                msg += "<br/>" + "ModalCreateEditUF";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_UF_*,g_UF_Actionupdate")]
+        public ActionResult AjaxCreateEditUF(g_uf view_g_uf)
+        {
+            try
+            {
+                if (view_g_uf.id_uf <= 0)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("UF", view_g_uf.id_uf)), JsonRequestBehavior.AllowGet);
+                }
+
+                g_uf existente = db.g_uf.Find(view_g_uf.id_uf);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("UF", view_g_uf.id_uf)), JsonRequestBehavior.AllowGet);
+                }
+
+                existente.basemg_icms_percentual_interno = view_g_uf.basemg_icms_percentual_interno;
+                existente.basemg_icms_interestadual = view_g_uf.basemg_icms_interestadual;
+                existente.basemg_icms_base_reducao = view_g_uf.basemg_icms_base_reducao;
+                existente.basesp_icms_percentual_interno = view_g_uf.basesp_icms_percentual_interno;
+                existente.basesp_icms_interestadual = view_g_uf.basesp_icms_interestadual;
+                existente.basesp_icms_base_reducao = view_g_uf.basesp_icms_base_reducao;
+                existente.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                existente.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "UF <b>" + existente.sigla.EmptyIfNull().ToString() + "</b> atualizada com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditUF(g_uf record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>UF</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_uf.EmptyIfNull().ToString() + " - " + record.nome.EmptyIfNull().ToString();
+        }
+
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_UF_*,g_UF_Actioncreate,gdc_Pefin_Default")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>UF</b";
-            g_uf newRecord = new g_uf();
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -268,17 +340,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_UF_*,g_UF_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_uf record_g_uf = db.g_uf.Find(id);
-            if (record_g_uf == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>UF</b>" + LibStringFormat.GetTabHtml(1) + record_g_uf.id_uf.EmptyIfNull().ToString() + " - " + record_g_uf.nome.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_uf);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

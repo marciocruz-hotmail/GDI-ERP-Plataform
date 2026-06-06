@@ -7,7 +7,7 @@
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
                 <h4 class="modal-title d-flex align-items-center gap-2">
-    
+
     @Html.Raw((String)ViewBag.Title)</h4>
                 @Html.HiddenFor(model => model.id_movimento)
                 <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
@@ -189,7 +189,6 @@
         }
     };
 
-
     function YesDownloadFileXML(data, name = 'file', type = 'text/plain')
     {
         const { createElement } = document
@@ -315,7 +314,6 @@
             }
         });
     };
-
 
     function jsAtualizarDadosNotasFicais()
     {
@@ -479,7 +477,6 @@
         });
     }
 
-
     function jsCancelamentoNF_Step3(id) {
         try {
             Swal.fire({
@@ -547,7 +544,6 @@
         }
     }
 
-
     function jsCancelamentoNF_Step5(id, obs, siare)
     {
         LibMessageProcessando("Solicitando Cancelamento . . .")
@@ -590,7 +586,4 @@
         });
     };
 
-
 </script>
-
-

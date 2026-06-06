@@ -37,7 +37,7 @@ namespace GdiPlataform.Areas.qa.Controllers
         #endregion
 
         #region Pops
-        [GdiPageScripts(GdiPageScriptsFlags.LayoutHubJstree)]
+        [GdiPageScripts(GdiPageScriptsFlags.LayoutLite)]
         [CustomAuthorize(Roles = "SuperAdmin,Admin,qa_GedSGQ_Default,qa_GedSGQ_IndexPops_*,qa_GedSGQ_IndexPops_Actionread")]
         public ActionResult IndexPops()
         {

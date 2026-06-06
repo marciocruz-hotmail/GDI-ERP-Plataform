@@ -88,8 +88,8 @@ BUNDLE_FILES = {
         "LibUI_AdminLTE-4.0.0/plugins/startprime/js/gdi-select2.js",
     ],
     "jstree": [
-        "LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/themes/default/style.css",
-        "LibUI_AdminLTE-4.0.0/plugins/jstree-3.3.4/dist/jstree.min.js",
+        "LibUI_AdminLTE-4.0.0/plugins/wunderbaum-0.14.1/dist/wunderbaum.css",
+        "LibUI_AdminLTE-4.0.0/plugins/wunderbaum-0.14.1/dist/wunderbaum.umd.min.js",
     ],
     "tempus": [
         "LibUI_AdminLTE-4.0.0/plugins/tempus-dominus-6.9.4/css/tempus-dominus.min.css",

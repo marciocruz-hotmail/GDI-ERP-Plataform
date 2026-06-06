@@ -26,7 +26,7 @@ O gargalo dominante para a **percepção do usuário** continua sendo:
 
 1. **Custo fixo por página autenticada** — `_Layout.cshtml` carrega ~15 CSS + ~12 JS (DataTables, Select2, jstree, Tempus, AdminLTE, `start.js`) em **todas** as telas, fora de bundles agressivos.
 2. **Child actions Navbar** — ainda há pipeline MVC extra (`RenderAction` navbar + footer), mitigado por cache 60 s e deduplicação na mesma request, mas **primeira** navegação após TTL dispara 4 queries EF.
-3. **Grids legados com paginação em memória** — inventário automatizado lista **6** `GetDados*` pendentes (`Assistentes`, `CentrosCustos`, `Ged`, `Nfe`, `EstoqueControle`, `Parametros`); **`Nfe.GetDados`** materializa **toda** `g_nfe` antes de `Skip/Take`.
+3. **Grids legados com paginação em memória** — inventário automatizado lista **5** `GetDados*` pendentes (`CentrosCustos`, `Ged`, `Nfe`, `EstoqueControle`, `Parametros`); ~~`Assistentes`~~ removido 2026-05-25; **`Nfe.GetDados`** materializa **toda** `g_nfe` antes de `Skip/Take`.
 4. **Formulários monolíticos** — `MovimentosController` (~9k linhas), `FormPedidoCreate.cshtml`, `ComexImportacoes/CreateEdit` com listas completas e integrações síncronas (e-Notas, S3, CPF/CNPJ).
 5. **Login** — `a_yesprodutos.ToList()` + montagem de menu EF (`getNavbarItemsMenu`) no POST de autenticação.
 
@@ -89,7 +89,7 @@ O gargalo dominante para a **percepção do usuário** continua sendo:
 
 | Campo | Detalhe |
 |-------|---------|
-| **Pendentes (script)** | `AssistentesController.GetDados` L62; `CentrosCustosController.getDados` L80; `GedController.GetDados` L111; `NfeController.GetDados` L151; `EstoqueControleController.GetDadosMedicoes`; `ParametrosController.GetDadosSistemas` |
+| **Pendentes (script)** | `CentrosCustosController.getDados` L80; `GedController.GetDados` L111; `NfeController.GetDados` L151; `EstoqueControleController.GetDadosMedicoes`; `ParametrosController.GetDadosSistemas` |
 | **Evidência** | `python Scripts/2026_05_22_gdi_inventory_datatables_memory_paging.py` → 6 PENDENTE, exit 1 |
 | **Por que lentidão** | SQL + app materializam conjunto inteiro; GC e tempo de resposta Ajax crescem com tabela |
 | **Sugestão** | `LibDataTableSqlPaging.SqlCount` + `SqlPage` (referência: `AtendimentosController.getDadosAtendimentos` L78) |

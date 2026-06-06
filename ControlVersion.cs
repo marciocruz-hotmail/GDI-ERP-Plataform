@@ -9,16 +9,20 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.32 - 03/06/2026";
+            return "2026.51.36 - 25/05/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.32";
+            return "2026.51.36";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.51.36 - 25/05/2026 - GdiTreeGetSelectedKey: fallback activeNode Wunderbaum (Editar árvore g)
+// 2026.51.35 - 25/05/2026 - G-TREE-01 Lote 3: remoção jstree-3.3.4; bundle Wunderbaum; PDFs; GedSGQ IndexPops LayoutLite
+// 2026.51.34 - 25/05/2026 - G-TREE-01 Lote 2: CentrosCustos Wunderbaum + árvore recursiva inline; GdiTreeNormalizeIcon (FA)
+// 2026.51.33 - 25/05/2026 - G-TREE-01 Lote 0+1: Wunderbaum 0.14.1 + piloto ClassificacaoFinanceira (jstree mantido CentrosCustos)
 // 2026.51.32 - 03/06/2026 - Atualização modal expedição
 // 2026.51.31 - 01/06/2026 - gdi-select2: pesquisa local Select2 em listas estáticas (2+ options; antes limite ≤5)
 // 2026.51.30 - 01/06/2026 - gdi-select2: allowClear em lookups Ajax (option vazia + select2:clear → change)

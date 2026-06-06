@@ -147,11 +147,9 @@
                     sSortDescending: ': Ordenar colunas de forma descendente'
                 }
                 });
-                $('#dtGcComexProdutos tbody').on('dblclick', 'tr td', function () {
+                $('#dtGcComexProdutos tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                     var data = otableGcComexProdutos.row($(this).closest('tr')).data();
-                    $("#mainModal").load('@Url.Action("ModalCreateEdit", "ComexProdutos", new { area = "gc" })?id=' + data[1], function () {
-                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                    })
+                    if (data) { jsGcComexProdutosCreateEdit(data[1]); }
                 });
             }
         }
@@ -160,14 +158,17 @@
         }
     };
 
-
-    function jsGcComexProdutosCreateEdit(id)
+    function jsGcComexProdutosCreateEdit(idComexProduto)
     {
         try
         {
-            $("#mainModal").load('@Url.Action("ModalCreateEdit", "ComexProdutos", new { area = "gc" })?id=' + id, function () {
-                var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-            })
+            var id = parseInt(idComexProduto, 10);
+            if (!id || id <= 0) { return; }
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEdit", "ComexProdutos", new { Area = "gc" })?id=' + emptyIfNull(id).toString(), function () {
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
         }
         catch (err) {
             LibMessageError("Atenção", "[jsGcComexProdutosCreateEdit] " + (err && err.message ? err.message.toString() : String(err)));
@@ -186,9 +187,11 @@
             {
                 if (selectedIds.indexOf(',') == -1)
                 {
+                    LibMessageProcessando("");
                     $("#mainModal").load('@Url.Action("ModalDesativarProdutoComex", "ComexProdutos", new { Area = "gc" })?id=' + selectedIds, function () {
-                        var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                    })
+                        var e = document.getElementById('mainModal');
+                        if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+                    });
                 }
                 else
                 {
@@ -201,9 +204,4 @@
         }
     }
 
-
 </script>
-
-
-
-

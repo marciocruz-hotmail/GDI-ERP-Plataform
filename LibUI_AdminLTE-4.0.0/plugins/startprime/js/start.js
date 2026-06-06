@@ -1338,17 +1338,119 @@ function jsDatepickerMonthAndYear(DatepickerName) {
 }
 
 
+/* G-TREE-01 — Wunderbaum (flag GdiPageScripts Jstree=16) */
+function gdiHasWunderbaum() {
+    return typeof window.mar10 !== 'undefined' && typeof window.mar10.Wunderbaum === 'function';
+}
+
+function GdiTreeNormalizeIcon(icon) {
+    if (!icon) {
+        return icon;
+    }
+    var s = String(icon);
+    if (s.indexOf('<') >= 0) {
+        return s;
+    }
+    if (/\.(png|jpe?g|gif|svg|webp|ico)(\?|$)/i.test(s) || (s.indexOf('/') >= 0 && !/\s/.test(s))) {
+        return s;
+    }
+    if (/\bfa-[a-z0-9-]+\b/i.test(s)) {
+        return '<i class="' + s + '" aria-hidden="true"></i>';
+    }
+    return s;
+}
+
+function GdiTreeMapNode(n) {
+    if (!n) {
+        return null;
+    }
+    var key = (n.id !== undefined && n.id !== null) ? String(n.id) : '';
+    var node = {
+        key: key,
+        title: n.text || '',
+        expanded: !!(n.state && n.state.opened)
+    };
+    if (n.icon) {
+        node.icon = GdiTreeNormalizeIcon(n.icon);
+    }
+    if (key === '-1' || (n.state && n.state.disabled)) {
+        node.unselectable = true;
+    }
+    var kids = n.children || [];
+    if (kids.length) {
+        node.children = kids.map(GdiTreeMapNode).filter(function (x) { return !!x; });
+    }
+    return node;
+}
+
+function GdiTreeNormalizeSource(data) {
+    if (!data) {
+        return [];
+    }
+    if (Array.isArray(data)) {
+        return data.map(GdiTreeMapNode).filter(function (x) { return !!x; });
+    }
+    var one = GdiTreeMapNode(data);
+    return one ? [one] : [];
+}
+
+function GdiTreeGetSelectedKey(treeRef) {
+    if (!treeRef) {
+        return '';
+    }
+    if (typeof treeRef.getSelectedNodes !== 'function') {
+        return '';
+    }
+    var wbNodes = treeRef.getSelectedNodes();
+    if (wbNodes && wbNodes.length) {
+        return String(wbNodes[0].key);
+    }
+    /* Wunderbaum: clique define activeNode, não selected (sem checkbox). */
+    var active = treeRef.activeNode;
+    if (active) {
+        if (typeof active.isRootNode === 'function' && active.isRootNode()) {
+            return '';
+        }
+        if (active.key && String(active.key) !== '__root__') {
+            return String(active.key);
+        }
+    }
+    return '';
+}
+
+function GdiTreeInit(elementSelectorOrElem, jstreeSource, options) {
+    var el = elementSelectorOrElem;
+    if (typeof elementSelectorOrElem === 'string') {
+        el = document.querySelector(elementSelectorOrElem);
+    } else if (typeof jQuery !== 'undefined' && elementSelectorOrElem instanceof jQuery && elementSelectorOrElem.length) {
+        el = elementSelectorOrElem[0];
+    }
+    if (!el) {
+        throw new Error('Elemento da árvore não encontrado.');
+    }
+    if (!gdiHasWunderbaum()) {
+        throw new Error('Wunderbaum indisponível.');
+    }
+    el.innerHTML = '';
+    var opts = Object.assign({
+        element: el,
+        source: GdiTreeNormalizeSource(jstreeSource),
+        selectMode: 'single'
+    }, options || {});
+    return new mar10.Wunderbaum(opts);
+}
+
 function jsYesEditRecordJsTree(JsTreeName, urlEdit) {
-    var selectedIds = JsTreeName.jstree('get_selected');
-    if (!selectedIds || selectedIds.length == 0 || selectedIds.toString() == "-1") {
+    var selectedKey = GdiTreeGetSelectedKey(JsTreeName);
+    if (!selectedKey || selectedKey === '-1') {
         LibMessageAlert("Atenção", "Selecione o item");
     }
     else {
-        if (selectedIds.toString().indexOf('R') >= 0) {
+        if (selectedKey.indexOf('R') >= 0) {
             LibMessageAlert("Atenção", "Selecione o item permitido");
         }
-        else if (selectedIds.toString().indexOf(',') == -1) {
-            $(window.document.location).attr('href', urlEdit + selectedIds);
+        else if (selectedKey.indexOf(',') === -1) {
+            $(window.document.location).attr('href', urlEdit + selectedKey);
         }
         else {
             LibMessageAlert("Atenção", "Para edição/visualização, selecione apenas 1(um) item!");
@@ -1477,7 +1579,7 @@ function GdiAjaxAntiForgeryHeaders(container) {
         if (missing & FLAG.dataTables) { names.push('DataTables'); }
         if (missing & FLAG.select2) { names.push('Select2'); }
         if (missing & FLAG.tempusDominus) { names.push('Tempus'); }
-        if (missing & FLAG.jstree) { names.push('jstree'); }
+        if (missing & FLAG.jstree) { names.push('Wunderbaum'); }
         return names;
     }
 
@@ -1494,16 +1596,12 @@ function GdiAjaxAntiForgeryHeaders(container) {
             typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.tempusDominus === 'function';
     }
 
-    function gdiHasJstree() {
-        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.jstree === 'function';
-    }
-
     function gdiRuntimeMissingFlags(needed) {
         var missing = 0;
         if ((needed & FLAG.dataTables) && !gdiHasDataTables()) { missing |= FLAG.dataTables; }
         if ((needed & FLAG.select2) && !gdiHasSelect2()) { missing |= FLAG.select2; }
         if ((needed & FLAG.tempusDominus) && !gdiHasTempus()) { missing |= FLAG.tempusDominus; }
-        if ((needed & FLAG.jstree) && !gdiHasJstree()) { missing |= FLAG.jstree; }
+        if ((needed & FLAG.jstree) && !gdiHasWunderbaum()) { missing |= FLAG.jstree; }
         return missing;
     }
 
@@ -1522,7 +1620,7 @@ function GdiAjaxAntiForgeryHeaders(container) {
         if (/jsdatepicker|tempus-dominus|\.tempusdominus/.test(h)) {
             flags |= FLAG.tempusDominus;
         }
-        if (/\.jstree\s*\(|jstree\.|id\s*=\s*['"]tree['"]/.test(h)) {
+        if (/GdiTreeInit|gdiHasWunderbaum|mar10\.Wunderbaum/.test(h)) {
             flags |= FLAG.jstree;
         }
         /* Toggle (switch-success) já vem no layout Core; não lazy-load — evita falso positivo no modal ANP. */

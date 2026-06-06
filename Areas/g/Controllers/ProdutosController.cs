@@ -264,30 +264,44 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Produtos_*,g_Produtos_Actionupdate,g_Produtos_Actionread")]
+        public ActionResult ModalCreateEditProduto(int? IdProduto)
+        {
+            try
+            {
+                int idProduto = IdProduto.GetValueOrDefault();
+                if (idProduto <= 0)
+                {
+                    return RedirectToAction("Index");
+                }
+                g_produtos record_g_produtos = db.g_produtos.Find(idProduto);
+                if (record_g_produtos == null)
+                {
+                    return RedirectToAction("Index");
+                }
+                CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_g_produtos);
+                PreencherLookupsProdutoCreateEdit();
+                if (record_g_produtos.is_servico == true) { ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Serviço</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_g_produtos.nome.EmptyIfNull().ToString(); }
+                else { ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Serviço</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_g_produtos.nome.EmptyIfNull().ToString(); }
+                return View("ModalCreateEditProduto", record_g_produtos);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "ProdutosController";
+                msg += "<br/>" + "ModalCreateEditProduto";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+        #endregion
+
         #region Edit
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Produtos_*,g_Produtos_Actionupdate,g_Produtos_Actionread")]
         public ActionResult Edit(int? id)
         {
-            DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_produtos record_g_produtos = db.g_produtos.Find(id);
-            if (record_g_produtos == null)
-            {
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_g_produtos);
-            }
-            PreencherLookupsProdutoCreateEdit();
-            if (record_g_produtos.is_servico == true) { ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Serviço</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_g_produtos.nome.EmptyIfNull().ToString(); }
-            else { ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Serviço</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_g_produtos.nome.EmptyIfNull().ToString(); }
-            ;
-            return View("CreateEdit", record_g_produtos);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

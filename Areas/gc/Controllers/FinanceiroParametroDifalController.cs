@@ -240,21 +240,99 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
+        #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_FinanceiroParametroDifal_*,gc_FinanceiroParametroDifal_Actionupdate")]
+        public ActionResult ModalCreateEditParametroDifal(int? IdParametroDifal)
+        {
+            try
+            {
+                int idParametroDifal = IdParametroDifal.GetValueOrDefault();
+                if (idParametroDifal <= 0)
+                {
+                    return RedirectToAction("Index");
+                }
+                gc_parametros_difal record_gc_parametros_difal = db.gc_parametros_difal.Find(idParametroDifal);
+                if (record_gc_parametros_difal == null)
+                {
+                    return RedirectToAction("Index");
+                }
+                CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_parametros_difal);
+                ViewBag.Title = MontarTituloCreateEditParametroDifal(record_gc_parametros_difal);
+                return View("ModalCreateEditParametroDifal", record_gc_parametros_difal);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "FinanceiroParametroDifalController";
+                msg += "<br/>" + "ModalCreateEditParametroDifal";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_FinanceiroParametroDifal_*,gc_FinanceiroParametroDifal_Actionupdate")]
+        public ActionResult AjaxCreateEditParametroDifal(gc_parametros_difal view_record_gc_parametros_difal)
+        {
+            try
+            {
+                if (view_record_gc_parametros_difal.id_parametro_difal <= 0)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Parâmetro Difal", view_record_gc_parametros_difal.id_parametro_difal)), JsonRequestBehavior.AllowGet);
+                }
+
+                gc_parametros_difal existente = db.gc_parametros_difal.Find(view_record_gc_parametros_difal.id_parametro_difal);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Parâmetro Difal", view_record_gc_parametros_difal.id_parametro_difal)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                view_record_gc_parametros_difal.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                view_record_gc_parametros_difal.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(view_record_gc_parametros_difal).State = EntityState.Modified;
+
+                gc_parametros_difal record_old_gc_parametros_difal = JsonConvert.DeserializeObject<gc_parametros_difal>(CachePersister.userIdentity.DataRowInUseSerialized);
+                String LogAlteracao = LibDB.CompareDataTable(record_old_gc_parametros_difal, view_record_gc_parametros_difal);
+                if (LogAlteracao.EmptyIfNull().ToString().Length > 0)
+                {
+                    LibAudit.SaveAudit(db, true, "gc_parametros_difal", view_record_gc_parametros_difal.id_parametro_difal, "Atualização Dados |  " + LogAlteracao + " |");
+                }
+
+                db.SaveChanges();
+                return Json(new
+                {
+                    success = true,
+                    msg = "Parâmetro Difal <b>" + view_record_gc_parametros_difal.sigla.EmptyIfNull().ToString() + "</b> atualizado com sucesso!"
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditParametroDifal(gc_parametros_difal record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Parâmetros Difal</b>"
+                + LibStringFormat.GetTabHtml(1) + record.sigla.EmptyIfNull().ToString() + " - " + record.estado.EmptyIfNull().ToString();
+        }
+
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_FinanceiroParametroDifal_*,gc_FinanceiroParametroDifal_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            gc_parametros_difal record_gc_parametros_difal = db.gc_parametros_difal.Find(id);
-            CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_parametros_difal);
-            if (record_gc_parametros_difal == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Parâmetros Difal</b>" + LibStringFormat.GetTabHtml(1) + record_gc_parametros_difal.sigla.EmptyIfNull().ToString() + " - " + record_gc_parametros_difal.estado.EmptyIfNull().ToString();
-            return View("CreateEdit", record_gc_parametros_difal);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -291,6 +369,7 @@ namespace GdiPlataform.Areas.gc.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Parâmetros Difal</b>" + LibStringFormat.GetTabHtml(1) + view_record_gc_parametros_difal.sigla.EmptyIfNull().ToString() + " - " + view_record_gc_parametros_difal.estado.EmptyIfNull().ToString();
             return View("CreateEdit", view_record_gc_parametros_difal);
         }
+        #endregion
 
         protected override void Dispose(bool disposing)
         {

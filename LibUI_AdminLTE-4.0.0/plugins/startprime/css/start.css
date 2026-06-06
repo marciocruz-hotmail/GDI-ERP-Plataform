@@ -1134,3 +1134,22 @@ select.select2-hidden-accessible.input-validation-error ~ .field-validation-erro
     font-weight: 600;
 }
 
+/* ============================================================
+   G-TREE-01 — Wunderbaum em cards AdminLTE 4 / BS5
+   ============================================================ */
+.gdi-wunderbaum-host.wb-tree,
+#jsTree.wb-tree {
+    min-height: 280px;
+    font-size: 0.9rem;
+}
+
+.gdi-wunderbaum-host .wb-row .wb-title,
+#jsTree .wb-row .wb-title {
+    color: var(--bs-body-color);
+}
+
+.gdi-wunderbaum-host .wb-row.wb-active .wb-title,
+#jsTree .wb-row.wb-active .wb-title {
+    font-weight: 600;
+}
+

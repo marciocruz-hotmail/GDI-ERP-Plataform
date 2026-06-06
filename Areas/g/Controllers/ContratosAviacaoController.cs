@@ -257,18 +257,167 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion 
 
         #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContratosAviacao_*,g_ContratosAviacao_Actioncreate,g_ContratosAviacao_Actionupdate,gdc_Pefin_Default")]
+        public ActionResult ModalCreateEditContratoAviacao(int? IdContrato)
+        {
+            try
+            {
+                DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
+                int idContrato = IdContrato.GetValueOrDefault();
+                g_contratos_aviacao record_g_contratos_aviacao;
+                if (idContrato > 0)
+                {
+                    record_g_contratos_aviacao = db.g_contratos_aviacao.Find(idContrato);
+                    if (record_g_contratos_aviacao == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    ViewBag.Title = MontarTituloCreateEditContratoAviacao(record_g_contratos_aviacao);
+                }
+                else
+                {
+                    record_g_contratos_aviacao = new g_contratos_aviacao
+                    {
+                        ativo = true,
+                        anexo = false,
+                        id_cliente = -1,
+                        data_assinatura = DataHoraAtual.Date
+                    };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>";
+                }
+                PreencherLookupsContratoCreateEdit(record_g_contratos_aviacao.id_cliente);
+                return View("ModalCreateEditContratoAviacao", record_g_contratos_aviacao);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "ContratosAviacaoController";
+                msg += "<br/>" + "ModalCreateEditContratoAviacao";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContratosAviacao_*,g_ContratosAviacao_Actioncreate,g_ContratosAviacao_Actionupdate,gdc_Pefin_Default")]
+        public ActionResult AjaxCreateEditContratoAviacao(g_contratos_aviacao record_g_contratos_aviacao)
+        {
+            try
+            {
+                DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
+                if (record_g_contratos_aviacao.descricao.EmptyIfNull().ToString() != String.Empty)
+                {
+                    record_g_contratos_aviacao.descricao = LibStringFormat.FormatarTextoSimples(record_g_contratos_aviacao.descricao);
+                }
+
+                if (record_g_contratos_aviacao.id_contrato == 0)
+                {
+                    record_g_contratos_aviacao.id_coligada = 0;
+                    record_g_contratos_aviacao.id_filial = 0;
+                    AplicarValidacaoContratoAviacao(record_g_contratos_aviacao);
+
+                    if (!ModelState.IsValid)
+                    {
+                        string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                        return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                    }
+
+                    record_g_contratos_aviacao.datahora_cadastro = DataHoraAtual;
+                    record_g_contratos_aviacao.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_contratos_aviacao.Add(record_g_contratos_aviacao);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Contrato <b>" + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString() + "</b> cadastrado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                g_contratos_aviacao existente = db.g_contratos_aviacao.Find(record_g_contratos_aviacao.id_contrato);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Contrato", record_g_contratos_aviacao.id_contrato)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    db.Entry(record_g_contratos_aviacao).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Contrato <b>" + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString() + "</b> atualizado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                string msgErroEdit = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                return Json(GdiMvcJsonResults.AjaxFailure(msgErroEdit), JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditContratoAviacao(g_contratos_aviacao record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_contrato.EmptyIfNull().ToString() + " - " + record.descricao.EmptyIfNull().ToString();
+        }
+
+        private void AplicarValidacaoContratoAviacao(g_contratos_aviacao record_g_contratos_aviacao)
+        {
+            if (record_g_contratos_aviacao.id_cliente <= 0)
+            {
+                ModelState.AddModelError("Model", "Cliente/Fornecedor é de preenchimento obrigatório!");
+            }
+            if (record_g_contratos_aviacao.descricao.EmptyIfNull().ToString().Length == 0)
+            {
+                ModelState.AddModelError("Model", "Descrição é de preenchimento obrigatório!");
+            }
+            if (record_g_contratos_aviacao.id_contrato_tipo <= 0)
+            {
+                ModelState.AddModelError("Model", "Tipo Contrato é de preenchimento obrigatório!");
+            }
+            else
+            {
+                g_contratos_aviacao_tipos RecordContratoTipo = db.g_contratos_aviacao_tipos.Find(record_g_contratos_aviacao.id_contrato_tipo);
+
+                if (RecordContratoTipo != null && RecordContratoTipo.assinatura_eletronica == true)
+                {
+                    if (record_g_contratos_aviacao.signatario1_nome.EmptyIfNull().ToString().Length == 0)
+                    {
+                        ModelState.AddModelError("Model", "Signatário (Nome) é de preenchimento obrigatório!");
+                    }
+                    if (record_g_contratos_aviacao.signatario1_email.EmptyIfNull().ToString().Length == 0)
+                    {
+                        ModelState.AddModelError("Model", "Signatário (Email) é de preenchimento obrigatório!");
+                    }
+                    if (record_g_contratos_aviacao.signatario1_telefone.EmptyIfNull().ToString().Length == 0)
+                    {
+                        ModelState.AddModelError("Model", "Signatário (Telefone) é de preenchimento obrigatório!");
+                    }
+                    if ((record_g_contratos_aviacao.signatario1_cpf.EmptyIfNull().ToString().Length == 0) && (record_g_contratos_aviacao.signatario1_cnpj.EmptyIfNull().ToString().Length == 0))
+                    {
+                        ModelState.AddModelError("Model", "Signatário (CPF ou CNPJ) é de preenchimento obrigatório!");
+                    }
+                    if ((record_g_contratos_aviacao.signatario1_cpf.EmptyIfNull().ToString().Length > 0) && (record_g_contratos_aviacao.signatario1_cnpj.EmptyIfNull().ToString().Length > 0))
+                    {
+                        ModelState.AddModelError("Model", "Signatário (CPF e CNPJ) não podem ser preenchidos simultaneamente!");
+                    }
+                }
+                if (RecordContratoTipo != null && RecordContratoTipo.identificador_obrigatorio == true)
+                {
+                    if (record_g_contratos_aviacao.identificador.EmptyIfNull().ToString().Length == 0)
+                    {
+                        ModelState.AddModelError("Model", "Identificador é de preenchimento obrigatório!");
+                    }
+                }
+            }
+        }
+
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContratosAviacao_*,g_ContratosAviacao_Actioncreate,gdc_Pefin_Default")]
         public ActionResult Create()
         {
-            DateTime DataHoraAtual = LibDateTime.getDataHoraBrasilia();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b";
-            g_contratos_aviacao newRecord = new g_contratos_aviacao();
-            newRecord.ativo = true;
-            newRecord.anexo = false;
-            newRecord.id_cliente = -1;
-            newRecord.data_assinatura = DataHoraAtual.Date;
-            PreencherLookupsContratoCreateEdit(newRecord.id_cliente);
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -360,18 +509,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContratosAviacao_*,g_ContratosAviacao_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_contratos_aviacao record_g_contratos_aviacao = db.g_contratos_aviacao.Find(id);
-            if (record_g_contratos_aviacao == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Contrato</b>" + LibStringFormat.GetTabHtml(1) + record_g_contratos_aviacao.id_contrato.EmptyIfNull().ToString() + " - " + record_g_contratos_aviacao.descricao.EmptyIfNull().ToString();
-            PreencherLookupsContratoCreateEdit(record_g_contratos_aviacao.id_cliente);
-            return View("CreateEdit", record_g_contratos_aviacao);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

@@ -3,9 +3,19 @@
 @{
     Layout = "~/Views/Shared/_Modal.cshtml";
 }
+<style>
+    #FormModalCreateEditGcEstoqueLotes .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+    }
+
+    #divDocsEstoqueLote {
+        min-width: 0;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGcEstoqueLotes" }))
 {
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-full modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header m-0 p-1">
                 <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
@@ -71,7 +81,7 @@
                             </div>
                             <div class="card shadow-sm gdi-section-accent-warning m-0 p-1" id="divDocsEstoqueLote" style="@(Model.id_estoque_lote > 0 ? "" : "display:none;")">
                                 <h5>Documentos</h5>
-                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                <div class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
                                     <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcEstoqueLotesGed">
                                         <thead>
                                             <tr>
@@ -87,16 +97,15 @@
                                         </thead>
                                         <tbody></tbody>
                                     </table>
-                                    <div class="card-body text-sm-center m-0 p-1">
-                                        <div class="row justify-content-center">
-                                            <div class="col-6" style="text-align:center">
-                                                <button type="button" name="btnUploadFileEstoqueLotes" title="Anexar Documentos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFileEstoqueLotes()"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Incluir Anexos</button>
-                                            </div>
+                                </div>
+                                <div class="card-body text-sm-center m-0 p-1">
+                                    <div class="row justify-content-center">
+                                        <div class="col-6" style="text-align:center">
+                                            <button type="button" name="btnUploadFileEstoqueLotes" title="Anexar Documentos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFileEstoqueLotes()"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Incluir Anexos</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
 
                         </div>
                     </div>
@@ -142,7 +151,6 @@
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
         }
     });
-
 
     function jsAjaxSaveEstoqueLote()
     {
@@ -200,7 +208,6 @@
         }
     }
 
-
     function jsModalUploadFileEstoqueLotes()
     {
         try
@@ -254,8 +261,6 @@
         }
     }
 
-
-
     function Old_jsModalUploadFileEstoqueLotes()
     {
         try
@@ -270,7 +275,6 @@
             LibMessageError("Atenção", "[jsModalUploadFileEstoqueLotes] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
 function jsCreateTable() {
     try
@@ -300,6 +304,10 @@ function jsCreateTable() {
                         error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
                     },
                     responsive: true,
+                    drawCallback: function (settings) {
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
+                        try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    },
                     bFilter: false,
                     bLengthChange: false,
                     bProcessing: true,
@@ -413,7 +421,4 @@ function jsCreateTable() {
         }
     }
 
-
-
 </script>
-

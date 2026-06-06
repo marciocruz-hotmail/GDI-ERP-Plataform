@@ -2,7 +2,6 @@
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 
-
 <style>
     /* Modal específico: Pedido Insert/Edit Item */
     #modalPedidoInsertEditItem .modal-content {
@@ -360,7 +359,6 @@
         }
     };
 
-
     function jsShowDadosHistoricoComercialItemGeral()
     {
         try
@@ -401,7 +399,6 @@
             LibMessageError("Atenção", "[jsShowDadosHistoricoComercialItemGeral] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
     function jsShowDadosHistoricoComercialItemCliente()
     {
@@ -445,7 +442,4 @@
         }
     }
 
-
-
 </script>
-

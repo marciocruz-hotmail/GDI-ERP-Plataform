@@ -153,7 +153,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     produtosPorId.TryGetValue(c.id_produto, out string nomeProduto) ? nomeProduto : String.Empty,
                     statusPorId.TryGetValue(c.id_produto_status, out string nomeStatus) ? nomeStatus : String.Empty,
                     c.lote.EmptyIfNull().ToString(),
-                    c.data_validade.EmptyIfNull().ToString()
+                    c.data_validade.HasValue ? c.data_validade.Value.ToString("dd/MM/yyyy") : ""
                 }).ToList();
 
                 filterOnOff = filterApplied ? "1" : "0";
@@ -242,17 +242,50 @@ namespace GdiPlataform.Areas.gc.Controllers
         }
         #endregion
 
+        #region ModalCreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueControle_*,gc_EstoqueControle_Actioncreate,gc_EstoqueControle_Actionupdate")]
+        public ActionResult ModalCreateEditEstoqueControle(int? IdProdutoControle)
+        {
+            try
+            {
+                int id = IdProdutoControle.GetValueOrDefault();
+                if (id > 0)
+                {
+                    g_produtos_controle record = db.g_produtos_controle.Find(id);
+                    if (record == null)
+                    {
+                        PreencherLookupsProdutosControleImportados();
+                        ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Controle de Estoque", id);
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições — (não localizado)</b>";
+                        return View("ModalCreateEditEstoqueControle", new g_produtos_controle { id_produto_controle = id });
+                    }
+                    CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record);
+                    PreencherLookupsProdutosControleImportados();
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições</b>" + LibStringFormat.GetTabHtml(1) + record.id_produto_controle.EmptyIfNull().ToString() + " - " + record.serial.EmptyIfNull().ToString();
+                    return View("ModalCreateEditEstoqueControle", record);
+                }
+
+                g_produtos_controle newRecord = new g_produtos_controle { ativo = true, id_coligada = 1, id_filial = 1 };
+                PreencherLookupsProdutosControleCreate();
+                ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições (Novo)</b>";
+                return View("ModalCreateEditEstoqueControle", newRecord);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "EstoqueControleController";
+                msg += "<br/>" + "ModalCreateEditEstoqueControle";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+        #endregion
+
         #region CreateEdit
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueControle_*,gc_EstoqueControle_Actioncreate")]
         public ActionResult Create()
         {
-            g_produtos_controle newRecord = new g_produtos_controle();
-            newRecord.ativo = true;
-            newRecord.id_coligada = 1;
-            newRecord.id_filial = 1;
-            PreencherLookupsProdutosControleCreate();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições (Novo)</b";
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -343,18 +376,7 @@ namespace GdiPlataform.Areas.gc.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,gc_EstoqueControle_*,gc_EstoqueControle_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_produtos_controle record_g_produtos_controle = db.g_produtos_controle.Find(id);
-            if (record_g_produtos_controle == null)
-            {
-                return RedirectToAction("Index");
-            }
-            PreencherLookupsProdutosControleImportados();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produtos - Controles e Aferições</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos_controle.id_produto_controle.EmptyIfNull().ToString() + " - " + record_g_produtos_controle.serial.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_produtos_controle);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

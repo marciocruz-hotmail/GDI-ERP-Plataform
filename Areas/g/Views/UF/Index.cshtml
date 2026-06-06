@@ -271,12 +271,27 @@
         }
     };
 
+    function jsModalCreateEditUF(idUf)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditUF", "UF", new { Area = "g" })?IdUf=' + emptyIfNull(idUf).toString(), function () {
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateEditUF] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsGUfEditRow(idUf)
     {
         try {
             var id = parseInt(idUf, 10);
             if (!id || id <= 0) { return; }
-            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "UF", new { Area = "g" })');
+            jsModalCreateEditUF(id);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsGUfEditRow] " + (err && err.message ? err.message.toString() : String(err)));

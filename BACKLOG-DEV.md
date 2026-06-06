@@ -117,7 +117,7 @@ python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py
 | 1 | **G-PROD-01** | Inventário filtro + grid inventário | Alta | 1. `EstoqueInventario/FormInventarioItens`: trocar filtro `GetComboGcProdutosServicosImportados` por typeahead (padrão PROD-002a). 2. `GetDadosInventarioItem`: **não** carregar `GetDatasetGcProdutosServicos` inteiro — resolver produto por linha/`id_produto` (EF/SQL). 3. Avaliar `pageLength` 1000 vs 50 (alinhar PERF-008). Ref: `2026_05_22_checklist-cache-produtos.md`, baseline JSON. | HTML filtro &lt;100 KB; Ajax grid sem 13k linhas em RAM por request |
 | 2 | **G-PROD-02** | Ajax produto no pedido (005a) | Alta | `MovimentosController`: `AjaxDadosProduto`, `AjaxGetPrecoVendaProduto` — query por `id_produto` em vez de dataset completo. | 1 request por produto; sem cache `GcProdutosServicosDataset` na ação |
 | 3 | **G-PROD-03** | Combo importados — recebimento estoque (003) | Média | `EstoqueController` recebimento: substituir `GetComboGcProdutosServicosImportados` por typeahead ou query local. | Abertura da tela sem 8k options no HTML |
-| 4 | **G-PROD-04** | Demais `GetComboGcProdutosServicosTodos` (004) | Média | PRs pequenos: `EstoqueInventario` modal item, Atendimentos, COMEX, Lotes, NF entrada, Produtos desativar, Estoque controle. Inventário em checklist-cache-produtos §PROD-000.3. | Zero consumidores por método legado |
+| 4 | **G-PROD-04** | Demais `GetComboGcProdutosServicosTodos` (004) | Média | PRs pequenos: `EstoqueInventario` modal item, Atendimentos, ~~COMEX~~ (2026-05-25), Lotes, NF entrada, Produtos desativar, Estoque controle. Inventário em checklist-cache-produtos §PROD-000.3. | Zero consumidores por método legado |
 | 5 | **G-PROD-05** | Deprecar métodos + `LookupCacheKeys` (006) | Média | Após G-PROD-04: remover métodos órfãos do `ILookupQueryService` e chaves MemoryCache; `gdi_inventory_libdatasets_usage.py --fail`. | Build OK; inventário sem referências |
 | 6 | **G-PROD-06** | Família/status produto (007) | Baixa | Opcional: `GetComboGcProdutosFamilia` / `Status` se ainda usados. | Documentar ou migrar |
 
@@ -127,7 +127,7 @@ python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py
 
 | Ordem | ID | Item | Crit. | Instruções | Aceite |
 |------:|-----|------|-------|-----------|--------|
-| 1 | **G-DT-01** | PERF-007b — lote 3 (8 actions) | Alta | Por controller (1 PR/área): aplicar `LibDataTableSqlPaging` ou EF `Count`+`Skip`/`Take`. Alvo: `Assistentes.GetDados`, `CentrosCustos.getDados`, `Ged.GetDados`, `Nfe.GetDados`, `Atendimentos.getDadosAtividades`, `getDadosAtendimentosLogs`, `EstoqueControle.GetDadosMedicoes`, `Parametros.GetDadosSistemas`. Script: `2026_05_22_gdi_inventory_datatables_memory_paging.py` → 0 `PENDENTE`. | Mesmo contrato JSON; sem `allRecords.ToList()` antes do total |
+| 1 | **G-DT-01** | PERF-007b — lote 3 (7 actions) | Alta | Por controller (1 PR/área): aplicar `LibDataTableSqlPaging` ou EF `Count`+`Skip`/`Take`. Alvo: `CentrosCustos.getDados`, `Ged.GetDados`, `Nfe.GetDados`, `Atendimentos.getDadosAtividades`, `getDadosAtendimentosLogs`, `EstoqueControle.GetDadosMedicoes`, `Parametros.GetDadosSistemas`. Script: `2026_05_22_gdi_inventory_datatables_memory_paging.py` → 0 `PENDENTE`. | Mesmo contrato JSON; sem `allRecords.ToList()` antes do total |
 | 2 | **G-DT-02** | FinanceiroLancamentos GED anexo | Média | `FinanceiroLancamentosController` ~L3940: GED lançamento com `allRecords.ToList()`+`Skip` — paginar SQL ou EF. Incluir no inventário script (método pode não ser `GetDados*`). | Página de anexos com muitos registros não materializa tudo |
 | 3 | **G-DT-03** | `GetDadosInvoicesItensEspelhoDigital` | Baixa | **Aceite documentado** — refactor `DataTable`/`DataRow` + dedupe; paginação SQL dedicada (doc perf007). Não bloquear lote 3. | Registado em `.cursor/context/2026_05_22_perf007-lote2-inventario.md` |
 | 4 | **G-DT-04** | IndexPedido — filtro data (PERF-019) | Média | `MovimentosController.GetDados`: revisar `OR` em datas; preferir intervalo único se regra permitir. Validar plano SQL com DBA. | Menos scans; UX de filtro inalterada |
@@ -179,6 +179,16 @@ python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py
 | 14 | **G-PERF-30** | COMEX CreateEdit — defer lookups | Média | `ComexImportacoesController` CreateEdit (~L747+): não carregar listas completas `g_produtos`/NCM/COMEX no primeiro paint; typeahead ou aba `shown.bs.tab`. Ref: auditoria §4 COMEX. | Abertura CreateEdit importação: HTML inicial &lt; baseline PROD-000 (**validar** DevTools) |
 
 **Nota:** PERF-001 a PERF-015 e PERF-006/007/008/009/010/011/012/013 estão **concluídos** (ver `CHANGELOG-DEV.md` 2026-05-20). Auditoria completa: `.cursor/context/2026_05_22_performance-audit-erp.md` (2026-05-20, read-only).
+
+---
+
+## G-TREE — jstree → Wunderbaum (migração cirúrgica)
+
+| Ordem | ID | Item | Crit. | Estado / aceite |
+|------:|-----|------|-------|-----------------|
+| ~~1~~ | ~~**G-TREE-01a**~~ | Lote 0+1 — vendor + piloto ClassificacaoFinanceira | Média | **Concluído 2026-05-25:** `wunderbaum-0.14.1`, helpers `GdiTree*` em `start.js`, flag 16 com Wunderbaum+jstree; smoke manual `/g/ClassificacaoFinanceira`. |
+| ~~2~~ | ~~**G-TREE-01b**~~ | Lote 2 — CentrosCustos + JSON inline | Média | **Concluído 2026-05-25:** `MontarArvoreCentrosCustos` recursivo, `ViewBag.CentrosCustosTreeJson`, `GdiTreeInit` no Index; `GdiTreeNormalizeIcon` (FA). Smoke manual `/g/CentrosCustos`. |
+| ~~3~~ | ~~**G-TREE-01c**~~ | Lote 3 — remoção jstree | Baixa | **Concluído 2026-05-25:** pasta `jstree-3.3.4` apagada; bundle só Wunderbaum; PDFs; `GedSGQ/IndexPops` `LayoutLite`; ícone em `startprime/images`. |
 
 ---
 

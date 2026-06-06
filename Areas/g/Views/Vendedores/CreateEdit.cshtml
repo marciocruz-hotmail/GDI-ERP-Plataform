@@ -139,78 +139,34 @@
                                 <!-- TabRegras2 -->
                                 <div class="tab-pane fade" id="tabRegras2" role="tabpanel" aria-labelledby="tabRegras2_tab">
                                     <div class="card-body m-0 p-1" style="height: 100%">
-                                        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                                            <li class="nav-item">
-                                                <a class="d-flex align-items-center nav-link active" id="tabRegras2dados_tab" data-bs-toggle="pill" href="#tabRegras2dados" role="tab" aria-controls="tabRegras2dados" aria-selected="true"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regra 2 - Dados</a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a class="d-flex align-items-center nav-link" id="tabRegras2Tabela_tab" data-bs-toggle="pill" href="#tabRegras2Tabela" role="tab" aria-controls="tabRegras2Tabela" aria-selected="false"><i class="fa-solid fa-circle-dot fa-sm" aria-hidden="true"></i>Regra 2 - Tabela Preços Vendedor</a>
-                                            </li>
-                                        </ul>
-                                        <div class="tab-content" id="pills-tabContent">
-                                            <div class="tab-pane fade show active" id="tabRegras2dados" role="tabpanel" aria-labelledby="tabRegras2dados_tab">
-                                                <div class="card-body m-0 p-1" style="height: 100%">
-                                                    <div class="form-horizontal m-0 p-0">
-                                                        <div class="form-group row text-sm-end m-0 pt-1">
-                                                            @Html.Label("", "Percentual %", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                                            <div class="col-sm-1">
-                                                                @Html.EditorFor(model => model.g_vendedores.regra2_perce_total_boleto_sem_consulta, new { htmlAttributes = new { @class = "form-control" } })
-                                                            </div>
-                                                            @Html.Label("", "% Percentual a ser aplicado no valor total do BOLETO QUANDO NÃO HOUVER CONSULTAS", htmlAttributes: new { @class = "col-sm-6 col-form-label text-sm-start" })
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="card mt-5">
-                                                        <div class="card-header text-sm-center bg-light"><b>Comissão Serviço "TIPO MENSALIDADE</b>"</div>
-                                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width: 100%" id="dataTables-ServicoTipoMens">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th style="width: 5%">Id.</th>
-                                                                    <th style="width: 40%">Produto/Serviço</th>
-                                                                    <th style="width: 25%">Percentual Comissão</th>
-                                                                    <th style="width: 20%">Valor Comissão</th>
-                                                                    <th style="width: 10%">Remover</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody></tbody>
-                                                        </table>
-                                                    </div>
-
-                                                    <div class="card-body text-sm-center m-1 p-1">
-                                                        <button type="button" name="btnCadastrarServTipoMensalidade" onclick="jsModalAdicionarServTipoMensalidade()" title="Adicionar Serviço Tipo Mensalidade" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Adicionar Serviço Tipo Mensalidade</button>
-                                                    </div>
+                                        <div class="form-horizontal m-0 p-0">
+                                            <div class="form-group row text-sm-end m-0 pt-1">
+                                                @Html.Label("", "Percentual %", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                                <div class="col-sm-1">
+                                                    @Html.EditorFor(model => model.g_vendedores.regra2_perce_total_boleto_sem_consulta, new { htmlAttributes = new { @class = "form-control" } })
                                                 </div>
+                                                @Html.Label("", "% Percentual a ser aplicado no valor total do BOLETO QUANDO NÃO HOUVER CONSULTAS", htmlAttributes: new { @class = "col-sm-6 col-form-label text-sm-start" })
                                             </div>
-                                            <div class="tab-pane fade" id="tabRegras2Tabela" role="tabpanel" aria-labelledby="tabRegras2Tabela-tab">
-                                                <div class="card-body m-0 p-1" style="height: 100%">
-                                                    <!-- Acessos do Sistema Backoffice -->
-                                                    @if (CachePersister.allSistemas.Where(p => p.id_sistema == 2).SingleOrDefault().ativo)
-                                                    {
-                                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width: 80%" align="center">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th style="width: 10%">Id.</th>
-                                                                    <th style="width: 70%">Consulta</th>
-                                                                    <th style="width: 10%">Valor (R$)</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @for (int i = 0; i < Model.allcstVendedoresTabelasDetalhesModel.Count; i++)
-                                                                {
-                                                                    <tr>
-                                                                        @Html.HiddenFor(model => model.allcstVendedoresTabelasDetalhesModel[i].id_consulta_tabela_vendedor)
-                                                                        @Html.HiddenFor(model => model.allcstVendedoresTabelasDetalhesModel[i].id_consulta)
-                                                                        <td>@Html.LabelFor(model => model.allcstVendedoresTabelasDetalhesModel[i].id_consulta, Model.allcstVendedoresTabelasDetalhesModel[i].id_consulta.ToString())</td>
-                                                                        <td>@Html.LabelFor(model => model.allcstVendedoresTabelasDetalhesModel[i].nome, Model.allcstVendedoresTabelasDetalhesModel[i].nome.ToString(), htmlAttributes: new { @class = "col-form-label" })</td>
-                                                                        <td>@Html.EditorFor(model => model.allcstVendedoresTabelasDetalhesModel[i].valor_unit, new { htmlAttributes = new { @class = "form-control" } })</td>
-                                                                    </tr>
-                                                                }
-                                                            </tbody>
-                                                        </table>
-                                                    }
+                                        </div>
 
-                                                </div>
-                                            </div>
+                                        <div class="card mt-5">
+                                            <div class="card-header text-sm-center bg-light"><b>Comissão Serviço "TIPO MENSALIDADE</b>"</div>
+                                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width: 100%" id="dataTables-ServicoTipoMens">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 5%">Id.</th>
+                                                        <th style="width: 40%">Produto/Serviço</th>
+                                                        <th style="width: 25%">Percentual Comissão</th>
+                                                        <th style="width: 20%">Valor Comissão</th>
+                                                        <th style="width: 10%">Remover</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="card-body text-sm-center m-1 p-1">
+                                            <button type="button" name="btnCadastrarServTipoMensalidade" onclick="jsModalAdicionarServTipoMensalidade()" title="Adicionar Serviço Tipo Mensalidade" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Adicionar Serviço Tipo Mensalidade</button>
                                         </div>
                                     </div>
                                 </div>
@@ -243,25 +199,32 @@
         }
     });
 
-
     function jsValidarRegraParametrizada()
     {
         try {
-            var _regraparametrizada = document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra_parametrizada"].value;
+            var form = document.forms["formCreateEdit_gVendedores"];
+            if (!form) return;
+            var regraEl = form["g_vendedores.regra_parametrizada"];
+            if (!regraEl) return;
+            var regra1 = form["g_vendedores.regra1_perce_total_boleto"];
+            var regra1SemConsulta = form["g_vendedores.regra1_perce_total_boleto_sem_consulta"];
+            var regra2 = form["g_vendedores.regra2_perce_total_boleto_sem_consulta"];
+            if (!regra1 || !regra1SemConsulta || !regra2) return;
+            var _regraparametrizada = regraEl.value;
             if (_regraparametrizada == "1") {
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto"].disabled = false;
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto_sem_consulta"].disabled = false;
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra2_perce_total_boleto_sem_consulta"].disabled = true;
+                regra1.disabled = false;
+                regra1SemConsulta.disabled = false;
+                regra2.disabled = true;
             }
             else if (_regraparametrizada == "2") {
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra2_perce_total_boleto_sem_consulta"].disabled = false;
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto"].disabled = true;
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto_sem_consulta"].disabled = true;
+                regra2.disabled = false;
+                regra1.disabled = true;
+                regra1SemConsulta.disabled = true;
             }
             else {
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto"].disabled = true;
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra1_perce_total_boleto_sem_consulta"].disabled = true;
-                document.forms["formCreateEdit_gVendedores"]["g_vendedores.regra2_perce_total_boleto_sem_consulta"].disabled = true;
+                regra1.disabled = true;
+                regra1SemConsulta.disabled = true;
+                regra2.disabled = true;
             }
         }
         catch (err) {
@@ -391,7 +354,6 @@
             LibMessageError("Atenção", "[jsRemoverRegraComissaoServicoMensalidade] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
     function jsSendRemoverRegraComissaoServicoMensalidade(idVedendorRegra)
     {

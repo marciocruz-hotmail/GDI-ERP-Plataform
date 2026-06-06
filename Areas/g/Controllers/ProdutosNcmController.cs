@@ -215,15 +215,131 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,g_ProdutosNcm,g_ProdutosNcm_*,g_ProdutosNcm_Actioncreate,g_ProdutosNcm_Actionupdate")]
+        public ActionResult ModalCreateEditProdutosNcm(int? IdProdutoNcm)
+        {
+            try
+            {
+                int idProdutoNcm = IdProdutoNcm.GetValueOrDefault();
+                g_produtos_ncm record_g_produtos_ncm;
+                if (idProdutoNcm > 0)
+                {
+                    record_g_produtos_ncm = db.g_produtos_ncm.Find(idProdutoNcm);
+                    if (record_g_produtos_ncm == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    ViewBag.Title = MontarTituloCreateEditProdutosNcm(record_g_produtos_ncm);
+                }
+                else
+                {
+                    record_g_produtos_ncm = new g_produtos_ncm { ativo = true };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>NCM</b>";
+                }
+                PreencherLookupsCreateEdit();
+                return View("ModalCreateEditProdutosNcm", record_g_produtos_ncm);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "ProdutosNcmController";
+                msg += "<br/>" + "ModalCreateEditProdutosNcm";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,g_ProdutosNcm,g_ProdutosNcm_*,g_ProdutosNcm_Actioncreate,g_ProdutosNcm_Actionupdate")]
+        public ActionResult AjaxCreateEditProdutosNcm(g_produtos_ncm record_g_produtos_ncm)
+        {
+            try
+            {
+                if (String.IsNullOrWhiteSpace(record_g_produtos_ncm.codigo_ncm.EmptyIfNull().ToString().Trim()))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Código NCM</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+
+                if (record_g_produtos_ncm.id_produto_ncm == 0)
+                {
+                    record_g_produtos_ncm.id_coligada = 1;
+                    record_g_produtos_ncm.id_filial = 1;
+
+                    if (ModelState.IsValid)
+                    {
+                        IQueryable<g_produtos_ncm> listaProdutosNCM = db.g_produtos_ncm.Where(p => p.codigo_ncm == record_g_produtos_ncm.codigo_ncm);
+                        foreach (g_produtos_ncm validacao in listaProdutosNCM)
+                        {
+                            if (validacao.codigo_ncm.ToString().ToUpper().Equals(record_g_produtos_ncm.codigo_ncm.ToString().ToUpper()))
+                            { ModelState.AddModelError("Model", "Campo [Código NCM] duplicado na base de dados [" + validacao.codigo_ncm.ToString() + "]"); }
+                        }
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                        return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                    }
+
+                    record_g_produtos_ncm.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    record_g_produtos_ncm.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_produtos_ncm.Add(record_g_produtos_ncm);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "NCM <b>" + record_g_produtos_ncm.codigo_ncm + "</b> cadastrado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                g_produtos_ncm existente = db.g_produtos_ncm.Find(record_g_produtos_ncm.id_produto_ncm);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("NCM", record_g_produtos_ncm.id_produto_ncm)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_produtos_ncm> listaProdutosNCM = db.g_produtos_ncm.Where(p => p.id_produto_ncm != record_g_produtos_ncm.id_produto_ncm);
+                    foreach (g_produtos_ncm validacao in listaProdutosNCM)
+                    {
+                        if (validacao.codigo_ncm.ToString().ToUpper().Equals(record_g_produtos_ncm.codigo_ncm.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Código NCM] duplicado na base de dados [" + validacao.codigo_ncm.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                record_g_produtos_ncm.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                record_g_produtos_ncm.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(record_g_produtos_ncm).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "NCM <b>" + record_g_produtos_ncm.codigo_ncm + "</b> atualizado com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditProdutosNcm(g_produtos_ncm record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>NCM</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_produto_ncm.EmptyIfNull().ToString() + " - " + record.codigo_ncm.EmptyIfNull().ToString();
+        }
+
         #region Create
         [CustomAuthorize(Roles = "SuperAdmin,g_ProdutosNcm,g_ProdutosNcm_*,g_ProdutosNcm_Actioncreate")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>NCM</b";
-            PreencherLookupsCreateEdit();
-            g_produtos_ncm newRecord = new g_produtos_ncm();
-            newRecord.ativo = true;
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -276,18 +392,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ProdutosNcm_*,g_ProdutosNcm_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_produtos_ncm record_g_produtos_ncm = db.g_produtos_ncm.Find(id);
-            if (record_g_produtos_ncm == null)
-            {
-                return RedirectToAction("Index");
-            }
-            PreencherLookupsCreateEdit();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>NCM</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos_ncm.id_produto_ncm.EmptyIfNull().ToString() + " - " + record_g_produtos_ncm.codigo_ncm.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_produtos_ncm);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -331,6 +436,7 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>NCM</b>" + LibStringFormat.GetTabHtml(1) + record_g_produtos_ncm.id_produto_ncm.EmptyIfNull().ToString() + " - " + record_g_produtos_ncm.codigo_ncm.EmptyIfNull().ToString();
             return View("CreateEdit", record_g_produtos_ncm);
         }
+        #endregion
         #endregion
 
         public ActionResult ModalAtualizarTabelaIBPT()

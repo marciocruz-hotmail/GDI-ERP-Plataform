@@ -20,7 +20,7 @@
             </div>
             <div class="card-header m-0 p-1">
                 @if ((CachePersister.userIdentity.Roles.Contains("g_Cidades_*")) || (CachePersister.userIdentity.Roles.Contains("g_Cidades_Actioncreate")))
-                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","Cidades",new { Area = "g" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
+                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateEditCidade(0)"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
             </div>
@@ -270,12 +270,27 @@
         }
     };
 
+    function jsModalCreateEditCidade(idCidade)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditCidade", "Cidades", new { Area = "g" })?IdCidade=' + emptyIfNull(idCidade).toString(), function () {
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateEditCidade] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsGCidadesEditRow(idCidade)
     {
         try {
             var id = parseInt(idCidade, 10);
             if (!id || id <= 0) { return; }
-            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Cidades", new { Area = "g" })');
+            jsModalCreateEditCidade(id);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsGCidadesEditRow] " + (err && err.message ? err.message.toString() : String(err)));

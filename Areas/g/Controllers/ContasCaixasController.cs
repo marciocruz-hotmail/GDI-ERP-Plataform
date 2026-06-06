@@ -214,15 +214,111 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region ModalCreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_*,g_ContasCaixas_Actioncreate,g_ContasCaixas_Actionupdate")]
+        public ActionResult ModalCreateEditContaCaixa(int? IdContaCaixa)
+        {
+            try
+            {
+                int id = IdContaCaixa.GetValueOrDefault();
+                g_contas_caixas record;
+                if (id > 0)
+                {
+                    record = db.g_contas_caixas.Find(id);
+                    if (record == null)
+                    {
+                        PreencherLookupsCreateEdit();
+                        ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Conta Caixa", id);
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Conta Caixa — (não localizada)</b>";
+                        return View("ModalCreateEditContaCaixa", new g_contas_caixas { id_conta_caixa = id });
+                    }
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Conta Caixa</b>" + LibStringFormat.GetTabHtml(1) + record.id_conta_caixa.EmptyIfNull().ToString() + " - " + record.nome.EmptyIfNull().ToString();
+                }
+                else
+                {
+                    record = new g_contas_caixas { is_gerencial = false };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Conta Caixa</b>";
+                }
+                PreencherLookupsCreateEdit();
+                return View("ModalCreateEditContaCaixa", record);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "ContasCaixasController";
+                msg += "<br/>" + "ModalCreateEditContaCaixa";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_*,g_ContasCaixas_Actioncreate,g_ContasCaixas_Actionupdate")]
+        public ActionResult AjaxCreateEditContaCaixa(g_contas_caixas record_g_contas_caixas)
+        {
+            try
+            {
+                if (record_g_contas_caixas.nome.EmptyIfNull().ToString() != String.Empty) { record_g_contas_caixas.nome = LibStringFormat.FormatarTextoSimples(record_g_contas_caixas.nome); }
+                if (record_g_contas_caixas.nome_fantasia.EmptyIfNull().ToString() != String.Empty) { record_g_contas_caixas.nome_fantasia = LibStringFormat.FormatarTextoSimples(record_g_contas_caixas.nome); }
+
+                if (record_g_contas_caixas.cnpj != null)
+                {
+                    if (!(LibStringValidate.ValidarCNPJ(record_g_contas_caixas.cnpj)))
+                    { ModelState.AddModelError("Model", "Campo [CNPJ] contém um CNPJ inválido"); }
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_contas_caixas> lista = record_g_contas_caixas.id_conta_caixa > 0
+                        ? db.g_contas_caixas.Where(p => p.nome == record_g_contas_caixas.nome && p.id_conta_caixa != record_g_contas_caixas.id_conta_caixa)
+                        : db.g_contas_caixas.Where(p => p.nome == record_g_contas_caixas.nome);
+                    foreach (g_contas_caixas validacao in lista)
+                    {
+                        if (validacao.nome.ToString().ToUpper().Equals(record_g_contas_caixas.nome.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                if (record_g_contas_caixas.id_conta_caixa == 0)
+                {
+                    record_g_contas_caixas.id_coligada = 1;
+                    record_g_contas_caixas.id_filial = 1;
+                    record_g_contas_caixas.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    record_g_contas_caixas.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_contas_caixas.Add(record_g_contas_caixas);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Conta Caixa <b>" + record_g_contas_caixas.nome + "</b> cadastrada com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                record_g_contas_caixas.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                record_g_contas_caixas.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(record_g_contas_caixas).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Conta Caixa <b>" + record_g_contas_caixas.nome + "</b> atualizada com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
+
         #region Create
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_*,g_ContasCaixas_Actioncreate")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Conta Caixa</b";
-            PreencherLookupsCreateEdit();
-            g_contas_caixas newRecord = new g_contas_caixas();
-            newRecord.is_gerencial = false;
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -283,18 +379,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_ContasCaixas_*,g_ContasCaixas_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_contas_caixas record_g_contas_caixas = db.g_contas_caixas.Find(id);
-            if (record_g_contas_caixas == null)
-            {
-                return RedirectToAction("Index");
-            }
-            PreencherLookupsCreateEdit();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Conta Caixa</b>" + LibStringFormat.GetTabHtml(1) + record_g_contas_caixas.id_conta_caixa.EmptyIfNull().ToString() + " - " + record_g_contas_caixas.nome.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_contas_caixas);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

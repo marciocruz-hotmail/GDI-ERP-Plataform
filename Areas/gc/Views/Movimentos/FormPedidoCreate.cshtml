@@ -508,9 +508,6 @@
                                             </div>
                                         </div>
 
-
-
-
                                         <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Checklist de Recebimento</div>
                                         <div class="form-group row text-sm-end m-0 pt-1">
                                             <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
@@ -581,7 +578,6 @@
                                             </div>
                                         </div>
 
-
                                         <div class="section-header"><i class="fa-solid fa-note-sticky me-1" aria-hidden="true"></i>Notas Avaliações (1 a 5)</div>
                                         <div class="form-group row text-sm-end m-0 pt-1 pb-1">
                                             @Html.Label("posvenda_nota_avaliacao_prazo_entrega", "Prazo Entrega?", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
@@ -647,7 +643,6 @@
                                     </div>
                                 </div>
 
-
                             </div>
                             <!-- Aba POSVENDA - FIM -->
                             <!-- Aba AUDIT - INÍCIO -->
@@ -668,8 +663,6 @@
                                 </div>
                             </div>
                             <!-- Aba AUDIT - FIM -->
-
-
 
                         </div>
                     </div>
@@ -724,7 +717,6 @@
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
         }
     });
-
 
     function jsSetCamposReadOnly(disable)
     {
@@ -808,7 +800,6 @@
             LibMessageError("Atenção", err != null ? String(err) : "");
         }
     }
-
 
     function jsCreateTableGcMovimentos()
     {
@@ -1123,7 +1114,6 @@
         }
     };
 
-
     function jsModalInserirItem()
     {
         try
@@ -1186,8 +1176,6 @@
         }
     }
 
-
-
     function jsModalCreateEditTarefa(IdTarefa)
     {
         try
@@ -1201,7 +1189,6 @@
             LibMessageError("Atenção", "[jsModalImportarTxtSC] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
     $('#tabAudit_tab').on('click', function (e)
     {
@@ -1524,7 +1511,6 @@
         }
     }
 
-
     function jsAjaxDesativarAnexo(id)
     {
         try
@@ -1567,7 +1553,5 @@
             LibMessageError("Atenção", "[jsAjaxRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
-
 
 </script>

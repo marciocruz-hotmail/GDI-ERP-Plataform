@@ -33,7 +33,6 @@
                             </div>
                         </div>
 
-
                         <!-- Dados - Fim -->
                         @if ((CachePersister.userIdentity.Administrador == true) && (Model.g_perfis.id_perfil > 0))
                         {
@@ -61,7 +60,6 @@
                                                 <tbody>
                                                     @for (int i = 0; i < Model.allCstPerfisAcessos.Count; i++)
                                                     {
-
 
                                                         if (Model.allCstPerfisAcessos[i].id_sistema == 2)
                                                         {
@@ -93,8 +91,6 @@
                                         </div>
                                     </div>
                                 }
-
-
 
                                 <!-- GESTÃO COMERCIAL -->
                                 @if (CachePersister.allSistemas.Where(p => p.id_sistema == 6).SingleOrDefault().ativo)

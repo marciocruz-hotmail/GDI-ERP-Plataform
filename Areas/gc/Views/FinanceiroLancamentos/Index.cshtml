@@ -63,7 +63,6 @@
                     </div>
                 }
 
-
                 @if (GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_*") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_Actionrun") || GcFinanceiroLancamentosHasRole("gc_FinanceiroLancamentos_ExportarLancamentosExcel"))
                 {
                     <div class="vr mx-1 align-self-stretch"></div>
@@ -94,7 +93,7 @@
                             @Html.DropDownListFor(model => model.Field_Text_01, comboContasCaixaGerencial, htmlAttributes: new { @class = "form-control", @onchange = "jsAjaxPesquisarFinanceiroLancamentos();" })
                         </div>
                         @Html.Label("Pagto", new { @class = "col-sm-1 col-form-label" })
-                        
+
                         <div class="col-sm-2">
                             @* id do .input-group distinto do input (EditorFor) para Tempus Dominus *@
                             <div class='input-group date' id='ig_gc_fin_lancamentos_idx_d1'>
@@ -102,7 +101,7 @@
                                 <span class="input-group-text"><i class="fa-regular fa-calendar-alt" aria-hidden="true"></i></span>
                             </div>
                         </div>
-                        
+
                         <div class="col-sm-2">
                             <div class='input-group date' id='ig_gc_fin_lancamentos_idx_d2'>
                                 @Html.EditorFor(model => model.Field_Data_02, new { htmlAttributes = new { @class = "form-control", type = "text", @onkeypress = "keypressed(event);" } })
@@ -371,7 +370,6 @@
         }
     };
 
-
     function jsGcFinanceiroLancamentosEditRow(id)
     {
         try {
@@ -519,7 +517,6 @@
         }
     }
 
-
     function jsModalDuplicarLancamentos(TableName, columnName)
     {
         try {
@@ -575,7 +572,6 @@
             LibMessageError("Atenção", "[jsModalGerarBoletoLancamentoAvulso] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-
 
     function jsUpdateDataView(yesDisplayField01, yesFilterOnOff)
     {
@@ -644,7 +640,6 @@
             LibMessageError("Atenção", "[jsAjaxExportarLancamentosExcel] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-
 
     function jsFinanceiroLancamentoBoleto(TableName, columnName)
     {
@@ -811,7 +806,4 @@
         }
     }
 
-
 </script>
-
-

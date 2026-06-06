@@ -358,13 +358,27 @@
         }
     }
 
+    function jsModalCreateEditProduto(idProduto)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditProduto", "Produtos", new { Area = "g" })?IdProduto=' + emptyIfNull(idProduto).toString(), function () {
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateEditProduto] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
 
     function jsGProdutosEditRow(idProduto)
     {
         try {
             var id = parseInt(idProduto, 10);
             if (!id || id <= 0) { return; }
-            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "Produtos", new { Area = "g" })');
+            jsModalCreateEditProduto(id);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsGProdutosEditRow] " + (err && err.message ? err.message.toString() : String(err)));
@@ -411,6 +425,4 @@
         }
     }
 
-
 </script>
-

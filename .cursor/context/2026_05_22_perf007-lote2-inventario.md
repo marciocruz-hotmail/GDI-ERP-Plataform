@@ -33,7 +33,7 @@ python Scripts/2026_05_22_gdi_inventory_datatables_memory_paging.py
 
 | Ficheiro | Action | Linha ~ |
 |----------|--------|---------|
-| `Areas/g/Controllers/AssistentesController.cs` | `GetDados` | 39 |
+| ~~`Areas/g/Controllers/AssistentesController.cs`~~ | — | **Removido** 2026-05-25 |
 | `Areas/g/Controllers/CentrosCustosController.cs` | `getDados` | 58 |
 | `Areas/g/Controllers/GedController.cs` | `GetDados` | 67 |
 | `Areas/g/Controllers/NfeController.cs` | `GetDados` | 150 |

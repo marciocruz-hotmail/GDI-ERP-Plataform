@@ -1,0 +1,172 @@
+@model GdiPlataform.Db.g_usuarios
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalCreateEditGUsuarios .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+    }
+</style>
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGUsuarios" }))
+{
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_usuario)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-2">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-secondary m-0 p-0">
+                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados do Usuário</div>
+                        <div class="card-body m-0 p-1">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.ativo, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-1 text-sm-start" style="margin-top:7px">
+                                    <div class="form-check form-switch form-switch-lg">
+                                        @Html.CheckBoxFor(model => model.ativo, new { @class = "form-check-input switch-success", role = "switch" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.email, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.login, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.login, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.senha, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.senha, new { htmlAttributes = new { @class = "form-control", type = "password" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.id_perfil, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4 input-group-sm">
+                                    @Html.DropDownListFor(model => model.id_perfil, ViewBag.comboPerfil as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.id_logomarca, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4 input-group-sm">
+                                    @Html.DropDownListFor(model => model.id_logomarca, ViewBag.comboLogomarca as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.id_coligada, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4 input-group-sm">
+                                    @Html.DropDownListFor(model => model.id_coligada, ViewBag.comboColigada as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.LabelFor(model => model.id_filial, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4 input-group-sm">
+                                    @Html.DropDownListFor(model => model.id_filial, ViewBag.comboFilial as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxCreateEditUsuario()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitModal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditUsuario()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = 'Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>';
+
+            if (isEmpty($('#email').val() == null ? '' : $('#email').val().toString().trim())) {
+                hasError = true;
+                msgError += 'Campo <b>Email</b> é de preenchimento obrigatório!<br/>';
+            }
+            if (isEmpty($('#nome').val() == null ? '' : $('#nome').val().toString().trim())) {
+                hasError = true;
+                msgError += 'Campo <b>Nome</b> é de preenchimento obrigatório!<br/>';
+            }
+            if (isEmpty($('#login').val() == null ? '' : $('#login').val().toString().trim())) {
+                hasError = true;
+                msgError += 'Campo <b>Login</b> é de preenchimento obrigatório!<br/>';
+            }
+            if (isEmpty($('#senha').val() == null ? '' : $('#senha').val().toString().trim())) {
+                hasError = true;
+                msgError += 'Campo <b>Senha</b> é de preenchimento obrigatório!<br/>';
+            }
+
+            if (hasError) {
+                LibMessageAlert('Atenção', msgError);
+                return;
+            }
+
+            LibMessageProcessando('Salvando usuário...');
+            var form = $('#FormModalCreateEditGUsuarios');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AjaxCreateEditUsuario", "Usuarios", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success === true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function (m) { var i = bootstrap.Modal.getInstance(m); if (i) i.hide(); });
+                        if (typeof otableGUsuarios !== 'undefined' && otableGUsuarios) {
+                            otableGUsuarios.draw(false);
+                        } else {
+                            $('#dtGUsuarios').DataTable().draw(false);
+                        }
+                        LibMessageHideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
+            });
+        }
+        catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageError('Atenção', '[jsAjaxCreateEditUsuario] ' + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

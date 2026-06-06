@@ -221,16 +221,131 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actioncreate,g_Vendedores_Actionupdate")]
+        public ActionResult ModalCreateEditVendedor(int? IdVendedor)
+        {
+            try
+            {
+                int idVendedor = IdVendedor.GetValueOrDefault();
+                CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new CstViewVendedoresTabelasModel();
+                if (idVendedor > 0)
+                {
+                    g_vendedores record_g_vendedores = db.g_vendedores.Find(idVendedor);
+                    if (record_g_vendedores == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    record_cstViewVendedoresTabelasDetalhesModel.g_vendedores = record_g_vendedores;
+                    ViewBag.Title = MontarTituloCreateEditVendedor(record_cstViewVendedoresTabelasDetalhesModel.g_vendedores);
+                }
+                else
+                {
+                    record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.ativo = true;
+                    record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.id_revenda = 0;
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Vendedor</b>";
+                }
+                PreencherLookupsCreateEdit();
+                return View("ModalCreateEditVendedor", record_cstViewVendedoresTabelasDetalhesModel);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "VendedoresController";
+                msg += "<br/>" + "ModalCreateEditVendedor";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actioncreate,g_Vendedores_Actionupdate")]
+        public ActionResult AjaxCreateEditVendedor(CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel)
+        {
+            try
+            {
+                g_vendedores vendedor = record_cstViewVendedoresTabelasDetalhesModel.g_vendedores;
+
+                if (vendedor.id_vendedor == 0)
+                {
+                    vendedor.id_coligada = 1;
+                    vendedor.id_filial = 1;
+
+                    if (ModelState.IsValid)
+                    {
+                        IQueryable<g_vendedores> listaVendedores = db.g_vendedores.Where(p => p.nome == vendedor.nome && p.id_coligada == vendedor.id_coligada && p.id_filial == vendedor.id_filial);
+                        foreach (g_vendedores validacao in listaVendedores)
+                        {
+                            if (validacao.nome.ToString().ToUpper().Equals(vendedor.nome.ToString().ToUpper()))
+                            { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                        }
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                        return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                    }
+
+                    vendedor.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    vendedor.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_vendedores.Add(vendedor);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Vendedor <b>" + vendedor.nome.EmptyIfNull().ToString() + "</b> cadastrado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                g_vendedores existente = db.g_vendedores.Find(vendedor.id_vendedor);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Vendedor", vendedor.id_vendedor)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_vendedores> listaVendedores = db.g_vendedores.Where(p => (p.nome == vendedor.nome && p.id_coligada == vendedor.id_coligada && p.id_filial == vendedor.id_filial) && (p.id_vendedor != vendedor.id_vendedor));
+                    foreach (g_vendedores validacao in listaVendedores)
+                    {
+                        if (validacao.nome.ToString().ToUpper().Equals(vendedor.nome.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                vendedor.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                vendedor.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                vendedor.nome = vendedor.nome.ToUpper();
+                db.Entry(vendedor).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Vendedor <b>" + vendedor.nome.EmptyIfNull().ToString() + "</b> atualizado com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditVendedor(g_vendedores record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Vendedor</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_vendedor.EmptyIfNull().ToString() + " - " + record.nome.EmptyIfNull().ToString();
+        }
+
         #region Create
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actioncreate")]
         public ActionResult Create()
         {
-            PreencherLookupsCreateEdit();
-            CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new CstViewVendedoresTabelasModel();
-            record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.ativo = true;
-            record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.id_revenda = 0;
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Vendedor</b";
-            return View("CreateEdit", record_cstViewVendedoresTabelasDetalhesModel);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -280,91 +395,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Vendedores_*,g_Vendedores_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            CstViewVendedoresTabelasModel record_cstViewVendedoresTabelasDetalhesModel = new CstViewVendedoresTabelasModel();
-
-            g_vendedores record_g_vendedores = new g_vendedores();
-
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                record_g_vendedores = db.g_vendedores.Find(id);
-
-                if (record_g_vendedores == null)
-                {
-                    return RedirectToAction("Index");
-                }
-                else if (CachePersister.userIdentity.IdPerfil > 1)
-                {
-                    record_cstViewVendedoresTabelasDetalhesModel.g_vendedores = record_g_vendedores;
-
-                    String sqlTemp = " select gdc_consultas.id_consulta, gdc_consultas.nome, " +
-                                        " gdc_consultas_tabelas_vendedores.id_consulta_tabela_vendedor, " +
-                                        " gdc_consultas_tabelas_vendedores.valor_unit, g_produtos.valor_base " +
-                                        " from gdc_consultas " +
-                                        " left join gdc_consultas_tabelas_vendedores on " +
-                                        " (gdc_consultas_tabelas_vendedores.id_consulta = gdc_consultas.id_consulta " +
-                                        " and gdc_consultas_tabelas_vendedores.id_vendedor = " + id.ToString() + ") " +
-                                        " left join g_produtos on (g_produtos.id_produto = gdc_consultas.id_produto) " +
-                                        " where gdc_consultas.ativo = 1 and gdc_consultas.extrato_tabelas = 1 " +
-                                        " order by gdc_consultas.id_consulta ";
-
-
-                    var allRecords = db.Database.SqlQuery<CstVendedoresTabelasDetalhesModel>(sqlTemp).ToList();
-                    for (int i = 0; i < allRecords.Count; i++)
-                    {
-                        if (allRecords[i].id_consulta_tabela_vendedor == null)
-                        {
-                            allRecords[i].id_consulta_tabela_vendedor = 0;
-                        }
-                        if (allRecords[i].valor_unit == null)
-                        {
-                            if (allRecords[i].valor_base == null)
-                            { allRecords[i].valor_unit = 0; }
-                            else { allRecords[i].valor_unit = allRecords[i].valor_base; }
-                        }
-                    }
-                    record_cstViewVendedoresTabelasDetalhesModel.allcstVendedoresTabelasDetalhesModel = allRecords;
-                }
-                else
-                {
-
-                    record_cstViewVendedoresTabelasDetalhesModel.g_vendedores = record_g_vendedores;
-
-                    String sqlTemp = " select gdc_consultas.id_consulta, gdc_consultas.nome, " +
-                                            " gdc_consultas_tabelas_vendedores.id_consulta_tabela_vendedor, " +
-                                            " gdc_consultas_tabelas_vendedores.valor_unit, g_produtos.valor_base " +
-                                            " from gdc_consultas " +
-                                            " left join gdc_consultas_tabelas_vendedores on " +
-                                            " (gdc_consultas_tabelas_vendedores.id_consulta = gdc_consultas.id_consulta " +
-                                            " and gdc_consultas_tabelas_vendedores.id_vendedor = " + id.ToString() + ") " +
-                                            " left join g_produtos on (g_produtos.id_produto = gdc_consultas.id_produto) " +
-                                            " where gdc_consultas.ativo = 1 and gdc_consultas.extrato_tabelas = 1 " +
-                                            " order by gdc_consultas.id_consulta ";
-
-                    var allRecords = db.Database.SqlQuery<CstVendedoresTabelasDetalhesModel>(sqlTemp).ToList();
-                    for (int i = 0; i < allRecords.Count; i++)
-                    {
-                        if (allRecords[i].id_consulta_tabela_vendedor == null)
-                        {
-                            allRecords[i].id_consulta_tabela_vendedor = 0;
-                        }
-                        if (allRecords[i].valor_unit == null)
-                        {
-                            if (allRecords[i].valor_base == null)
-                            { allRecords[i].valor_unit = 0; }
-                            else { allRecords[i].valor_unit = allRecords[i].valor_base; }
-                        }
-                    }
-                    record_cstViewVendedoresTabelasDetalhesModel.allcstVendedoresTabelasDetalhesModel = allRecords;
-                }
-            }
-
-            PreencherLookupsCreateEdit();
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Vendedor</b>" + LibStringFormat.GetTabHtml(1) + record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.id_vendedor.EmptyIfNull().ToString() + " - " + record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.nome.EmptyIfNull().ToString();
-            return View("CreateEdit", record_cstViewVendedoresTabelasDetalhesModel);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -408,6 +439,7 @@ namespace GdiPlataform.Areas.g.Controllers
             ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Vendedor</b>" + LibStringFormat.GetTabHtml(1) + record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.id_vendedor.EmptyIfNull().ToString() + " - " + record_cstViewVendedoresTabelasDetalhesModel.g_vendedores.nome.EmptyIfNull().ToString();
             return View("CreateEdit", record_cstViewVendedoresTabelasDetalhesModel);
         }
+        #endregion
         #endregion
 
         private JsonResult JsonDataTableException(Exception e, jQueryDataTableParamModel param, string yesFilterOnOff)

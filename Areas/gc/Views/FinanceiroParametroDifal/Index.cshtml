@@ -273,12 +273,27 @@
         }
     };
 
+    function jsModalCreateEditParametroDifal(idParametroDifal)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditParametroDifal", "FinanceiroParametroDifal", new { Area = "gc" })?IdParametroDifal=' + emptyIfNull(idParametroDifal).toString(), function () {
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsModalCreateEditParametroDifal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsGDifalEditRow(idParametroDifal)
     {
         try {
             var id = parseInt(idParametroDifal, 10);
             if (!id || id <= 0) { return; }
-            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "FinanceiroParametroDifal", new { Area = "gc" })');
+            jsModalCreateEditParametroDifal(id);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsGDifalEditRow] " + (err && err.message ? err.message.toString() : String(err)));

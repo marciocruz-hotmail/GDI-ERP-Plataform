@@ -27,7 +27,7 @@
                 @Html.ValidationSummary(true)
             </div>
             <div class="card-body m-0 p-1" style="height: 100%">
-                <div id="jsTree"></div>
+                <div id="jsTree" class="gdi-wunderbaum-host"></div>
             </div>
         </div>
     </div>
@@ -49,34 +49,50 @@
         }
     });
 
+    var classificacaoFinanceiraTreeData = @Html.Raw((string)(ViewBag.ClassificacaoFinanceiraTreeJson ?? "null"));
+
     function jsLoadTree()
     {
         try {
-            var initJstree = function () {
-                ojsTree = $('#jsTree').jstree({
-                    'core': {
-                        'data': {
-                            'url': '@Url.Action("GetTreeViewClassificacaoFinanceira", "ClassificacaoFinanceira", new { Area = "g" })',
-                            'dataType': 'json'
-                        }
-                    }
-                });
-                $('#jsTree').on('error.jstree', function (e, data) {
-                    var det = (data && (data.reason || data.error)) ? String(data.reason || data.error) : 'resposta inválida do servidor';
-                    LibMessageError("Atenção", "Falha ao carregar a árvore de classificação financeira: " + det);
-                });
+            var initTree = function () {
+                if (!classificacaoFinanceiraTreeData) {
+                    LibMessageError("Atenção", "[jsLoadTree] Dados da árvore não foram gerados no servidor.");
+                    return;
+                }
+                if (typeof GdiTreeInit !== 'function' || !gdiHasWunderbaum()) {
+                    LibMessageError("Atenção", "[jsLoadTree] Biblioteca Wunderbaum indisponível.");
+                    return;
+                }
+                ojsTree = GdiTreeInit('#jsTree', classificacaoFinanceiraTreeData);
             };
-            if (typeof window.GdiEnsureScriptFlags === 'function' && (typeof jQuery.fn.jstree !== 'function')) {
-                window.GdiEnsureScriptFlags(16, function (err) {
-                    if (err) {
-                        LibMessageError("Atenção", "[jsLoadTree] jstree não carregou: " + String(err));
-                        return;
+            var bootTree = function () {
+                if (gdiHasWunderbaum()) {
+                    initTree();
+                    return;
+                }
+                if (typeof window.GdiEnsureScriptFlags === 'function') {
+                    window.GdiEnsureScriptFlags(16, function (err) {
+                        if (err) {
+                            LibMessageError("Atenção", "[jsLoadTree] Wunderbaum não carregou: " + String(err));
+                            return;
+                        }
+                        initTree();
+                    });
+                    return;
+                }
+                var attempts = 0;
+                var timer = window.setInterval(function () {
+                    attempts++;
+                    if (gdiHasWunderbaum()) {
+                        window.clearInterval(timer);
+                        initTree();
+                    } else if (attempts >= 80) {
+                        window.clearInterval(timer);
+                        LibMessageError("Atenção", "[jsLoadTree] Timeout aguardando Wunderbaum.");
                     }
-                    initJstree();
-                });
-            } else {
-                initJstree();
-            }
+                }, 50);
+            };
+            bootTree();
         }
         catch (err) {
             LibMessageError("Atenção", "[jsLoadTree] " + (err && err.message ? err.message.toString() : String(err)));

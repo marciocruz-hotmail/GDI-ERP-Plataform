@@ -10,7 +10,7 @@
 
 ## Estado atual do projeto
 
-Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidade). Portal cliente em `crm` + `UserIdentity`. Modernização 2026: **`GdiMvcJsonResults`** + guards modal GET + handlers Ajax/DT homogéneos; lookups via **`ILookupQueryService`**; módulos legados removidos (Filtros, PortalVendedor, FinanceiroFaturamentos/Lancamentos em `g`, etc.).
+Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidade). Portal cliente em `crm` + `UserIdentity`. Modernização 2026: **`GdiMvcJsonResults`** + guards modal GET + handlers Ajax/DT homogéneos; lookups via **`ILookupQueryService`**; módulos legados removidos (Filtros, PortalVendedor, Assistentes, FinanceiroFaturamentos/Lancamentos em `g`, etc.).
 
 **Build** Release OK nas intervenções recentes. **VersionERP:** incrementar após `start.js` / `start.css` / `gdi-select2.js`.
 
@@ -29,6 +29,99 @@ Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidad
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-25 — gc/EstoqueControle: coluna Validade só com data (sem hora)
+- `EstoqueControleController.GetDados`: `data_validade` formatada `dd/MM/yyyy` (alinhado a `EstoqueLotes`).
+
+### 2026-05-25 — gc/EstoqueLotes: scroll horizontal desnecessário no DataTable Documentos
+- `ModalCreateEdit.cshtml`: bloco GED com `gdi-dt-scroll-host min-w-0` (remove `overflow-x: auto` inline); botão «Incluir Anexos» fora do host; `drawCallback` com `columns.adjust()`; `#divDocsEstoqueLote` com `min-width: 0`.
+
+### 2026-05-25 — gc/EstoqueControle: LibMessageProcessando ao abrir modal CreateEdit
+- `Index.cshtml`: `LibMessageProcessandoHide` duplo no callback do `#mainModal.load` + erro de load; `drawCallback` da grelha com hide; `ModalCreateEditEstoqueControle`: `jsInitModal` antes dos datepickers + hide no `catch` (contador `waitingDialog`).
+
+### 2026-05-25 — gc/EstoqueLotes: modal CreateEdit em `modal-full`
+- `ModalCreateEdit.cshtml`: `modal-xl` → `modal-full modal-dialog-scrollable` (~90% largura, `start.css`); scroll no body do modal.
+
+### 2026-05-25 — gc/EstoqueControle: CRUD modal CreateEdit
+- `ModalCreateEditEstoqueControle` + Index (`jsModalCreateEditEstoqueControle`); GET `Create`/`Edit` → `Index`; reutiliza `AjaxSaveRecord`; `DataRowInUseSerialized` na edição; abas Dados/Aferições em `modal-full`.
+
+### 2026-05-25 — CRUD modal: ContasCaixas, PagRecCondicoes, PagRecTipos, gc/Cfop
+- Migração padrão Vendedores/UF: `ModalCreateEdit*` + `AjaxCreateEdit*`; GET `Create`/`Edit` → `Index`; Index com `jsModal*` + duplo clique; `CreateEdit.cshtml` legado mantido; ContasCaixas `modal-full` com abas.
+
+### 2026-05-25 — g/Vendedores: modal CreateEdit sem erro quando GDC inativo
+- `ModalCreateEditVendedor.cshtml` + `CreateEdit.cshtml`: `jsValidarRegraParametrizada` com guard quando abas Regras Comissão não estão no DOM (módulo GDC / `id_sistema == 3` inativo).
+
+### 2026-05-25 — g/Produtos: modal com abas Parâmetros e Endereço Estoque
+- `ModalCreateEditProduto.cshtml`: abas `Parâmetros` (card Parâmetros) e `Endereço Estoque` (cards BH/SP); aba Dados mantém Dados do Produto + FOB; abas só para `is_servico == false`.
+
+### 2026-05-25 — g/ProdutosNcm: modal CreateEdit em `modal-full`
+- `ModalCreateEditProdutosNcm.cshtml`: `modal-xl` → `modal-full modal-dialog-scrollable` (padrão maior do ERP em `start.css`, ~90% largura); scroll no diálogo; `overflow-x: visible` no body.
+
+### 2026-05-25 — gc/ComexProdutos: modal CreateEdit — typeahead produto (G-PROD-04)
+- `PreencherLookupsProdutoModal` (placeholder + item vinculado) substitui `GetComboGcProdutosServicosTodos` no GET do modal; `ComexProdutosController.LookupAjax.cs` (`GetProdutosLookup`); `ModalCreateEdit.cshtml` com Select2 Ajax (`data-gdi-select2-search`).
+
+### 2026-05-25 — gc/ComexProdutos: modal CreateEdit alinhado ao padrão ERP
+- `Index.cshtml`: duplo clique com `td:not(.dt-no-row-select)` + guard `data`; `jsGcComexProdutosCreateEdit` com `LibMessageProcessando`, validação de id e `emptyIfNull`; desativar com spinner; `ModalCreateEdit.cshtml`: redraw via `otableGcComexProdutos`, `LibMessageHideAll`/`LibMessageProcessandoHide` no Ajax.
+
+### 2026-05-25 — Publish: remover `_Layout.cshtml` órfãos de área no `.csproj`
+- `GDI-ERP-Plataform.csproj`: removidos `Content Include` de `Areas/gc`, `Areas/g` e `Areas/qa/Views/Shared/_Layout.cshtml` (ficheiros inexistentes); `_ViewStart` de cada área já aponta para `~/Views/Shared/_Layout.cshtml`.
+
+### 2026-05-25 — g/Produtos: modal CreateEdit em `modal-full`
+- `ModalCreateEditProduto.cshtml`: `modal-xl` → `modal-full modal-dialog-scrollable` (padrão maior do ERP em `start.css`, ~90% largura); scroll no diálogo; `overflow-x: visible` no body.
+
+### 2026-05-25 — g/Vendedores: CreateEdit em modal Ajax (padrão Filiais)
+- `ModalCreateEditVendedor` + `AjaxCreateEditVendedor`; view modal (`modal-xl`, abas Dados/Regras comissão); Index com `mainModal.load` + redraw `dtGVendedores`; validação nome duplicado preservada; GET `Create`/`Edit` → Index; POST legados mantidos; DataTable comissão com variável `otableGVendedoresServicoTipoMens` (evita colisão com Index).
+
+### 2026-05-25 — g/ContratosAviacao: CreateEdit em modal Ajax (padrão Filiais)
+- `ModalCreateEditContratoAviacao` + `AjaxCreateEditContratoAviacao`; view modal (`modal-xl`, Select2 cliente, datepicker); Index com `mainModal.load` + redraw `dtGContratos`; validação create (tipo/signatário/identificador) em `AplicarValidacaoContratoAviacao`; GET `Create`/`Edit` → Index; POST legados mantidos; `AjaxGetDadosClientes`, PDF e upload assinado inalterados.
+
+### 2026-05-25 — g/UF: edição em modal Ajax (padrão Filiais)
+- `ModalCreateEditUF` + `AjaxCreateEditUF`; view modal (`modal-lg`, parâmetros ICMS MG/SP); Index com `mainModal.load` + redraw `dtGUF`; GET `Create`/`Edit` → Index; POST legados mantidos; `CreateEdit.cshtml` mantido; botão Novo permanece desabilitado (só edição).
+
+### 2026-05-25 — g/Produtos: edição em modal Ajax (padrão Filiais)
+- `ModalCreateEditProduto`; view modal (`modal-xl`, abas Dados/Audit); Index com `mainModal.load` + redraw `dtGProdutos`; reutiliza `AjaxEditProduto`; `DataRowInUseSerialized`/`LibAudit` preservados; GET `Edit` → Index; `CreateEdit.cshtml` mantido; modais ficha estoque/desativar/atualizar cadastro inalterados; sem Create (só edição).
+
+### 2026-05-25 — g/ProdutosNcm: CreateEdit em modal Ajax (padrão Filiais)
+- `ModalCreateEditProdutosNcm` + `AjaxCreateEditProdutosNcm`; view modal (`modal-xl`); Index com `mainModal.load` + redraw `dtGProdutosNcm`; lookups `PreencherLookupsCreateEdit`; GET `Create`/`Edit` → Index; `ModalAtualizarTabelaIBPT` inalterado.
+
+### 2026-05-25 — g/Cidades: CreateEdit em modal Ajax (padrão Filiais)
+- `ModalCreateEditCidade` + `AjaxCreateEditCidade`; view modal; Index com `mainModal.load` + redraw `dtGCidades`; GET `Create`/`Edit` → Index; `ModalCadastrarNovaCidade`/`AjaxCadastrarNovaCidade` inalterados (fluxo Pefin).
+
+### 2026-05-25 — gc/FinanceiroParametroDifal: edição em modal Ajax
+- `ModalCreateEditParametroDifal` + `AjaxCreateEditParametroDifal`; view modal; Index com `mainModal.load` + redraw `dtGcFinanceiroParametrosDifal`; auditoria `DataRowInUseSerialized`/`LibAudit` preservada; GET `Edit` → Index; sem Create (só edição).
+
+### 2026-05-25 — g/Usuarios: CreateEdit em modal Ajax (padrão Filiais)
+- `ModalCreateEditUsuario` + `AjaxCreateEditUsuario`; view `ModalCreateEditUsuario.cshtml`; Index com `mainModal.load` + redraw `dtGUsuarios`; GET `Create`/`Edit` → Index; POST legados mantidos; `ModalUsuarioTrocarSenha` inalterado.
+
+### 2026-05-25 — g/Filiais: CreateEdit em modal Ajax (padrão FinanceiroLancamentos)
+- `ModalCreateEditFilial` + `AjaxCreateEditFilial`; view `ModalCreateEditFilial.cshtml` (`_Modal.cshtml`); Index com `$("#mainModal").load` + redraw `dtGFiliais`; `Create`/`Edit` GET redirecionam ao Index; POST legados mantidos.
+
+### 2026-05-25 — Areas a/crm/gc/qa Views: normalização CRLF e linhas em branco
+- `Scripts/2026_05_25_gdi_normalize_g_views_format.ps1` (multi-pasta) — **145** ficheiros em `Areas/a|crm|gc|qa/Views`; **128** alterados (LF→CRLF + linhas em branco excessivas); sem alteração de lógica.
+
+### 2026-05-25 — Areas/g/Views: normalização CRLF e linhas em branco
+- Script `Scripts/2026_05_25_gdi_normalize_g_views_format.ps1` — 84 ficheiros em `Areas/g/Views` com **CRLF** Windows; 69 ajustados (28 LF-only + linhas em branco duplicadas); sem alteração de lógica Razor/JS.
+
+### 2026-05-25 — ClassificacaoFinanceira/CentrosCustos: Editar árvore (Wunderbaum)
+- `GdiTreeGetSelectedKey` usa `activeNode` quando `getSelectedNodes()` vazio (clique ativa, não marca `selected` sem checkbox). Corrige botão **Editar** em `/g/ClassificacaoFinanceira` e `/g/CentrosCustos`. **VersionERP** 2026.51.36.
+
+### 2026-05-25 — G-TREE-01 Lote 3: remoção jstree
+- Pasta `jstree-3.3.4` e entradas `.csproj` removidas; flag **16** carrega só Wunderbaum. Ícone raiz em `startprime/images/icons8-genealogy-24.png`. CSS jstree retirado de 3 PDFs; `qa/GedSGQ/IndexPops` → `LayoutLite` (sem `#tree` morto). `start.js` sem compat jstree. **VersionERP** 2026.51.35.
+
+### 2026-05-25 — G-TREE-01 Lote 2: CentrosCustos → Wunderbaum
+- `CentrosCustosController`: `MontarArvoreCentrosCustos` recursivo (substitui 4 níveis fixos + Ajax); `ViewBag.CentrosCustosTreeJson` no `Index`; `GetTreeViewCentroCusto` reutiliza o builder. `CentrosCustos/Index` com `GdiTreeInit`. `start.js`: `GdiTreeNormalizeIcon` para classes Font Awesome no Wunderbaum. **VersionERP** 2026.51.34.
+
+### 2026-05-25 — G-TREE-01 Lote 0+1: Wunderbaum + piloto ClassificacaoFinanceira
+- Vendor `wunderbaum-0.14.1` (UMD+CSS) em `LibUI`; flag GdiPageScripts **16** carrega Wunderbaum + jstree (transição). `start.js`: `GdiTreeInit`, `GdiTreeNormalizeSource`, `GdiTreeGetSelectedKey`; `jsYesEditRecordJsTree` compatível Wunderbaum/jstree. `ClassificacaoFinanceira/Index` migra para Wunderbaum com dados inline (`JsTree3Node` inalterado). **VersionERP** 2026.51.33.
+
+### 2026-05-25 — Assistentes (`g`): módulo MVC removido
+- Apagado `AssistentesController.cs` e entrada no `.csproj`; sem views no repo. Entidade EF `g_assistentes` / tabela SQL mantidas (sem superfície MVC). Menu/roles em BD — limpar manualmente se ainda existirem.
+
+### 2026-05-25 — ClassificacaoFinanceira (`g`): árvore presa em «Loading…»
+- Árvore serializada no `Index` (`ViewBag.ClassificacaoFinanceiraTreeJson`) — jstree usa dados inline em vez de Ajax pendente; `MontarArvoreClassificacaoFinanceira` com proteção a ciclos pai/filho; `GetTreeViewClassificacaoFinanceira` reutiliza o mesmo builder.
+
+### 2026-05-25 — Vendedores (`g`): remoção legado `gdc_consultas`
+- `VendedoresController.Edit`: SQL `gdc_consultas` / `gdc_consultas_tabelas_vendedores` removido; `CreateEdit` sem aba «Tabela Preços Vendedor»; `Index` sem JS morto de exportar/copiar/alterar preços; models `CstVendedoresTabelasDetalhesModel` e `CstAlterarPrecosTabelasRevendaVendedor` apagados.
 
 ### 2026-05-25 — NuGet Lote A: SkiaSharp + MathNet removidos; docs sem trilha ASP.NET Core
 - Removidos `SkiaSharp`, `SkiaSharp.NativeAssets.Win32` e `MathNet.Numerics.Signed` (usings mortos); pastas `packages/` apagadas. Build Release + testes lookups OK. Decisão: **sem** migração ASP.NET Core; manifesto **78** pacotes.

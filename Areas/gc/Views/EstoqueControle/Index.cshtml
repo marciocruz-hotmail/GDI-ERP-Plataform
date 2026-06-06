@@ -20,7 +20,7 @@
             </div>
             <div class="card-header m-0 p-1">
                 @if ((CachePersister.userIdentity.Roles.Contains("gc_EstoqueControle_*")) || (CachePersister.userIdentity.Roles.Contains("gc_EstoqueControle_Actioncreate")))
-                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="JsNewRecord('@Url.Action("Create","EstoqueControle",new { Area = "gc" })')"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
+                {<button type="button" name="btnRegistroNovo" title="Novo Registro" class="btn btn-outline-success d-inline-flex align-items-center gap-2" onclick="jsModalCreateEditEstoqueControle(0)"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button> }
                 else
                 { <button type="button" name="btnRegistroNovo" title="Novo Registro - Não Liberado" class="btn btn-outline-secondary disabled d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Novo</button>}
             </div>
@@ -221,6 +221,7 @@
             },
             order: [[1, 'asc']],
             drawCallback: function (settings) {
+                LibMessageProcessandoHide();
                 document.querySelectorAll('#dtGcProdutosControle [data-bs-toggle="tooltip"]').forEach(function (el) {
                     bootstrap.Tooltip.getOrCreateInstance(el);
                 });
@@ -270,12 +271,34 @@
         }
     };
 
+    function jsModalCreateEditEstoqueControle(idProdutoControle)
+    {
+        try
+        {
+            LibMessageProcessando("");
+            $("#mainModal").load('@Url.Action("ModalCreateEditEstoqueControle", "EstoqueControle", new { area = "gc" })?IdProdutoControle=' + emptyIfNull(idProdutoControle).toString(), function (response, status) {
+                LibMessageProcessandoHide();
+                LibMessageProcessandoHide();
+                if (status === 'error') {
+                    LibMessageError("Atenção", "Não foi possível carregar o formulário de controle de estoque.");
+                    return;
+                }
+                var e = document.getElementById('mainModal');
+                if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+            });
+        }
+        catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageError("Atenção", "[jsModalCreateEditEstoqueControle] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    }
+
     function jsGcEstoqueControleEditRow(idControle)
     {
         try {
             var id = parseInt(idControle, 10);
             if (!id || id <= 0) { return; }
-            JsEditRecordDoubleClick(id, '@Url.Action("Edit", "EstoqueControle", new { Area = "gc" })');
+            jsModalCreateEditEstoqueControle(id);
         }
         catch (err) {
             LibMessageError("Atenção", "[jsGcEstoqueControleEditRow] " + (err && err.message ? err.message.toString() : String(err)));

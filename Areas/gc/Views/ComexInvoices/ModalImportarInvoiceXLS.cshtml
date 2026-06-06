@@ -36,7 +36,7 @@
     $(function () {
         try {
             jsInitModal();
-            
+
         }
         catch (err) {
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
@@ -126,7 +126,7 @@
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-                    
+
     function jsCheckReprocessarPlanilha() {
         try {
             if (isEmpty($('#customFile').val().toString().trim())) {
@@ -140,8 +140,7 @@
             LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
-                    
-                    
+
     function jsReprocessarPlanilha()
     {
         try {
@@ -196,11 +195,5 @@
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
     };
-                    
-                    
+
                     </script>
-                    
-                    
-                    
-
-

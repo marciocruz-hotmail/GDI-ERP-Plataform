@@ -12,7 +12,7 @@
 
 | Controller | Removido | Mantido |
 |------------|----------|---------|
-| `AssistentesController.GetDados` | `filterAdvanced` / `yesFilterAdvancedText` | `filterDb` (`g_filtros`) |
+| ~~`AssistentesController.GetDados`~~ | — | **Removido** 2026-05-25 |
 | `GedController.GetDados` | `filterAdvanced` | Filtro inline `yesCustomField01–03` |
 | `NfeController.GetDados` | `filterAdvanced` + `SentencaSQLFiltroGenerico` (operador/text) | `filterDb` ou lista padrão |
 | `CentrosCustosController.getDados` | `SentencaSQLFiltroGenerico` | `filterDb` (`g_CentrosCustos`) — método legado (Index = jsTree) |

@@ -1,0 +1,155 @@
+@model GdiPlataform.Db.g_uf
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalCreateEditGUF .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+    }
+</style>
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGUF" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_uf)
+                @Html.HiddenFor(model => model.sigla)
+                @Html.HiddenFor(model => model.nome)
+                @Html.HiddenFor(model => model.id_usuario_cadastro)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Dados da UF</div>
+                        <div class="card-body m-0 p-1">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("sigla", "Sigla", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.sigla, new { htmlAttributes = new { @class = "form-control", disabled = true } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("nome", "Nome", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-4">
+                                    @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", disabled = true } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Parâmetros Base MG</div>
+                        <div class="card-body m-0 p-1">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("ICMS - Interno (%)", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.basemg_icms_percentual_interno, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("ICMS - Interestadual (%)", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.basemg_icms_interestadual, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("ICMS - Base Redução (%)", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.basemg_icms_base_reducao, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                        <div class="section-header"><i class="fa-solid fa-circle-info me-1" aria-hidden="true"></i>Parâmetros Base SP</div>
+                        <div class="card-body m-0 p-1">
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("ICMS - Interno (%)", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.basesp_icms_percentual_interno, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("ICMS - Interestadual (%)", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.basesp_icms_interestadual, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                            <div class="form-group row text-sm-end m-0 pt-1">
+                                @Html.Label("ICMS - Base Redução (%)", htmlAttributes: new { @class = "col-sm-3 col-form-label" })
+                                <div class="col-sm-2">
+                                    @Html.EditorFor(model => model.basesp_icms_base_reducao, new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxCreateEditUF()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitModal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditUF()
+    {
+        try
+        {
+            LibMessageProcessando('Salvando UF...');
+            var form = $('#FormModalCreateEditGUF');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AjaxCreateEditUF", "UF", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success === true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function (m) { var i = bootstrap.Modal.getInstance(m); if (i) i.hide(); });
+                        if (typeof otableGUF !== 'undefined' && otableGUF) {
+                            otableGUF.draw(false);
+                        } else {
+                            $('#dtGUF').DataTable().draw(false);
+                        }
+                        LibMessageHideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
+            });
+        }
+        catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageError('Atenção', '[jsAjaxCreateEditUF] ' + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>

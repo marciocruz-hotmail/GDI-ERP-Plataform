@@ -222,13 +222,128 @@ namespace GdiPlataform.Areas.g.Controllers
         }
 
         #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate,g_Filiais_Actionupdate")]
+        public ActionResult ModalCreateEditFilial(int? IdFilial)
+        {
+            try
+            {
+                int idFilial = IdFilial.GetValueOrDefault();
+                g_filiais record_g_filiais;
+                if (idFilial > 0)
+                {
+                    record_g_filiais = db.g_filiais.Find(idFilial);
+                    if (record_g_filiais == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    ViewBag.Title = MontarTituloCreateEditFilial(record_g_filiais);
+                }
+                else
+                {
+                    record_g_filiais = new g_filiais();
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>";
+                }
+                PreencherLookupsCreateEdit();
+                return View("ModalCreateEditFilial", record_g_filiais);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "FiliaisController";
+                msg += "<br/>" + "ModalCreateEditFilial";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate,g_Filiais_Actionupdate")]
+        public ActionResult AjaxCreateEditFilial(g_filiais view_g_filiais)
+        {
+            try
+            {
+                string nomeNormalizado = LibStringFormat.RemoverAcentos(view_g_filiais.nome.EmptyIfNull().ToString()).Trim().ToUpper();
+                view_g_filiais.nome = nomeNormalizado;
+
+                if (view_g_filiais.id_coligada <= 0)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Coligada</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+
+                if (String.IsNullOrWhiteSpace(nomeNormalizado))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Nome</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+
+                if (view_g_filiais.id_filial == 0)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        IQueryable<g_filiais> listaGFiliais = db.g_filiais.Where(p => p.nome == nomeNormalizado);
+                        foreach (g_filiais validacao in listaGFiliais)
+                        {
+                            if (validacao.nome.ToString().ToUpper().Equals(nomeNormalizado))
+                            { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                        }
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                        return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                    }
+
+                    view_g_filiais.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    view_g_filiais.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_filiais.Add(view_g_filiais);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Filial <b>" + nomeNormalizado + "</b> cadastrada com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                g_filiais existente = db.g_filiais.Find(view_g_filiais.id_filial);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Filial", view_g_filiais.id_filial)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_filiais> listaGFiliais = db.g_filiais.Where(p => (p.nome == nomeNormalizado) && (p.id_filial != existente.id_filial));
+                    foreach (g_filiais validacao in listaGFiliais)
+                    {
+                        if (validacao.nome.ToString().ToUpper().Equals(nomeNormalizado))
+                        { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                existente.nome = nomeNormalizado;
+                existente.id_coligada = view_g_filiais.id_coligada;
+                existente.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                existente.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Filial <b>" + nomeNormalizado + "</b> atualizada com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actioncreate")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Filial</b>";
-            g_filiais newRecord = new g_filiais();
-            PreencherLookupsCreateEdit();
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -277,18 +392,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Filiais_*,g_Filiais_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_filiais record_g_filiais = db.g_filiais.Find(id);
-            if (record_g_filiais == null)
-            {
-                return RedirectToAction("Index");
-            }
-            PreencherLookupsCreateEdit();
-            ViewBag.Title = MontarTituloCreateEditFilial(record_g_filiais);
-            return View("CreateEdit", record_g_filiais);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

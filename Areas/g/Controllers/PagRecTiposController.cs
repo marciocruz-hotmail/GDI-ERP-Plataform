@@ -226,14 +226,102 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region ModalCreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecTipos_*,g_PagRecTipos_Actioncreate,g_PagRecTipos_Actionupdate")]
+        public ActionResult ModalCreateEditPagRecTipo(int? IdPagRecTipo)
+        {
+            try
+            {
+                int id = IdPagRecTipo.GetValueOrDefault();
+                g_pagrec_tipos record;
+                if (id > 0)
+                {
+                    record = db.g_pagrec_tipos.Find(id);
+                    if (record == null)
+                    {
+                        ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Pag/Rec Tipo", id);
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Tipo — (não localizado)</b>";
+                        return View("ModalCreateEditPagRecTipo", new g_pagrec_tipos { id_pagrec_tipo = id });
+                    }
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Tipo</b>" + LibStringFormat.GetTabHtml(1) + record.id_pagrec_tipo.EmptyIfNull().ToString() + " - " + record.descricao.EmptyIfNull().ToString();
+                }
+                else
+                {
+                    record = new g_pagrec_tipos { ativo = true };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Tipo</b>";
+                }
+                return View("ModalCreateEditPagRecTipo", record);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "PagRecTiposController";
+                msg += "<br/>" + "ModalCreateEditPagRecTipo";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecTipos_*,g_PagRecTipos_Actioncreate,g_PagRecTipos_Actionupdate")]
+        public ActionResult AjaxCreateEditPagRecTipo(g_pagrec_tipos record_g_pagrec_tipos)
+        {
+            try
+            {
+                record_g_pagrec_tipos.descricao = (record_g_pagrec_tipos.descricao ?? "").Trim().ToUpper();
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_pagrec_tipos> lista = record_g_pagrec_tipos.id_pagrec_tipo > 0
+                        ? db.g_pagrec_tipos.Where(p => p.descricao == record_g_pagrec_tipos.descricao && p.id_pagrec_tipo != record_g_pagrec_tipos.id_pagrec_tipo)
+                        : db.g_pagrec_tipos.Where(p => p.descricao == record_g_pagrec_tipos.descricao);
+                    foreach (g_pagrec_tipos validacao in lista)
+                    {
+                        if (validacao.descricao.ToString().ToUpper().Equals(record_g_pagrec_tipos.descricao.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Descrição] duplicado na base de dados [" + validacao.descricao.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                if (record_g_pagrec_tipos.id_pagrec_tipo == 0)
+                {
+                    record_g_pagrec_tipos.id_coligada = 1;
+                    record_g_pagrec_tipos.id_filial = 1;
+                    record_g_pagrec_tipos.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    record_g_pagrec_tipos.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_pagrec_tipos.Add(record_g_pagrec_tipos);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Tipo <b>" + record_g_pagrec_tipos.descricao + "</b> cadastrado com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                record_g_pagrec_tipos.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                record_g_pagrec_tipos.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(record_g_pagrec_tipos).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Tipo <b>" + record_g_pagrec_tipos.descricao + "</b> atualizado com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
+
         #region CreateEdit
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecTipos_*,g_PagRecTipos_Actioncreate")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Tipo</b";
-            g_pagrec_tipos newRecord = new g_pagrec_tipos();
-            newRecord.ativo = true;
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
 
@@ -284,17 +372,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecTipos_*,g_PagRecTipos_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_pagrec_tipos record_g_pagrec_tipo = db.g_pagrec_tipos.Find(id);
-            if (record_g_pagrec_tipo == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Tipo</b>" + LibStringFormat.GetTabHtml(1) + record_g_pagrec_tipo.id_pagrec_tipo.EmptyIfNull().ToString() + " - " + record_g_pagrec_tipo.descricao.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_pagrec_tipo);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

@@ -26,10 +26,8 @@
                 else
                 { <button type="button" name="btnRegistroExcluir" title="Excluir Registro - Não Liberado" class="btn btn-outline-danger disabled d-inline-flex align-items-center gap-2"><i class="fa-regular fa-trash-alt me-2" aria-hidden="true"></i>Excluir</button>}
             </div>
-            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                    <div id="jsTree"></div>
-                </div>
+            <div class="card-body m-0 p-1" style="height: 100%">
+                <div id="jsTree" class="gdi-wunderbaum-host"></div>
             </div>
         </div>
     </div>
@@ -52,18 +50,50 @@
         }
     });
 
+    var centrosCustosTreeData = @Html.Raw((string)(ViewBag.CentrosCustosTreeJson ?? "null"));
+
     function jsLoadTree()
     {
-        try
-        {
-            ojsTree = $('#jsTree').jstree({
-                'core': {
-                    'data': {
-                        'url': '@Url.Action("GetTreeViewCentroCusto", "CentrosCustos", new { Area = "g" })',
-                        'dataType' : 'json'
-                    }
+        try {
+            var initTree = function () {
+                if (!centrosCustosTreeData) {
+                    LibMessageError("Atenção", "[jsLoadTree] Dados da árvore não foram gerados no servidor.");
+                    return;
                 }
-            });
+                if (typeof GdiTreeInit !== 'function' || !gdiHasWunderbaum()) {
+                    LibMessageError("Atenção", "[jsLoadTree] Biblioteca Wunderbaum indisponível.");
+                    return;
+                }
+                ojsTree = GdiTreeInit('#jsTree', centrosCustosTreeData);
+            };
+            var bootTree = function () {
+                if (gdiHasWunderbaum()) {
+                    initTree();
+                    return;
+                }
+                if (typeof window.GdiEnsureScriptFlags === 'function') {
+                    window.GdiEnsureScriptFlags(16, function (err) {
+                        if (err) {
+                            LibMessageError("Atenção", "[jsLoadTree] Wunderbaum não carregou: " + String(err));
+                            return;
+                        }
+                        initTree();
+                    });
+                    return;
+                }
+                var attempts = 0;
+                var timer = window.setInterval(function () {
+                    attempts++;
+                    if (gdiHasWunderbaum()) {
+                        window.clearInterval(timer);
+                        initTree();
+                    } else if (attempts >= 80) {
+                        window.clearInterval(timer);
+                        LibMessageError("Atenção", "[jsLoadTree] Timeout aguardando Wunderbaum.");
+                    }
+                }, 50);
+            };
+            bootTree();
         }
         catch (err)
         {

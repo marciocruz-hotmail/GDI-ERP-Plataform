@@ -31,8 +31,6 @@
                 <div class="form-horizontal m-0 p-0">
                     <div class="tab-content" id="crud-tabs-content">
 
-
-
                         <div class="tab-pane fade show active" id="tabDados" role="tabpanel" aria-labelledby="tabDados_tab">
                             <div class="card-body m-0 p-1" style="height: 100%">
                                 <div class="card shadow-sm gdi-section-accent-success m-2 p-1">
@@ -94,7 +92,6 @@
                                         </div>
                                     </div>
                                 </div>
-
 
                                 <div class="card shadow-sm gdi-section-accent-warning m-2 p-2">
                                     <h5>Dados da Saída</h5>
@@ -162,7 +159,7 @@
             jsDatepicker('#ig_gc_est_ctrl_rec_data');
             jsDatepicker('#ig_gc_est_ctrl_saida_data');
             jsInitForm();
-            
+
             getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
         }
         catch (err) {
@@ -401,8 +398,5 @@
             }
         });
     };
-
-
-
 
 </script>

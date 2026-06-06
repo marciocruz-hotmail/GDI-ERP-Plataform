@@ -411,7 +411,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (idProdutoComex <= 0)
                 {
                     ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Produto COMEX", null);
-                    PreencherLookupsProdutosServicosTodos();
+                    PreencherLookupsProdutoModal();
                     ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex — (não localizado)</b>";
                     return View("ModalCreateEdit", new gc_comex_produtos());
                 }
@@ -419,7 +419,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (record_gc_comex_produtos == null)
                 {
                     ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Produto COMEX", idProdutoComex);
-                    PreencherLookupsProdutosServicosTodos();
+                    PreencherLookupsProdutoModal();
                     ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex — (não localizado)</b>";
                     return View("ModalCreateEdit", new gc_comex_produtos { id_comex_produto = idProdutoComex });
                 }
@@ -433,7 +433,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                     }
                 }
                 CachePersister.userIdentity.DataRowInUseSerialized = JsonConvert.SerializeObject(record_gc_comex_produtos);
-                PreencherLookupsProdutosServicosTodos();
+                PreencherLookupsProdutoModal(record_gc_comex_produtos.id_produto);
                 ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Produto Comex</b>" + LibStringFormat.GetTabHtml(1) + record_gc_comex_produtos.id_produto.EmptyIfNull().ToString() + " - " + record_gc_comex_produtos.description.EmptyIfNull().ToString();
                 return View("ModalCreateEdit", record_gc_comex_produtos);
             }

@@ -214,13 +214,130 @@ namespace GdiPlataform.Areas.g.Controllers
         #endregion
 
         #region CreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Cidades_*,g_Cidades_Actioncreate,g_Cidades_Actionupdate,gdc_Pefin_Default")]
+        public ActionResult ModalCreateEditCidade(int? IdCidade)
+        {
+            try
+            {
+                int idCidade = IdCidade.GetValueOrDefault();
+                g_cidades record_g_cidades;
+                if (idCidade > 0)
+                {
+                    record_g_cidades = db.g_cidades.Find(idCidade);
+                    if (record_g_cidades == null)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    ViewBag.Title = MontarTituloCreateEditCidade(record_g_cidades);
+                }
+                else
+                {
+                    record_g_cidades = new g_cidades { ativo = true };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cidade</b>";
+                }
+                return View("ModalCreateEditCidade", record_g_cidades);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "CidadesController";
+                msg += "<br/>" + "ModalCreateEditCidade";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Cidades_*,g_Cidades_Actioncreate,g_Cidades_Actionupdate,gdc_Pefin_Default")]
+        public ActionResult AjaxCreateEditCidade(g_cidades record_g_cidades)
+        {
+            try
+            {
+                if (String.IsNullOrWhiteSpace(record_g_cidades.nome.EmptyIfNull().ToString().Trim()))
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure("Campo <b>Nome</b> é de preenchimento obrigatório!"), JsonRequestBehavior.AllowGet);
+                }
+
+                record_g_cidades.nome = LibStringFormat.FormatarTextoSimples(record_g_cidades.nome);
+
+                if (record_g_cidades.id_cidade == 0)
+                {
+                    record_g_cidades.id_coligada = 0;
+                    record_g_cidades.id_filial = 0;
+
+                    if (ModelState.IsValid)
+                    {
+                        IQueryable<g_cidades> listaCidades = db.g_cidades.Where(p => p.nome == record_g_cidades.nome);
+                        foreach (g_cidades validacao in listaCidades)
+                        {
+                            if (validacao.nome.ToString().ToUpper().Equals(record_g_cidades.nome.ToString().ToUpper()))
+                            { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                        }
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                        return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                    }
+
+                    record_g_cidades.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    record_g_cidades.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_cidades.Add(record_g_cidades);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Cidade <b>" + record_g_cidades.nome + "</b> cadastrada com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                g_cidades existente = db.g_cidades.Find(record_g_cidades.id_cidade);
+                if (existente == null)
+                {
+                    return Json(GdiMvcJsonResults.AjaxFailure(GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Cidade", record_g_cidades.id_cidade)), JsonRequestBehavior.AllowGet);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_cidades> listaCidades = db.g_cidades.Where(p => (p.nome == record_g_cidades.nome) && (p.id_cidade != record_g_cidades.id_cidade));
+                    foreach (g_cidades validacao in listaCidades)
+                    {
+                        if (validacao.nome.ToString().ToUpper().Equals(record_g_cidades.nome.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Nome] duplicado na base de dados [" + validacao.nome.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                record_g_cidades.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                record_g_cidades.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(record_g_cidades).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Cidade <b>" + record_g_cidades.nome + "</b> atualizada com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private static string MontarTituloCreateEditCidade(g_cidades record)
+        {
+            return LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp"
+                + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Cidade</b>"
+                + LibStringFormat.GetTabHtml(1) + record.id_cidade.EmptyIfNull().ToString() + " - " + record.nome.EmptyIfNull().ToString();
+        }
+
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Cidades_*,g_Cidades_Actioncreate,gdc_Pefin_Default")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Cidade</b";
-            g_cidades newRecord = new g_cidades();
-            newRecord.ativo = true;
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -271,17 +388,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_Cidades_*,g_Cidades_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_cidades record_g_cidade = db.g_cidades.Find(id);
-            if (record_g_cidade == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Cidade</b>" + LibStringFormat.GetTabHtml(1) + record_g_cidade.id_cidade.EmptyIfNull().ToString() + " - " + record_g_cidade.nome.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_cidade);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

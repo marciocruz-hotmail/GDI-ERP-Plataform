@@ -224,16 +224,102 @@ namespace GdiPlataform.Areas.g.Controllers
         }
         #endregion
 
+        #region ModalCreateEdit
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecCondicoes_*,g_PagRecCondicoes_Actioncreate,g_PagRecCondicoes_Actionupdate")]
+        public ActionResult ModalCreateEditPagRecCondicao(int? IdPagRecCondicao)
+        {
+            try
+            {
+                int id = IdPagRecCondicao.GetValueOrDefault();
+                g_pagrec_condicoes record;
+                if (id > 0)
+                {
+                    record = db.g_pagrec_condicoes.Find(id);
+                    if (record == null)
+                    {
+                        ViewBag.MsgBloqueio = GdiMvcJsonResults.EntidadeNaoEncontradaMensagem("Pag/Rec Condição", id);
+                        ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Condição — (não localizada)</b>";
+                        return View("ModalCreateEditPagRecCondicao", new g_pagrec_condicoes { id_pagrec_condicao = id });
+                    }
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Condição</b>" + LibStringFormat.GetTabHtml(1) + record.id_pagrec_condicao.EmptyIfNull().ToString() + " - " + record.descricao.EmptyIfNull().ToString();
+                }
+                else
+                {
+                    record = new g_pagrec_condicoes { ativo = true, qtd_dias = 0, qtd_parcelas = 0 };
+                    ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Condição</b>";
+                }
+                return View("ModalCreateEditPagRecCondicao", record);
+            }
+            catch (Exception ex)
+            {
+                String msg = GdiMvcJsonResults.AjaxFailureMessage(ex);
+                msg += "<br/>" + "PagRecCondicoesController";
+                msg += "<br/>" + "ModalCreateEditPagRecCondicao";
+                LibFlashMessage.SetModalMessage(this, msg);
+                return RedirectToAction("ModalError", "Error", new { area = "" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecCondicoes_*,g_PagRecCondicoes_Actioncreate,g_PagRecCondicoes_Actionupdate")]
+        public ActionResult AjaxCreateEditPagRecCondicao(g_pagrec_condicoes record_g_pagrec_condicoes)
+        {
+            try
+            {
+                record_g_pagrec_condicoes.descricao = (record_g_pagrec_condicoes.descricao ?? "").Trim().ToUpper();
+
+                if (ModelState.IsValid)
+                {
+                    IQueryable<g_pagrec_condicoes> lista = record_g_pagrec_condicoes.id_pagrec_condicao > 0
+                        ? db.g_pagrec_condicoes.Where(p => p.descricao == record_g_pagrec_condicoes.descricao && p.id_pagrec_condicao != record_g_pagrec_condicoes.id_pagrec_condicao)
+                        : db.g_pagrec_condicoes.Where(p => p.descricao == record_g_pagrec_condicoes.descricao);
+                    foreach (g_pagrec_condicoes validacao in lista)
+                    {
+                        if (validacao.descricao.ToString().ToUpper().Equals(record_g_pagrec_condicoes.descricao.ToString().ToUpper()))
+                        { ModelState.AddModelError("Model", "Campo [Descrição] duplicado na base de dados [" + validacao.descricao.ToString() + "]"); }
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    string msgErro = String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
+                    return Json(GdiMvcJsonResults.AjaxFailure(msgErro), JsonRequestBehavior.AllowGet);
+                }
+
+                if (record_g_pagrec_condicoes.id_pagrec_condicao == 0)
+                {
+                    record_g_pagrec_condicoes.id_coligada = 1;
+                    record_g_pagrec_condicoes.id_filial = 1;
+                    record_g_pagrec_condicoes.datahora_cadastro = LibDateTime.getDataHoraBrasilia();
+                    record_g_pagrec_condicoes.id_usuario_cadastro = CachePersister.userIdentity.IdUsuario;
+                    db.g_pagrec_condicoes.Add(record_g_pagrec_condicoes);
+                    db.SaveChanges();
+                    return Json(new { success = true, msg = "Condição <b>" + record_g_pagrec_condicoes.descricao + "</b> cadastrada com sucesso!" }, JsonRequestBehavior.AllowGet);
+                }
+
+                record_g_pagrec_condicoes.datahora_alteracao = LibDateTime.getDataHoraBrasilia();
+                record_g_pagrec_condicoes.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                db.Entry(record_g_pagrec_condicoes).State = EntityState.Modified;
+                db.SaveChanges();
+                return Json(new { success = true, msg = "Condição <b>" + record_g_pagrec_condicoes.descricao + "</b> atualizada com sucesso!" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DbEntityValidationException ex)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailureValidation(ex), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(GdiMvcJsonResults.AjaxFailure(e), JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
+
         #region CreateEdit
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecCondicoes_*,g_PagRecCondicoes_Actioncreate")]
         public ActionResult Create()
         {
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-folder-plus", "", "green", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Condição</b";
-            g_pagrec_condicoes newRecord = new g_pagrec_condicoes();
-            newRecord.ativo = true;
-            newRecord.qtd_dias = 0;
-            newRecord.qtd_parcelas = 0;
-            return View("CreateEdit", newRecord);
+            return RedirectToAction("Index");
         }
 
 
@@ -283,17 +369,7 @@ namespace GdiPlataform.Areas.g.Controllers
         [CustomAuthorize(Roles = "SuperAdmin,Admin,g_PagRecCondicoes_*,g_PagRecCondicoes_Actionupdate")]
         public ActionResult Edit(int? id)
         {
-            if ((id == null) || (id == 0))
-            {
-                return RedirectToAction("Index");
-            }
-            g_pagrec_condicoes record_g_pagrec_condicoes = db.g_pagrec_condicoes.Find(id);
-            if (record_g_pagrec_condicoes == null)
-            {
-                return RedirectToAction("Index");
-            }
-            ViewBag.Title = LibIcons.getIcon("fa-solid fa-search", "", "#0066ff", "fa-lg") + "&nbsp|&nbsp" + LibIcons.getIcon("fa-regular fa-edit", "", "#B7950B", "") + LibStringFormat.GetTabHtml(1) + "<b>Pag/Rec Condição</b>" + LibStringFormat.GetTabHtml(1) + record_g_pagrec_condicoes.id_pagrec_condicao.EmptyIfNull().ToString() + " - " + record_g_pagrec_condicoes.descricao.EmptyIfNull().ToString();
-            return View("CreateEdit", record_g_pagrec_condicoes);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

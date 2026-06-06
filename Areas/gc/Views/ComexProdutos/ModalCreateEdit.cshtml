@@ -71,7 +71,7 @@
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("produto", "Part Number:", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
                                 <div class="col-sm-10 text-sm-start">
-                                    @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control" })
+                                    @Html.DropDownListFor(model => model.id_produto, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @id = "id_produto", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "ComexProdutos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal", @data_container = "body" })
                                 </div>
                             </div>
                         </div>
@@ -99,7 +99,7 @@
             jsInitModal();
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsInitModal] " + (err && err.message ? err.message.toString() : String(err)));
         }
     });
 
@@ -116,19 +116,25 @@
                 success: function (result)
                 {
                     LibMessageProcessandoHide();
-                    if (result.success == true)
+                    if (result.success === true)
                     {
-                        document.querySelectorAll('.modal').forEach(function(m){var i=bootstrap.Modal.getInstance(m);if(i)i.hide();});
-                        $("#dtGcComexProdutos").DataTable().draw(false);
+                        document.querySelectorAll('.modal').forEach(function (m) { var i = bootstrap.Modal.getInstance(m); if (i) i.hide(); });
+                        if (typeof otableGcComexProdutos !== 'undefined' && otableGcComexProdutos) {
+                            otableGcComexProdutos.draw(false);
+                        } else {
+                            $('#dtGcComexProdutos').DataTable().draw(false);
+                        }
+                        LibMessageHideAll();
                     }
                     else
                     {
-                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.')
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
                     }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
         }
@@ -138,5 +144,3 @@
     };
 
 </script>
-
-

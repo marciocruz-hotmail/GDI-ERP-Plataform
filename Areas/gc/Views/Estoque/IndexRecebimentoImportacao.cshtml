@@ -11,7 +11,6 @@
                 @Html.ValidationSummary(true)
             </div>
 
-
             <div class="card-header m-0 p-1">
                 @if ((CachePersister.userIdentity.Roles.Contains("gc_Estoque_IndexRecebimentoImportacao_*")) || (CachePersister.userIdentity.Roles.Contains("gc_Estoque_IndexRecebimentoImportacao_Actionmanager")))
                 {
@@ -227,7 +226,6 @@
         }
     }
 
-
     function jsFormRecebimentoImportacao(id)
     {
         try
@@ -337,11 +335,4 @@
         });
     };
 
-
-
 </script>
-
-
-
-
-

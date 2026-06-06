@@ -1,0 +1,111 @@
+@model GdiPlataform.Db.g_filiais
+@using GdiPlataform.Security
+@{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGFiliais" }))
+{
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header m-0 p-1">
+                <h5 class="modal-title d-flex align-items-center gap-2">@Html.Raw(ViewBag.Title)</h5>
+                @Html.HiddenFor(model => model.id_filial)
+                @Html.HiddenFor(model => model.datahora_cadastro)
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-2">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.LabelFor(model => model.nome, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-5">
+                            @Html.EditorFor(model => model.nome, new { htmlAttributes = new { @class = "form-control", data_autofocus = "true" } })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.LabelFor(model => model.id_coligada, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                        <div class="col-sm-5">
+                            @Html.DropDownListFor(model => model.id_coligada, ViewBag.comboColigadas as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" title="Cancelar" class="btn btn-warning d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnSalvar" title="Salvar" onclick="jsAjaxCreateEditFilial()" class="btn btn-success float-end d-inline-flex align-items-center gap-2"><i class="fa-solid fa-save me-2" aria-hidden="true"></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(function ()
+    {
+        try
+        {
+            jsInitModal();
+            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+        }
+        catch (err) {
+            LibMessageError("Atenção", "[jsInitModal] " + (err && err.message ? err.message.toString() : String(err)));
+        }
+    });
+
+    function jsAjaxCreateEditFilial()
+    {
+        try
+        {
+            var hasError = false;
+            var msgError = 'Campos <b>Obrigatórios</b> deverão ser preenchidos!<br/><br/>';
+
+            if (isEmpty($('#nome').val() == null ? '' : $('#nome').val().toString().trim())) {
+                hasError = true;
+                msgError += 'Campo <b>Nome</b> é de preenchimento obrigatório!<br/>';
+            }
+            var coligadaVal = $('#id_coligada').val();
+            if (coligadaVal == null || coligadaVal === '' || coligadaVal === '0') {
+                hasError = true;
+                msgError += 'Campo <b>Coligada</b> é de preenchimento obrigatório!<br/>';
+            }
+
+            if (hasError) {
+                LibMessageAlert('Atenção', msgError);
+                return;
+            }
+
+            LibMessageProcessando('Salvando filial...');
+            var form = $('#FormModalCreateEditGFiliais');
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AjaxCreateEditFilial", "Filiais", new { area = "g" })',
+                data: form.serialize(),
+                success: function (result)
+                {
+                    LibMessageProcessandoHide();
+                    if (result.success === true)
+                    {
+                        document.querySelectorAll('.modal').forEach(function (m) { var i = bootstrap.Modal.getInstance(m); if (i) i.hide(); });
+                        if (typeof otableFiliais !== 'undefined' && otableFiliais) {
+                            otableFiliais.draw(false);
+                        } else {
+                            $('#dtGFiliais').DataTable().draw(false);
+                        }
+                        LibMessageHideAll();
+                    }
+                    else
+                    {
+                        GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown)
+                {
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
+            });
+        }
+        catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageError('Atenção', '[jsAjaxCreateEditFilial] ' + (err && err.message ? err.message.toString() : String(err)));
+        }
+    };
+
+</script>
