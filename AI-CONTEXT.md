@@ -14,7 +14,7 @@ Contexto técnico **fixo** do **GDI-ERP-Plataform** para IA e developers. Detalh
 
 ## Projeto
 
-Monólito **ASP.NET MVC .NET Framework 4.7.2** — COMEX, comercial, estoque, financeiro, qualidade (GDI Aviação, BH/SP). Portal cliente **integrado** (`crm`, `UserIdentity/AcessoPortal`); repositório **GDI-PortalCliente** descontinuado. Publish: VS → IIS; agente **sem** deploy remoto nem git salvo pedido explícito.
+Monólito **ASP.NET MVC .NET Framework 4.7.2** — COMEX, comercial, estoque, financeiro, qualidade (GDI Aviação, BH/SP). Portal cliente **integrado** (`crm`, `UserIdentity/AcessoPortal`); repositório **GDI-PortalCliente** descontinuado. **Sem** migração para ASP.NET Core / .NET 6+ (decisão 2026-05-25). Publish: VS → IIS; agente **sem** deploy remoto nem git salvo pedido explícito.
 
 ---
 

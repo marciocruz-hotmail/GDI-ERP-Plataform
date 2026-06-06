@@ -10,7 +10,7 @@ namespace GdiPlataform.Lib
         public static GdiPageScriptsFlags GetFlags(ViewContext viewContext)
         {
             if (viewContext == null)
-                return GdiPageScriptsFlags.Core | GdiPageScriptsFlags.BootstrapToggle;
+                return GdiPageScriptsFlags.Core;
 
             var viewData = viewContext.ViewData;
             if (viewData != null && viewData.ContainsKey(GdiPageScriptsActionFilter.ViewBagKey))
@@ -22,7 +22,7 @@ namespace GdiPlataform.Lib
 
             var route = viewContext.RouteData;
             if (route == null)
-                return GdiPageScriptsFlags.Core | GdiPageScriptsFlags.BootstrapToggle;
+                return GdiPageScriptsFlags.Core;
 
             var area = route.DataTokens["area"] as string ?? string.Empty;
             var controller = Convert.ToString(route.Values["controller"]) ?? string.Empty;

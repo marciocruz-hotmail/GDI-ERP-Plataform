@@ -6,7 +6,6 @@ using GdiPlataform.Security;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Data;

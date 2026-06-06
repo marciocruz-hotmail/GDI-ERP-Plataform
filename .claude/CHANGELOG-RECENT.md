@@ -9,35 +9,27 @@
 
 ## Últimas alterações (5)
 
-### 2026-06-05 — packages.config: auditoria e remoção de 26 pacotes mortos
-- **Validado:** 112 → **86** pacotes; versões alinhadas ao `.csproj` e `targetFramework="net472"`.
-- **Removidos:** bloco Microsoft.Graph/Kiota/Identity/Azure (zero uso em código); órfãos `jQuery`, `Modernizr`, `Microsoft.AspNet.WebApi` (metapacote), `SixLabors.ImageSharp` (só props).
-- **Sincronizado:** `.csproj` (References/Import), `Web.config` (binding redirects), `using` mortos em `CustomPrincipal` e `FinanceiroLancamentosController`.
-- **Build Release OK.** Candidatos futuros: `SkiaSharp.NativeAssets.Linux/macOS`, `ZString`, `bootstrap` NuGet (UI ativa = LibUI).
+### 2026-05-25 — NuGet Lote A: SkiaSharp + MathNet removidos; docs sem trilha ASP.NET Core
+- Removidos `SkiaSharp`, `SkiaSharp.NativeAssets.Win32` e `MathNet.Numerics.Signed` (usings mortos); pastas `packages/` apagadas. Build Release + testes lookups OK. Decisão: **sem** migração ASP.NET Core; manifesto **78** pacotes.
 
 ---
 
-### 2026-06-05 — Web.config: auditoria e alinhamento de versões
-- **7 ficheiros** revistos: raiz (`Web.config`, `Web.Debug.config`, `Web.Release.config`), `Views/Web.config`, áreas `a|g|gc|qa|crm`.
-- **Correções:** `MvcWebRazorHostFactory` e assembly MVC em todas as Views → **5.3.0.0** (NuGet `Microsoft.AspNet.Mvc` 5.3.0); binding redirects IdentityModel (Tokens, Protocols, Jwt, JsonWebTokens, Logging) **8.15.0.0 → 8.18.0.0** alinhados a `packages.config`.
-- **Validado:** `Scripts/2026_05_22_gdi_verify_web_release_transform.ps1` — Release sem `debug`, `customErrors On`, compressão PERF-012 OK; áreas `web.config` já no `.csproj`.
+### 2026-05-25 — System.Runtime.Caching: remoção pacote NuGet órfão (GAC mantido)
+- Retirado `System.Runtime.Caching` 10.0.7 de `packages.config`; pasta `packages/System.Runtime.Caching.10.0.7` apagada. Referência de framework em `.csproj`/testes e uso de `MemoryCache` preservados (GAC .NET 4.7.2). Build Release OK.
 
 ---
 
-### 2026-06-05 — GDI-ERP-Plataform.csproj: auditoria e correções
-- **Validação:** 1069 Includes, 0 paths em falta, 0 duplicados, 0 views `Gdi*` fora do csproj.
-- **Correções:** SourceLink fallback 8.0.0 → 10.0.203; `ExcludeFoldersFromDeployment` + strip publish `.claude`; `None` para `AI-CONTEXT`/`CHANGELOG`/`BACKLOG`; `Content` templates `appSettings` + novo `sql-server.local.config.example`; script `2026_06_05_gdi_verify_csproj_includes.py`.
+### 2026-05-25 — ZString: remoção de pacote órfão (sem uso no código)
+- Retirado `ZString` 2.6.0 de `packages.config` e `.csproj`; pasta `packages/ZString.2.6.0` apagada. Build Release OK; `ZString.dll` deixa de ir para o publish.
 
 ---
 
-### 2026-06-05 — Remoção `nul)` acidental na raiz (F06)
-- Artefacto cmd (redirecionamento `2>nul)` inválido); apagado com `Remove-Item -LiteralPath`; F06 resolvido em `docs/AVALIACAO-TECNICA-ERP-GDI.md`.
+### 2026-05-25 — SkiaSharp: remoção NativeAssets Linux/macOS (IIS Windows)
+- Retirados `SkiaSharp.NativeAssets.Linux.NoDependencies` e `SkiaSharp.NativeAssets.macOS` de `packages.config` e `.csproj` (Error/Import); pastas físicas apagadas em `packages/`. Mantidos `SkiaSharp` + `SkiaSharp.NativeAssets.Win32`. Publish ~141 MB mais leve; sem impacto em runtime IIS.
 
 ---
 
-### 2026-06-05 — Remoção pasta `.md/` legada: csproj e refs
-- Pasta **`.md/`** removida (duplicata de `docs/`); canónico: `docs/investigacao-timeout-sessao.md`, `docs/relatorio-migracao-netframework-472-481.md`.
-- **`.csproj`:** removidos `Content` `.md\*`; `CLAUDE.md` e docs relevantes → `None Include` (versionam no Git, **não** vão ao IIS).
-- **`roadmap.md`** / `0004 - auditoria-tecnica-relatorio.md` só existiam em `.md/` — recuperar do histórico Git se ainda forem necessários.
+### 2026-05-25 — ReportEmailPedido: HTML de e-mail alinhado a Bootstrap 5.3.8
+- `getEmailOrcamentoPedido` — CDN BS 4.3.1/FA 4.7 trocados por Bootstrap **5.3.8** e Font Awesome **7.2.0** (jsDelivr); markup `panel`/`borderless` → `card`/`table-borderless`/`table-bordered`; removidos scripts JS (inúteis em e-mail); correções `utf-8`, nº movimento dinâmico e data validade.
 
 ---

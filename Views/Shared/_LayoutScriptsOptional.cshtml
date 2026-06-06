@@ -1,4 +1,4 @@
-@* G-PERF-20 Fase 3 — JS opcional defer (ViewBag.GdiPageScripts); ordem: DT → Select2 → jstree → jsFileInputChange → Toggle *@
+@* G-PERF-20 Fase 3 — JS opcional defer (ViewBag.GdiPageScripts); ordem: DT → Select2 → jstree → jsFileInputChange *@
 @using GdiPlataform.Security
 @using GdiPlataform.Lib
 @{
@@ -8,11 +8,10 @@
 @* BS5 global: em páginas sem DataTables o bootstrap vinha só dentro de datatables.min.js (hubs relatório, jstree, LayoutLite). Síncrono antes dos defer. *@
 @if (!GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.DataTables))
 {
-    <script src="~/Scripts/bootstrap.bundle.min.js?v=@(v)"></script>
+    <script src="~/LibUI_AdminLTE-4.0.0/plugins/bootstrap-5.3.8/bootstrap.bundle.min.js?v=@(v)"></script>
 }
 @if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.DataTables)) { Html.RenderPartial("~/Views/Shared/_LayoutScriptsDataTables.cshtml"); }
 @if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.Select2)) { Html.RenderPartial("~/Views/Shared/_LayoutScriptsSelect2.cshtml"); }
 @if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.Jstree)) { Html.RenderPartial("~/Views/Shared/_LayoutScriptsJstree.cshtml"); }
 <script defer src="~/Scripts/jsFileInputChange.js?v=@(v)"></script>
-@if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.BootstrapToggle)) { Html.RenderPartial("~/Views/Shared/_LayoutScriptsBootstrapToggle.cshtml"); }
 @if (GdiPageScriptsDefaults.HasFlag(gdiScripts, GdiPageScriptsFlags.TempusDominus)) { Html.RenderPartial("~/Views/Shared/_LayoutScriptsTempus.cshtml"); }

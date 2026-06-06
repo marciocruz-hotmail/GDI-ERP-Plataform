@@ -18,7 +18,7 @@ Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidad
 
 ## Decisões técnicas ativas
 
-- **.NET 4.7.2** nesta fase; migração **4.8.1** trilha isolada (`2026_05_20_migracao-472-481.md`).
+- **.NET Framework 4.7.2** permanente em IIS — **sem** migração para ASP.NET Core / .NET 6+ (decisão 2026-05-25). Bump opcional **4.8.1** (mesmo monólito) só se a equipa decidir — `2026_05_20_migracao-472-481.md`.
 - Stack UI fixa (Bootstrap 5, AdminLTE 4, DataTables bs5, SweetAlert2, Tempus Dominus).
 - **Dois tipos de tabela:** DataTables (Ajax) vs MVC (`@for`) — não misturar CSS/contratos.
 - **Arquitetura centralizada obrigatória:** `2026_06_05_arquitetura-centralizada-erp-gdi.md` + `Lib/GdiMvcJsonResults.cs`.
@@ -29,6 +29,30 @@ Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidad
 ---
 
 ## Últimas alterações relevantes
+
+### 2026-05-25 — NuGet Lote A: SkiaSharp + MathNet removidos; docs sem trilha ASP.NET Core
+- Removidos `SkiaSharp`, `SkiaSharp.NativeAssets.Win32` e `MathNet.Numerics.Signed` (usings mortos); pastas `packages/` apagadas. Build Release + testes lookups OK. Decisão: **sem** migração ASP.NET Core; manifesto **78** pacotes.
+
+### 2026-05-25 — System.Runtime.Caching: remoção pacote NuGet órfão (GAC mantido)
+- Retirado `System.Runtime.Caching` 10.0.7 de `packages.config`; pasta `packages/System.Runtime.Caching.10.0.7` apagada. Referência de framework em `.csproj`/testes e uso de `MemoryCache` preservados (GAC .NET 4.7.2). Build Release OK.
+
+### 2026-05-25 — ZString: remoção de pacote órfão (sem uso no código)
+- Retirado `ZString` 2.6.0 de `packages.config` e `.csproj`; pasta `packages/ZString.2.6.0` apagada. Build Release OK; `ZString.dll` deixa de ir para o publish.
+
+### 2026-05-25 — SkiaSharp: remoção NativeAssets Linux/macOS (IIS Windows)
+- Retirados `SkiaSharp.NativeAssets.Linux.NoDependencies` e `SkiaSharp.NativeAssets.macOS` de `packages.config` e `.csproj` (Error/Import); pastas físicas apagadas em `packages/`. Mantidos `SkiaSharp` + `SkiaSharp.NativeAssets.Win32`. Publish ~141 MB mais leve; sem impacto em runtime IIS.
+
+### 2026-05-25 — ReportEmailPedido: HTML de e-mail alinhado a Bootstrap 5.3.8
+- `getEmailOrcamentoPedido` — CDN BS 4.3.1/FA 4.7 trocados por Bootstrap **5.3.8** e Font Awesome **7.2.0** (jsDelivr); markup `panel`/`borderless` → `card`/`table-borderless`/`table-bordered`; removidos scripts JS (inúteis em e-mail); correções `utf-8`, nº movimento dinâmico e data validade.
+
+### 2026-06-05 — Bootstrap 5 LibUI: remoção NuGet legado + bootstrap4-toggle (lotes 1–3)
+- **Lote 1:** `bootstrap.bundle.min.js` vendorizado em `LibUI_AdminLTE-4.0.0/plugins/bootstrap-5.3.8/`; refs em `_LayoutScriptsOptional`, login; removido pacote NuGet `bootstrap` e ficheiros `Scripts/`/`Content/bootstrap*`.
+- **Lote 2:** removido `bootstrap4-toggle` (BS4), flag `GdiPageScriptsFlags.BootstrapToggle`, partials e lazy-load em `start.js`/`GdiPageScriptRegistry`.
+- **Lote 3:** apagados layouts mortos `Areas/g|gc|qa/Views/Shared/_Layout.cshtml`; `BundleConfig` só `jqueryval` + `libui-swal-compat`. Build Release OK. **Publish:** incrementar `VersionERP` após `start.js`.
+
+### 2026-06-05 — packages/: limpeza de 26 pastas órfãs no disco
+- Script `Scripts/2026_06_05_gdi_remove_orphan_packages_dirs.py` — remove pastas em `packages/` ausentes de `packages.config` (chmod + `rmtree`).
+- **26 pastas** apagadas (Graph/Kiota/Identity/Azure, jQuery, Modernizr, ImageSharp, etc.); **86** restantes = manifesto atual; build Release OK.
 
 ### 2026-06-05 — packages.config: auditoria e remoção de 26 pacotes mortos
 - **Validado:** 112 → **86** pacotes; versões alinhadas ao `.csproj` e `targetFramework="net472"`.
@@ -108,7 +132,7 @@ Lista completa e critérios de aceite → **`BACKLOG-DEV.md`**.
 |------------|--------|
 | Alta | Smoke pós-publish; NFe e-Notas homologação; Release/IIS/health |
 | Média | 14 controllers híbridos `ViewBag.combo`; smoke Index cadastros |
-| Baixa | Migração 4.8.1; filtro legado residual; índices SQL (DBA) |
+| Baixa | Bump opcional 4.8.1 (sem Core); filtro legado residual; índices SQL (DBA) |
 
 ---
 

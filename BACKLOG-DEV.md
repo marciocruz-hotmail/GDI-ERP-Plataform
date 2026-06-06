@@ -21,7 +21,7 @@ Pendências **ativas** do **GDI-ERP-Plataform**, consolidadas a partir de `.curs
 | IIS / gzip / 304 | `.cursor/context/2026_05_22_perf012-iis-static-compression-cache.md` |
 | IsTableUpdate TTL | `.cursor/context/2026_05_22_perf015-is-table-update-ttl.md` |
 | NFe e-Notas | `.cursor/context/2026_05_26_nfe-enotas-arquitetura.md` |
-| Migração 4.8.1 | `.cursor/context/2026_05_20_migracao-472-481.md` |
+| Bump opcional 4.8.1 (sem ASP.NET Core) | `.cursor/context/2026_05_20_migracao-472-481.md` |
 | Monitorização lookups pós-publish | `.cursor/context/2026_05_20_lookups-monitorizacao-pos-publish.md` |
 | Health + PUB-1/PUB-2 | `.cursor/context/2026_05_22_health-endpoint-publish.md` |
 | TempData legado (filtro/login) | `.cursor/context/2026_05_22_tempdata-legado-filtro-login.md` |
@@ -253,13 +253,15 @@ python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py
 
 ---
 
-## G-NET — Migração .NET 4.8.1 (trilha separada)
+## G-NET — Plataforma .NET (sem ASP.NET Core)
+
+> **Decisão 2026-05-25:** não haverá migração para **ASP.NET Core** / .NET 6+. O monólito permanece em **.NET Framework 4.7.2** (IIS). Bump opcional para **4.8.1** (mesmo stack MVC) — ver contexto; **não** é reescrita Core.
 
 | Ordem | ID | Item | Crit. | Instruções | Aceite |
 |------:|-----|------|-------|-----------|--------|
-| 1 | **G-NET-01** | Plano de migração | Baixa | Ler `.cursor/context/2026_05_20_migracao-472-481.md` integralmente. | Equipa alinhada |
-| 2 | **G-NET-02** | Checklist próprio | Baixa | NuGet, TLS, `Web.config`, `ComexImportacoesController`, publish profile — **PR dedicado**. | **Não** misturar com G-PUB/G-DT/G-PROD na mesma branch |
-| 3 | **G-NET-03** | NuGet — lote 2 limpeza | Baixa | Após auditoria 2026-06-05 (86 pacotes): avaliar remoção `SkiaSharp.NativeAssets.Linux/macOS` (IIS Win), `ZString`, `bootstrap` NuGet legado (`BundleConfig` vs LibUI), `System.Runtime.Caching` pacote vs GAC; smoke relatórios NPOI/ClosedXML. | Build Release + export Excel/PDF OK |
+| 1 | **G-NET-01** | Bump 4.8.1 (opcional) | Baixa | Só se a equipa decidir; ler `.cursor/context/2026_05_20_migracao-472-481.md`. | PR isolado |
+| 2 | **G-NET-02** | Checklist 4.8.1 | Baixa | TLS, `Web.config`, publish profile — **PR dedicado**. | **Não** misturar com G-PUB/G-DT/G-PROD |
+| 3 | **G-NET-03** | NuGet — limpeza | Baixa | ~~bootstrap~~, ~~bootstrap4-toggle~~, ~~ReportEmailPedido BS5~~, ~~SkiaSharp (total)~~, ~~ZString~~, ~~System.Runtime.Caching NuGet~~, ~~MathNet~~ concluídos. Pendente: smoke relatórios NPOI/ClosedXML; template BD `GcMovimentosEmailCotacaoPedido` (BS4 inline). | Build Release + export Excel/PDF OK |
 
 ---
 

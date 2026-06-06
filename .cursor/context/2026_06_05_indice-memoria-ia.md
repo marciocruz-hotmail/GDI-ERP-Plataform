@@ -58,7 +58,7 @@
 | IIS gzip / cache | `2026_05_22_perf012-iis-static-compression-cache.md` |
 | Health endpoint publish | `2026_05_22_health-endpoint-publish.md` |
 | Cache produtos | `2026_05_22_checklist-cache-produtos.md` |
-| Migração .NET 4.8.1 | `2026_05_20_migracao-472-481.md`, `docs/relatorio-migracao-netframework-472-481.md` |
+| Plataforma (sem ASP.NET Core; bump 4.8.1 opcional) | `2026_05_20_migracao-472-481.md`, `docs/relatorio-migracao-netframework-472-481.md` |
 
 ### Domínios específicos
 

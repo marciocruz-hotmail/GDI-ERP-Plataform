@@ -14,7 +14,6 @@ using GdiPlataform.Robos.CotacaoDolar;
 using GdiPlataform.Robos.ENotas;
 using GdiPlataform.Robos.Whatsapp;
 using GdiPlataform.Security;
-using MathNet.Numerics;
 using Newtonsoft.Json;
 using NPOI.SS.Formula.Functions;
 using Rotativa;

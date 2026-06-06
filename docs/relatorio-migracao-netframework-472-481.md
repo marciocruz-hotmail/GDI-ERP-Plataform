@@ -1,8 +1,10 @@
 # Relatório de compatibilidade: .NET Framework 4.7.2 → 4.8.1
 
 **Repositório:** GDI-ERP-Plataform  
-**Data da análise:** 11/05/2026  
-**Escopo:** análise estática do código-fonte no workspace (sem aplicar migração).
+**Data da análise:** 11/05/2026 (actualizado 2026-05-25)  
+**Escopo:** bump TFM opcional no **mesmo** monólito MVC/IIS (sem ASP.NET Core).
+
+> **Decisão 2026-05-25:** migração para **ASP.NET Core** / .NET 6+ **cancelada**. Este relatório não cobre reescrita Core.
 
 ---
 
@@ -76,18 +78,17 @@
 
 ### 2.2 Lista de pacotes (resumo)
 
-Lista completa em `packages.config` (linhas 3–114). Grupos relevantes:
+Lista completa em `packages.config` (**78** pacotes, 2026-05-25). Grupos relevantes:
 
 | Categoria | Exemplos de IDs |
 |-----------|-----------------|
 | ASP.NET MVC / Web API | `Microsoft.AspNet.Mvc` 5.3.0, `Microsoft.AspNet.WebApi.*` 5.3.0 / Client 6.0.0, Razor/WebPages 3.3.0 |
 | EF | `EntityFramework` 6.5.2 |
-| Identidade / Graph | `Microsoft.IdentityModel.*` 8.18.0, `Microsoft.Graph` 5.105.0, MSAL 4.84.0, Kiota 2.0.0 |
 | Office / planilhas | `ClosedXML` 0.105.0, `NPOI` 2.8.0, `DocumentFormat.OpenXml` 3.5.1 |
-| Imagem / PDF | `SixLabors.ImageSharp` 3.1.12, `SkiaSharp` 3.119.2, **Rotativa** 1.7.3 |
-| Legado / tooling front | `Antlr` 3.5.0.2, `Microsoft.AspNet.Web.Optimization` 1.1.3, `WebGrease` 1.6.0, `Modernizr` 2.8.3 |
-| Código de barras | **Zen.Barcode.Rendering.Framework** 3.1.10729.1 |
-| BCL / compat | `System.Text.Json` 10.0.7, `Microsoft.Bcl.*` 10.0.7, vários `System.*` 4.3.x / 10.0.7 |
+| PDF / barcode | **Rotativa** 1.7.3, **Zen.Barcode.Rendering.Framework** 3.1.10729.1 |
+| Cloud / HTTP | `AWSSDK.S3`, `RestSharp`, `Newtonsoft.Json` |
+| Legado / bundling | `Antlr` 3.5.0.2, `Microsoft.AspNet.Web.Optimization` 1.1.3, `WebGrease` 1.6.0 |
+| BCL / compat | `System.Text.Json` 10.0.7, `Microsoft.Bcl.*` 10.0.7, `Microsoft.Extensions.*`, facades `System.*` |
 
 ### 2.3 Pacotes sem evidência de incompatibilidade com 4.8.1
 

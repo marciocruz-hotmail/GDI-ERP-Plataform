@@ -19,31 +19,30 @@ namespace GdiPlataform.Lib
         Select2 = 4,
         TempusDominus = 8,
         Jstree = 16,
-        BootstrapToggle = 32,
 
         /// <summary>Padrão áreas g/gc: Core + DataTables + Select2 (modais Ajax frequentes).</summary>
         DefaultGcG = Core | DataTables | Select2,
 
-        /// <summary>Padrão efetivo g/gc/qa via <see cref="GdiPageScriptsDefaults.Resolve"/> (DefaultGcG + Toggle).</summary>
-        DefaultGcGArea = DefaultGcG | BootstrapToggle,
+        /// <summary>Padrão efetivo g/gc/qa via <see cref="GdiPageScriptsDefaults.Resolve"/>.</summary>
+        DefaultGcGArea = DefaultGcG,
 
         /// <summary>Todas as libs hoje no _Layout autenticado.</summary>
-        FullAuthenticated = Core | DataTables | Select2 | TempusDominus | Jstree | BootstrapToggle,
+        FullAuthenticated = Core | DataTables | Select2 | TempusDominus | Jstree,
 
         /// <summary>G-PERF-20e — Hub relatório: sem DT/S2; Tempus no layout para modais com datas.</summary>
-        LayoutHubReport = Core | BootstrapToggle | TempusDominus,
+        LayoutHubReport = Core | TempusDominus,
 
         /// <summary>G-PERF-20e — Hub relatório com lookup Select2 no modal (ex. lançamentos financeiros).</summary>
-        LayoutHubReportSelect2 = Core | BootstrapToggle | Select2 | TempusDominus,
+        LayoutHubReportSelect2 = Core | Select2 | TempusDominus,
 
         /// <summary>G-PERF-20e — Index hierárquico jstree (sem DataTables).</summary>
-        LayoutHubJstree = Core | BootstrapToggle | Jstree,
+        LayoutHubJstree = Core | Jstree,
 
         /// <summary>G-PERF-20e — Página simples (parâmetros, etc.).</summary>
-        LayoutLite = Core | BootstrapToggle,
+        LayoutLite = Core,
 
         /// <summary>G-PERF-20 Fase 4 — Portal cliente (crm): sem DataTables/Select2 no layout.</summary>
-        LayoutPortalCliente = Core | BootstrapToggle,
+        LayoutPortalCliente = Core,
     }
 
     /// <summary>
@@ -114,22 +113,18 @@ namespace GdiPlataform.Lib
             var flags = GdiPageScriptsFlags.Core;
 
             if (string.IsNullOrEmpty(area))
-                return flags | GdiPageScriptsFlags.BootstrapToggle;
+                return flags;
 
             if (area == "g" || area == "gc" || area == "qa")
             {
-                flags |= GdiPageScriptsFlags.BootstrapToggle;
                 if (!ContainsIgnoreCase(NoDataTablesControllers, ctrl))
                     flags |= GdiPageScriptsFlags.DataTables | GdiPageScriptsFlags.Select2;
             }
             else if (area == "a")
             {
-                flags |= GdiPageScriptsFlags.BootstrapToggle;
                 if (string.Equals(ctrl, "Parametros", StringComparison.OrdinalIgnoreCase))
                     flags |= GdiPageScriptsFlags.DataTables;
             }
-            else if (area == "crm")
-                flags |= GdiPageScriptsFlags.BootstrapToggle;
 
             if (ContainsIgnoreCase(JstreeControllers, ctrl))
                 flags |= GdiPageScriptsFlags.Jstree;

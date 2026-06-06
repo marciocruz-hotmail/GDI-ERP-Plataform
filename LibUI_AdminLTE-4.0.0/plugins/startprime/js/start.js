@@ -1460,7 +1460,7 @@ function GdiAjaxAntiForgeryHeaders(container) {
     }
     window._gdiMainModalLazyScriptsInstalled = true;
 
-    var FLAG = { core: 1, dataTables: 2, select2: 4, tempusDominus: 8, jstree: 16, bootstrapToggle: 32 };
+    var FLAG = { core: 1, dataTables: 2, select2: 4, tempusDominus: 8, jstree: 16 };
     var _scriptState = window._gdiLoadedScriptKeys || (window._gdiLoadedScriptKeys = {});
     var _scriptWaiters = window._gdiLoadedScriptWaiters || (window._gdiLoadedScriptWaiters = {});
 
@@ -1478,7 +1478,6 @@ function GdiAjaxAntiForgeryHeaders(container) {
         if (missing & FLAG.select2) { names.push('Select2'); }
         if (missing & FLAG.tempusDominus) { names.push('Tempus'); }
         if (missing & FLAG.jstree) { names.push('jstree'); }
-        if (missing & FLAG.bootstrapToggle) { names.push('Toggle'); }
         return names;
     }
 
@@ -1499,17 +1498,12 @@ function GdiAjaxAntiForgeryHeaders(container) {
         return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.jstree === 'function';
     }
 
-    function gdiHasBootstrapToggle() {
-        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.bootstrapToggle === 'function';
-    }
-
     function gdiRuntimeMissingFlags(needed) {
         var missing = 0;
         if ((needed & FLAG.dataTables) && !gdiHasDataTables()) { missing |= FLAG.dataTables; }
         if ((needed & FLAG.select2) && !gdiHasSelect2()) { missing |= FLAG.select2; }
         if ((needed & FLAG.tempusDominus) && !gdiHasTempus()) { missing |= FLAG.tempusDominus; }
         if ((needed & FLAG.jstree) && !gdiHasJstree()) { missing |= FLAG.jstree; }
-        if ((needed & FLAG.bootstrapToggle) && !gdiHasBootstrapToggle()) { missing |= FLAG.bootstrapToggle; }
         return missing;
     }
 
@@ -1804,7 +1798,6 @@ function GdiAjaxAntiForgeryHeaders(container) {
         appendBundle('select2', FLAG.select2);
         appendBundle('tempusDominus', FLAG.tempusDominus);
         appendBundle('jstree', FLAG.jstree);
-        appendBundle('bootstrapToggle', FLAG.bootstrapToggle);
 
         window.GdiLoadStylesOnce(css, function (cssErr) {
             if (cssErr) {

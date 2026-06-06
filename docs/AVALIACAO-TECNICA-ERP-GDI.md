@@ -38,7 +38,7 @@ O backend permanece em **.NET Framework 4.7.2** com **Entity Framework 6.5.2 (Da
 | **P2** | **God controllers** (`MovimentosController` ~9.406 linhas; `FinanceiroLancamentosController` ~4.216) |
 | **P2** | **Mistura EF + ADO/SQL bruto** no mesmo fluxo funcional |
 | **P2** | **~540 `Html.Raw`** em 217 views — XSS onde conteúdo não é confiável |
-| **P3** | Plataforma **.NET Framework 4.7.2** sem caminho claro para ASP.NET Core |
+| **P3** | Plataforma **.NET Framework 4.7.2** — **sem** migração ASP.NET Core (decisão 2026-05-25) |
 | **P3** | Dependências legadas (`Rotativa`, `Zen.Barcode`, `WebGrease`, `Modernizr`) |
 
 ### Principais oportunidades
@@ -49,7 +49,7 @@ O backend permanece em **.NET Framework 4.7.2** com **Entity Framework 6.5.2 (Da
 4. Aplicar **`[CustomAuthorize]`** uniformemente ou filtro global complementar.
 5. Extrair services de domínio dos controllers gigantes (pedidos, financeiro, COMEX).
 6. Limpeza controlada de código morto (`PedidosVendaServices`, arquivos `*Copia*`, stubs EF).
-7. Trilha isolada **4.7.2 → 4.8.1** já documentada; preparar migração gradual futura.
+7. Bump opcional **4.7.2 → 4.8.1** (mesmo monólito IIS) se a equipa decidir — **sem** trilha ASP.NET Core.
 
 ### Recomendações prioritárias (Top 5)
 
@@ -135,7 +135,7 @@ O backend permanece em **.NET Framework 4.7.2** com **Entity Framework 6.5.2 (Da
 
 | ID | Tecnologia / Dependência | Versão identificada | Arquivo | Evidência | Risco | Gravidade | Recomendação |
 |----|--------------------------|---------------------|---------|-----------|-------|-----------|--------------|
-| T01 | .NET Framework | 4.7.2 | `GDI-ERP-Plataform.csproj` L21 | `<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>` | Sem suporte Microsoft; bloqueio futuro ASP.NET Core | Alta | Trilha 4.8.1 documentada em `docs/relatorio-migracao-netframework-472-481.md`; não misturar PRs |
+| T01 | .NET Framework | 4.7.2 | `GDI-ERP-Plataform.csproj` L21 | `<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>` | Stack legada em manutenção; **sem** reescrita Core | Média | Monólito permanente IIS; bump 4.8.1 opcional em `docs/relatorio-migracao-netframework-472-481.md` |
 | T02 | ASP.NET MVC | 5.3.0 | `packages.config` | `Microsoft.AspNet.Mvc` 5.3.0 | Framework legado; sem evolução | Média | Manter na fase atual; planejar migração incremental |
 | T03 | Entity Framework | 6.5.2 | `packages.config` | EF6 Database First EDMX | EDMX frágil em refactors; tooling VS | Média | Consolidar regeneração EDMX; avaliar EF Core só em trilha separada |
 | T04 | WebGrease + Optimization | 1.6.0 / 1.1.3 | `packages.config` | Bundling legado ASP.NET | Manutenção mínima | Baixa | Manter até migrar bundling; bundles atuais são pequenos |
@@ -362,18 +362,9 @@ Controllers, `Lib/Lookups/*`, `Robos/*`, entidades em `Db/*.cs` (~170 tabelas), 
 - Static `CachePersister`, `HttpContext`, EF direct — impede unit tests sem harness pesado.
 - Lookups já testáveis — **modelo a replicar**.
 
-### Dificuldade para migração ASP.NET Core
+### Migração ASP.NET Core — **cancelada** (2026-05-25)
 
-| Bloqueador | Notas |
-|------------|-------|
-| .NET Framework 4.7.2 | Trilha 4.8.1 primeiro |
-| EF6 EDMX | Maior esforço; EF Core reverse engineer |
-| `System.Web.Mvc` | Reescrever pipeline, sessão, autorização |
-| `CachePersister` / Session | Redesign state management |
-| Rotativa / wkhtmltopdf | Alternativa PDF |
-| IIS-specific config | `Web.config` transforms → `appsettings` |
-
-**Estratégia incremental viável:** Strangler Fig por área (`crm` portal → depois cadastros `g` → depois `gc` transacional).
+O produto permanece em **ASP.NET MVC .NET Framework 4.7.2** no IIS. Não está planeado Strangler Fig nem reescrita para .NET 6+ / ASP.NET Core. Evolução via refactors internos, serviços de domínio e hardening de segurança no monólito actual.
 
 ---
 
@@ -507,7 +498,7 @@ Checklist objetivo — **executar todos os itens aplicáveis** antes de qualquer
 ### Itens que exigem decisão de arquitetura
 
 - Estratégia **EF6 vs SQL bruto** por módulo (política formal).
-- Cronograma **4.8.1** vs **ASP.NET Core** (Strangler).
+- Bump opcional **4.8.1** (TFM) vs manter **4.7.2** — **sem** ASP.NET Core.
 - Filtro **global** de autorização vs `[CustomAuthorize]` por action.
 - Política **CSRF** global para Web API + MVC Ajax.
 - Substuição **Rotativa/wkhtmltopdf** vs serviço PDF externo.
