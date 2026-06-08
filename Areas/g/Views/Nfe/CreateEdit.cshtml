@@ -301,7 +301,8 @@
             if (otableNfeLogs == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableNfeLogs = $('#dataTables-NfeLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+                otableNfeLogs = $('#dataTables-NfeLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -318,7 +319,8 @@
                                 yesCustomIdPK: $('#id_nfe').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,

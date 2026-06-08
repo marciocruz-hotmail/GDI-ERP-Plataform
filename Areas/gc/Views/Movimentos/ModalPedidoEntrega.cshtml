@@ -1,6 +1,21 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalPedidoEntrega .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divPedidoEntregaDt {
+        min-width: 0;
+    }
+
+    #divPedidoEntregaDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoEntrega" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable" id="Modal1">
@@ -23,18 +38,14 @@
                                 <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Dados da Entrega</div>
                                 <div class="form-group row text-sm-end m-0 pt-1">
                                     @Html.Label("movimento_entregue", "Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                    <div class="col-sm-3 text-sm-start" style="margin-top:5px;">
+                                    <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
                                         <div class="form-check form-switch form-switch-lg">
                                             @Html.CheckBoxFor(model => model.movimento_entregue, htmlAttributes: new { @class = "form-check-input switch-success", @id = "movimento_entregue", role = "switch" })
                                             <label class="form-check-label" for="movimento_entregue" id="label_movimento_entregue">Não Entregue / Entregue</label>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="form-group row text-sm-end m-0 pt-1">
-                                    @Html.Label("datahora_entrega", "Data Entrega", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                    <div class="col-sm-3">
-                                        @* id do .input-group distinto do input para Tempus Dominus *@
+                                    @Html.LabelFor(model => model.datahora_entrega, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                    <div class="col-sm-2">
                                         <div class='input-group date' id='ig_gc_mov_modal_ped_entrega'>
                                             @Html.EditorFor(model => model.datahora_entrega, new { htmlAttributes = new { @class = "form-control", type = "text" } })
                                             <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
@@ -104,7 +115,7 @@
                                 <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>@Html.Raw((String)ViewBag.QtdItensPedido)</div>
                                 <div class="modal-body m-0 p-0">
                                     <div class="form-horizontal m-0 p-0">
-                                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                        <div id="divPedidoEntregaDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
                                             <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtPedidoEntregaItens">
                                                 <thead>
                                                     <tr>
@@ -206,6 +217,7 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
@@ -223,7 +235,8 @@
             if (oTablePedidoEntregaItens == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                oTableGcMovimentosCreatePedido = $('#DtPedidoEntregaItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
+                oTableGcMovimentosCreatePedido = $('#DtPedidoEntregaItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -240,9 +253,17 @@
                             yesCustomIdPK: $('#id_movimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
+                drawCallback: function (settings) {
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.getElementById('divPedidoEntregaDt');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalPedidoEntrega .modal-body');
+                    if (body) { body.scrollLeft = 0; }
+                },
                 bFilter: false,
                 bLengthChange: false,
                 bProcessing: true,

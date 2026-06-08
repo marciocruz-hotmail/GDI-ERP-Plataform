@@ -153,7 +153,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGcCfopParametros = $('#dtGcCfopParametros').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+            otableGcCfopParametros = $('#dtGcCfopParametros').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) {
                 if (GdiDtNotifyJsonErrorMessage(json)) { }
                 else if (json && json.yesFilterOnOff !== undefined) {
                     jsAtualizarIndicadorFiltroCfopParametros(json.yesFilterOnOff);
@@ -178,7 +179,10 @@
                         yesCustomField02: emptyIfNull($('#edit_descricao').val()).toString()
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) {
+                    LibMessageProcessandoHide();
+                    GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

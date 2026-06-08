@@ -1,63 +1,72 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalViewCartaCorrecao .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divCartaCorrecaoDt {
+        min-width: 0;
+    }
+
+    #divCartaCorrecaoDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewCartaCorrecao" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="scroll-modal-horizontal" style="width:100%">
-                <div class="modal-header m-0 p-1">
-                    <h4 class="modal-title d-flex align-items-center gap-2">
+            <div class="modal-header m-0 p-1">
+                <h4 class="modal-title d-flex align-items-center gap-2">
 
     @Html.Raw((String)ViewBag.Title)</h4>
-                    @Html.HiddenFor(model => model.id_movimento)
-                    <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
-                    <input type="hidden" id="yesFilterController" value="ModalViewCartaCorrecao" name="yesFilterController" />
-                    @Html.AntiForgeryToken()
-                    @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.id_movimento)
+                <input type="hidden" id="yesFilterField" value="" name="yesFilterField" />
+                <input type="hidden" id="yesFilterController" value="ModalViewCartaCorrecao" name="yesFilterController" />
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+            </div>
+            <div class="modal-body m-0 p-1 min-w-0">
+                @if (Model.id_movimento > 0)
+                {
+                <div id="divCartaCorrecaoDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTablesGCViewCartaCorrecao">
+                        <thead>
+                            <tr>
+                                <th>[x]</th>
+                                <th>Id.</th>
+                                <th>Identificador</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Correção/Motivo</th>
+                                <th><i class="fa-solid fa-cloud-download-alt fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Carta Correção"></i></th>
+                                <th><i class="fa-regular fa-file-code fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="XML"></i></th>
+                            </tr>
+                        </thead>
+                        <tfoot align="right">
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                <div class="modal-body m-0 p-0">
-                    <div class="form-horizontal m-0 p-0">
-                        @if (Model.id_movimento > 0)
-                        {
-                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTablesGCViewCartaCorrecao">
-                                        <thead>
-                                            <tr>
-                                                <th>[x]</th>
-                                                <th>Id.</th>
-                                                <th>Identificador</th>
-                                                <th>Status</th>
-                                                <th>Data</th>
-                                                <th>Correção/Motivo</th>
-                                                <th><i class="fa-solid fa-cloud-download-alt fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Carta Correção"></i></th>
-                                                <th><i class="fa-regular fa-file-code fa-lg" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="XML"></i></th>
-                                            </tr>
-                                        </thead>
-                                        <tfoot align="right">
-                                            <tr>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                            </tr>
-                                        </tfoot>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-                <div class="modal-footer justify-content-between m-0 p-1">
-                    <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
-                    <button type="button" name="btnOK" class="btn btn-success d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>OK</button>
-                </div>
+                }
+            </div>
+            <div class="modal-footer justify-content-between m-0 p-1">
+                <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
+                <button type="button" name="btnOK" class="btn btn-success d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa-solid fa-check me-2" aria-hidden="true"></i>OK</button>
             </div>
         </div>
     </div>
@@ -92,9 +101,15 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otablesGCViewCartaCorrecao = $('#dataTablesGCViewCartaCorrecao').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otablesGCViewCartaCorrecao = $('#dataTablesGCViewCartaCorrecao').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.getElementById('divCartaCorrecaoDt');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalViewCartaCorrecao .modal-body');
+                    if (body) { body.scrollLeft = 0; }
                 },
                 processing: true,
                 bServerSide: true,
@@ -112,7 +127,8 @@
                             yesCustomField01: '@Model.id_movimento',
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -215,10 +231,11 @@
                     else
                     {
                         GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                    }
+                }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });
@@ -261,10 +278,11 @@
                     else
                     {
                         GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                    }
+                }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });

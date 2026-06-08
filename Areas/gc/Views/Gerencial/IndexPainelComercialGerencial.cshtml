@@ -303,7 +303,8 @@
             if (OTableGcFinanceiroLancamentosIndex == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                OTableGcFinanceiroLancamentosIndex = $('#DtGcFinanceiroLancamentosIndex').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); jsUpdateDataView(json.yesDisplayField01, json.yesFilterOnOff) }).DataTable({
+                OTableGcFinanceiroLancamentosIndex = $('#DtGcFinanceiroLancamentosIndex').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); jsUpdateDataView(json.yesDisplayField01, json.yesFilterOnOff) }).DataTable({
                     "drawCallback": function (settings) {
                         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                     },
@@ -344,7 +345,8 @@
                             yesCustomField10: '',
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,

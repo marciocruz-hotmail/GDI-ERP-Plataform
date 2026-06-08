@@ -70,7 +70,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            oTableGcMovimentosCreatePedido = $('#dtFichaEstoqueProduto').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
+            oTableGcMovimentosCreatePedido = $('#dtFichaEstoqueProduto').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
             processing: true,
             bServerSide: true,
             ajax: {
@@ -87,7 +88,8 @@
                         yesCustomIdPK: $('#id_produto').val().toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

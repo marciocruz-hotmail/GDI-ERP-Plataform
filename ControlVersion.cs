@@ -9,16 +9,20 @@ namespace GdiPlataform
     {
         public static String getVersion()
         {
-            return "2026.51.36 - 25/05/2026";
+            return "2026.51.40 - 08/06/2026";
         }
         public static String getShortVersion()
         {
-            return "2026.51.36";
+            return "2026.51.40";
         }
     }
 }
 
 // ########## HISTÓRICO DAS VERSÕES ##########
+// 2026.51.40 - 08/06/2026 - start.css: modal-dialog-scrollable overflow-x clip; Lote A modais DT (anexos/logs/NF) gdi-dt-scroll-host
+// 2026.51.39 - 08/06/2026 - ModalPedidoViewAnexos: view alinhada ao financeiro + guards controller/TryGetMovimentoModal; _Modal VersionERP null-safe
+// 2026.51.38 - 08/06/2026 - GdiMainModalLoad: confiar DT/Select2 do host (data-gdi-page-scripts); erro HTTP detalhado; IndexPedido anexos data-id-mov
+// 2026.51.37 - 08/06/2026 - GdiMainModalLoad: aguarda DataTables/Select2 defer do host; hide overlay em erro; IndexPedido anexos inline
 // 2026.51.36 - 25/05/2026 - GdiTreeGetSelectedKey: fallback activeNode Wunderbaum (Editar árvore g)
 // 2026.51.35 - 25/05/2026 - G-TREE-01 Lote 3: remoção jstree-3.3.4; bundle Wunderbaum; PDFs; GedSGQ IndexPops LayoutLite
 // 2026.51.34 - 25/05/2026 - G-TREE-01 Lote 2: CentrosCustos Wunderbaum + árvore recursiva inline; GdiTreeNormalizeIcon (FA)

@@ -1,6 +1,26 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@{
+    var msgBloqueio = ViewBag.MsgBloqueio as string;
+    var podeExibirGed = string.IsNullOrEmpty(msgBloqueio) && Model != null && Model.id_movimento > 0;
+}
+<style>
+    /* Padrão EstoqueLotes/ModalCreateEdit — evita scroll horizontal residual com modal-dialog-scrollable + DataTables */
+    #FormModalPedidoViewAnexos .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divDocsPedidoAnexos {
+        min-width: 0;
+    }
+
+    #divDocsPedidoAnexos .gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoViewAnexos" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -13,48 +33,35 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="modal-body m-0 p-0">
-                <div class="form-horizontal m-0 p-0">
-                    @if (!string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
-                    {
-                        <div class="col-sm-12 text-sm-start m-0 p-1">
-                            @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
-                        </div>
-                    }
-                    @if (Model.id_movimento > 0)
-                    {
-                    <div class="card-body m-0 p-0" style="height: 100%">
-                        <div class="table-responsive scroll-body-horizontal m-0 p-0" style="width:100%">
-                            <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
-                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtModalPedidoViewAnexos">
-                                        <thead>
-                                            <tr>
-                                                <th>@Html.Raw("Id.")</th>
-                                                <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
-                                                <th>@Html.Raw("Tipo")</th>
-                                                <th>@Html.Raw("Descrição")</th>
-                                                <th>@Html.Raw("Arquivo")</th>
-                                                <th>@Html.Raw("Data")</th>
-                                                <th>@Html.Raw("Usuário")</th>
-                                                <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                    <div class="card-body text-sm-center m-0 p-1">
-                                        <div class="row justify-content-center">
-                                            <div class="col-6" style="text-align:center">
-                                                <button type="button" name="btnUploadFilePedidos" title="Anexar Documentos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFilePedidos()"><i class="fa-solid fa-cloud-arrow-up fa-lg me-2" aria-hidden="true"></i>Anexar Documentos</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="modal-body m-0 p-1 min-w-0">
+                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(msgBloqueio, "danger"))
+                @if (podeExibirGed)
+                {
+                <div id="divDocsPedidoAnexos" class="card shadow-sm gdi-section-accent-secondary m-0 p-0 min-w-0">
+                    <div class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtModalPedidoViewAnexos">
+                            <thead>
+                                <tr>
+                                    <th>@Html.Raw("Id.")</th>
+                                    <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                    <th>@Html.Raw("Tipo")</th>
+                                    <th>@Html.Raw("Descrição")</th>
+                                    <th>@Html.Raw("Arquivo")</th>
+                                    <th>@Html.Raw("Data")</th>
+                                    <th>@Html.Raw("Usuário")</th>
+                                    <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="card-body text-sm-center m-0 p-1">
+                        <div class="d-flex justify-content-center">
+                            <button type="button" name="btnUploadFilePedidos" title="Anexar Documentos" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2" onclick="jsModalUploadFilePedidos()"><i class="fa-solid fa-cloud-arrow-up fa-lg me-2" aria-hidden="true"></i>Anexar Documentos</button>
                         </div>
                     </div>
                 </div>
-                    }
+                }
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
                 <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
@@ -73,11 +80,11 @@
         try
         {
             jsInitModal();
-            @if (Model.id_movimento > 0)
+            @if (podeExibirGed)
             {
             <text>CreateTableModalPedidoViewAnexos();</text>
             }
-            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            getValidationSummary(@Html.Raw(Json.Encode("")));
         }
         catch (err) {
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
@@ -89,7 +96,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            oTableModalPedidoViewAnexos = $('#dtModalPedidoViewAnexos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            oTableModalPedidoViewAnexos = $('#dtModalPedidoViewAnexos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -106,9 +114,18 @@
                             yesCustomIdPK: $('#id_movimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
+                drawCallback: function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.querySelector('#divDocsPedidoAnexos .gdi-dt-scroll-host');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalPedidoViewAnexos .modal-body');
+                    if (body) { body.scrollLeft = 0; }
+                },
                 bFilter: false,
                 bLengthChange: false,
                 bProcessing: true,
@@ -171,13 +188,18 @@
     {
         try
         {
+            var idMov = ($('#id_movimento').val() || '').toString().trim();
+            if (!idMov) {
+                LibMessageAlert("Atenção", "Identificador do pedido inválido.");
+                return;
+            }
             LibMessageProcessando("");
-            $("#mainModal").load('@Url.Action("ModalUploadFilePedidos", "Movimentos", new { area = "gc" })?IdMovimento=' +@Model.id_movimento, function () {
+            $("#mainModal").load('@Url.Action("ModalUploadFilePedidos", "Movimentos", new { area = "gc" })?IdMovimento=' + encodeURIComponent(idMov), function () {
                 var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
             })
         }
         catch (err) {
-            LibMessageError("Atenção", "[jsModalUploadFileGed] " + (err && err.message ? err.message.toString() : String(err)));
+            LibMessageError("Atenção", "[jsModalUploadFilePedidos] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
 
@@ -261,10 +283,11 @@
                     else
                     {
                         GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                    }
+                }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
             });

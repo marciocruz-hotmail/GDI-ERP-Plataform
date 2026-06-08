@@ -3,7 +3,17 @@
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
 <style>
     #formCreateEdit_gProdutos .modal-body {
-        overflow-x: visible;
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divProdutoAuditDt {
+        min-width: 0;
+    }
+
+    #divProdutoAuditDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
     }
 </style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreateEdit_gProdutos" }))
@@ -355,22 +365,18 @@
 
                             <!-- Aba AUDIT - INÍCIO -->
                             <div class="tab-pane fade" id="tabAudit" role="tabpanel" aria-labelledby="tabAudit_tab">
-                                <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                                    <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
-                                        <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Trilha de Auditoria</div>
-                                        <div class="card-body m-0 p-1" style="height: 100%">
-                                            <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAudit">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>@Html.Raw("Dt/Hora")</th>
-                                                            <th>@Html.Raw("Audit Trail")</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody></tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                                <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                    <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Trilha de Auditoria</div>
+                                    <div id="divProdutoAuditDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtAudit">
+                                            <thead>
+                                                <tr>
+                                                    <th>@Html.Raw("Dt/Hora")</th>
+                                                    <th>@Html.Raw("Audit Trail")</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -426,7 +432,8 @@
             if (otableGProdutosAudit == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableGProdutosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableGProdutosAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -444,9 +451,17 @@
                                 yesCustomField01: "g_produtos",
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
+                    drawCallback: function (settings) {
+                        try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                        var host = document.getElementById('divProdutoAuditDt');
+                        if (host) { host.scrollLeft = 0; }
+                        var body = document.querySelector('#formCreateEdit_gProdutos .modal-body');
+                        if (body) { body.scrollLeft = 0; }
+                    },
                     bFilter: false,
                     bLengthChange: false,
                     bProcessing: true,
@@ -534,7 +549,7 @@
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[JsAjaxCreateEditProduto] " + (err && err.message ? err.message.toString() : String(err)));
         }

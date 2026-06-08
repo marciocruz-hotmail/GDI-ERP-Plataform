@@ -79,7 +79,8 @@
         {
             $.fn.dataTable.ext.errMode = 'none';
             oTableMovimentosEstoque = $('#dtMovimentosEstoque')
-                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (json) {
                         document.getElementById("label_Valor_estoque_bh").innerHTML = json.yesDisplayField01 || '';
@@ -113,7 +114,8 @@
                         yesCustomField01: emptyIfNull($('#id_produto_servico').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

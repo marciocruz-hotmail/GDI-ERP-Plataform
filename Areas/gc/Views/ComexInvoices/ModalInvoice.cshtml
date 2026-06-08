@@ -74,7 +74,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            oTableInvoicesItens = $('#dataTable-InvoicesItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            oTableInvoicesItens = $('#dataTable-InvoicesItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -91,7 +92,8 @@
                             yesCustomIdPK: $('#id_invoice').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,

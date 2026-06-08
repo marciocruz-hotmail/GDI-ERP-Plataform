@@ -1,6 +1,21 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #GcComexImportacoesModalInvoicesItensEspelhoDigital .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divInvoicesEspelhoDt {
+        min-width: 0;
+    }
+
+    #divInvoicesEspelhoDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "GcComexImportacoesModalInvoicesItensEspelhoDigital" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -12,7 +27,7 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="modal-body m-1 p-0">
+            <div class="modal-body m-1 p-1 min-w-0">
                 <div class="form-horizontal m-0 p-0">
                     <div class="form-group row text-sm-end m-0 pt-1">
                         @Html.Label("Importação", htmlAttributes: new { @class = "col-form-label col-sm-1" })
@@ -35,9 +50,8 @@
                             <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarItens()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
                         </div>
                     </div>
-                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexImportacoesModalInvoicesItensEspelhoDigital">
+                    <div id="divInvoicesEspelhoDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcComexImportacoesModalInvoicesItensEspelhoDigital">
                                 <thead>
                                     <tr>
                                         <th style="font-size:14px; width:4%">[x]</th>
@@ -50,7 +64,6 @@
                                     </tr>
                                 </thead>
                             </table>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -87,7 +100,8 @@
             if (oTableInvoicesItens == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                oTableInvoicesItens = $('#dtGcComexImportacoesModalInvoicesItensEspelhoDigital').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                oTableInvoicesItens = $('#dtGcComexImportacoesModalInvoicesItensEspelhoDigital').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -105,9 +119,17 @@
                             yesCustomField02: emptyIfNull($('#edit_os').val()).toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
+                drawCallback: function (settings) {
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.getElementById('divInvoicesEspelhoDt');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#GcComexImportacoesModalInvoicesItensEspelhoDigital .modal-body');
+                    if (body) { body.scrollLeft = 0; }
+                },
                 bFilter: false,
                 bLengthChange: false,
                 bProcessing: true,
@@ -230,12 +252,13 @@
                         else
                         {
                             GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                        }
+                }
                     },
                     error: function (xhr, textStatus, errorThrown)
                     {
-                        GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-                    }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
                 });
             }
         }

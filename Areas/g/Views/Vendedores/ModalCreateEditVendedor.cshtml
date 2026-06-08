@@ -241,7 +241,8 @@
             if (otableGVendedoresServicoTipoMens == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableGVendedoresServicoTipoMens = $('#dataTables-ServicoTipoMens').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableGVendedoresServicoTipoMens = $('#dataTables-ServicoTipoMens').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -258,7 +259,8 @@
                                 yesCustomIdPK: $('#id_vendedor_get').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,
@@ -396,10 +398,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendRemoverRegraComissaoServicoMensalidade] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -436,7 +439,7 @@
                     else
                     {
                         GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                    }
+                }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {

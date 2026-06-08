@@ -94,7 +94,8 @@
             {
                 $.fn.dataTable.ext.errMode = 'none';
                 otableGcComexImportacoes = $('#dtGcComexImportacoes')
-                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                     .on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); })
                     .DataTable({
                 processing: true,
@@ -112,7 +113,8 @@
                             iDisplayLength: d.length,
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -295,8 +297,8 @@
                         },
                         error: function (xhr, textStatus, errorThrown)
                         {
-                            LibMessageProcessandoHide();
-                            $('#limite_credito_atual').attr('disabled', true);
+                    LibMessageProcessandoHide();
+$('#limite_credito_atual').attr('disabled', true);
                             GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                         }
                     });

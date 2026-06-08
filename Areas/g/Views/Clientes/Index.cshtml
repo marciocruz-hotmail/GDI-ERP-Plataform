@@ -205,7 +205,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableCliente = $('#dtGClientes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+            otableCliente = $('#dtGClientes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) {
                 if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 else if (json && json.yesFilterOnOff !== undefined) {
                     jsAtualizarIndicadorFiltroClientes(json.yesFilterOnOff);
@@ -233,7 +234,8 @@
                         yesCustomField04: emptyIfNull($('#edit_cnpj').val()).toString()
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

@@ -588,6 +588,18 @@ td.BoletoSubTotal {
         min-height: 95%;
     }
 
+/* Modal scrollable + DataTables: evita barra horizontal residual no body (BS5 .row + footer DT) */
+.modal-dialog-scrollable .modal-body {
+    overflow-x: clip;
+    min-width: 0;
+}
+
+.modal-dialog-scrollable .modal-content > .scroll-modal-horizontal {
+    overflow-x: clip;
+    min-width: 0;
+    max-width: 100%;
+}
+
 .lbl {
     font-weight: normal;
     color: red;
@@ -691,6 +703,23 @@ td.BoletoSubTotal {
 .gdi-form-table-fixed .gdi-col-produto {
     white-space: normal;
     text-align: left;
+}
+
+/* COMEX — Processar Novos Produtos: PN com quebra; Description e Produto dividem o restante 50/50 */
+.gdi-form-table-processar-novos-produtos col.gdi-col-pn-width {
+    width: 11rem;
+}
+
+.gdi-form-table-processar-novos-produtos .gdi-col-pn {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+.gdi-form-table-processar-novos-produtos .gdi-col-descricao,
+.gdi-form-table-processar-novos-produtos .gdi-col-produto-vinculo {
+    white-space: normal;
 }
 
 .gdi-form-table-fixed .form-control,

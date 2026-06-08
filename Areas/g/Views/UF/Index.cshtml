@@ -163,7 +163,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGUF = $('#dtGUF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+            otableGUF = $('#dtGUF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) {
                 if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 else if (json && json.yesFilterOnOff !== undefined) {
                     jsAtualizarIndicadorFiltroUf(json.yesFilterOnOff);
@@ -188,7 +189,10 @@
                         yesCustomField02: emptyIfNull($('#edit_sigla').val()).toString()
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) {
+                    LibMessageProcessandoHide();
+                    GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

@@ -1,6 +1,21 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalPedidoSeparacao .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divPedidoSeparacaoDt {
+        min-width: 0;
+    }
+
+    #divPedidoSeparacaoDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoSeparacao" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -111,7 +126,7 @@
                                 {
                                     <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0" style="height:100%;">
                                         <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>Itens do Pedido</div>
-                                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                        <div id="divPedidoSeparacaoDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
                                             <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtPedidoSeparacaoLotes">
                                                 <thead>
                                                     <tr>
@@ -234,7 +249,8 @@
             }
 
             $.fn.dataTable.ext.errMode = 'none';
-            OTablePedidoSeparacaoLotes = $tbl.off('error.dt.pedSepLot').off('xhr.dt.pedSepLot').on('error.dt.pedSepLot', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt.pedSepLot', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
+            OTablePedidoSeparacaoLotes = $tbl.off('error.dt.pedSepLot').off('xhr.dt.pedSepLot').on('error.dt.pedSepLot', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt.pedSepLot', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
                     initComplete: function ()
                     {
                         var api = this.api();
@@ -256,9 +272,17 @@
                                 yesCustomIdPK: '@Model.id_movimento',
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: false,
+                    drawCallback: function (settings) {
+                        try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                        var host = document.getElementById('divPedidoSeparacaoDt');
+                        if (host) { host.scrollLeft = 0; }
+                        var body = document.querySelector('#FormModalPedidoSeparacao .modal-body');
+                        if (body) { body.scrollLeft = 0; }
+                    },
                     bFilter: false,
                     bLengthChange: false,
                     bProcessing: true,

@@ -321,7 +321,8 @@
                                 yesFilterController: $('#yesFilterController').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
 
                     responsive: true,
@@ -351,7 +352,10 @@
                         { "width": "8%", orderable: false, className: 'text-sm-end', targets: [12] },
                         { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [13], data: null, defaultContent: "",
                             render: function (data, type, row, meta) {
-                                return '<button type="button" name="btnGCIndexPedidoAnexos" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos da Cotação/Pedido Nº ' + data[1] + '" class="btn btn-outline-info btn-sm p-1 btnGCIndexPedidoAnexos d-inline-flex align-items-center" onclick="jsGCIndexPedidoAnexos(' + data[1] + ');"><i class="fa-solid fa-paperclip"></i></button>';
+                                if (type !== 'display') { return ''; }
+                                var idMov = (row || data)[1];
+                                if (idMov == null || idMov === '') { return ''; }
+                                return '<button type="button" name="btnGCIndexPedidoAnexos" data-id-mov="' + idMov + '" data-bs-toggle="tooltip" data-bs-placement="top" title="Anexos da Cotação/Pedido Nº ' + idMov + '" class="btn btn-outline-info btn-sm p-1 btnGCIndexPedidoAnexos d-inline-flex align-items-center"><i class="fa-solid fa-paperclip"></i></button>';
                             }
                         },
                         { "width": "3%", orderable: false, className: 'text-sm-center dt-no-row-select', targets: [14], data: null, defaultContent: "",
@@ -377,7 +381,19 @@
                     }
                 });
 
-            $('#dataTableGCIndexPedido tbody').on('dblclick', 'tr td', function () {
+            $('#dataTableGCIndexPedido tbody').off('click.gdiAnexos', '.btnGCIndexPedidoAnexos').on('click.gdiAnexos', '.btnGCIndexPedidoAnexos', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var id = $(this).attr('data-id-mov');
+                if (!id) {
+                    var rowData = otableGCIndexPedido.row($(this).closest('tr')).data();
+                    if (!rowData) { return; }
+                    id = rowData[1];
+                }
+                jsGCIndexPedidoAnexos(id);
+            });
+
+            $('#dataTableGCIndexPedido tbody').on('dblclick', 'tr td:not(.dt-no-row-select)', function () {
                 var data = otableGCIndexPedido.row($(this).closest('tr')).data();
                 jsGCIndexPedidoEditRow(data[1]);
             });
@@ -401,12 +417,30 @@
     {
         try
         {
-                LibMessageProcessando("");
-                $("#mainModal").load('@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { Area = "gc" })?id=' + id, function () {
-                    var e=document.getElementById('mainModal');if(e){bootstrap.Modal.getOrCreateInstance(e).show();}
-                })
+            id = String(id == null ? '' : id).trim();
+            if (!id || id === 'undefined' || id === 'null') {
+                LibMessageAlert("Atenção", "Identificador da Cotação/Pedido/OS inválido.");
+                return;
+            }
+            var url = '@Url.Action("ModalPedidoViewAnexos", "Movimentos", new { area = "gc" })?id=' + encodeURIComponent(id);
+            LibMessageProcessando("");
+            $("#mainModal").load(url, function (_html, status) {
+                LibMessageProcessandoHide();
+                LibMessageProcessandoHide();
+                if (status === 'error') {
+                    return;
+                }
+                if (typeof GdiMainModalShow === 'function') {
+                    GdiMainModalShow();
+                } else {
+                    var e = document.getElementById('mainModal');
+                    if (e) { bootstrap.Modal.getOrCreateInstance(e).show(); }
+                }
+            });
         }
         catch (err) {
+            LibMessageProcessandoHide();
+            LibMessageProcessandoHide();
             LibMessageError("Atenção", "[jsGCIndexPedidoAnexos] " + (err && err.message ? err.message.toString() : String(err)));
         }
     }
@@ -506,9 +540,9 @@
                             }
                         },
                         error: function (xhr, textStatus, errorThrown) {
-                            LibMessageProcessandoHide();
-                            GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-                        }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
                     })
                 }
                 else

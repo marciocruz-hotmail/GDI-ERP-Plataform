@@ -590,7 +590,8 @@
             $.fn.dataTable.ext.errMode = 'none';
             if (otableGcComexInvoices == null)
             {
-                otableGcComexInvoices = $('#dtGcComexInvoices').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); if (!json || !json.errorMessage || String(json.errorMessage).trim().length === 0) { var el1 = document.getElementById("label_total_cambio_debito"); var el2 = document.getElementById("label_total_itens"); if (el1 && json.yesDisplayField01 != null) el1.innerHTML = json.yesDisplayField01; if (el2 && json.yesDisplayField02 != null) el2.innerHTML = json.yesDisplayField02; } }).DataTable({
+                otableGcComexInvoices = $('#dtGcComexInvoices').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); if (!json || !json.errorMessage || String(json.errorMessage).trim().length === 0) { var el1 = document.getElementById("label_total_cambio_debito"); var el2 = document.getElementById("label_total_itens"); if (el1 && json.yesDisplayField01 != null) el1.innerHTML = json.yesDisplayField01; if (el2 && json.yesDisplayField02 != null) el2.innerHTML = json.yesDisplayField02; } }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -607,7 +608,8 @@
                                 yesCustomIdPK: $('#id_importacao').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,
@@ -685,7 +687,8 @@
             $.fn.dataTable.ext.errMode = 'none';
             if (otableGcComexItens == null)
             {
-                otableGcComexItens = $('#dtGcComexItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); jsDisplayFooterItensImportacao(json); }).DataTable({
+                otableGcComexItens = $('#dtGcComexItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); jsDisplayFooterItensImportacao(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -702,7 +705,8 @@
                                 yesCustomIdPK: $('#id_importacao').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,
@@ -772,7 +776,8 @@
             $.fn.dataTable.ext.errMode = 'none';
             if (otableGcComexGed == null)
             {
-                otableGcComexGed = $('#dtGedComexArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableGcComexGed = $('#dtGedComexArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -789,7 +794,8 @@
                                 yesCustomIdPK: $('#id_importacao').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,
@@ -865,7 +871,8 @@
             $.fn.dataTable.ext.errMode = 'none';
             if (otableGcComexInvoicesPDF == null)
             {
-                otableGcComexInvoicesPDF = $('#dtGedComexInvoicesPDF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableGcComexInvoicesPDF = $('#dtGedComexInvoicesPDF').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -882,7 +889,8 @@
                                 yesCustomIdPK: $('#id_importacao').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,
@@ -949,7 +957,8 @@
             $.fn.dataTable.ext.errMode = 'none';
             if (otableGcComexAudit == null)
             {
-                otableGcComexAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableGcComexAudit = $('#dtAudit').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -967,7 +976,8 @@
                                 yesCustomField01: "gc_comex_importacoes",
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     bFilter: false,
@@ -1212,7 +1222,7 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
 </script>

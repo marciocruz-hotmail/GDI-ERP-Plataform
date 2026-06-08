@@ -77,7 +77,7 @@
         }
         catch (err) {
             LibMessageError("Atenção", "[jsCheckInputs] " + (err && err.message ? err.message.toString() : String(err)));
-        }
+                }
     }
 
     function jsSendForm()
@@ -118,10 +118,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

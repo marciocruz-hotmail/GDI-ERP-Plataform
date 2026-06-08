@@ -186,7 +186,8 @@
             $.fn.dataTable.ext.errMode = 'none';
             otableGCIndexPedido = $('#dataTableGCIndexPedido')
                 .css("font-size", 16)
-                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                     if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroPainelPedidos(json.yesFilterOnOff); }
@@ -222,7 +223,8 @@
                         yesFilterController: $('#yesFilterController').val().toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

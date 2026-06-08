@@ -1,6 +1,25 @@
 @model GdiPlataform.Db.gc_financeiro_lancamentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+@{
+    var msgBloqueio = ViewBag.MsgBloqueio as string;
+    var podeExibirGed = string.IsNullOrEmpty(msgBloqueio) && Model != null && Model.id_lancamento > 0;
+}
+<style>
+    #FormModalFinanceiroViewAnexos .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divDocsFinanceiroAnexos {
+        min-width: 0;
+    }
+
+    #divDocsFinanceiroAnexos .gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalFinanceiroViewAnexos" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -13,36 +32,30 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="modal-body m-0 p-0">
-                <div class="form-horizontal m-0 p-0">
-                    <div class="card-body m-0 p-0" style="height: 100%">
-                        @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(ViewBag.MsgBloqueio as string, "danger"))
-                        @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
-                        {
-                        <div class="table-responsive scroll-body-horizontal m-0 p-0" style="width:100%">
-                            <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
-                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtModalFinanceiroViewAnexos">
-                                        <thead>
-                                            <tr>
-                                                <th>@Html.Raw("Id.")</th>
-                                                <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
-                                                <th>@Html.Raw("Tipo")</th>
-                                                <th>@Html.Raw("Descrição")</th>
-                                                <th>@Html.Raw("Arquivo")</th>
-                                                <th>@Html.Raw("Data")</th>
-                                                <th>@Html.Raw("Usuário")</th>
-                                                <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        }
+            <div class="modal-body m-0 p-1 min-w-0">
+                @Html.Partial("_AlertMsg", AlertMsgItem.Maybe(msgBloqueio, "danger"))
+                @if (podeExibirGed)
+                {
+                <div id="divDocsFinanceiroAnexos" class="card shadow-sm gdi-section-accent-secondary m-0 p-0 min-w-0">
+                    <div class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtModalFinanceiroViewAnexos">
+                            <thead>
+                                <tr>
+                                    <th>@Html.Raw("Id.")</th>
+                                    <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                    <th>@Html.Raw("Tipo")</th>
+                                    <th>@Html.Raw("Descrição")</th>
+                                    <th>@Html.Raw("Arquivo")</th>
+                                    <th>@Html.Raw("Data")</th>
+                                    <th>@Html.Raw("Usuário")</th>
+                                    <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
+                }
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
                 <button type="button" name="btnCancelar" class="btn btn-warning me-auto d-inline-flex align-items-center gap-2" data-bs-dismiss="modal"><i class="fa fa-undo me-2" aria-hidden="true"></i>Cancelar</button>
@@ -61,11 +74,11 @@
         try
         {
             jsInitModal();
-            @if (string.IsNullOrEmpty(ViewBag.MsgBloqueio as string))
+            @if (podeExibirGed)
             {
             <text>CreateTableModalFinanceiroViewAnexos();</text>
             }
-            getValidationSummary(@Html.Raw(Json.Encode(((@Html.ValidationSummary()==null)?"":@Html.ValidationSummary().ToHtmlString()))));
+            getValidationSummary(@Html.Raw(Json.Encode("")));
         }
         catch (err) {
             LibMessageError("Atenção", "[jsInitForm]" + (err && err.message ? err.message.toString() : String(err)));
@@ -76,7 +89,8 @@
     {
         try
         {
-            oTableModalFinanceiroViewAnexos = $('#dtModalFinanceiroViewAnexos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            oTableModalFinanceiroViewAnexos = $('#dtModalFinanceiroViewAnexos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -93,9 +107,18 @@
                             yesCustomIdPK: $('#id_lancamento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
+                drawCallback: function (settings) {
+                    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.querySelector('#divDocsFinanceiroAnexos .gdi-dt-scroll-host');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalFinanceiroViewAnexos .modal-body');
+                    if (body) { body.scrollLeft = 0; }
+                },
                 bFilter: false,
                 bLengthChange: false,
                 bProcessing: true,
@@ -192,17 +215,17 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
     function jsDesativarAnexo(id)
     {
         GdiAjaxNotifyInconsistencias("Operação não permitida");
-    }
+                }
 
     function jsAjaxDesativarAnexo(id)
     {
         GdiAjaxNotifyInconsistencias("Operação não permitida");
-    };
+                };
 
 </script>

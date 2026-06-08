@@ -68,7 +68,7 @@
             if (isEmpty($('#cambio_debito').val().toString().trim()))
             {
                 GdiAjaxNotifyInconsistencias("Informe o valor do <b>Câmbio Débito</b>!");
-            }
+                }
             else
             {
                 var cambioConvertido = jsFormatMoedaReal($('#cambio_debito').val().toString().trim());
@@ -139,10 +139,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

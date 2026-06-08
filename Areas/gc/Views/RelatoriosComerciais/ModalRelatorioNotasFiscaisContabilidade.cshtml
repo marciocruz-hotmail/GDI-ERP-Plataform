@@ -73,7 +73,7 @@
         }
         catch (exception) {
             GdiAjaxNotifyInconsistencias(exception.message);
-        }
+                }
     }
 
     function jsSendForm()
@@ -108,9 +108,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

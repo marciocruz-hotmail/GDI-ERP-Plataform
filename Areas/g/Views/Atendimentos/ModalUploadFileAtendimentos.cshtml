@@ -76,10 +76,10 @@
         try {
             if (isEmpty($('#customFile').val().toString().trim())) {
                 GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
-            }
+                }
             else if ($('#id_arquivo_tipo').val().toString().trim() == "0") {
                 GdiAjaxNotifyInconsistencias("Selecione o Tipo do Anexo!");
-            }
+                }
             else {
                 jsSendForm();
             }
@@ -131,12 +131,12 @@
                     else
                     {
                         GdiAjaxNotifyInconsistencias(result.msg, { title: "Erro no Upload - Verifique as inconsistências" });
-                    }
+                }
                 },
                 error: function (jqXHR, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
-                    var details =
+var details =
                         "Status: " + jqXHR.status + "\n" +
                         "textStatus: " + textStatus + "\n" +
                         "errorThrown: " + errorThrown + "\n\n" +

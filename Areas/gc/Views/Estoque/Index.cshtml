@@ -91,7 +91,8 @@
         {
             $.fn.dataTable.ext.errMode = 'none';
             oTableEstoque = $('#dtEstoque')
-                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                 .on('xhr.dt', function (e, settings, json, xhr)
                 {
                     document.getElementById("label_Valor_estoque_bh").innerHTML = json.yesDisplayField01;
@@ -125,7 +126,8 @@
                         yesCustomField01: emptyIfNull($('#id_produto_servico').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,
@@ -297,9 +299,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsFinanceiroInfo] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -335,9 +339,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

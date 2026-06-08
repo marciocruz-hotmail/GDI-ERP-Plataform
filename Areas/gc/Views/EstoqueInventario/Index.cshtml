@@ -101,7 +101,8 @@
         {
             $.fn.dataTable.ext.errMode = 'none';
             TableGcInventario = $('#dtGcInventario')
-                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                 .on('xhr.dt', function (e, settings, json, xhr) {
                     if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                     if (json && json.yesFilterOnOff !== undefined) {
@@ -132,7 +133,8 @@
                         yesCustomField01: emptyIfNull($('#id_local_estoque').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
 
             responsive: true,
@@ -354,9 +356,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

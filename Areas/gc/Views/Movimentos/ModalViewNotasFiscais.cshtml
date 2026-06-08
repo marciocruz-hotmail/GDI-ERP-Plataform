@@ -1,6 +1,17 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalViewNotasFiscais .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divNotasFiscaisDt {
+        min-width: 0;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewNotasFiscais" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -15,13 +26,13 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="modal-body m-0 p-0">
+            <div class="modal-body m-0 p-1 min-w-0">
                 <div class="form-horizontal m-0 p-0">
                     @if (Model.id_movimento > 0)
                     {
-                        <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                            <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTableGCViewNotasFiscais">
+                    <div id="divNotasFiscaisDt" class="gdi-dt-scroll-host min-w-0">
+                        <div class="table-responsive scroll-body-horizontal" style="width:100%">
+                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTableGCViewNotasFiscais">
                                     <thead>
                                         <tr>
                                             <th>[x]</th>
@@ -60,8 +71,8 @@
                                     </tfoot>
                                     <tbody></tbody>
                                 </table>
-                            </div>
                         </div>
+                    </div>
                     }
                 </div>
             </div>
@@ -103,10 +114,13 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableNotaFiscalPedido = $('#dataTableGCViewNotasFiscais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otableNotaFiscalPedido = $('#dataTableGCViewNotasFiscais').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                     try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var body = document.querySelector('#FormModalViewNotasFiscais .modal-body');
+                    if (body) { body.scrollLeft = 0; }
                 },
                 processing: true,
                 bServerSide: true,
@@ -124,7 +138,8 @@
                             yesCustomField01: '@Model.id_movimento',
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -235,8 +250,9 @@
             },
             error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
         });
     };
 
@@ -270,8 +286,9 @@
             },
             error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
         });
     };
 
@@ -310,8 +327,9 @@
             },
             error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
         });
     };
 
@@ -581,8 +599,9 @@
             },
             error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
         });
     };
 

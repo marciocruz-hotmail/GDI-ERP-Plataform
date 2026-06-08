@@ -218,12 +218,12 @@
                         else
                         {
                             GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                        }
+                }
                     },
                     error: function (xhr, textStatus, errorThrown)
                     {
                         GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
-                    }
+                }
                 });
             }
         }
@@ -264,10 +264,11 @@
                     {
                         document.getElementById('btnSalvar').disabled = false;
                         GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                    }
+                }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }

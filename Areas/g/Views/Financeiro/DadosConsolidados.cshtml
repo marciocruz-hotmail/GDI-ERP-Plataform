@@ -76,7 +76,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            oTableGClientesDadosConsolidados = $('#dtGClientesDadosConsolidados').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            oTableGClientesDadosConsolidados = $('#dtGClientesDadosConsolidados').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
             processing: true,
             bServerSide: true,
             ajax: {
@@ -92,7 +93,8 @@
                         iDisplayLength: d.length,
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

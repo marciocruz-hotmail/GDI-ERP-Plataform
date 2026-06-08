@@ -108,7 +108,8 @@
                 $.fn.dataTable.ext.errMode = 'none';
                 oTableMovimentosEntrada = $('#dtGcMovimentosIndexEntrada')
                     .css("font-size", 16)
-                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                     .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; }).DataTable({
                     "drawCallback": function (settings) {
                         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
@@ -129,7 +130,8 @@
                             yesFilterField: $('#yesFilterField').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -480,7 +482,7 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
     function jsModalPedidoTransferirFilial(TableName, columnName)

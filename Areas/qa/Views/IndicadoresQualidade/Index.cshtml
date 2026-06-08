@@ -121,7 +121,7 @@
             error: function (xhr, textStatus, errorThrown) {
                 $('#pvSpinner').hide();
                 GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao carregar indicadores de Pós-Venda.', { title: 'Indicadores Pós-Venda' });
-            }
+                }
         });
     }
 </script>

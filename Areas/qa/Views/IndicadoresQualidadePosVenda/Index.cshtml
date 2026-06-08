@@ -202,7 +202,7 @@
             error: function (xhr, textStatus, errorThrown) {
                 $('#rowKpisNota, #rowKpisConf, #rowKpisNc').html('');
                 GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao carregar os KPIs.', { title: 'KPIs Pós-Venda' });
-            }
+                }
         });
     }
 
@@ -256,7 +256,7 @@
             error: function (xhr, textStatus, errorThrown) {
                 $('#tblTendenciaWrapper').html('<div class="text-center text-muted py-2">Falha ao carregar tendência.</div>');
                 GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha ao carregar tendência.', { title: 'Tendência' });
-            }
+                }
         });
     }
 
@@ -266,7 +266,8 @@
         try {
             $.fn.dataTable.ext.errMode = 'none';
             oDtPosVenda = $('#dtPosVenda')
-                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                 .on('xhr.dt',   function (e, settings, json, xhr)         { GdiDtNotifyJsonErrorMessage(json); })
                 .DataTable({
                     processing:   true,
@@ -288,7 +289,8 @@
                                 yesCustomField04: $('#selResultado').val()
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive:      true,
                     bFilter:         false,

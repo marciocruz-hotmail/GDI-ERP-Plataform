@@ -11,7 +11,15 @@
     #ModalCreateEditLancamento .modal-body {
         overflow-y: auto; /* scroll manual */
         max-height: calc(100vh - 170px); /* ajuste fino: header+footer */
-        overflow-x: visible; /* ajuda com componentes horizontais */
+        overflow-x: hidden;
+    }
+
+    #divLancamentoGedDt {
+        min-width: 0;
+    }
+
+    #divLancamentoGedDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
     }
 </style>
 
@@ -257,27 +265,25 @@
 
                                     <!-- Aba GED - INÍCIO -->
                                     <div class="tab-pane fade" id="tabGED" role="tabpanel" aria-labelledby="tabGED_tab">
-                                        <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                                            <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
-                                                <div class="card-header m-0 mb-1 p-0" style="height:100%; text-align:right ">
-                                                    <button type="button" name="btnUploadAnexoFinanceiro" title="Anexar Documentos" class="btn btn-info btn-sm d-inline-flex align-items-center gap-2" onclick="jsModalUploadAnexoFinanceiro()"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Incluir Anexos</button>
-                                                </div>
-                                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                                                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGedGcLancamentos">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>@Html.Raw("Id.")</th>
-                                                                <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
-                                                                <th>@Html.Raw("Descrição")</th>
-                                                                <th>@Html.Raw("Arquivo")</th>
-                                                                <th>@Html.Raw("Data")</th>
-                                                                <th>@Html.Raw("Usuário")</th>
-                                                                <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody></tbody>
-                                                    </table>
-                                                </div>
+                                        <div class="card shadow-sm gdi-section-accent-secondary m-1 p-0">
+                                            <div class="card-header m-0 mb-1 p-0" style="height:100%; text-align:right ">
+                                                <button type="button" name="btnUploadAnexoFinanceiro" title="Anexar Documentos" class="btn btn-info btn-sm d-inline-flex align-items-center gap-2" onclick="jsModalUploadAnexoFinanceiro()"><i class="fa-solid fa-paperclip me-2" aria-hidden="true"></i>Incluir Anexos</button>
+                                            </div>
+                                            <div id="divLancamentoGedDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGedGcLancamentos">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>@Html.Raw("Id.")</th>
+                                                            <th><i class="fa-solid fa-power-off" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Desativar Anexo"></i></th>
+                                                            <th>@Html.Raw("Descrição")</th>
+                                                            <th>@Html.Raw("Arquivo")</th>
+                                                            <th>@Html.Raw("Data")</th>
+                                                            <th>@Html.Raw("Usuário")</th>
+                                                            <th><i class="fa-regular fa-file-lines" style="cursor:pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Visualizar Anexo"></i></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -358,11 +364,12 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxCreateEditLancamento] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -393,10 +400,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxLiquidarLancamento] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -408,7 +416,8 @@
         {
             if (otableGedGcLancamentos == null) {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableGedGcLancamentos = $('#dtGedGcLancamentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableGedGcLancamentos = $('#dtGedGcLancamentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -425,9 +434,17 @@
                                 yesCustomIdPK: $('#id_lancamento').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
+                    drawCallback: function (settings) {
+                        try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                        var host = document.getElementById('divLancamentoGedDt');
+                        if (host) { host.scrollLeft = 0; }
+                        var body = document.querySelector('#ModalCreateEditLancamento .modal-body');
+                        if (body) { body.scrollLeft = 0; }
+                    },
                     bFilter: false,
                     bLengthChange: false,
                     bProcessing: true,
@@ -542,7 +559,7 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
     function jsDesativarAnexo(id)
@@ -588,10 +605,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxRemoverAnexo] " + (err && err.message ? err.message.toString() : String(err)));
         }

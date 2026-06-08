@@ -238,11 +238,12 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -275,9 +276,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsFinanceiroInfo] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -304,9 +307,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsFinanceiroBoleto] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -361,9 +366,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsFinanceiroCancelamentoExecutar] " + (err && err.message ? err.message.toString() : String(err)));
         }

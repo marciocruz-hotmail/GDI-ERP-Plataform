@@ -66,7 +66,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            TableRecebimentoEstoque = $('#dtGcRecebimentoEstoque').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            TableRecebimentoEstoque = $('#dtGcRecebimentoEstoque').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
                 },
@@ -92,7 +93,8 @@
                         yesCustomField02: emptyIfNull($('#tag_string').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
 
             responsive: true,

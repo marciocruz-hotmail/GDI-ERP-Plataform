@@ -121,7 +121,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroGed(json.yesFilterOnOff); } }).DataTable({
+            otableGedArquivos = $('#dataTableGedArquivos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroGed(json.yesFilterOnOff); } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) { bootstrap.Tooltip.getOrCreateInstance(el); });
                 },
@@ -156,7 +157,8 @@
                         yesFilterController: $('#yesFilterController').val().toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,
@@ -342,6 +344,6 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 </script>

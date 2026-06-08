@@ -5,6 +5,15 @@
     #FormModalCreateEditGcEstoqueControle .modal-body {
         overflow-y: auto;
         max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divEstoqueControleMedicoesDt {
+        min-width: 0;
+    }
+
+    #divEstoqueControleMedicoesDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
     }
 </style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGcEstoqueControle" }))
@@ -123,25 +132,21 @@
 
                         <!-- Aba Medição - INÍCIO -->
                         <div class="tab-pane fade" id="tabAfericao" role="tabpanel" aria-labelledby="tabAfericao_tab">
-                            <div class="card-body m-0 p-1" style="height: 100%">
-                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
-                                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtEstoqueControleMedicoes">
-                                            <thead>
-                                                <tr>
-                                                    <th>Id.</th>
-                                                    <th>Data/Hora</th>
-                                                    <th>Tensão</th>
-                                                    <th><i class="fa-solid fa-trash-alt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir"></i></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="card-body text-sm-center m-0 p-1">
-                                    <button type="button" name="btnCreateMedicao" onclick="jsModalCreateMedicao()" title="Registrar Medição/Aferição" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Registrar&nbspMedição/Aferição</button>
-                                </div>
+                            <div id="divEstoqueControleMedicoesDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                                <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtEstoqueControleMedicoes">
+                                    <thead>
+                                        <tr>
+                                            <th>Id.</th>
+                                            <th>Data/Hora</th>
+                                            <th>Tensão</th>
+                                            <th><i class="fa-solid fa-trash-alt" style="cursor: pointer" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir"></i></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="card-body text-sm-center m-0 p-1">
+                                <button type="button" name="btnCreateMedicao" onclick="jsModalCreateMedicao()" title="Registrar Medição/Aferição" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"><i class="fa fa-plus me-2" aria-hidden="true"></i>Registrar&nbspMedição/Aferição</button>
                             </div>
                         </div>
                         <!-- Aba Medição - FIM -->
@@ -236,7 +241,7 @@
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxSavePedido] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -249,7 +254,8 @@
             if (otableAfericoes == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                otableAfericoes = $('#dtEstoqueControleMedicoes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+                otableAfericoes = $('#dtEstoqueControleMedicoes').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                     processing: true,
                     bServerSide: true,
                     ajax: {
@@ -266,9 +272,17 @@
                                 yesCustomIdPK: $('#id_produto_controle').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
+                    drawCallback: function (settings) {
+                        try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                        var host = document.getElementById('divEstoqueControleMedicoesDt');
+                        if (host) { host.scrollLeft = 0; }
+                        var body = document.querySelector('#FormModalCreateEditGcEstoqueControle .modal-body');
+                        if (body) { body.scrollLeft = 0; }
+                    },
                     bFilter: false,
                     bLengthChange: false,
                     bProcessing: true,
@@ -404,10 +418,11 @@
             },
             error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
             }
         });
-    };
+                };
 
 
 </script>

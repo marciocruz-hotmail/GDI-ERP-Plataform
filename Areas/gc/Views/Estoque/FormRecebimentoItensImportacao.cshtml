@@ -85,7 +85,8 @@
         {
             $.fn.dataTable.ext.errMode = 'none';
             TableRecebimentoImportacao = $('#dtGcRecebimentoImportacao')
-                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                 .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroRecebimentoItens(json.yesFilterOnOff); } })
                 .DataTable({
                 "drawCallback": function (settings) {
@@ -113,7 +114,8 @@
                         yesCustomField02: emptyIfNull($('#tag_string').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
 
             responsive: true,

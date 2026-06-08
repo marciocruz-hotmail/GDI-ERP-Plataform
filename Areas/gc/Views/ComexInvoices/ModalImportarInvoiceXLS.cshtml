@@ -61,7 +61,7 @@
             if (isEmpty($('#customFile').val().toString().trim()))
             {
                 GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
-            }
+                }
             else {
                 jsSendForm();
             }
@@ -118,10 +118,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -131,7 +132,7 @@
         try {
             if (isEmpty($('#customFile').val().toString().trim())) {
                 GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
-            }
+                }
             else {
                 jsReprocessarPlanilha();
             }
@@ -187,10 +188,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

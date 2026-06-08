@@ -1,6 +1,21 @@
 @model GdiPlataform.Db.gc_financeiro_lancamentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalViewFinanceiroMovimentos .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divFinanceiroMovimentosDt {
+        min-width: 0;
+    }
+
+    #divFinanceiroMovimentosDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalViewFinanceiroMovimentos" }))
 {
     <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -15,12 +30,11 @@
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true)
                 </div>
-                <div class="modal-body m-0 p-0">
+                <div class="modal-body m-0 p-0 min-w-0">
                     <div class="form-horizontal m-0 p-0">
-                        <div class="card-body m-0 p-0" style="max-width: 100%; overflow-x: auto; ">
                             @if (Model.id_movimento > 0)
                             {
-                                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                <div id="divFinanceiroMovimentosDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
                                     <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtGcFinanceiroLancamentosModalViewFinanceiroMovimentos">
                                         <thead>
                                             <tr>
@@ -54,7 +68,6 @@
                                     </table>
                                 </div>
                             }
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between m-0 p-1">
@@ -86,9 +99,15 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            OtableGcFinanceiroLancamentosModalViewFinanceiroMovimentos = $('#DtGcFinanceiroLancamentosModalViewFinanceiroMovimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+            OtableGcFinanceiroLancamentosModalViewFinanceiroMovimentos = $('#DtGcFinanceiroLancamentosModalViewFinanceiroMovimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.getElementById('divFinanceiroMovimentosDt');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalViewFinanceiroMovimentos .modal-body');
+                    if (body) { body.scrollLeft = 0; }
                 },
                 "footerCallback": function (row, data, start, end, display) {
                     var api = this.api(), data;
@@ -117,7 +136,8 @@
                         yesCustomField01: "",
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,
@@ -261,9 +281,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
-                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')            }
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
+                }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsFinanceiroLancamentoBoleto] " + (err && err.message ? err.message.toString() : String(err)));
         }

@@ -173,7 +173,8 @@
         {
             var form = $('#FormIndexGAtendimentos');
             $.fn.dataTable.ext.errMode = 'none';
-            TableAtendimentos = $('#dtGAtendimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroAtendimentos(json.yesFilterOnOff); } }).DataTable({
+            TableAtendimentos = $('#dtGAtendimentos').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroAtendimentos(json.yesFilterOnOff); } }).DataTable({
                 "footerCallback": function (row, data, start, end, display)
                 {
                     LibMessageProcessandoHide();
@@ -201,7 +202,8 @@
                         yesCustomField05: emptyIfNull($('#responsavel_id_usuario').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

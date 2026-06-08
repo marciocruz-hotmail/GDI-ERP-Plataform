@@ -49,7 +49,7 @@
         try {
             if (isEmpty($('#customFile').val().toString().trim())) {
                 GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
-            }
+                }
             else {
                 sendForm();
             }
@@ -108,10 +108,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[sendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

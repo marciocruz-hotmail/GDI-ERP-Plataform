@@ -78,7 +78,8 @@
             {
                 $.fn.dataTable.ext.errMode = 'none';
                 oTableRecebimentoEstoque = $('#dtGcMovimentosIndexRecebimentoEstoque')
-                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                     .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; }; }).DataTable({ 
                     "drawCallback": function (settings) {
                         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
@@ -99,7 +100,8 @@
                             yesFilterField: $('#yesFilterField').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -221,10 +223,11 @@
             },
             error: function (xhr, textStatus, errorThrown)
             {
-                GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
             }
         });
-    };
+                };
 
     function jsDownloadFileS3(id)
     {
@@ -262,8 +265,8 @@
                         }
                     },
                     error: function (xhr, textStatus, errorThrown) {
-                        LibMessageProcessandoHide();
-                        GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                     }
                 })
             }
@@ -271,7 +274,7 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
     function jsFormRecebimentoItensEstoque(id)
@@ -334,7 +337,9 @@
                         },
                         error: function (xhr, textStatus, errorThrown)
                         {
-                        }
+                            LibMessageProcessandoHide();
+                            GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Falha na comunicação com o servidor.');
+                }
                     });
                 }
                 else

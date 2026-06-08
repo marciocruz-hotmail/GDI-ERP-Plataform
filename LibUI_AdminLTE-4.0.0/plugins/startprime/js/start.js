@@ -1583,8 +1583,35 @@ function GdiAjaxAntiForgeryHeaders(container) {
         return names;
     }
 
+    function gdiHostPageScriptFlags() {
+        var body = document.body;
+        if (!body) {
+            return 0;
+        }
+        var attr = body.getAttribute('data-gdi-page-scripts');
+        if (!attr) {
+            return 0;
+        }
+        var n = parseInt(attr, 10);
+        return isNaN(n) ? 0 : n;
+    }
+
+    function gdiHostPageHasFlag(flagBit) {
+        return (gdiHostPageScriptFlags() & flagBit) === flagBit;
+    }
+
+    function gdiHasDataTablesRelaxed() {
+        if (typeof jQuery === 'undefined' || !jQuery.fn) {
+            return false;
+        }
+        return typeof jQuery.fn.dataTable === 'function' || typeof jQuery.fn.DataTable === 'function';
+    }
+
     function gdiHasDataTables() {
-        return typeof jQuery !== 'undefined' && jQuery.fn && typeof jQuery.fn.DataTable === 'function';
+        if (!gdiHasDataTablesRelaxed()) {
+            return false;
+        }
+        return typeof window.DataTable !== 'undefined';
     }
 
     function gdiHasSelect2() {
@@ -1598,8 +1625,16 @@ function GdiAjaxAntiForgeryHeaders(container) {
 
     function gdiRuntimeMissingFlags(needed) {
         var missing = 0;
-        if ((needed & FLAG.dataTables) && !gdiHasDataTables()) { missing |= FLAG.dataTables; }
-        if ((needed & FLAG.select2) && !gdiHasSelect2()) { missing |= FLAG.select2; }
+        if ((needed & FLAG.dataTables) && !gdiHasDataTables()) {
+            if (!(gdiHostPageHasFlag(FLAG.dataTables) && gdiScriptTagPresent('datatables') && gdiHasDataTablesRelaxed())) {
+                missing |= FLAG.dataTables;
+            }
+        }
+        if ((needed & FLAG.select2) && !gdiHasSelect2()) {
+            if (!(gdiHostPageHasFlag(FLAG.select2) && gdiScriptTagPresent('select2') && gdiHasSelect2())) {
+                missing |= FLAG.select2;
+            }
+        }
         if ((needed & FLAG.tempusDominus) && !gdiHasTempus()) { missing |= FLAG.tempusDominus; }
         if ((needed & FLAG.jstree) && !gdiHasWunderbaum()) { missing |= FLAG.jstree; }
         return missing;
@@ -1776,28 +1811,84 @@ function GdiAjaxAntiForgeryHeaders(container) {
         }, 50);
     }
 
-    /** Evita lazy-load duplicado quando a view host já incluiu Tempus (defer). */
+    /** Libera overlay processando (contador waitingDialog pode estar > 1). */
+    function gdiMainModalReleaseProcessando() {
+        if (typeof LibMessageProcessandoHide !== 'function') {
+            return;
+        }
+        try { LibMessageProcessandoHide(); } catch (e1) { }
+        try { LibMessageProcessandoHide(); } catch (e2) { }
+    }
+
+    /** Evita lazy-load duplicado quando a view host já incluiu libs defer (DT, Select2, Tempus). */
     function gdiEnsureScriptFlagsForModal(needed, done) {
-        var missing = gdiRuntimeMissingFlags(needed);
-        if (!missing) {
+        function finish(err) {
             if (typeof done === 'function') {
-                done();
+                done(err || null);
             }
-            return;
         }
-        var waitHostTempus = (missing & FLAG.tempusDominus) && gdiScriptTagPresent('tempus-dominus');
-        if (!waitHostTempus) {
-            window.GdiEnsureScriptFlags(missing, done);
-            return;
-        }
-        gdiWaitForLibrary(gdiHasTempus, function (waitErr) {
-            if (waitErr) {
-                window.GdiEnsureScriptFlags(missing, done);
+
+        function ensureRemaining(flagsNeeded) {
+            var still = gdiRuntimeMissingFlags(flagsNeeded);
+            if (!still) {
+                finish();
                 return;
             }
-            var still = gdiRuntimeMissingFlags(needed);
-            window.GdiEnsureScriptFlags(still, done);
-        });
+            window.GdiEnsureScriptFlags(still, finish);
+        }
+
+        function waitHostLib(isReady, onDone) {
+            gdiWaitForLibrary(isReady, function (waitErr) {
+                if (!waitErr && !gdiRuntimeMissingFlags(needed)) {
+                    finish();
+                    return;
+                }
+                onDone(waitErr);
+            });
+        }
+
+        var missing = gdiRuntimeMissingFlags(needed);
+        if (!missing) {
+            finish();
+            return;
+        }
+
+        if ((missing & FLAG.dataTables) && gdiScriptTagPresent('datatables') && !gdiHasDataTables()) {
+            waitHostLib(function () {
+                return gdiHasDataTables() || (gdiHostPageHasFlag(FLAG.dataTables) && gdiHasDataTablesRelaxed());
+            }, function (waitErr) {
+                if (waitErr && !gdiHasDataTablesRelaxed()) {
+                    finish(waitErr);
+                    return;
+                }
+                ensureRemaining(needed);
+            });
+            return;
+        }
+
+        if ((missing & FLAG.select2) && gdiScriptTagPresent('select2') && !gdiHasSelect2()) {
+            waitHostLib(gdiHasSelect2, function (waitErr) {
+                if (waitErr && !gdiHasSelect2()) {
+                    finish(waitErr);
+                    return;
+                }
+                ensureRemaining(needed);
+            });
+            return;
+        }
+
+        if ((missing & FLAG.tempusDominus) && gdiScriptTagPresent('tempus-dominus')) {
+            waitHostLib(gdiHasTempus, function (waitErr) {
+                if (waitErr) {
+                    ensureRemaining(missing);
+                    return;
+                }
+                ensureRemaining(needed);
+            });
+            return;
+        }
+
+        window.GdiEnsureScriptFlags(missing, finish);
     }
 
     window.GdiLoadScriptOnce = function (src, done) {
@@ -2016,7 +2107,8 @@ function GdiAjaxAntiForgeryHeaders(container) {
             url: url,
             type: 'GET',
             dataType: 'text',
-            cache: false
+            cache: false,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         };
         if (data !== undefined && data !== null) {
             ajaxOpts.data = data;
@@ -2030,6 +2122,7 @@ function GdiAjaxAntiForgeryHeaders(container) {
                 var needed = window.GdiDetectScriptFlagsFromHtml(bodyHtml || html);
                 gdiEnsureScriptFlagsForModal(needed, function (err) {
                     if (err) {
+                        gdiMainModalReleaseProcessando();
                         if (typeof LibMessageError === 'function') {
                             LibMessageError('Atenção', '[GdiMainModalLoad] ' + (err.message || String(err)));
                         }
@@ -2044,8 +2137,12 @@ function GdiAjaxAntiForgeryHeaders(container) {
                 });
             })
             .fail(function (xhr, status, err) {
+                gdiMainModalReleaseProcessando();
                 if (typeof LibMessageError === 'function') {
-                    LibMessageError('Atenção', '[GdiMainModalLoad] ' + (err || status || 'Erro ao carregar modal.'));
+                    var urlHint = ajaxOpts.url || '';
+                    var httpInfo = (xhr && xhr.status) ? ('HTTP ' + xhr.status) : (status || 'error');
+                    var detail = err || (xhr && xhr.statusText) || status || 'Erro ao carregar modal.';
+                    LibMessageError('Atenção', '[GdiMainModalLoad] ' + httpInfo + (urlHint ? ' — ' + urlHint : '') + ' — ' + detail);
                 }
             });
         return $modal;

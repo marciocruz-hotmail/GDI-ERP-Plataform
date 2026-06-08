@@ -162,7 +162,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGcCfop = $('#dtGcCfop').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+            otableGcCfop = $('#dtGcCfop').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) {
                 if (GdiDtNotifyJsonErrorMessage(json)) { }
                 else if (json && json.yesFilterOnOff !== undefined) {
                     jsAtualizarIndicadorFiltroCfop(json.yesFilterOnOff);
@@ -187,7 +188,10 @@
                         yesCustomField02: emptyIfNull($('#edit_numero_cfop').val()).toString()
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) {
+                    LibMessageProcessandoHide();
+                    GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

@@ -1,6 +1,21 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalPedidosLogs .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divHistoricoMovimentoDt {
+        min-width: 0;
+    }
+
+    #divHistoricoMovimentoDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidosLogs" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -15,19 +30,15 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="modal-body m-0 p-0">
-                <div class="form-horizontal m-0 p-0">
-                    <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto;">
-                        <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                            <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTable-HistoricoMovimento">
-                                <thead>
-                                    <tr>
-                                        <th style="font-size:12px;">Histórico</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
+            <div class="modal-body m-0 p-1 min-w-0">
+                <div id="divHistoricoMovimentoDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dataTable-HistoricoMovimento">
+                        <thead>
+                            <tr>
+                                <th style="font-size:12px;">Histórico</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
@@ -60,7 +71,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            oTableHistoricoMovimento = $('#dataTable-HistoricoMovimento').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            oTableHistoricoMovimento = $('#dataTable-HistoricoMovimento').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
             processing: true,
             bServerSide: true,
             ajax: {
@@ -77,9 +89,17 @@
                         yesCustomIdPK: $('#id_movimento').val().toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
+            drawCallback: function (settings) {
+                try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                var host = document.getElementById('divHistoricoMovimentoDt');
+                if (host) { host.scrollLeft = 0; }
+                var body = document.querySelector('#FormModalPedidosLogs .modal-body');
+                if (body) { body.scrollLeft = 0; }
+            },
             bFilter: false,
             bLengthChange: false,
             bProcessing: true,

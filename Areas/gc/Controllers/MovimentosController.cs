@@ -4097,10 +4097,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                     MsgRetorno += String.Join("<br/>", ModelState.Values.SelectMany(v => v.Errors).Select(v => v.ErrorMessage));
                 }
 
-                // Conferido?
+                // Lotes: qtd exige lote; lote ativo do produto; conferido
                 if (QtdInconsistencias == 0)
                 {
                     var tipo = RecordPedidoSeparacaoLote.GetType();
+                    var idsLotesValidos = new HashSet<int>(
+                        db.gc_estoque_lotes
+                            .Where(l => l.ativo == true && l.id_produto == RecordMovimentoItem.id_produto)
+                            .Select(l => l.id_estoque_lote)
+                            .ToList());
 
                     for (int i = 1; i <= 50; i++)
                     {
@@ -4112,6 +4117,18 @@ namespace GdiPlataform.Areas.gc.Controllers
                         var idEstoqueLote = Convert.ToInt32(tipo.GetProperty(propId)?.GetValue(RecordPedidoSeparacaoLote) ?? 0);
                         var qtd = Convert.ToDecimal(tipo.GetProperty(propQtd)?.GetValue(RecordPedidoSeparacaoLote) ?? 0);
                         var conferido = Convert.ToBoolean(tipo.GetProperty(propConferido)?.GetValue(RecordPedidoSeparacaoLote) ?? false);
+
+                        if (qtd > 0 && idEstoqueLote == 0)
+                        {
+                            QtdInconsistencias += 1;
+                            MsgRetorno += $"Selecione o [Lote] para o slot {loteNum}<br/>";
+                        }
+
+                        if (idEstoqueLote > 0 && idsLotesValidos.Contains(idEstoqueLote) == false)
+                        {
+                            QtdInconsistencias += 1;
+                            MsgRetorno += $"Lote {loteNum} inválido ou inativo para o produto do item.<br/>";
+                        }
 
                         if (idEstoqueLote > 0 && (qtd == 0 || conferido == false))
                         {
@@ -4251,6 +4268,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                         Index += 1;
                         var tipo = ItemMovimento.GetType();
                         decimal somaLotes = 0;
+                        var idsLotesValidos = new HashSet<int>(
+                            db.gc_estoque_lotes
+                                .Where(l => l.ativo == true && l.id_produto == ItemMovimento.id_produto)
+                                .Select(l => l.id_estoque_lote)
+                                .ToList());
 
                         for (int i = 1; i <= 50; i++)
                         {
@@ -4262,6 +4284,18 @@ namespace GdiPlataform.Areas.gc.Controllers
                             var qtd = Convert.ToDecimal(tipo.GetProperty(propQtd)?.GetValue(ItemMovimento) ?? 0);
 
                             somaLotes += qtd;
+
+                            if (qtd > 0 && idEstoqueLote == 0)
+                            {
+                                QtdInconsistencias += 1;
+                                MsgRetorno += $"Selecione o [Lote] para o Item [{Index}] slot {loteNum}<br/>";
+                            }
+
+                            if (idEstoqueLote > 0 && idsLotesValidos.Contains(idEstoqueLote) == false)
+                            {
+                                QtdInconsistencias += 1;
+                                MsgRetorno += $"Lote {loteNum} inválido ou inativo para o Item [{Index}].<br/>";
+                            }
 
                             if (idEstoqueLote > 0 && qtd == 0)
                             {
@@ -4935,9 +4969,27 @@ namespace GdiPlataform.Areas.gc.Controllers
                 }
                 else
                 {
+                    record_gc_movimento = db.gc_movimentos.Find(viewrecord_gc_movimento_nf.id_movimento);
+                    if (record_gc_movimento == null)
+                    {
+                        MsgRetorno += " - Pedido não localizado!" + "<br/>";
+                        QtdErros += 1;
+                    }
+
+                    if (record_gc_cfop_operacao.has_nfe == false)
+                    {
+                        MsgRetorno += "<b> ---------- O TIPO DE PEDIDO [" + record_gc_cfop_operacao.descricao.EmptyIfNull().ToString().Trim() + "] NÃO POSSUI ATIVIDADE DE NOTA FISCAL ----------</b>" + "<br/>";
+                        QtdErros += 1;
+                    }
+                    else if (record_gc_movimento != null)
+                    {
+                        if ((record_gc_cfop_operacao.has_aprovacao == true) && (record_gc_movimento.movimento_aprovado == false)) { MsgRetorno += " - Pedido não foi APROVADO!<br/>"; QtdErros += 1; }
+                        if ((record_gc_cfop_operacao.has_separacao == true) && (record_gc_movimento.movimento_separado == false)) { MsgRetorno += " - Pedido não foi SEPARADO!<br/>"; QtdErros += 1; }
+                        if ((record_gc_cfop_operacao.has_financeiro == true) && (record_gc_movimento.movimento_faturado == false)) { MsgRetorno += " - Pedido não foi FATURADO!<br/>"; QtdErros += 1; }
+                    }
+
                     if (record_gc_cfop_operacao.has_financeiro == true)
                     {
-                        // Validações
                         int QtdLancamentosFinanceiros = LibDB.dbQueryCount("select count(*) from gc_financeiro_lancamentos where ativo = 1 and tipo_pag_rec = 2 and id_movimento = " + viewrecord_gc_movimento_nf.id_movimento.EmptyIfNull().ToString(), db);
                         if (QtdLancamentosFinanceiros == 0)
                         {
@@ -4975,33 +5027,45 @@ namespace GdiPlataform.Areas.gc.Controllers
                         }
                     }
 
-                    // Consistir Movimento
-                    record_gc_movimento = db.gc_movimentos.Find(viewrecord_gc_movimento_nf.id_movimento);
-                    if (record_gc_movimento == null)
+                    if (QtdErros == 0 && record_gc_movimento != null)
                     {
-                        MsgRetorno += " - Pedido não localizado!" + "<br/>";
-                        QtdErros += 1;
-                    }
-
-                    // Consistir CFOP Dentro/Fora UF
-                    int IdUfDestinatario = 0;
-                    if (viewrecord_gc_movimento_nf.id_cliente_destinatario > 0) { IdUfDestinatario = db.g_clientes_destinatarios.Find(viewrecord_gc_movimento_nf.id_cliente_destinatario).id_uf_com.GetValueOrDefault(); }
-                    else IdUfDestinatario = db.g_clientes.Find(record_gc_movimento.id_cliente).id_uf_com.GetValueOrDefault();
-                    if (IdUfDestinatario == 0)
-                    {
-                        MsgRetorno += " - UF do Destinatário NÃO localizada!" + "<br/>";
-                        QtdErros += 1;
+                        int IdUfDestinatario = 0;
+                        if (viewrecord_gc_movimento_nf.id_cliente_destinatario > 0)
+                        {
+                            g_clientes_destinatarios recordDestinatario = db.g_clientes_destinatarios.Find(viewrecord_gc_movimento_nf.id_cliente_destinatario);
+                            if (recordDestinatario == null)
+                            {
+                                MsgRetorno += " - Destinatário NÃO localizado!" + "<br/>";
+                                QtdErros += 1;
+                            }
+                            else { IdUfDestinatario = recordDestinatario.id_uf_com.GetValueOrDefault(); }
+                        }
+                        else
+                        {
+                            g_clientes recordCliente = db.g_clientes.Find(record_gc_movimento.id_cliente);
+                            if (recordCliente == null)
+                            {
+                                MsgRetorno += " - Cliente do pedido NÃO localizado!" + "<br/>";
+                                QtdErros += 1;
+                            }
+                            else { IdUfDestinatario = recordCliente.id_uf_com.GetValueOrDefault(); }
+                        }
+                        if (QtdErros == 0 && IdUfDestinatario == 0)
+                        {
+                            MsgRetorno += " - UF do Destinatário NÃO localizada!" + "<br/>";
+                            QtdErros += 1;
+                        }
                     }
                 }
                 if (QtdErros == 0)
                 {
-                    if (record_gc_movimento.id_movimento_tipo == 3) { record_gc_movimento.id_movimento_tipo = 4; } // Pedido
-                    record_gc_movimento.datahora_alteracao = DataHoraAtual;
-                    record_gc_movimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
-                    db.Entry(record_gc_movimento).State = EntityState.Modified;
-                    db.SaveChanges();
                     if (IdGateway == 1) // ENotas
                     {
+                        if (record_gc_movimento.id_movimento_tipo == 3) { record_gc_movimento.id_movimento_tipo = 4; } // Pedido
+                        record_gc_movimento.datahora_alteracao = DataHoraAtual;
+                        record_gc_movimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
+                        db.Entry(record_gc_movimento).State = EntityState.Modified;
+                        db.SaveChanges();
                         RoboEnotasNFE _RoboFaturarNFP = new RoboEnotasNFE();
                         bool okNf;
                         if (record_gc_cfop_operacao.is_servico == true)
@@ -5028,6 +5092,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                         {
                             MsgRetorno = "Falha na transmissão da nota fiscal. Verifique os logs da NF-e.";
                         }
+                    }
+                    else
+                    {
+                        MsgRetorno += " - Gateway de NF-e não habilitado para emissão!" + "<br/>";
                     }
                 }
             }
@@ -5675,7 +5743,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     if ((RecordCfopOperacao.has_entrega == true) && (RecordMovimento.movimento_entregue == true)) { MsgBloqueio += " - Pedido já foi ENTREGUE!<br/>"; }
                 }
 
-                if (MsgBloqueio.EmptyIfNull().ToString().Trim().Length == 0) 
+                if (MsgBloqueio.EmptyIfNull().ToString().Trim().Length == 0
+                    && RecordMovimento.movimento_expedido == false)
                 {
                     RecordMovimento.datahora_expedicao = DataHoraAtual;
                     RecordMovimento.datahora_entrega_previsao = DataHoraAtual.AddDays(5);
@@ -5751,18 +5820,25 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     if (view_record_gc_movimento.movimento_expedido == true)
                     {
+                        if (!view_record_gc_movimento.datahora_expedicao.HasValue
+                            || view_record_gc_movimento.datahora_expedicao.Value.Year <= 1900)
+                        {
+                            qtdInconsistencias += 1;
+                            MsgRetorno += "Campo [Dt. Expedição] é de preenchimento obrigatório!<br/>";
+                        }
+                        if (!view_record_gc_movimento.datahora_entrega_previsao.HasValue
+                            || view_record_gc_movimento.datahora_entrega_previsao.Value.Year <= 1900)
+                        {
+                            qtdInconsistencias += 1;
+                            MsgRetorno += "Campo [Dt. Previsão Entrega] é de preenchimento obrigatório!<br/>";
+                        }
+
                         if (qtdInconsistencias == 0)
                         {
                             record_gc_movimento.movimento_expedido = true;
                             record_gc_movimento.id_movimento_status = 2; // Fechado
-                            record_gc_movimento.datahora_expedicao = (view_record_gc_movimento.datahora_expedicao.HasValue
-                                && view_record_gc_movimento.datahora_expedicao.Value.Year > 1900)
-                                ? view_record_gc_movimento.datahora_expedicao
-                                : DataHoraAtual;
-                            record_gc_movimento.datahora_entrega_previsao = (view_record_gc_movimento.datahora_entrega_previsao.HasValue
-                                && view_record_gc_movimento.datahora_entrega_previsao.Value.Year > 1900)
-                                ? view_record_gc_movimento.datahora_entrega_previsao
-                                : DataHoraAtual.AddDays(5);
+                            record_gc_movimento.datahora_expedicao = view_record_gc_movimento.datahora_expedicao;
+                            record_gc_movimento.datahora_entrega_previsao = view_record_gc_movimento.datahora_entrega_previsao;
                             record_gc_movimento.obs_expedicao = view_record_gc_movimento.obs_expedicao;
                             record_gc_movimento.id_usuario_expedicao = CachePersister.userIdentity.IdUsuario;
 
@@ -5964,7 +6040,11 @@ namespace GdiPlataform.Areas.gc.Controllers
                     if ((RecordCfopOperacao.has_expedicao == true) && (RecordMovimento.movimento_expedido == false) ) { MsgBloqueio += " - Pedido NÃO foi EXPEDIDO!<br/>"; }
                 }
 
-                if (MsgBloqueio.EmptyIfNull().ToString().Length == 0) { RecordMovimento.datahora_entrega = DataHoraAtual; };
+                if (MsgBloqueio.EmptyIfNull().ToString().Trim().Length == 0
+                    && RecordMovimento.movimento_entregue == false)
+                {
+                    RecordMovimento.datahora_entrega = DataHoraAtual;
+                }
             }
             else
             {
@@ -6025,6 +6105,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                 {
                     if (view_record_gc_movimento.movimento_entregue == true)
                     {
+                        if (!view_record_gc_movimento.datahora_entrega.HasValue
+                            || view_record_gc_movimento.datahora_entrega.Value.Year <= 1900)
+                        {
+                            qtdInconsistencias += 1;
+                            MsgRetorno += "Campo [Dt. Entrega] é de preenchimento obrigatório!<br/>";
+                        }
+
+                        if (qtdInconsistencias == 0)
+                        {
                         record_gc_movimento.datahora_entrega = view_record_gc_movimento.datahora_entrega;
                         record_gc_movimento.nome_recebedor_entrega = view_record_gc_movimento.nome_recebedor_entrega;
                         record_gc_movimento.documento_recebedor_entrega = view_record_gc_movimento.documento_recebedor_entrega;
@@ -6054,7 +6143,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         if (record_gc_movimento.id_movimento_posicao < 6) { record_gc_movimento.id_movimento_posicao = 6; }  // Entregue
 
                         if (record_gc_movimento.movimento_entregue == false) { MsgRetorno += "Status do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString() + LibStringFormat.GetTabHtml(1) + "<b>ENTREGUE</b> "; }
-                        else MsgRetorno += "Atualização de dados da Entrega do do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString(); }
+                        else { MsgRetorno += "Atualização de dados da Entrega do do pedido " + record_gc_movimento.id_movimento.EmptyIfNull().ToString(); }
 
                         record_gc_movimento.datahora_alteracao = DataHoraAtual;
                         record_gc_movimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
@@ -6072,8 +6161,9 @@ namespace GdiPlataform.Areas.gc.Controllers
                         if (record_gc_movimento.obs_entrega.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Obs Entrega: " + record_gc_movimento.obs_entrega.EmptyIfNull().ToString().Trim() + " | "; };
                         if (LogFrete.EmptyIfNull().Trim().Length > 0) { LogAlteracoes += "Dados do Frete: " + LogFrete; };
 
-                        if (Sucesso == true) { if (LogAlteracoes.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "gc_movimentos", record_gc_movimento.id_movimento, LogAlteracoes); };
+                        if (Sucesso == true) { if (LogAlteracoes.EmptyIfNull().ToString().Trim().Length > 0) { LibAudit.SaveAudit(db, true, "gc_movimentos", record_gc_movimento.id_movimento, LogAlteracoes); }; };
                         db.SaveChanges();
+                        }
                     }
                     else
                     {
@@ -7773,21 +7863,36 @@ namespace GdiPlataform.Areas.gc.Controllers
         #region Pedido - Anexos - View (Modal)
         public ActionResult ModalPedidoViewAnexos(int? id, string tag)
         {
-            gc_movimentos RecordMovimento = TryGetMovimentoModal(id);
-            if (RecordMovimento != null)
+            int idMov = id.GetValueOrDefault();
+            string tituloBase = LibIcons.getIcon("fa-solid fa-paperclip", "", "", "fa-lg") + LibStringFormat.GetTabHtml(1);
+
+            try
             {
-                ViewBag.Title = LibIcons.getIcon("fa-solid fa-paperclip", "" , "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Anexos do Pedido Nº " + RecordMovimento.id_movimento.EmptyIfNull().ToString()+ "</b>";
+                if (db == null)
+                {
+                    ViewBag.MsgBloqueio = "Conexão com o banco de dados indisponível. Efetue nova conexão.";
+                    ViewBag.Title = tituloBase + "<b>Anexos do Pedido (indisponível)</b>";
+                    return View("ModalPedidoViewAnexos", new gc_movimentos { id_movimento = idMov });
+                }
+
+                gc_movimentos RecordMovimento = TryGetMovimentoModal(id);
+                if (RecordMovimento != null)
+                {
+                    ViewBag.Title = tituloBase + "<b>Anexos do Pedido Nº " + RecordMovimento.id_movimento.ToString() + "</b>";
+                    return View("ModalPedidoViewAnexos", RecordMovimento);
+                }
+
+                ViewBag.MsgBloqueio = GdiMvcJsonResults.PedidoNaoEncontradoMensagem(idMov);
+                ViewBag.Title = tituloBase + "<b>Anexos do Pedido Nº " + idMov.ToString() + " (não localizado)</b>";
+                return View("ModalPedidoViewAnexos", new gc_movimentos { id_movimento = idMov });
             }
-            else
+            catch (Exception ex)
             {
-                ViewBag.Title = LibIcons.getIcon("fa-solid fa-paperclip", "" , "", "fa-lg") + LibStringFormat.GetTabHtml(1) + "<b>Anexos do Pedido Nº " + id.GetValueOrDefault().ToString() + " não localizado</b>";
-                ViewBag.MsgBloqueio = "Pedido Nº " + id.GetValueOrDefault().ToString() + " não localizado no ERP.";
+                LibLogger.Error("[ModalPedidoViewAnexos] id=" + idMov.ToString(), ex);
+                ViewBag.MsgBloqueio = LibExceptions.getExceptionShortMessage(ex);
+                ViewBag.Title = tituloBase + "<b>Anexos do Pedido</b>";
+                return View("ModalPedidoViewAnexos", new gc_movimentos { id_movimento = idMov });
             }
-            if (RecordMovimento == null)
-            {
-                RecordMovimento = new gc_movimentos { id_movimento = id.GetValueOrDefault() };
-            }
-            return View(RecordMovimento);            
         }
         #endregion
 
@@ -9769,7 +9874,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
         private gc_movimentos TryGetMovimentoModal(int? id)
         {
-            if (id == null || id.GetValueOrDefault() <= 0)
+            if (db == null || id == null || id.GetValueOrDefault() <= 0)
             {
                 return null;
             }

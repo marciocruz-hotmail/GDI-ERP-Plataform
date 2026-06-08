@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <script src="~/Scripts/jsFileInputChange.js?v=@(CachePersister.userIdentity.VersionERP)"></script>
+    <script src="~/Scripts/jsFileInputChange.js?v=@((CachePersister.userIdentity != null) ? CachePersister.userIdentity.VersionERP : ControlVersion.getShortVersion())"></script>
 
     <style type="text/css">
 

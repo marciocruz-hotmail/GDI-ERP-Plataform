@@ -99,7 +99,7 @@
         try {
             if (isEmpty($('#customFile').val().toString().trim())) {
                 GdiAjaxNotifyInconsistencias("Selecione o arquivo a ser processado!");
-            }
+                }
             else {
                 jsSendForm();
             }
@@ -158,7 +158,7 @@
                     {
                         document.getElementById('btnSalvar').disabled = false;
                         GdiAjaxNotifyInconsistencias(result.msg, { title: "Erro no Upload - Verifique as inconsistências" });
-                    }
+                }
                 },
                 error: function (jqXHR, textStatus, errorThrown)
                 {

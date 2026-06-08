@@ -158,10 +158,11 @@
                         }
                     },
                     error: function (xhr, textStatus, errorThrown) {
-                        GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                     }
                 });
-            }
+                }
         }
         catch (err)
         {
@@ -172,7 +173,7 @@
             document.getElementById("signatario1_email").value = "";
             document.getElementById("identificador").value = result.RecordCliente.identificador;
             GdiAjaxNotifyInconsistencias(err.message);
-        }
+                }
     }
 
     function jsAjaxCreateEditContratoAviacao()
@@ -206,7 +207,7 @@
                     else
                     {
                         GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
-                    }
+                }
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {

@@ -301,6 +301,7 @@
                     }
                 },
                 error: function (xhr, status, error) {
+                    LibMessageProcessandoHide();
                     // CORREÇÃO 5: Usa parâmetros corretos do callback de erro do jQuery AJAX
                     LibMessageAlert("Erro na requisição", status + ": " + error);
                 }

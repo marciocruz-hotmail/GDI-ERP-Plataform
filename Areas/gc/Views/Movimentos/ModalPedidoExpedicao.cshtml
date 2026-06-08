@@ -1,6 +1,21 @@
 @model GdiPlataform.Db.gc_movimentos
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalPedidoExpedicao .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divPedidoExpedicaoDt {
+        min-width: 0;
+    }
+
+    #divPedidoExpedicaoDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidoExpedicao" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -9,8 +24,6 @@
                 <h4 class="modal-title d-flex align-items-center gap-2">
     @Html.Raw((String)ViewBag.Title)</h4>
                 @Html.HiddenFor(model => model.id_movimento)
-                @Html.HiddenFor(model => model.datahora_expedicao)
-                @Html.HiddenFor(model => model.datahora_entrega_previsao)
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
@@ -24,10 +37,24 @@
                             <div class="section-header"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Dados da Expedição</div>
                             <div class="form-group row text-sm-end m-0 pt-1">
                                 @Html.Label("movimento_expedido", "Status", htmlAttributes: new { @class = "col-sm-2 col-form-label" })
-                                <div class="col-sm-3 text-sm-start" style="margin-top:5px;">
+                                <div class="col-sm-2 text-sm-start" style="margin-top:5px;">
                                     <div class="form-check form-switch form-switch-lg">
                                         @Html.CheckBoxFor(model => model.movimento_expedido, htmlAttributes: new { @class = "form-check-input switch-success", @id = "movimento_expedido", role = "switch" })
                                         <label class="form-check-label" for="movimento_expedido" id="label_movimento_expedido">Não Expedido / Expedido</label>
+                                    </div>
+                                </div>
+                                @Html.LabelFor(model => model.datahora_expedicao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    <div class='input-group date' id='ig_gc_mov_modal_ped_exped'>
+                                        @Html.EditorFor(model => model.datahora_expedicao, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                                    </div>
+                                </div>
+                                @Html.LabelFor(model => model.datahora_entrega_previsao, htmlAttributes: new { @class = "col-sm-2 col-form-label" })
+                                <div class="col-sm-2">
+                                    <div class='input-group date' id='ig_gc_mov_modal_ped_entrega_prev'>
+                                        @Html.EditorFor(model => model.datahora_entrega_previsao, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
                                     </div>
                                 </div>
                             </div>
@@ -82,7 +109,7 @@
                             <div class="section-header"><i class="fa-solid fa-file-pen me-1" aria-hidden="true"></i>@Html.Raw((String)ViewBag.QtdItensPedido)</div>
                             <div class="modal-body m-0 p-0">
                                 <div class="form-horizontal m-0 p-0">
-                                    <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto; ">
+                                    <div id="divPedidoExpedicaoDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
                                         <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="DtPedidoExpedicaoItens">
                                             <thead>
                                                 <tr>
@@ -247,7 +274,8 @@
             if (oTablePedidoExpedicaoItens == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                oTableGcMovimentosCreatePedido = $('#DtPedidoExpedicaoItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
+                oTableGcMovimentosCreatePedido = $('#DtPedidoExpedicaoItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -264,9 +292,17 @@
                             yesCustomIdPK: $('#id_movimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
+                drawCallback: function (settings) {
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.getElementById('divPedidoExpedicaoDt');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalPedidoExpedicao .modal-body');
+                    if (body) { body.scrollLeft = 0; }
+                },
                 bFilter: false,
                 bLengthChange: false,
                 bProcessing: true,

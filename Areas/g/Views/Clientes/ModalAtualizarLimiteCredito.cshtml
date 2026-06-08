@@ -124,11 +124,11 @@
                 error: function (xhr, textStatus, errorThrown)
                 {
                     LibMessageProcessandoHide();
-                    $('#limite_credito_atual').attr('disabled', true);
+$('#limite_credito_atual').attr('disabled', true);
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendForm] " + (err && err.message ? err.message.toString() : String(err)));
         }

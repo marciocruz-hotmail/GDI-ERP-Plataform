@@ -344,7 +344,8 @@
                         if (typeof otableGContasCaixas !== 'undefined' && otableGContasCaixas) { otableGContasCaixas.draw(false); }
                         else { $('#dtGContasCaixas').DataTable().draw(false); }
                         LibMessageHideAll();
-                    } else { GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.'); }
+                    } else { GdiAjaxNotifyInconsistencias((result && result.msg) ? result.msg : 'Verifique as inconsistências.');
+                }
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     LibMessageProcessandoHide();

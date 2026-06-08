@@ -186,7 +186,7 @@
                 },
                 error: function (xhr) {
                     LibMessageProcessandoHide();
-                    var msg = (xhr && xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : (xhr && xhr.statusText ? xhr.statusText : "Erro de rede.");
+var msg = (xhr && xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : (xhr && xhr.statusText ? xhr.statusText : "Erro de rede.");
                     LibMessageAlert("Atenção", msg);
                 }
             });

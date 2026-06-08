@@ -140,7 +140,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGContratos = $('#dtGContratos').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) {
+            otableGContratos = $('#dtGContratos').css("font-size", 14).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) {
                 if (GdiDtNotifyJsonErrorMessage(json)) { return; }
                 else if (json && json.yesFilterOnOff !== undefined) { jsAtualizarIndicadorFiltroContratos(json.yesFilterOnOff); }
             }).DataTable({
@@ -163,7 +164,8 @@
                         yesCustomField02: emptyIfNull($('#edit_descricao_contrato').val()).toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
 
             "createdRow": function (row, data, dataIndex) {
@@ -298,8 +300,8 @@
                         },
                         error: function (xhr, textStatus, errorThrown)
                         {
-                            LibMessageProcessandoHide();
-                            GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
+                    LibMessageProcessandoHide();
+                    GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                         }
                     })
                 }
@@ -381,7 +383,7 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
 </script>

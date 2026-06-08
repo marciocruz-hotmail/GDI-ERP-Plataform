@@ -1,6 +1,21 @@
 @model GdiPlataform.Areas.gc.Models.CstModalRelatorio
 @using GdiPlataform.Security
 @{ Layout = "~/Views/Shared/_Modal.cshtml"; }
+<style>
+    #FormModalPedidosHistorico .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 170px);
+        overflow-x: hidden;
+    }
+
+    #divConsultaPedidosDt {
+        min-width: 0;
+    }
+
+    #divConsultaPedidosDt.gdi-dt-scroll-host {
+        overflow-x: hidden;
+    }
+</style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalPedidosHistorico" }))
 {
     <div class="modal-dialog modal-full modal-dialog-scrollable">
@@ -10,48 +25,42 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true)
             </div>
-            <div class="modal-body m-0 p-1">
-            </div>
-            <div class="modal-body m-0 p-1">
-                <div class="card-body m-0 p-1" style="max-width: 100%; overflow-x: auto;">
-                    <div class="table-responsive scroll-body-horizontal" style="width:100%">
-                        <div class="form-horizontal m-0 p-0">
-                            <div class="form-group row text-sm-end m-0 pt-1">
-                                @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
-                                <div class="col-sm-9">
-                                    @Html.DropDownListFor(model => model.Field_Int_01, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "z-index:99;", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
-                                </div>
-                            </div>
-                            <div class="form-group row text-sm-end m-0 pt-1">
-                                @Html.Label("produto", "Part Number:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
-                                <div class="col-sm-9 text-sm-start">
-                                    @Html.DropDownListFor(model => model.Field_Int_02, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "margin-top:5px; overflow:visible;", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
-                                </div>
-                            </div>
-                            <div class="form-group row text-sm-end m-0 pt-1">
-                                @Html.Label("Período", new { @class = "col-sm-1 col-form-label" })
-                                <div class="col-sm-2">
-                                    @* id do .input-group distinto do input (EditorFor) para Tempus Dominus *@
-                                    <div class='input-group date' id='ig_gc_modal_consulta_pedidos_d1'>
-                                        @Html.EditorFor(model => model.Field_Data_01, new { htmlAttributes = new { @class = "form-control", type = "text" } })
-                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
-                                    </div>
-                                </div>
-                                @Html.Label("à", new { @class = "col-sm-1 col-form-label text-sm-center" })
-                                <div class="col-sm-2">
-                                    <div class='input-group date' id='ig_gc_modal_consulta_pedidos_d2'>
-                                        @Html.EditorFor(model => model.Field_Data_02, new { htmlAttributes = new { @class = "form-control", type = "text" } })
-                                        <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
-                                    </div>
-                                </div>
-                                <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
-                                    <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarPedidos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
-                                </div>
-                            </div>
-                            <div class="form-group row text-sm-end m-0 pt-1">
+            <div class="modal-body m-0 p-1 min-w-0">
+                <div class="form-horizontal m-0 p-0">
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Cliente", htmlAttributes: new { @class = "col-form-label col-sm-1" })
+                        <div class="col-sm-9">
+                            @Html.DropDownListFor(model => model.Field_Int_01, ViewBag.comboClientes as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "z-index:99;", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetClientesLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("produto", "Part Number:", htmlAttributes: new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-9 text-sm-start">
+                            @Html.DropDownListFor(model => model.Field_Int_02, ViewBag.comboProdutosServicos as List<SelectListItem>, new { @class = "form-control", @data_container = "body", @style = "margin-top:5px; overflow:visible;", @data_gdi_select2_search = "true", @data_gdi_lookup_url = Url.Action("GetProdutosLookup", "Movimentos", new { area = "gc" }), @data_gdi_lookup_min_length = "2", @data_select2_dropdown_parent = "#mainModal" })
+                        </div>
+                    </div>
+                    <div class="form-group row text-sm-end m-0 pt-1">
+                        @Html.Label("Período", new { @class = "col-sm-1 col-form-label" })
+                        <div class="col-sm-2">
+                            <div class='input-group date' id='ig_gc_modal_consulta_pedidos_d1'>
+                                @Html.EditorFor(model => model.Field_Data_01, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
                             </div>
                         </div>
-                        <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcModalPedidosHistorico">
+                        @Html.Label("à", new { @class = "col-sm-1 col-form-label text-sm-center" })
+                        <div class="col-sm-2">
+                            <div class='input-group date' id='ig_gc_modal_consulta_pedidos_d2'>
+                                @Html.EditorFor(model => model.Field_Data_02, new { htmlAttributes = new { @class = "form-control", type = "text" } })
+                                <span class="input-group-text"><i class="fa-regular fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 text-sm-start" style="margin-bottom:2px">
+                            <button type="button" id="btnPesquisar" name="btnPesquisar" title="Pesquisar Pedidos" class="btn btn-secondary d-inline-flex align-items-center gap-2" onclick="jsAjaxPesquisarPedidos()"><i class="fa-solid fa-search me-2" aria-hidden="true"></i>Pesquisar</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="divConsultaPedidosDt" class="card-body m-0 p-1 gdi-dt-scroll-host min-w-0">
+                    <table class="table table-sm table-striped table-hover align-middle w-100 display compact" style="width:100%" id="dtGcModalPedidosHistorico">
                             <thead>
                                 <tr>
                                     <th>@Html.Encode("Id.")</th>
@@ -74,7 +83,6 @@
                             </tfoot>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer justify-content-between m-0 p-1">
@@ -119,9 +127,15 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGCIndexPedido = $('#dtGcModalPedidosHistorico').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
+            otableGCIndexPedido = $('#dtGcModalPedidosHistorico').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } }).DataTable({
                 "drawCallback": function (settings) {
                     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){bootstrap.Tooltip.getOrCreateInstance(el);});
+                    try { new $.fn.dataTable.Api(settings).columns.adjust(); } catch (e) { }
+                    var host = document.getElementById('divConsultaPedidosDt');
+                    if (host) { host.scrollLeft = 0; }
+                    var body = document.querySelector('#FormModalPedidosHistorico .modal-body');
+                    if (body) { body.scrollLeft = 0; }
                 },
                 "footerCallback": function (row, data, start, end, display) {
                     var api = this.api(), data;
@@ -153,7 +167,8 @@
                         yesCustomField04: jsGetDateDDMMYYYY(jsDatepickerGetDate('#ig_gc_modal_consulta_pedidos_d2')),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,

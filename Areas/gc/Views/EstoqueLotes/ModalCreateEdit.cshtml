@@ -7,10 +7,15 @@
     #FormModalCreateEditGcEstoqueLotes .modal-body {
         overflow-y: auto;
         max-height: calc(100vh - 170px);
+        overflow-x: hidden;
     }
 
     #divDocsEstoqueLote {
         min-width: 0;
+    }
+
+    #divDocsEstoqueLote .gdi-dt-scroll-host {
+        overflow-x: hidden;
     }
 </style>
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "FormModalCreateEditGcEstoqueLotes" }))
@@ -202,7 +207,7 @@
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxSaveEstoqueLote] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -255,7 +260,7 @@
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxSaveEstoqueLote] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -301,7 +306,10 @@ function jsCreateTable() {
                                 yesCustomIdPK: $('#id_estoque_lote').val().toString(),
                             };
                         },
-                        error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                        error: function (xhr, textStatus, errorThrown) {
+                    LibMessageProcessandoHide();
+                    GdiDtNotifyLoadFailure(errorThrown);
+                }
                     },
                     responsive: true,
                     drawCallback: function (settings) {
@@ -418,7 +426,7 @@ function jsCreateTable() {
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
 </script>

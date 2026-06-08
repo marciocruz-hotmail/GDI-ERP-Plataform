@@ -68,7 +68,8 @@
             {
                 $.fn.dataTable.ext.errMode = 'none';
                 otableGcComexProdutos = $('#dtGcComexProdutos')
-                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); })
+                    .on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                })
                     .on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } })
                     .css("font-size", 14)
                     .DataTable({
@@ -88,7 +89,8 @@
                             yesFilterField: $('#yesFilterField').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,

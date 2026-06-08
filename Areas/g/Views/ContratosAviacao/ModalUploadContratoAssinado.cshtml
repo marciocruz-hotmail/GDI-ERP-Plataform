@@ -94,7 +94,7 @@
         try {
             if (isEmpty($('#customFile').val().toString().trim())) {
                 GdiAjaxNotifyInconsistencias("Selecione o contrato assinado!");
-            }
+                }
             else {
                 jsSendForm();
             }
@@ -144,7 +144,7 @@
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     LibMessageProcessandoHide();
-                    var details =
+var details =
                         "Status: " + jqXHR.status + "\n" +
                         "textStatus: " + textStatus + "\n" +
                         "errorThrown: " + errorThrown + "\n\n" +

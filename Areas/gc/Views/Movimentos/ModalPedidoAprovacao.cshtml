@@ -233,6 +233,7 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     document.getElementById('btnSalvar').disabled = false;
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.');
                 }
@@ -250,7 +251,8 @@
             if (oTablePedidoAprovacaoItens == null)
             {
                 $.fn.dataTable.ext.errMode = 'none';
-                oTableGcMovimentosCreatePedido = $('#DtPedidoAprovacaoItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
+                oTableGcMovimentosCreatePedido = $('#DtPedidoAprovacaoItens').css("font-size", 12).on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).dataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -267,7 +269,8 @@
                             yesCustomIdPK: $('#id_movimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,

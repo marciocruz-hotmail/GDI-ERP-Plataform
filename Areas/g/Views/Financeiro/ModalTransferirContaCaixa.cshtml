@@ -109,7 +109,7 @@
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsSendFormTransferirContaCaixa] " + (err && err.message ? err.message.toString() : String(err)));
         }

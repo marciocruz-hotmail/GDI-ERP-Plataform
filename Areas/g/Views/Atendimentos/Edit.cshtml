@@ -268,7 +268,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            TableAtividades = $('#dtGAtendimentoAtividades').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            TableAtividades = $('#dtGAtendimentoAtividades').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -285,7 +286,8 @@
                             yesCustomIdPK: $('#id_atendimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -374,7 +376,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableGcMovimentosGed = $('#dtGAtendimentosGed').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            otableGcMovimentosGed = $('#dtGAtendimentosGed').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -391,7 +394,10 @@
                             yesCustomIdPK: $('#id_atendimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) {
+                    LibMessageProcessandoHide();
+                    GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -456,7 +462,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            TableAtendimentos = $('#dtGAtendimentosLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
+            TableAtendimentos = $('#dtGAtendimentosLogs').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { GdiDtNotifyJsonErrorMessage(json); }).DataTable({
                 processing: true,
                 bServerSide: true,
                 ajax: {
@@ -473,7 +480,8 @@
                             yesCustomIdPK: $('#id_atendimento').val().toString(),
                         };
                     },
-                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
                 },
                 responsive: true,
                 bFilter: false,
@@ -567,10 +575,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxCreateEditAtendimento] " + (err && err.message ? err.message.toString() : String(err)));
         }
@@ -614,7 +623,7 @@
         catch (e)
         {
             LibMessageError("Atenção", "[jsDownloadFile] " + (e && e.message ? e.message.toString() : String(e)));
-        }
+                }
     }
 
     function jsModalUploadFileAtendimentos()

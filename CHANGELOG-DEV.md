@@ -30,6 +30,63 @@ Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidad
 
 ## Últimas alterações relevantes
 
+### 2026-06-08 — Modais scrollable + DataTables: scroll horizontal residual (Lote A + start.css)
+- `start.css` (`VersionERP` 2026.51.40): `.modal-dialog-scrollable .modal-body { overflow-x: clip; min-width: 0 }`; `.scroll-modal-horizontal` contido.
+- **Lote A (≤10 col / GED/logs):** `ModalFinanceiroViewAnexos`, `ModalHistoricoMovimento`, `ModalViewCartaCorrecao`, `ModalImportacoesLogs`, `ModalConsultaPedidos`, `ModalInvoicesItensEspelhoDigital`, `EstoqueControle/ModalCreateEdit` (medições), `EstoqueLotes` (reforço CSS), `Produtos/ModalCreateEditProduto` (audit), `FinanceiroLancamentos/ModalCreateEditLancamento` (aba GED), `ModalViewFinanceiroMovimentos`, `ModalPedidoSeparacao`, `ModalPedidoExpedicao`, `ModalPedidoEntrega`; `ModalViewNotasFiscais` (14 col — host + scroll interno).
+- Script inventário: `Scripts/2026_06_08_gdi_audit_modal_dt_scroll.py`.
+
+### 2026-06-08 — gc/Movimentos/ModalPedidoViewAnexos: scroll horizontal residual (padrão EstoqueLotes)
+- `ModalPedidoViewAnexos.cshtml`: CSS `#FormModalPedidoViewAnexos .modal-body { overflow-x: hidden }` + `#divDocsPedidoAnexos { min-width: 0 }`; remove wrappers extras; `.row` → `d-flex`; `modal-body p-1`; `drawCallback` zera `scrollLeft`.
+
+### 2026-06-08 — gc/Movimentos/ModalPedidoViewAnexos: scroll horizontal desnecessário (gdi-dt-scroll-host)
+- `ModalPedidoViewAnexos.cshtml`: padrão `EstoqueLotes/ModalCreateEdit` — `gdi-dt-scroll-host min-w-0` no host da tabela (8 col.); remove `scroll-body-horizontal` + `overflow-x` inline; botão upload fora do host; `drawCallback` + `columns.adjust()`.
+
+### 2026-06-08 — gc/Movimentos/ModalPedidoViewAnexos: HTTP 500 — view + controller (arquitetura modal GET)
+- `ModalPedidoViewAnexos.cshtml`: estrutura HTML alinhada a `ModalFinanceiroViewAnexos` (`_AlertMsg` + grelha só sem `MsgBloqueio`); corrige `@if`/`</div>` mal aninhados da modernização 2026-06-05; upload via `#id_movimento`.
+- `MovimentosController.ModalPedidoViewAnexos`: guard `db`, `PedidoNaoEncontradoMensagem`, try/catch + `LibLogger`; `TryGetMovimentoModal` null-safe se `db` ausente.
+- `_Modal.cshtml`: `VersionERP` null-safe (`ControlVersion` fallback).
+
+### 2026-06-08 — gc/Movimentos/IndexPedido: anexos inline — confiar DT do host + erro HTTP detalhado
+- `start.js` (`VersionERP` 2026.51.38): `gdiHostPageScriptFlags` / `gdiHasDataTablesRelaxed`; não recarrega DataTables/Select2 quando o host já declara o bundle (`data-gdi-page-scripts`); timeout do defer propaga erro; `GdiMainModalLoad` envia `X-Requested-With` e mensagem com HTTP + URL.
+- `IndexPedido.cshtml`: botão anexo com `data-id-mov`; clique delegado namespaced; URL com `encodeURIComponent`; evita alerta duplicado (erro fica no `GdiMainModalLoad`).
+
+### 2026-06-08 — gc/Movimentos/IndexPedido: botão inline Anexos (GdiMainModalLoad + DT defer)
+- `start.js` (`VersionERP` 2026.51.37): `gdiEnsureScriptFlagsForModal` aguarda DataTables/Select2 já no host (defer) em vez de recarregar bundle; `gdiHasDataTables` reforçado; `gdiMainModalReleaseProcessando` em erros do `GdiMainModalLoad`.
+- `IndexPedido.cshtml`: clique delegado `.btnGCIndexPedidoAnexos`; duplo `LibMessageProcessandoHide` no callback; mensagem se load falhar; `GdiMainModalShow`.
+
+### 2026-06-08 — gc/Movimentos: AjaxModalPedidoEntrega — correção CS1513 (chave `}`)
+- `MovimentosController.AjaxModalPedidoEntrega`: fecha bloco `if (Sucesso == true)` antes de `db.SaveChanges()` (padrão `AjaxModalPedidoExpedicao`).
+
+### 2026-06-08 — gc/ComexProdutos: FormProcessarProdutosPreNovos — layout coluna PN
+- `FormProcessarProdutosPreNovos.cshtml` + `start.css`: coluna PN mais larga (11rem) com quebra de linha; Description/Tradução e Produto dividem o espaço restante igualmente (`colgroup` + `table-layout: fixed`).
+
+### 2026-06-08 — gc/Movimentos: AjaxModalPedidoSeparacao — validação de lotes na confirmação global
+- `MovimentosController.AjaxModalPedidoSeparacao`: na confirmação da separação, replica regra do submodal — `qtd > 0` exige lote selecionado; `id_estoque_lote` deve ser ativo e do produto do item.
+
+### 2026-06-08 — gc/Movimentos: AjaxModalPedidoSeparacaoLotes — validação qtd exige lote ativo do produto
+- `MovimentosController.AjaxModalPedidoSeparacaoLotes`: bloqueia quantidade sem lote selecionado (`qtd > 0` ⇒ `id_estoque_lote > 0`) e rejeita `id_estoque_lote` inativo ou de outro produto (mesmo critério do GET do submodal).
+
+### 2026-06-08 — gc/Movimentos: AjaxModalPedidoNotaFiscal — validações POST alinhadas ao GET
+- `MovimentosController.AjaxModalPedidoNotaFiscal`: replica bloqueios do `ModalPedidoNotaFiscal` (`has_nfe`, aprovação, separação, faturado), null-check destinatário/cliente/UF, mensagem quando gateway NF-e ≠ e-Notas; gravação do movimento só com `IdGateway == 1`.
+
+### 2026-06-08 — Views: LibMessageProcessandoHide explícito em callbacks error Ajax
+- Lote em **124** `.cshtml` (`Areas/`, `Views/`): após `LibMessageProcessando`, handlers `error` de `$.ajax` passam a chamar `LibMessageProcessandoHide()` (padrão `ModalPedidoExpedicao`), incluindo modais de pedido/NF, financeiro, estoque, COMEX, relatórios e cadastros `g`.
+- **2** handlers vazios (`IndexRecebimentoEstoque`, `IndexRecebimentoImportacao`) ganharam feedback `GdiAjaxNotifyInconsistencias`.
+- Script reutilizável: `Scripts/2026_06_08_gdi_patch_ajax_error_processando_hide.py`.
+
+### 2026-06-08 — gc/Movimentos: modal Entrega — LibMessageProcessandoHide no erro Ajax
+- `ModalPedidoEntrega.cshtml`: handler `error` de `jsSendForm` chama `LibMessageProcessandoHide()` (overlay não fica preso em falha de rede).
+
+### 2026-06-08 — gc/Movimentos: modal Entrega — data entrega na linha do status e obrigatória ao salvar
+- `ModalPedidoEntrega.cshtml`: `datahora_entrega` com Tempus Dominus na mesma linha do switch entregue.
+- `MovimentosController.ModalPedidoEntrega`: preenche data atual só quando pedido ainda não entregue.
+- `MovimentosController.AjaxModalPedidoEntrega`: validação `qtdInconsistencias` obrigatória para `datahora_entrega` ao confirmar entrega.
+
+### 2026-06-08 — gc/Movimentos: modal Expedição — datas editáveis e obrigatórias ao salvar
+- `ModalPedidoExpedicao.cshtml`: `datahora_expedicao` e `datahora_entrega_previsao` com Tempus Dominus (`jsDatepicker`) na mesma linha do switch expedido.
+- `MovimentosController.ModalPedidoExpedicao`: preenche data atual (+5 dias previsão entrega) só quando pedido ainda não expedido.
+- `MovimentosController.AjaxModalPedidoExpedicao`: validação `qtdInconsistencias` obrigatória para ambas as datas ao confirmar expedição; grava valores do formulário na row (sem fallback silencioso).
+
 ### 2026-05-25 — gc/EstoqueControle: coluna Validade só com data (sem hora)
 - `EstoqueControleController.GetDados`: `data_validade` formatada `dd/MM/yyyy` (alinhado a `EstoqueLotes`).
 

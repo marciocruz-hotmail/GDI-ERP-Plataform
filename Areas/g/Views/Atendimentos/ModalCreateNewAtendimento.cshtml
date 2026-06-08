@@ -161,7 +161,7 @@
         {
             if (isEmpty($('#solicitacao').val().toString().trim()) || isEmpty($('#descricao').val().toString().trim())) {
                 GdiAjaxNotifyInconsistencias("Preencha corretamente os campos [Solicitação e Descrição]!");
-            }
+                }
             else {
                 //2025-04-09 tratar os caracteres < >
                 var _descricao = document.forms["ModalCreateGAtendimentos"]["descricao"].value;
@@ -208,10 +208,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[jsAjaxCreateEditAtendimento] " + (err && err.message ? err.message.toString() : String(err)));
         }

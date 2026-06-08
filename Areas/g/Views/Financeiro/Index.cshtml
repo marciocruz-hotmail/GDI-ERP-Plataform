@@ -178,7 +178,8 @@
         try
         {
             $.fn.dataTable.ext.errMode = 'none';
-            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message); }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroFinanceiro(json.yesFilterOnOff); } }).DataTable({
+            otableFinanceiro = $('#dtGFinanceiro').on('error.dt', function (e, settings, techNote, message) { GdiDtNotifyLoadFailure(message);
+                }).on('xhr.dt', function (e, settings, json, xhr) { if (GdiDtNotifyJsonErrorMessage(json)) { return; } if (json && json.yesFilterOnOff != null) { jsAtualizarIndicadorFiltroFinanceiro(json.yesFilterOnOff); } }).DataTable({
                 "footerCallback": function (row, data, start, end, display) {
                     var api = this.api(), data;
                     var intVal = function (i) {
@@ -214,7 +215,8 @@
                         yesFilterController: $('#yesFilterController').val().toString(),
                     };
                 },
-                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown); }
+                error: function (xhr, textStatus, errorThrown) { GdiDtNotifyLoadFailure(errorThrown);
+                }
             },
             responsive: true,
             bFilter: false,
@@ -313,10 +315,11 @@
                 },
                 error: function (xhr, textStatus, errorThrown)
                 {
+                    LibMessageProcessandoHide();
                     GdiAjaxNotifyInconsistencias(errorThrown || textStatus || 'Verifique as inconsistências.')
                 }
             });
-        }
+                }
         catch (err) {
             LibMessageError("Atenção", "[ajaxEnviarBoletosEmail] " + (err && err.message ? err.message.toString() : String(err)));
         }
