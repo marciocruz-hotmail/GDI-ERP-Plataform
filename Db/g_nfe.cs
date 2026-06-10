@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_nfeMetadata))]
     public partial class g_nfe
     {
         public int id_nfe { get; set; }
@@ -71,4 +67,3 @@ namespace GdiPlataform.Db
         public Nullable<int> id_usuario_alteracao { get; set; }
     }
 }
-

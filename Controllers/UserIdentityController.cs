@@ -772,7 +772,7 @@ namespace GdiPlataform.Controllers
                 subDominio        = "localhost",
                 ImgLogoSubdominio = "logoMicrosoft.png",
                 database          = "GdiPlataformEntities_localhost",
-                ambiente          = "Desenvolvimento",
+                ambiente          = "Localhost",
             };
             allTenants.Add(tenant1);
 

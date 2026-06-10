@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_financeiroMetadata))]
     public partial class g_financeiro
     {
         public int id_financeiro { get; set; }
@@ -95,4 +91,3 @@ namespace GdiPlataform.Db
         public Nullable<System.DateTime> datahora_alteracao { get; set; }
     }
 }
-

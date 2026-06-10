@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_movimentosMetadata))]
     public partial class gc_movimentos
     {
         public int id_movimento { get; set; }
@@ -140,6 +136,10 @@ namespace GdiPlataform.Db
         public int id_usuario_cancelamento { get; set; }
         public Nullable<System.DateTime> datahora_cancelamento { get; set; }
         public string obs_cancelamento { get; set; }
+        public bool movimento_devolvido { get; set; }
+        public int id_usuario_devolucao { get; set; }
+        public Nullable<System.DateTime> datahora_devolucao { get; set; }
+        public string obs_devolucao { get; set; }
         public bool movimento_posvenda { get; set; }
         public int id_usuario_posvenda { get; set; }
         public Nullable<System.DateTime> datahora_posvenda { get; set; }
@@ -239,4 +239,3 @@ namespace GdiPlataform.Db
         public string obs_negociacao { get; set; }
     }
 }
-

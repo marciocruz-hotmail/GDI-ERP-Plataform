@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_clientesMetadata))]
     public partial class g_clientes
     {
         public int id_cliente { get; set; }
@@ -136,4 +132,3 @@ namespace GdiPlataform.Db
         public Nullable<int> id_usuario_alteracao { get; set; }
     }
 }
-

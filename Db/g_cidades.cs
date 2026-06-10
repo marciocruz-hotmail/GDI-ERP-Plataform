@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_cidadesMetadata))]
     public partial class g_cidades
     {
         public int id_cidade { get; set; }
@@ -29,4 +25,3 @@ namespace GdiPlataform.Db
         public Nullable<System.DateTime> datahora_alteracao { get; set; }
     }
 }
-

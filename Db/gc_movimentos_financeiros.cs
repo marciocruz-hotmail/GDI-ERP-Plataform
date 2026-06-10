@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_movimentos_financeirosMetadata))]
     public partial class gc_movimentos_financeiros
     {
         public int id_movimento_financeiro { get; set; }
@@ -81,4 +77,3 @@ namespace GdiPlataform.Db
         public bool flag { get; set; }
     }
 }
-

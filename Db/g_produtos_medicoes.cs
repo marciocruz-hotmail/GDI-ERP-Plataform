@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_produtos_medicoesMetadata))]
     public partial class g_produtos_medicoes
     {
         public int id_produto_medicao { get; set; }
@@ -31,4 +27,3 @@ namespace GdiPlataform.Db
         public int id_usuario_alteracao { get; set; }
     }
 }
-

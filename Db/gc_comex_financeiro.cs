@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_comex_financeiroMetadata))]
     public partial class gc_comex_financeiro
     {
         public int id_financeiro { get; set; }
@@ -42,4 +38,3 @@ namespace GdiPlataform.Db
         public string motivo_cancelamento { get; set; }
     }
 }
-

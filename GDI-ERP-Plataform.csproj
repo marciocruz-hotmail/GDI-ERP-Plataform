@@ -540,8 +540,6 @@
     <Compile Include="Controllers\ClientesLookupController.cs" />
     <Compile Include="Controllers\NavbarController.cs" />
     <Compile Include="Controllers\UserIdentityController.cs" />
-    <Compile Include="Services\LotePublicDocumentUrlService.cs" />
-    <Compile Include="ControlVersion.cs" />
     <Compile Include="Db\a_parametros.cs">
       <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
     </Compile>
@@ -780,9 +778,6 @@
       <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
     </Compile>
     <Compile Include="Db\g_api_gateway.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Db\g_assistentes.cs">
       <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
     </Compile>
     <Compile Include="Db\g_atendimentos.cs">
@@ -1031,6 +1026,31 @@
     <Compile Include="Db\g_vendedores.cs">
       <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
     </Compile>
+    <Compile Include="Db\ModelDbGdiPlataform1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos_areas.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos_arquivos.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_cursos_registros.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_evidence_event.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Db\qa_lms_evidence_status.cs">
+      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Services\LotePublicDocumentUrlService.cs" />
+    <Compile Include="ControlVersion.cs" />
     <Compile Include="Db\Metadata\gc_comex_financeiroMetadata.cs" />
     <Compile Include="Db\Metadata\gc_comex_importacoesMetadata.cs" />
     <Compile Include="Db\Metadata\gc_comex_importacoes_itens_lotesMetadata.cs" />
@@ -1040,7 +1060,6 @@
     <Compile Include="Db\Metadata\gc_movimentos_financeirosMetadata.cs" />
     <Compile Include="Db\Metadata\gc_movimentos_itensMetadata.cs" />
     <Compile Include="Db\Metadata\ged_arquivosMetadata.cs" />
-    <Compile Include="Db\Metadata\g_assistentesMetadata.cs" />
     <Compile Include="Db\Metadata\g_cidadesMetadata.cs" />
     <Compile Include="Db\Metadata\g_clientesMetadata.cs" />
     <Compile Include="Db\Metadata\g_clientes_produtos_fixosMetadata.cs" />
@@ -1068,33 +1087,10 @@
     <Compile Include="Db\ModelDbGdiPlataform.Designer.cs">
       <DependentUpon>ModelDbGdiPlataform.cs</DependentUpon>
     </Compile>
-    <Compile Include="Db\ModelDbGdiPlataform1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
     <Compile Include="Db\ModelDbGdiPlataform1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ModelDbGdiPlataform.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Db\qa_lms_cursos.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Db\qa_lms_cursos_areas.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Db\qa_lms_cursos_arquivos.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Db\qa_lms_cursos_registros.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Db\qa_lms_evidence_event.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Db\qa_lms_evidence_status.cs">
-      <DependentUpon>ModelDbGdiPlataform.tt</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

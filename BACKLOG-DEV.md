@@ -250,6 +250,7 @@ python Scripts/2026_06_05_gdi_smoke_architecture_inventories.py
 | Ordem | ID | Item | Crit. | Instruções | Aceite |
 |------:|-----|------|-------|-----------|--------|
 | ~~1~~ | ~~**G-UX-01**~~ | ~~TempData message PRG~~ | — | **Concluído 2026-05-20:** `Lib/LibFlashMessage.cs` (`SetModalMessage`, `SetError`, `SetInfo`); controllers + `ModalError.cshtml`; login/troca senha/logout. | — |
+| ~~2~~ | ~~**G-UX-02**~~ | ~~PainelPedidos: coluna "Próxima atividade" dinâmica~~ | — | **Concluído 2026-06-10:** `GetDadosPainelPedidos` calcula a primeira etapa habilitada na operação (flags `has_*`) para posições 1–5, descartando atividades não parametrizadas; ícone/texto derivados em runtime. | — |
 
 ---
 

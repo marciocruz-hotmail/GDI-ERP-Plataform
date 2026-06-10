@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_movimentos_itensMetadata))]
     public partial class gc_movimentos_itens
     {
         public int id_movimento_item { get; set; }
@@ -268,4 +264,3 @@ namespace GdiPlataform.Db
         public Nullable<System.DateTime> datahora_alteracao { get; set; }
     }
 }
-

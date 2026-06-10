@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
   <!-- EF Runtime content -->
   <edmx:Runtime>
@@ -156,19 +156,6 @@
           <Property Name="key3" Type="nvarchar" MaxLength="100" />
           <Property Name="key4" Type="nvarchar" MaxLength="100" />
           <Property Name="obs" Type="nvarchar(max)" />
-        </EntityType>
-        <EntityType Name="g_assistentes">
-          <Key>
-            <PropertyRef Name="id_assistente" />
-          </Key>
-          <Property Name="id_assistente" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="nome" Type="varchar" MaxLength="30" Nullable="false" />
-          <Property Name="id_coligada" Type="int" Nullable="false" />
-          <Property Name="id_filial" Type="int" Nullable="false" />
-          <Property Name="id_usuario_cadastro" Type="int" Nullable="false" />
-          <Property Name="datahora_cadastro" Type="datetime2" Precision="0" Nullable="false" />
-          <Property Name="id_usuario_alteracao" Type="int" />
-          <Property Name="datahora_alteracao" Type="datetime2" Precision="0" />
         </EntityType>
         <EntityType Name="g_atendimentos">
           <Key>
@@ -3100,6 +3087,10 @@
           <Property Name="id_usuario_cancelamento" Type="int" Nullable="false" />
           <Property Name="datahora_cancelamento" Type="datetime2" Precision="0" />
           <Property Name="obs_cancelamento" Type="varchar(max)" />
+          <Property Name="movimento_devolvido" Type="bit" Nullable="false" />
+          <Property Name="id_usuario_devolucao" Type="int" Nullable="false" />
+          <Property Name="datahora_devolucao" Type="datetime2" Precision="0" />
+          <Property Name="obs_devolucao" Type="varchar(max)" />
           <Property Name="movimento_posvenda" Type="bit" Nullable="false" />
           <Property Name="id_usuario_posvenda" Type="int" Nullable="false" />
           <Property Name="datahora_posvenda" Type="datetime2" Precision="0" />
@@ -4073,7 +4064,6 @@
           <EntitySet Name="crm_portalcliente_acessos" EntityType="Self.crm_portalcliente_acessos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="g_alerts" EntityType="Self.g_alerts" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="g_api_gateway" EntityType="Self.g_api_gateway" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="g_assistentes" EntityType="Self.g_assistentes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="g_atendimentos" EntityType="Self.g_atendimentos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="g_atendimentos_atividades" EntityType="Self.g_atendimentos_atividades" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="g_atendimentos_categorias" EntityType="Self.g_atendimentos_categorias" Schema="dbo" store:Type="Tables" />
@@ -4248,7 +4238,6 @@
           <EntitySet Name="crm_portalcliente_acessos" EntityType="erp_gdi_homologacaoModel.crm_portalcliente_acessos" />
           <EntitySet Name="g_alerts" EntityType="erp_gdi_homologacaoModel.g_alerts" />
           <EntitySet Name="g_api_gateway" EntityType="erp_gdi_homologacaoModel.g_api_gateway" />
-          <EntitySet Name="g_assistentes" EntityType="erp_gdi_homologacaoModel.g_assistentes" />
           <EntitySet Name="g_atendimentos" EntityType="erp_gdi_homologacaoModel.g_atendimentos" />
           <EntitySet Name="g_atendimentos_atividades" EntityType="erp_gdi_homologacaoModel.g_atendimentos_atividades" />
           <EntitySet Name="g_atendimentos_categorias" EntityType="erp_gdi_homologacaoModel.g_atendimentos_categorias" />
@@ -4558,19 +4547,6 @@
           <Property Name="key3" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="key4" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="obs" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-        </EntityType>
-        <EntityType Name="g_assistentes">
-          <Key>
-            <PropertyRef Name="id_assistente" />
-          </Key>
-          <Property Name="id_assistente" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="nome" Type="String" Nullable="false" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="id_coligada" Type="Int32" Nullable="false" />
-          <Property Name="id_filial" Type="Int32" Nullable="false" />
-          <Property Name="id_usuario_cadastro" Type="Int32" Nullable="false" />
-          <Property Name="datahora_cadastro" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="id_usuario_alteracao" Type="Int32" />
-          <Property Name="datahora_alteracao" Type="DateTime" Precision="0" />
         </EntityType>
         <EntityType Name="g_atendimentos">
           <Key>
@@ -7502,6 +7478,10 @@
           <Property Name="id_usuario_cancelamento" Type="Int32" Nullable="false" />
           <Property Name="datahora_cancelamento" Type="DateTime" Precision="0" />
           <Property Name="obs_cancelamento" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="movimento_devolvido" Type="Boolean" Nullable="false" />
+          <Property Name="id_usuario_devolucao" Type="Int32" Nullable="false" />
+          <Property Name="datahora_devolucao" Type="DateTime" Precision="0" />
+          <Property Name="obs_devolucao" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="movimento_posvenda" Type="Boolean" Nullable="false" />
           <Property Name="id_usuario_posvenda" Type="Int32" Nullable="false" />
           <Property Name="datahora_posvenda" Type="DateTime" Precision="0" />
@@ -8629,20 +8609,6 @@
                 <ScalarProperty Name="ativo" ColumnName="ativo" />
                 <ScalarProperty Name="id_yesproduto" ColumnName="id_yesproduto" />
                 <ScalarProperty Name="id_api_gateway" ColumnName="id_api_gateway" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="g_assistentes">
-            <EntityTypeMapping TypeName="erp_gdi_homologacaoModel.g_assistentes">
-              <MappingFragment StoreEntitySet="g_assistentes">
-                <ScalarProperty Name="datahora_alteracao" ColumnName="datahora_alteracao" />
-                <ScalarProperty Name="id_usuario_alteracao" ColumnName="id_usuario_alteracao" />
-                <ScalarProperty Name="datahora_cadastro" ColumnName="datahora_cadastro" />
-                <ScalarProperty Name="id_usuario_cadastro" ColumnName="id_usuario_cadastro" />
-                <ScalarProperty Name="id_filial" ColumnName="id_filial" />
-                <ScalarProperty Name="id_coligada" ColumnName="id_coligada" />
-                <ScalarProperty Name="nome" ColumnName="nome" />
-                <ScalarProperty Name="id_assistente" ColumnName="id_assistente" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -11675,6 +11641,10 @@
                 <ScalarProperty Name="datahora_posvenda" ColumnName="datahora_posvenda" />
                 <ScalarProperty Name="id_usuario_posvenda" ColumnName="id_usuario_posvenda" />
                 <ScalarProperty Name="movimento_posvenda" ColumnName="movimento_posvenda" />
+                <ScalarProperty Name="obs_devolucao" ColumnName="obs_devolucao" />
+                <ScalarProperty Name="datahora_devolucao" ColumnName="datahora_devolucao" />
+                <ScalarProperty Name="id_usuario_devolucao" ColumnName="id_usuario_devolucao" />
+                <ScalarProperty Name="movimento_devolvido" ColumnName="movimento_devolvido" />
                 <ScalarProperty Name="obs_cancelamento" ColumnName="obs_cancelamento" />
                 <ScalarProperty Name="datahora_cancelamento" ColumnName="datahora_cancelamento" />
                 <ScalarProperty Name="id_usuario_cancelamento" ColumnName="id_usuario_cancelamento" />

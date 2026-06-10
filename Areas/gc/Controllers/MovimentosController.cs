@@ -404,6 +404,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                         m.id_movimento_tipo,
                         m.id_movimento_status,
                         m.movimento_cancelado,
+                        m.movimento_devolvido,
                         m.movimento_aprovado,
                         m.movimento_separado,
                         m.movimento_faturado,
@@ -498,6 +499,15 @@ namespace GdiPlataform.Areas.gc.Controllers
                             m.id_movimento_tipo == 8 ? "OS Cancelada" :
                             "Transferência Cancelada";
                     }
+                    else if (m.movimento_devolvido)
+                    {
+                        corIcone = "#cc6600";
+                        tipoMovimento =
+                            m.id_movimento_tipo == 3 ? "Orçamento Devolvido" :
+                            m.id_movimento_tipo == 4 ? "Pedido Devolvido" :
+                            m.id_movimento_tipo == 8 ? "OS Devolvida" :
+                            "Transferência Devolvida";
+                    }
                     else
                     {
                         corIcone = (m.id_movimento_status == 1) ? "#CACFD2" : "#008000";
@@ -517,7 +527,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                     string iconeStatus = "";
                     if (m.id_movimento_status == 1) iconeStatus = LibIcons.getIcon("fa-solid fa-lock-open", "Aberto", corIcone, "");
                     else if (m.id_movimento_status == 2) iconeStatus = LibIcons.getIcon("fa-solid fa-lock", "Fechado", corIcone, "");
-                    else if (m.id_movimento_status == 3) iconeStatus = LibIcons.getIcon("fa-solid fa-thumbs-down", "Cancelado", corIcone, "");
+                    else if (m.id_movimento_status == 3) iconeStatus = LibIcons.getIcon("fa-solid fa-circle-xmark", "Cancelado", corIcone, "");
+                    else if (m.id_movimento_status == 4) iconeStatus = LibIcons.getIcon("fa-solid fa-reply-all", "Devolvido", corIcone, "");
 
                     string iconeStatusPrazos = "";
                     if (m.id_movimento_status == 1)
@@ -1809,6 +1820,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                 if (record_pedido_gc_movimento.movimento_cancelado == true)
                 {
                     MsgRetorno += "Não é possível registrar Pós-Venda em pedido cancelado.<br/>";
+                }
+                if (record_pedido_gc_movimento.movimento_devolvido == true)
+                {
+                    MsgRetorno += "Não é possível registrar Pós-Venda em pedido devolvido.<br/>";
                 }
                 if (record_pedido_gc_movimento.movimento_entregue != true)
                 {
@@ -6216,9 +6231,26 @@ namespace GdiPlataform.Areas.gc.Controllers
                     (m.id_movimento_tipo == 3 || m.id_movimento_tipo == 4 || m.id_movimento_tipo == 8) &&
                     m.id_movimento_status == 2 &&
                     (m.id_movimento_posicao == 1 || m.id_movimento_posicao == 2 || m.id_movimento_posicao == 3 || m.id_movimento_posicao == 4 || m.id_movimento_posicao == 5) &&
+                    m.movimento_cancelado == false &&
+                    m.movimento_devolvido == false &&
                     m.datahora_aprovacao != null &&
                     m.datahora_aprovacao >= dataCorte
                 );
+
+            // Regra estrutural: só exibe movimentos que ainda têm atividade pendente
+            // (separação → financeiro → nfe → expedição → entrega), conforme os flags da operação fiscal (gc_cfop_operacoes).
+            movimentos = movimentos.Where(m =>
+                db.gc_cfop_operacoes.Any(op =>
+                    op.id_cfop_operacao == m.id_cfop_operacao &&
+                    (
+                        (m.id_movimento_posicao == 1 && (op.has_separacao || op.has_financeiro || op.has_nfe || op.has_expedicao || op.has_entrega)) ||
+                        (m.id_movimento_posicao == 2 && (op.has_financeiro || op.has_nfe || op.has_expedicao || op.has_entrega)) ||
+                        (m.id_movimento_posicao == 3 && (op.has_nfe || op.has_expedicao || op.has_entrega)) ||
+                        (m.id_movimento_posicao == 4 && (op.has_expedicao || op.has_entrega)) ||
+                        (m.id_movimento_posicao == 5 && op.has_entrega)
+                    )
+                )
+            );
 
             // Busca por termo (id_movimento ou NF LIKE %termo%)
             string termo = param.yesCustomField01.EmptyIfNull().ToString().Trim();
@@ -6328,6 +6360,13 @@ namespace GdiPlataform.Areas.gc.Controllers
                     op.is_servico,
                     op.is_baixa,
 
+                    // operação — atividades parametrizadas (próxima atividade dinâmica)
+                    HasSeparacao = op.has_separacao,
+                    HasFinanceiro = op.has_financeiro,
+                    HasNfe = op.has_nfe,
+                    HasExpedicao = op.has_expedicao,
+                    HasEntrega = op.has_entrega,
+
                     // NF numero
                     NfNumero = db.gc_movimentos_nf
                         .Where(nf => nf.id_movimento == m.id_movimento &&
@@ -6419,6 +6458,39 @@ namespace GdiPlataform.Areas.gc.Controllers
                     colorMovimento = ColorMovimentoQualificado;
                 }
 
+                // Próxima atividade dinâmica (posições 1–5): primeira etapa habilitada na operação,
+                // descartando as atividades não parametrizadas (has_*). Não altera o filtro de seleção.
+                string proximaAtividadeTexto = m.ProximaAtividade;
+                if (m.id_movimento_posicao >= 1 && m.id_movimento_posicao <= 5)
+                {
+                    int p = m.id_movimento_posicao;
+                    if (p <= 1 && m.HasSeparacao)
+                    {
+                        iconeProximaAtividade = LibIcons.getIcon("fa-solid fa-dolly", "Separar", "#008000", "fa-lg");
+                        proximaAtividadeTexto = "Separar";
+                    }
+                    else if (p <= 2 && m.HasFinanceiro)
+                    {
+                        iconeProximaAtividade = LibIcons.getIcon("fa-solid fa-credit-card", "Faturar", "#008000", "fa-sm");
+                        proximaAtividadeTexto = "Faturar";
+                    }
+                    else if (p <= 3 && m.HasNfe)
+                    {
+                        iconeProximaAtividade = LibIcons.getIcon("fa-solid fa-file-invoice", "Emitir NF", "#008000", "fa-sm");
+                        proximaAtividadeTexto = "Emitir NF";
+                    }
+                    else if (p <= 4 && m.HasExpedicao)
+                    {
+                        iconeProximaAtividade = LibIcons.getIcon("fa-solid fa-truck", "Expedir", "#008000", "fa-sm");
+                        proximaAtividadeTexto = "Expedir";
+                    }
+                    else if (p <= 5 && m.HasEntrega)
+                    {
+                        iconeProximaAtividade = LibIcons.getIcon("fa-solid fa-people-carry", "Entregar", "#008000", "fa-sm");
+                        proximaAtividadeTexto = "Entregar";
+                    }
+                }
+
                 // Operação (ícone)
                 string iconeOperacao = "";
                 if (!string.IsNullOrWhiteSpace(m.OpDescricao))
@@ -6447,21 +6519,21 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 list.Add(new[]
                 {
-            colorMovimento,
-            "",
-            m.id_movimento.ToString(),
-            iconeOperacao,
-            (m.NfNumero ?? ""),
-            (!string.IsNullOrWhiteSpace(m.PosicaoNome) ? iconePosicaoAtual + "<br/>" + m.PosicaoNome : ""),
-            (!string.IsNullOrWhiteSpace(m.ProximaAtividade) ? iconeProximaAtividade + "<br/>" + m.ProximaAtividade : ""),
-            nomeCliente,
-            (m.VendedorApelido ?? ""),
-            m.datahora_aprovacao.GetValueOrDefault().ToString("dd/MM/yy") + "<br/>" + m.datahora_aprovacao.GetValueOrDefault().ToString("HH:mm"),
-            m.qtd_itens.EmptyIfNull().ToString(),
-            (m.LocalSigla ?? ""),
-            valorFormatado,
-            "", "", "", "", ""
-        });
+                    colorMovimento,
+                    "",
+                    m.id_movimento.ToString(),
+                    iconeOperacao,
+                    (m.NfNumero ?? ""),
+                    (!string.IsNullOrWhiteSpace(m.PosicaoNome) ? iconePosicaoAtual + "<br/>" + m.PosicaoNome : ""),
+                    (!string.IsNullOrWhiteSpace(proximaAtividadeTexto) ? iconeProximaAtividade + "<br/>" + proximaAtividadeTexto : ""),
+                    nomeCliente,
+                    (m.VendedorApelido ?? ""),
+                    m.datahora_aprovacao.GetValueOrDefault().ToString("dd/MM/yy") + "<br/>" + m.datahora_aprovacao.GetValueOrDefault().ToString("HH:mm"),
+                    m.qtd_itens.EmptyIfNull().ToString(),
+                    (m.LocalSigla ?? ""),
+                    valorFormatado,
+                    "", "", "", "", ""
+                });
             }
 
             if (param.yesFilterField.EmptyIfNull().ToString().Trim() != "*")
@@ -6601,7 +6673,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                 string iconeTipo = String.Empty;
                 if (m.id_movimento_status == 1) { iconeTipo = LibIcons.getIcon("fa-solid fa-clipboard-list", "Cotação (Aberta)", "#CACFD2", "fa-lg"); }
                 else if (m.id_movimento_status == 2) { iconeTipo = LibIcons.getIcon("fa-solid fa-boxes", "Pedido (Fechado)", "#008000", "fa-lg"); }
-                else if (m.id_movimento_status == 3) { iconeTipo = LibIcons.getIcon("fa-regular fa-thumbs-down", "Pedido(Cancelado)", "cc0000", "fa-lg"); }
+                else if (m.id_movimento_status == 3) { iconeTipo = LibIcons.getIcon("fa-regular fa-circle-xmark", "Pedido(Cancelado)", "cc0000", "fa-lg"); }
+                else if (m.id_movimento_status == 4) { iconeTipo = LibIcons.getIcon("fa-solid fa-reply-all", "Pedido(Devolvido)", "cc6600", "fa-lg"); }
 
                 string formatoMoeda = string.Empty;
                 if (m.id_moeda == 1) { formatoMoeda = "pt-BR"; }

@@ -9,32 +9,27 @@
 
 ## Últimas alterações (5)
 
-### 2026-06-08 — Modais scrollable + DataTables: scroll horizontal residual (Lote A + start.css)
-- `start.css` (`VersionERP` 2026.51.40): `.modal-dialog-scrollable .modal-body { overflow-x: clip; min-width: 0 }`; `.scroll-modal-horizontal` contido.
-- **Lote A (≤10 col / GED/logs):** `ModalFinanceiroViewAnexos`, `ModalHistoricoMovimento`, `ModalViewCartaCorrecao`, `ModalImportacoesLogs`, `ModalConsultaPedidos`, `ModalInvoicesItensEspelhoDigital`, `EstoqueControle/ModalCreateEdit` (medições), `EstoqueLotes` (reforço CSS), `Produtos/ModalCreateEditProduto` (audit), `FinanceiroLancamentos/ModalCreateEditLancamento` (aba GED), `ModalViewFinanceiroMovimentos`, `ModalPedidoSeparacao`, `ModalPedidoExpedicao`, `ModalPedidoEntrega`; `ModalViewNotasFiscais` (14 col — host + scroll interno).
-- Script inventário: `Scripts/2026_06_08_gdi_audit_modal_dt_scroll.py`.
+### 2026-06-10 — Limpeza g_assistentes (tabela removida do banco)
+- EDMX atualizado a partir do schema removeu a entidade `g_assistentes` (POCO `Db/g_assistentes.cs` e `DbSet` já não existem). Limpeza das referências órfãs restantes: removido `<Compile>` de `Db\g_assistentes.cs` e `Db\Metadata\g_assistentesMetadata.cs` do `.csproj`; apagado `Db/Metadata/g_assistentesMetadata.cs`; removido token `g_assistentes` de `Db/InserirMetadata.exe.config`. Sem Controller/View/Modal (já não existiam). `ddl-version.txt` intocado (refere `id_vendedor_assistente` de `gc_movimentos`, não relacionado).
 
 ---
 
-### 2026-06-08 — gc/Movimentos/ModalPedidoViewAnexos: scroll horizontal residual (padrão EstoqueLotes)
-- `ModalPedidoViewAnexos.cshtml`: CSS `#FormModalPedidoViewAnexos .modal-body { overflow-x: hidden }` + `#divDocsPedidoAnexos { min-width: 0 }`; remove wrappers extras; `.row` → `d-flex`; `modal-body p-1`; `drawCallback` zera `scrollLeft`.
+### 2026-06-10 — gc/Movimentos: ícone do status Cancelado (3) → fa-circle-xmark
+- Substituído `fa-thumbs-down` por `fa-circle-xmark` no status 3 (Cancelado) em `MovimentosController` (iconeStatus `fa-solid` em GetDadosPedidos; iconeTipo `fa-regular` na listagem por status), alinhando ao padrão já usado em AtendimentosController/Financeiro. Distinção visual: Cancelado = X em círculo, Devolvido = fa-reply-all.
 
 ---
 
-### 2026-06-08 — gc/Movimentos/ModalPedidoViewAnexos: scroll horizontal desnecessário (gdi-dt-scroll-host)
-- `ModalPedidoViewAnexos.cshtml`: padrão `EstoqueLotes/ModalCreateEdit` — `gdi-dt-scroll-host min-w-0` no host da tabela (8 col.); remove `scroll-body-horizontal` + `overflow-x` inline; botão upload fora do host; `drawCallback` + `columns.adjust()`.
+### 2026-06-10 — Movimento status 4 (Devolvido): tratamento de exibição (espelho do status 3)
+- Novo `id_movimento_status = 4` ('Devolvido') em `gc_movimentos_status` (todo `movimento_devolvido = true` ⇒ status 4). Adicionado branch de exibição para status 4 onde já se tratava status 3 (Cancelado): `MovimentosController.GetDadosPedidos` (iconeStatus "Devolvido") e listagem por status (iconeTipo "Pedido(Devolvido)"); `RelatoriosComerciaisController` (sufixo " (Devolvido)"); `ReportEmailPedido` (texto "Devolvido", 2 ocorrências). Filtros por status revisados: PainelPedidos usa `== 2` (devolvido já excluído); GetDadosPedidos lista todos os status.
 
 ---
 
-### 2026-06-08 — gc/Movimentos/ModalPedidoViewAnexos: HTTP 500 — view + controller (arquitetura modal GET)
-- `ModalPedidoViewAnexos.cshtml`: estrutura HTML alinhada a `ModalFinanceiroViewAnexos` (`_AlertMsg` + grelha só sem `MsgBloqueio`); corrige `@if`/`</div>` mal aninhados da modernização 2026-06-05; upload via `#id_movimento`.
-- `MovimentosController.ModalPedidoViewAnexos`: guard `db`, `PedidoNaoEncontradoMensagem`, try/catch + `LibLogger`; `TryGetMovimentoModal` null-safe se `db` ausente.
-- `_Modal.cshtml`: `VersionERP` null-safe (`ControlVersion` fallback).
+### 2026-06-10 — gc/Fretes/GetDados: exclui movimentos devolvidos (espelho de cancelado)
+- `FretesController.GetDados`: filtro base passa a excluir `movimento_devolvido` (`.Where(m => !m.movimento_devolvido)`), espelhando o `!m.movimento_cancelado` já existente. Levantamento projeto-wide de `movimento_cancelado`: demais usos são definição de campo (POCO/EDMX/DDL), setter de cancelamento ou já tratados no MovimentosController.
 
 ---
 
-### 2026-06-08 — gc/Movimentos/IndexPedido: anexos inline — confiar DT do host + erro HTTP detalhado
-- `start.js` (`VersionERP` 2026.51.38): `gdiHostPageScriptFlags` / `gdiHasDataTablesRelaxed`; não recarrega DataTables/Select2 quando o host já declara o bundle (`data-gdi-page-scripts`); timeout do defer propaga erro; `GdiMainModalLoad` envia `X-Requested-With` e mensagem com HTTP + URL.
-- `IndexPedido.cshtml`: botão anexo com `data-id-mov`; clique delegado namespaced; URL com `encodeURIComponent`; evita alerta duplicado (erro fica no `GdiMainModalLoad`).
+### 2026-06-10 — gc/Movimentos/AjaxSavePosVenda: bloqueio de Pós-Venda em pedido devolvido
+- `MovimentosController.AjaxSavePosVenda`: espelha a validação de `movimento_cancelado` para `movimento_devolvido` — bloqueia registro de Pós-Venda em pedido devolvido ("Não é possível registrar Pós-Venda em pedido devolvido."). Demais usos de `movimento_cancelado` no controller já tratados (projeção/exibição em GetDadosPedidos, filtro do PainelPedidos) ou são o setter do próprio cancelamento (não validação).
 
 ---

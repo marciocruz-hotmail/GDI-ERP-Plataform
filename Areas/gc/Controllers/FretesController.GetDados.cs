@@ -50,6 +50,7 @@ namespace GdiPlataform.Areas.gc.Controllers
 
                 var movimentos = db.gc_movimentos.AsNoTracking()
                     .Where(m => !m.movimento_cancelado)
+                    .Where(m => !m.movimento_devolvido)
                     .Where(m => m.id_movimento_tipo == 3 || m.id_movimento_tipo == 4 || m.id_movimento_tipo == 8 || m.id_movimento_tipo == 19);
 
                 filterOnOff = "1";

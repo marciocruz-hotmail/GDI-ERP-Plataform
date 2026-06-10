@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_comex_importacoes_itens_lotesMetadata))]
     public partial class gc_comex_importacoes_itens_lotes
     {
         public int id_importacao_item_lote { get; set; }
@@ -62,4 +58,3 @@ namespace GdiPlataform.Db
         public bool lote10_controla_validade { get; set; }
     }
 }
-

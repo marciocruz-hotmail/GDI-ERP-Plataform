@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_comex_importacoesMetadata))]
     public partial class gc_comex_importacoes
     {
         public int id_importacao { get; set; }
@@ -101,4 +97,3 @@ namespace GdiPlataform.Db
         public string exclusao_motivo { get; set; }
     }
 }
-

@@ -776,7 +776,8 @@ namespace GdiPlataform.Areas.gc.Controllers
                                     };
 
                                     if (RecordMovimento.id_movimento_status == 1) { PedidoNumero += " (Aberto)"; }
-                                    else if (RecordMovimento.id_movimento_status == 3) { PedidoNumero += " (Cancelado)"; };
+                                    else if (RecordMovimento.id_movimento_status == 3) { PedidoNumero += " (Cancelado)"; }
+                                    else if (RecordMovimento.id_movimento_status == 4) { PedidoNumero += " (Devolvido)"; };
                                 }
                             }
                             String nomeClienteLookup;

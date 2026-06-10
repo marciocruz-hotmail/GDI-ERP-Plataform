@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(ged_arquivosMetadata))]
     public partial class ged_arquivos
     {
         public int id_arquivo { get; set; }
@@ -59,4 +55,3 @@ namespace GdiPlataform.Db
         public string tag_string { get; set; }
     }
 }
-

@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_financeiro_faturamentosMetadata))]
     public partial class g_financeiro_faturamentos
     {
         public int id_financeiro_faturamento { get; set; }
@@ -37,4 +33,3 @@ namespace GdiPlataform.Db
         public System.DateTime datahora_cadastro { get; set; }
     }
 }
-

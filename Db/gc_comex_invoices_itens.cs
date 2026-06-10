@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(gc_comex_invoices_itensMetadata))]
     public partial class gc_comex_invoices_itens
     {
         public int id_invoice_item { get; set; }
@@ -101,4 +97,3 @@ namespace GdiPlataform.Db
         public int id_usuario_alteracao { get; set; }
     }
 }
-

@@ -40,7 +40,6 @@ namespace GdiPlataform.Db
         public virtual DbSet<crm_portalcliente_acessos> crm_portalcliente_acessos { get; set; }
         public virtual DbSet<g_alerts> g_alerts { get; set; }
         public virtual DbSet<g_api_gateway> g_api_gateway { get; set; }
-        public virtual DbSet<g_assistentes> g_assistentes { get; set; }
         public virtual DbSet<g_atendimentos> g_atendimentos { get; set; }
         public virtual DbSet<g_atendimentos_atividades> g_atendimentos_atividades { get; set; }
         public virtual DbSet<g_atendimentos_categorias> g_atendimentos_categorias { get; set; }

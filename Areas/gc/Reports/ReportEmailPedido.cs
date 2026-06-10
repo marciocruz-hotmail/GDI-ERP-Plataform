@@ -62,7 +62,8 @@ namespace GdiPlataform.Areas.gc.Reports
             int idStatus = listMovimento.FirstOrDefault().tableMovimento.id_movimento_status;
             if (idStatus == 1) { statusMovimento = "Aberto"; }
             else if (idStatus == 2) { statusMovimento = "Fechado"; }
-            else if (idStatus == 3) { statusMovimento = "Cancelado"; };
+            else if (idStatus == 3) { statusMovimento = "Cancelado"; }
+            else if (idStatus == 4) { statusMovimento = "Devolvido"; };
 
             string iconPosicaoMovimento = string.Empty;
             if ((listMovimento.FirstOrDefault().tableMovimento.id_movimento_posicao == 1) && (listMovimento.FirstOrDefault().tableMovimento.id_movimento_tipo == 3)) { iconPosicaoMovimento = LibIcons.getIcon("fa-regular fa-file", "Orçamento Incluído", "", "fa-lg"); }
@@ -197,7 +198,8 @@ namespace GdiPlataform.Areas.gc.Reports
             int idStatus = listMovimento.FirstOrDefault().tableMovimento.id_movimento_status;
             if (idStatus == 1) { statusMovimento = "Aberto"; iconeStatusMovimento = imagesS3.Replace("[img]", "fa-shopping-cart.png"); }
             else if (idStatus == 2) { statusMovimento = "Fechado"; iconeStatusMovimento = imagesS3.Replace("[img]", "fa-lock.png"); }
-            else if (idStatus == 3) { statusMovimento = "Cancelado"; };
+            else if (idStatus == 3) { statusMovimento = "Cancelado"; }
+            else if (idStatus == 4) { statusMovimento = "Devolvido"; };
 
             string posicaoMovimento = string.Empty;
             if ((listMovimento.FirstOrDefault().tableMovimento.id_movimento_posicao == 1) && (listMovimento.FirstOrDefault().tableMovimento.id_movimento_tipo == 3)) { posicaoMovimento = "Orçamento Incluído"; iconePosicaoMovimento = imagesS3.Replace("[img]", "fa-file.png"); }

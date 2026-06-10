@@ -30,6 +30,31 @@ Monólito ASP.NET MVC **4.7.2** (COMEX, comercial, estoque, financeiro, qualidad
 
 ## Últimas alterações relevantes
 
+### 2026-06-10 — Limpeza g_assistentes (tabela removida do banco)
+- EDMX atualizado a partir do schema removeu a entidade `g_assistentes` (POCO `Db/g_assistentes.cs` e `DbSet` já não existem). Limpeza das referências órfãs restantes: removido `<Compile>` de `Db\g_assistentes.cs` e `Db\Metadata\g_assistentesMetadata.cs` do `.csproj`; apagado `Db/Metadata/g_assistentesMetadata.cs`; removido token `g_assistentes` de `Db/InserirMetadata.exe.config`. Sem Controller/View/Modal (já não existiam). `ddl-version.txt` intocado (refere `id_vendedor_assistente` de `gc_movimentos`, não relacionado).
+
+### 2026-06-10 — gc/Movimentos: ícone do status Cancelado (3) → fa-circle-xmark
+- Substituído `fa-thumbs-down` por `fa-circle-xmark` no status 3 (Cancelado) em `MovimentosController` (iconeStatus `fa-solid` em GetDadosPedidos; iconeTipo `fa-regular` na listagem por status), alinhando ao padrão já usado em AtendimentosController/Financeiro. Distinção visual: Cancelado = X em círculo, Devolvido = fa-reply-all.
+
+### 2026-06-10 — Movimento status 4 (Devolvido): tratamento de exibição (espelho do status 3)
+- Novo `id_movimento_status = 4` ('Devolvido') em `gc_movimentos_status` (todo `movimento_devolvido = true` ⇒ status 4). Adicionado branch de exibição para status 4 onde já se tratava status 3 (Cancelado): `MovimentosController.GetDadosPedidos` (iconeStatus "Devolvido") e listagem por status (iconeTipo "Pedido(Devolvido)"); `RelatoriosComerciaisController` (sufixo " (Devolvido)"); `ReportEmailPedido` (texto "Devolvido", 2 ocorrências). Filtros por status revisados: PainelPedidos usa `== 2` (devolvido já excluído); GetDadosPedidos lista todos os status.
+
+### 2026-06-10 — gc/Fretes/GetDados: exclui movimentos devolvidos (espelho de cancelado)
+- `FretesController.GetDados`: filtro base passa a excluir `movimento_devolvido` (`.Where(m => !m.movimento_devolvido)`), espelhando o `!m.movimento_cancelado` já existente. Levantamento projeto-wide de `movimento_cancelado`: demais usos são definição de campo (POCO/EDMX/DDL), setter de cancelamento ou já tratados no MovimentosController.
+
+### 2026-06-10 — gc/Movimentos/AjaxSavePosVenda: bloqueio de Pós-Venda em pedido devolvido
+- `MovimentosController.AjaxSavePosVenda`: espelha a validação de `movimento_cancelado` para `movimento_devolvido` — bloqueia registro de Pós-Venda em pedido devolvido ("Não é possível registrar Pós-Venda em pedido devolvido."). Demais usos de `movimento_cancelado` no controller já tratados (projeção/exibição em GetDadosPedidos, filtro do PainelPedidos) ou são o setter do próprio cancelamento (não validação).
+
+### 2026-06-10 — gc/Movimentos/GetDadosPedidos: tratamento visual de movimento_devolvido
+- `MovimentosController.GetDadosPedidos`: espelha o tratamento de `movimento_cancelado` para `movimento_devolvido` — campo adicionado à projeção e novo `else if` com cor (#cc6600) e rótulo "Orçamento/Pedido Devolvido", "OS Devolvida", "Transferência Devolvida" (precedência: cancelado > devolvido).
+
+### 2026-06-10 — gc/Movimentos/PainelPedidos: oculta movimentos cancelados/devolvidos
+- `MovimentosController.GetDadosPainelPedidos`: filtro base passa a excluir `movimento_cancelado == true` e `movimento_devolvido == true` (antes do `Count`/`Skip`).
+
+### 2026-06-10 — gc/Movimentos/PainelPedidos: filtro por atividade pendente da operação fiscal
+- `MovimentosController.GetDadosPainelPedidos`: novo `.Where` estrutural (subconsulta `EXISTS` em `gc_cfop_operacoes`) antes do `Count`/`Skip`. Movimento só aparece se, a partir da posição (1–5), houver atividade pendente habilitada na operação (`has_separacao`/`has_financeiro`/`has_nfe`/`has_expedicao`/`has_entrega`). Movimentos sem atividade pendente (ou sem operação cadastrada) deixam de ser exibidos.
+- Coluna "Próxima atividade" **dinâmica** (posições 1–5): calcula a primeira etapa habilitada na operação (flags `has_*`), descartando atividades não parametrizadas. Flags `has_*` adicionados à projeção; texto/ícone derivados em runtime (não altera o filtro de seleção). [G-UX-02]
+
 ### 2026-06-08 — Modais scrollable + DataTables: scroll horizontal residual (Lote A + start.css)
 - `start.css` (`VersionERP` 2026.51.40): `.modal-dialog-scrollable .modal-body { overflow-x: clip; min-width: 0 }`; `.scroll-modal-horizontal` contido.
 - **Lote A (≤10 col / GED/logs):** `ModalFinanceiroViewAnexos`, `ModalHistoricoMovimento`, `ModalViewCartaCorrecao`, `ModalImportacoesLogs`, `ModalConsultaPedidos`, `ModalInvoicesItensEspelhoDigital`, `EstoqueControle/ModalCreateEdit` (medições), `EstoqueLotes` (reforço CSS), `Produtos/ModalCreateEditProduto` (audit), `FinanceiroLancamentos/ModalCreateEditLancamento` (aba GED), `ModalViewFinanceiroMovimentos`, `ModalPedidoSeparacao`, `ModalPedidoExpedicao`, `ModalPedidoEntrega`; `ModalViewNotasFiscais` (14 col — host + scroll interno).

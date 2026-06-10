@@ -1,65 +1,82 @@
-Atue como especialista em SQL Server, modelagem de banco de dados e scripts de migração estrutural seguros.
+Atue como especialista em SQL Server, modelagem de banco de dados e scripts de
+migração estrutural seguros.
 
-Vou anexar o script atual de criação da tabela [tablename].
+Vou anexar o script CREATE atual da tabela [<<<NOME_DA_TABELA>>>].
+Sua tarefa é gerar um script SQL Server completo e blindado que recrie essa
+tabela com os novos campos abaixo, migre 100% dos dados e substitua a tabela
+original, preservando a integridade do banco.
 
-Sua tarefa é gerar um novo script SQL Server completo, seguro e blindado para alteração estrutural dessa tabela, seguindo rigorosamente as instruções abaixo:
+== NOVOS CAMPOS (definição exata e posição exata) ==
+Para cada campo, respeite rigorosamente: nome, tipo, tamanho, nulabilidade,
+default e a posição informada. "Após o campo X" significa imediatamente após X.
 
-Objetivo:
-Criar uma nova versão da tabela atual, com a inclusão dos novos campos informados, migrar integralmente os dados da tabela original para a nova estrutura e substituir a tabela antiga pela nova, preservando a integridade do banco.
+<<<EXEMPLO — substituir pelos campos reais:
+1. [movimento_devolvido]  [bit]          NOT NULL  DEFAULT ((0))   — após [obs_cancelamento]
+2. [id_usuario_devolucao] [int]          NOT NULL  DEFAULT ((0))   — após [movimento_devolvido]
+3. [datahora_devolucao]   [datetime2](0) NULL      DEFAULT (NULL)  — após [id_usuario_devolucao]
+4. [obs_devolucao]        [varchar](max) NULL      DEFAULT (NULL)  — após [datahora_devolucao]
+>>>
 
-Requisitos obrigatórios do script:
-1. Utilizar como base a estrutura atual da tabela anexada.
-2. Criar uma tabela temporária ou tabela auxiliar com a mesma estrutura da tabela original, já incorporando os novos campos solicitados.
-3. Incluir os novos campos exatamente conforme especificado, por exemplo:
-   - [XXXX] [YYYYY]
-4. Manter na definição de cada coluna todas as propriedades originais que existirem no script fonte, como:
-   - tipo de dado
-   - tamanho
-   - null / not null
-   - identity
-   - default
-   - constraints
-5. Copiar todos os dados da tabela original para a tabela temporária, garantindo compatibilidade entre os campos antigos e os novos.
-6. Para novos campos definidos como NULL, criar também uma constraint DEFAULT coerente, para evitar inconsistências futuras.
-7. Validar a existência de todos os objetos antes de criar, alterar, apagar ou renomear, incluindo:
-   - tabelas
-   - constraints default
-   - conflito de nome da PK
-   - primary keys
-   - foreign keys
-   - índices
-   - objetos temporários ou auxiliares
-8. Após a cópia dos dados, remover com segurança a tabela antiga e renomear a tabela temporária para assumir o nome da tabela principal.
-9. O script deve conter limpeza prévia e limpeza final de objetos temporários, evitando deixar qualquer resíduo no banco.
-10. O script deve analisar e tratar pontos cegos que possam deixar objetos soltos, órfãos ou duplicados no banco, como:
-    - constraints com nomes fixos já existentes
-    - índices remanescentes
-    - tabelas auxiliares de execuções anteriores
-    - conflitos de rename
-    - dependências não removidas
-11. O script deve ser idempotente na medida do possível, ou seja, preparado para evitar falhas por objetos já existentes de execuções anteriores.
-12. Implementar o código com abordagem defensiva e segura, priorizando consistência e previsibilidade.
-13. Sempre que necessário, usar IF EXISTS / IF NOT EXISTS para validação dos objetos.
-14. Organizar o script em blocos lógicos, com comentários objetivos, por exemplo:
-    - limpeza inicial
-    - criação da tabela auxiliar
-    - criação dos novos campos
-    - cópia dos dados
-    - remoção de constraints antigas
-    - remoção da tabela original
-    - rename da nova tabela
-    - recriação de índices e constraints, se aplicável
-    - limpeza final
-15. Analisar o script original e identificar riscos técnicos ou fragilidades estruturais que possam comprometer a execução.
-16. Entregar um script final blindado, pronto para execução em SQL Server.
-17. Escreva cada bloco autocontido com tratamento de erro local.
-18. Adicione uma limpeza por nome global antes de criar qualquer constraint
+Valor inicial dos novos campos para as linhas já existentes na migração:
+<<<ex.: movimento_devolvido = 0; id_usuario_devolucao = 0; demais = NULL>>>
+Se algo na definição ou posição for ambíguo, pergunte antes de gerar o script.
 
-Formato da resposta esperado:
-- Apresente primeiro uma análise técnica breve dos riscos e pontos de atenção identificados.
-- Em seguida, entregue o script SQL Server completo.
-- Inclua comentários no script explicando apenas o necessário para manutenção futura.
-- Não simplifique a solução.
-- Não omita validações de segurança.
-- Não entregue apenas um exemplo genérico.
-- Gere o script final já adaptado à estrutura real da tabela anexada.
+== ESTRATÉGIA OBRIGATÓRIA ==
+1. Tabela auxiliar com a estrutura original completa + novos campos, criada SEM
+   constraints nomeadas conflitantes (PK com nome temporário; defaults criados
+   só após o swap, com os nomes canônicos).
+2. Capturar DINAMICAMENTE do catálogo do banco (não apenas do script-fonte,
+   que pode estar defasado): constraints DEFAULT (nome/coluna/definição),
+   índices não clusterizados e UNIQUE constraints (key, INCLUDE, filtro),
+   e FOREIGN KEYS nas duas direções (de e para a tabela), com regras
+   ON DELETE/ON UPDATE e estado trusted — recriando tudo após o swap.
+3. Cópia dos dados com SET IDENTITY_INSERT, lista de colunas montada
+   dinamicamente pela interseção das duas tabelas, e reseed explícito do
+   IDENTITY (DBCC CHECKIDENT) com base no maior id migrado.
+4. Cópia + validação de contagem + drop da original + rename + recriação de
+   constraints numa ÚNICA transação com TABLOCKX na origem (swap atômico:
+   qualquer falha => ROLLBACK total, tabela original intacta).
+
+== PRÉ-VALIDAÇÕES OBRIGATÓRIAS (abortar com mensagem clara) ==
+- Tabela original inexistente.
+- Idempotência: todos os novos campos já existem => abortar como "já aplicado";
+  apenas parte deles existe => abortar como "estado parcial, análise manual".
+- Triggers na tabela; objetos com SCHEMABINDING referenciando a tabela;
+  CDC habilitado; replicação; tabela temporal.
+- Avisos não fatais (PRINT) para permissões GRANT/DENY explícitas e extended
+  properties, que se perdem no DROP e devem ser reaplicadas pelo DBA.
+
+== BLINDAGEM E IDEMPOTÊNCIA ==
+- Limpeza inicial de resíduos de execuções anteriores (tabela auxiliar,
+  constraints órfãs com nomes temporários, FKs apontando para a auxiliar).
+- Limpeza GLOBAL POR NOME antes de criar qualquer constraint: se o nome existir
+  preso a qualquer objeto, remover do dono atual antes de criar.
+- IF EXISTS / IF NOT EXISTS em toda criação, alteração, drop e rename.
+- Cada bloco autocontido com TRY/CATCH local; falha fatal => THROW interrompendo
+  tudo; CATCH do bloco crítico faz ROLLBACK e remove a tabela auxiliar.
+- Limpeza final de todos os objetos de trabalho (tabelas temporárias etc.).
+- Verificação final: contagem de linhas, existência de todas as novas colunas,
+  IDENT_CURRENT, contagem de defaults e FKs, ausência de resíduos.
+
+== QUALIDADE TÉCNICA ==
+- Validar os nomes de colunas das views de catálogo (sys.*) contra a
+  documentação oficial antes de usar (ex.: sys.sql_modules.is_schema_bound) —
+  não escrever consultas de catálogo de memória.
+- Compatibilidade mínima SQL Server 2012+ (usar FOR XML PATH em vez de
+  STRING_AGG; omitir opções exclusivas de versões novas, comentando o motivo,
+  como OPTIMIZE_FOR_SEQUENTIAL_KEY quando o valor original é OFF).
+- Organizar em blocos numerados e comentados: pré-validações; limpeza inicial;
+  criação da auxiliar; captura dinâmica de objetos; cópia + swap atômico;
+  recriação de defaults; recriação de índices; recriação de FKs; verificação
+  final + limpeza.
+- Marcar com comentário ">>> NOVOS CAMPOS <<<" todos os pontos que precisam ser
+  editados ao adicionar campos futuros.
+
+== FORMATO DA RESPOSTA ==
+1. Análise técnica breve dos riscos identificados no script anexado e no
+   cenário (FKs/índices não documentados, log de transações, janela de
+   bloqueio, o que NÃO é coberto e por quê).
+2. Script SQL completo, pronto para execução, já adaptado à estrutura real
+   da tabela anexada — não entregue exemplo genérico nem simplifique.
+3. Recomendações de execução (homologação primeiro, backup, janela de
+   manutenção).

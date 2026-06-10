@@ -12,10 +12,6 @@ namespace GdiPlataform.Db
     using System;
     using System.Collections.Generic;
     
-    using Metadata;
-    using System.ComponentModel.DataAnnotations;
-
-    [MetadataType(typeof(g_requisicoesMetadata))]
     public partial class g_requisicoes
     {
         public int id_requisicao { get; set; }
@@ -34,4 +30,3 @@ namespace GdiPlataform.Db
         public bool notificacao_conclusao { get; set; }
     }
 }
-
