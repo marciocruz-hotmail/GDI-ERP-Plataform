@@ -4371,35 +4371,39 @@ namespace GdiPlataform.Areas.gc.Controllers
                         ListaIdsLotes = ListaIdsLotes.Trim().TrimEnd(',');
                     }
 
-                    // GED: desativa somente anexos de lote (id_arquivo_origem = 1) já vinculados ao pedido; demais anexos do movimento permanecem ativos.
+                    // GED: desativa somente cópias de lote (id_arquivo_origem = 1) já vinculadas ao pedido; demais anexos do movimento permanecem ativos.
                     var arquivos = db.ged_arquivos
                         .Where(g => g.ativo == true && g.id_arquivo_origem == 1 && g.id_gc_movimento == RecordMovimento.id_movimento)
                         .ToList();
                     arquivos.ForEach(g => g.ativo = false);
                     db.SaveChanges();
 
-                    // Documentos de lote atuais — copiar para o pedido (origem lote)
-                    int[] Ids = ListaIdsLotes
-                        .Split(',')
-                        .Where(x => !string.IsNullOrWhiteSpace(x))
-                        .Select(int.Parse)
-                        .ToArray();
-
-                    List<ged_arquivos> ListaArquivosGed = db.ged_arquivos
-                        .Where(x => x.ativo == true && x.id_arquivo_origem == 1 && Ids.Contains(x.id_estoque_lote))
-                        .ToList();
-
-                    foreach (var ArquivoGedMovimento in ListaArquivosGed)
+                    // Documentos dos lotes separados — copiar para o pedido (origem: ged_arquivos.id_estoque_lote; id_arquivo_origem = 1 marca a cópia no pedido)
+                    if (RecordViewMovimento.movimento_separado == true && ListaIdsLotes.EmptyIfNull().Trim().Length > 0)
                     {
-                        ged_arquivos NewRecordGed = LibDB.CloneTObject(ArquivoGedMovimento);
-                        NewRecordGed.id_arquivo = 0;
-                        NewRecordGed.id_estoque_lote = 0;
-                        NewRecordGed.id_gc_movimento = RecordMovimento.id_movimento;
-                        NewRecordGed.id_arquivo_origem = 1;
-                        db.ged_arquivos.Add(NewRecordGed);
-                    }
+                        int[] Ids = ListaIdsLotes
+                            .Split(',')
+                            .Where(x => !string.IsNullOrWhiteSpace(x))
+                            .Select(int.Parse)
+                            .Distinct()
+                            .ToArray();
 
-                    db.SaveChanges();
+                        List<ged_arquivos> ListaArquivosGed = db.ged_arquivos
+                            .Where(x => x.ativo == true && x.id_estoque_lote > 0 && Ids.Contains(x.id_estoque_lote))
+                            .ToList();
+
+                        foreach (var ArquivoGedMovimento in ListaArquivosGed)
+                        {
+                            ged_arquivos NewRecordGed = LibDB.CloneTObject(ArquivoGedMovimento);
+                            NewRecordGed.id_arquivo = 0;
+                            NewRecordGed.id_estoque_lote = 0;
+                            NewRecordGed.id_gc_movimento = RecordMovimento.id_movimento;
+                            NewRecordGed.id_arquivo_origem = 1;
+                            db.ged_arquivos.Add(NewRecordGed);
+                        }
+
+                        db.SaveChanges();
+                    }
                 }
 
                 if (QtdInconsistencias == 0)

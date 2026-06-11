@@ -40,9 +40,9 @@ GO
 ALTER DATABASE [erp_gdi_homologacao]
 SET MULTI_USER;
 GO
+UPDATE [erp_gdi_homologacao].[dbo].[g_nfe_gateway] set producao = 0;
+UPDATE [erp_gdi_homologacao].[dbo].[g_usuarios] set ativo = 0 where id_usuario > 1;
 /* ========== RESTORE DATABASE HOMOLOGACAO ========== */
 
 
 
-UPDATE [erp_gdi_homologacao].[dbo].[g_nfe_gateway] set producao = 0;
-UPDATE [erp_gdi_homologacao].[dbo].[g_usuarios] set ativo = 0 where id_usuario > 1;
