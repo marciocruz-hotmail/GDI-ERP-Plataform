@@ -2046,6 +2046,11 @@ namespace GdiPlataform.Robos.ENotas
                                 {
                                     RecordMovimento.movimento_nf_autorizada = true;
                                     if (RecordMovimento.id_movimento_posicao < 4) { RecordMovimento.id_movimento_posicao = 4; } // NF
+                                    if (RecordMovimento.datahora_nf == null)
+                                    {
+                                        RecordMovimento.datahora_nf = (DataAutorizacaoNFe.Year > 2000) ? DataAutorizacaoNFe : DataHoraAtual;
+                                        RecordMovimento.id_usuario_nf = CachePersister.userIdentity.IdUsuario;
+                                    }
                                     RecordMovimento.datahora_alteracao = DataHoraAtual;
                                     RecordMovimento.id_usuario_alteracao = CachePersister.userIdentity.IdUsuario;
                                     db.Entry(RecordMovimento).State = EntityState.Modified;

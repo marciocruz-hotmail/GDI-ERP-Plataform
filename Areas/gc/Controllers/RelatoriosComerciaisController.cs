@@ -715,7 +715,12 @@ namespace GdiPlataform.Areas.gc.Controllers
                 SQLMovimentos += " JOIN gc_cfop_operacoes cf ON cf.id_cfop_operacao = m.id_cfop_operacao ";
                 SQLMovimentos += " JOIN g_vendedores v ON m.id_vendedor = v.id_vendedor ";
                 SQLMovimentos += " WHERE m.movimento_aprovado = 1 ";
-                SQLMovimentos += " AND (m.datahora_aprovacao BETWEEN '" + DataInicialSQL + "' AND '" + DataFinalSQL + "') ";
+                SQLMovimentos += " AND (COALESCE(m.datahora_nf, ( ";
+                SQLMovimentos += "   SELECT MIN(nf_inner.nf_data_autorizacao) FROM gc_movimentos_nf nf_inner ";
+                SQLMovimentos += "   WHERE nf_inner.id_movimento = m.id_movimento ";
+                SQLMovimentos += "     AND nf_inner.id_nfe_status IN (8, 17, 22) ";
+                SQLMovimentos += "     AND nf_inner.nf_data_autorizacao IS NOT NULL ";
+                SQLMovimentos += " )) BETWEEN '" + DataInicialSQL + "' AND '" + DataFinalSQL + "') ";
                 if (IdVendedor > 0) { SQLMovimentos += " AND m.comissao1_vendedor = " + IdVendedor.ToString() + " "; }
                 SQLMovimentos += " AND cf.is_venda = 1 ";
                 SQLMovimentos += " AND EXISTS ( ";
@@ -725,7 +730,12 @@ namespace GdiPlataform.Areas.gc.Controllers
                 SQLMovimentos += "   AND nf.id_nfe_status IN (8, 17, 22) ";
                 SQLMovimentos += "   AND operacao.is_venda = 1 ";
                 SQLMovimentos += " ) ";
-                SQLMovimentos += " ORDER BY m.datahora_aprovacao ";
+                SQLMovimentos += " ORDER BY COALESCE(m.datahora_nf, ( ";
+                SQLMovimentos += "   SELECT MIN(nf_inner.nf_data_autorizacao) FROM gc_movimentos_nf nf_inner ";
+                SQLMovimentos += "   WHERE nf_inner.id_movimento = m.id_movimento ";
+                SQLMovimentos += "     AND nf_inner.id_nfe_status IN (8, 17, 22) ";
+                SQLMovimentos += "     AND nf_inner.nf_data_autorizacao IS NOT NULL ";
+                SQLMovimentos += " )) ";
                 AllMovimentos = db.gc_movimentos.SqlQuery(SQLMovimentos).ToList();
 
                 IndexLinha = 3;

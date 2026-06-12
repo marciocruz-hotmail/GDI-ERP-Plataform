@@ -42,11 +42,6 @@ namespace GdiPlataform.Robos.Whatsapp
             { 10, "Leo"     }
         };
 
-        private static readonly int[] IdsVendedoresOrdemAlfabetica = NomesVendedor
-            .OrderBy(kv => kv.Value, StringComparer.Create(PtBR, ignoreCase: true))
-            .Select(kv => kv.Key)
-            .ToArray();
-
         public static void EnviarResumoGerencial(string jobId, string parameters,
             System.Threading.CancellationToken cancellationToken, string database)
         {
@@ -115,7 +110,12 @@ namespace GdiPlataform.Robos.Whatsapp
                 " INNER JOIN gc_cfop_operacoes" +
                 "         ON gc_cfop_operacoes.id_cfop_operacao = gc_movimentos.id_cfop_operacao" +
                 " WHERE gc_movimentos.movimento_aprovado = 1" +
-                "   AND gc_movimentos.datahora_aprovacao BETWEEN" +
+                "   AND COALESCE(gc_movimentos.datahora_nf, (" +
+                "       SELECT MIN(nf_inner.nf_data_autorizacao) FROM gc_movimentos_nf nf_inner" +
+                "       WHERE nf_inner.id_movimento = gc_movimentos.id_movimento" +
+                "         AND nf_inner.id_nfe_status IN (8, 17, 22)" +
+                "         AND nf_inner.nf_data_autorizacao IS NOT NULL" +
+                "   )) BETWEEN" +
                 "       '" + dataHora.ToString("yyyy-MM-dd 00:00:00") + "'" +
                 "       AND '" + dataHora.ToString("yyyy-MM-dd 23:59:59") + "'" +
                 "   AND gc_cfop_operacoes.is_venda = 1" +
@@ -140,7 +140,12 @@ namespace GdiPlataform.Robos.Whatsapp
                 " INNER JOIN gc_cfop_operacoes" +
                 "         ON gc_cfop_operacoes.id_cfop_operacao = gc_movimentos.id_cfop_operacao" +
                 " WHERE gc_movimentos.movimento_aprovado = 1" +
-                "   AND gc_movimentos.datahora_aprovacao BETWEEN" +
+                "   AND COALESCE(gc_movimentos.datahora_nf, (" +
+                "       SELECT MIN(nf_inner.nf_data_autorizacao) FROM gc_movimentos_nf nf_inner" +
+                "       WHERE nf_inner.id_movimento = gc_movimentos.id_movimento" +
+                "         AND nf_inner.id_nfe_status IN (8, 17, 22)" +
+                "         AND nf_inner.nf_data_autorizacao IS NOT NULL" +
+                "   )) BETWEEN" +
                 "       '" + LibDateTime.getPrimeiroDiaMesAtual().ToString("yyyy-MM-dd 00:00:00") + "'" +
                 "       AND '" + LibDateTime.getUltimoDiaMesAtual().ToString("yyyy-MM-dd 23:59:59") + "'" +
                 "   AND gc_cfop_operacoes.is_venda = 1" +
@@ -231,7 +236,9 @@ namespace GdiPlataform.Robos.Whatsapp
             decimal valorSC)
         {
             sb.Append(titulo + "\n");
-            foreach (int idVendedor in IdsVendedoresOrdemAlfabetica)
+            foreach (int idVendedor in NomesVendedor.Keys
+                .OrderByDescending(id => valorPorVendedor.ContainsKey(id) ? valorPorVendedor[id] : 0m)
+                .ThenBy(id => NomesVendedor[id], StringComparer.Create(PtBR, ignoreCase: true)))
             {
                 int qtd = qtdPorVendedor.ContainsKey(idVendedor) ? qtdPorVendedor[idVendedor] : 0;
                 decimal valor = valorPorVendedor.ContainsKey(idVendedor) ? valorPorVendedor[idVendedor] : 0m;
