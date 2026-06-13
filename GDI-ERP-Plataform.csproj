@@ -1188,6 +1188,7 @@
     <Compile Include="Robos\SintegraWS\RoboSintegraWS.cs" />
     <Compile Include="Robos\WhatsApp\RoboWhatsApp.cs" />
     <Compile Include="Robos\WhatsApp\RoboWhatsAppGerencial.cs" />
+    <Compile Include="Robos\WhatsApp\RoboWhatsAppInteligenciaComercial.cs" />
     <Compile Include="Security\CachePersister.cs" />
     <Compile Include="Security\NavbarFragmentCache.cs" />
     <Compile Include="Security\Contexto.cs" />

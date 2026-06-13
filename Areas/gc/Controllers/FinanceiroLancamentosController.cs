@@ -162,7 +162,7 @@ namespace GdiPlataform.Areas.gc.Controllers
                 // =========================
                 var lanc = db.gc_financeiro_lancamentos.AsNoTracking().Where(l => l.id_usuario_cadastro > 0 && l.ativo == true);
                 if (idContaCaixa < 999) lanc = lanc.Where(l => l.id_conta_caixa == idContaCaixa);
-                lanc = lanc.Where(l => l.data_vencimento >= data1 && l.data_vencimento <= data2);
+                lanc = lanc.Where(l => l.data_pagamento >= data1 && l.data_pagamento <= data2);
 
                 // Observação importante:
                 // Seu legado tinha filtros de STATUS comentados por /* ... */ e só "descomentava" quando FilterAdvanced==false,
@@ -216,9 +216,6 @@ namespace GdiPlataform.Areas.gc.Controllers
                         lanc = lanc.Where(l => l.valor_total == v || l.valor_pago == v);
                     }
                 }
-
-                
-                
                 
                 // Custom categoria
                 if (filtroCustom01 == "1") lanc = lanc.Where(l => l.is_adiantamento == true);
@@ -2275,6 +2272,10 @@ namespace GdiPlataform.Areas.gc.Controllers
                     ValorTotalParcela = view_record_gc_movimento_financeiro.valor_total_10;
                     TipoPagamentoParcela = view_record_gc_movimento_financeiro.id_pagrec_tipo_10;
                 }
+
+                // Fallback: parcela sem vencimento informado (data_vencimento_N nulo → GetValueOrDefault() = DateTime.MinValue)
+                // evita gravar a data-sentinela 0001-01-01 em data_vencimento/data_pagamento (campo não-nullable).
+                if (DataVencimentoParcela < new DateTime(1900, 1, 1)) { DataVencimentoParcela = DataHoraAtual; }
 
                 // Gestão Comercial - Lançamento Financeiro
                 new_record_gc_financeiro_lancamento.id_lancamento_origem = 2; // Vendas GC

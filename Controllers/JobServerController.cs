@@ -113,6 +113,10 @@ namespace GdiPlataform.Controllers
                     RoboWhatsAppGerencial.EnviarResumoGerencial(jobId, parameters, cancellationToken, database);
                     break;
 
+                case "EnviarRelatorioInteligenciaComercialWhatsApp":
+                    RoboWhatsAppInteligenciaComercial.EnviarRelatorioInteligenciaComercial(jobId, parameters, cancellationToken, database);
+                    break;
+
                 default:
                     // Por ora apenas simula um processamento genérico.
                     System.Threading.Thread.Sleep(100);

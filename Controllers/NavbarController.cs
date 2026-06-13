@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Web.Mvc;
 using GdiPlataform.Domain;
 using GdiPlataform.Security;
@@ -14,6 +15,18 @@ namespace GdiPlataform.Controllers
                 if (CachePersister.contextoModel != null)
                 {
                     ContextoModel contextoModel = CachePersister.contextoModel;
+
+                    // Recuperação do menu: o cache contextoModel_{TokenId} pode expirar (sliding 15 min)
+                    // enquanto a sessão segue viva via Ajax/lookups, sendo recriado VAZIO por
+                    // LookupQueryServiceCache.EnsureContextoModel(). Aqui remontamos o menu pelo método
+                    // oficial do login (getNavbarItemsMenu) e re-persistimos, evitando a sidebar sem itens.
+                    if ((contextoModel.allNavbarItemMenu == null || !contextoModel.allNavbarItemMenu.Any())
+                        && CachePersister.userIdentity != null)
+                    {
+                        contextoModel.allNavbarItemMenu = new Contexto().getNavbarItemsMenu().ToList();
+                        CachePersister.contextoModel = contextoModel;
+                    }
+
                     NavbarFragmentCache.ApplyToContextoModel(contextoModel);
                     contextoModel.userIdentity = CachePersister.userIdentity;
                     contextoModel.versaoPlataforma = ControlVersion.getVersion();
